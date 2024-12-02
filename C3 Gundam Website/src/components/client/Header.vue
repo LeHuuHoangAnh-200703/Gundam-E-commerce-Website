@@ -50,7 +50,7 @@ onMounted(() => {
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><router-link to="">Đăng nhập</router-link>
+                    <li class="group"><router-link to="/login">Đăng nhập</router-link>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
@@ -74,7 +74,7 @@ onMounted(() => {
                 </button>
             </div>
         </div>
-        <div class="sidebar fixed top-0 -left-[100%] w-full h-full bg-[#1A1D27] p-4">
+        <div class="sidebar fixed top-0 -left-[100%] w-full h-full bg-[#1A1D27] p-4 z-10">
             <div class="flex justify-between items-center">
                 <h1 class="font-bold text-white text-[24px] font-bungee"><span class="text-[#DB3F4C]">C3</span>
                     GunDam</h1>
@@ -96,7 +96,7 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <router-link to="">Tài khoản</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-globe"></i> <router-link to="">Đăng nhập</router-link></li>
+                        class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>
             </ul>
         </div>
     </header>
