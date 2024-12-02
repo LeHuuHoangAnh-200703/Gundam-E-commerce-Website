@@ -1,8 +1,14 @@
 <script setup>
-import {ref, onMounted} from "vue"
+import { ref, onMounted, computed } from "vue"
 import Header from "@/components/client/Header.vue";
 import Footer from "@/components/client/Footer.vue";
+import BackToTop from "@/components/client/BackToTop.vue";
+
 const listChoices = [
+    {
+        name: "TẤT CẢ SẢN PHẨM",
+        type: "All",
+    },
     {
         name: "MG - HIRM - RE/100 - 1/100",
         type: "MG",
@@ -15,36 +21,32 @@ const listChoices = [
         name: "RG - REAL GRADE 1/144",
         type: "RG",
     },
-    {
-        name: "SD - SUPERROR DEFENDER",
-        type: "SD",
-    },
 ]
 
-const listProducts = [
+const listProducts = ref([
     {
         name: "SD WORLD HEROES 16 SEITEN TAISEI GOKU QITIAN DASHENG IMPULSE GUNDAM DOUZHAN SHENGFO WUKONG SDWH",
         price: "250.000 VNĐ",
         img: "/src/assets/img/SD04.jpg",
-        type: "SD"
+        type: "MG"
     },
     {
         name: "SD WORLD HEROES 25 LEIF GUNDAM GP04 SDWH",
         price: "220.000 VNĐ",
         img: "/src/assets/img/SD03.jpg",
-        type: "SD"
+        type: "PG"
     },
     {
         name: "SD WORLD HEROES 36 Onmitsu Gundam Aerial SDWH",
         price: "300.000 VNĐ",
         img: "/src/assets/img/SD01.jpg",
-        type: "SD"
+        type: "RG"
     },
     {
         name: "SDCS F-KUNOICHI KAI F9 No.1 (Gundam Build Metaverse) HGBM",
         price: "340.000 VNĐ",
         img: "/src/assets/img/SD02.jpg",
-        type: "SD"
+        type: "RG"
     },
     {
         name: "MG 1/100 ZGMF-X20A Strike Freedom Gundam",
@@ -118,59 +120,75 @@ const listProducts = [
         img: "/src/assets/img/RG04.jpg",
         type: "RG"
     },
-]
+]);
 
-onMounted(() => {
-    const openMenu = $(".open-menu");
-    const closeMenu = $(".close-menu");
-    const sideBar = $(".sidebar");
+const searchQuery = ref("");
+const selectedType = ref("All");
+const selectTypeProducts = (type) => {
+  selectedType.value = type;
+};
 
-    openMenu.click(() => {
-        sideBar.animate({left: "0"}, 400);
-    })
+const handleSearch = (query) => {
+  searchQuery.value = query;
+};
 
-    closeMenu.click(() => {
-        sideBar.animate({left: "-100%"}, 400);
-    })
+const filteredProducts = computed(() => {
+  return listProducts.value.filter(product => {
+    const matchesType = selectedType.value === "All" || product.type === selectedType.value;
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+    return matchesType && matchesSearch;
+  });
 });
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans">
-        <Header />
+    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+        <Header @search="handleSearch" />
         <div class="w-full bg-[#DB3F4C]">
-            <div class="flex lg:flex-row flex-col justify-center items-center lg:justify-between w-full p-5 lg:px-[220px]">
+            <div
+                class="flex lg:flex-row flex-col justify-center items-center lg:justify-between w-full p-5 lg:px-[220px]">
                 <div class="flex flex-col gap-3 w-full lg:w-[50%] justify-center lg:justify-start items-start">
-                    <p class="bg-[rgba(52,52,52,0.7)] text-white text-[14px] px-3 py-2 font-medium rounded-md">C3 GUNDAM STORE</p>
-                    <p class="text-white font-semibold uppercase text-[26px]">C3 GUNDAM STORE - Gắn kết đam mê, xây dựng thế giới Gundam của riêng bạn.</p>
+                    <p class="bg-[rgba(52,52,52,0.7)] text-white text-[14px] px-3 py-2 font-medium rounded-md">C3 GUNDAM
+                        STORE</p>
+                    <p class="text-white font-semibold uppercase text-[26px]">C3 GUNDAM STORE - Gắn kết đam mê, xây dựng
+                        thế giới Gundam của riêng bạn.</p>
                     <span class="lg:w-[150px] w-full h-1 bg-white"></span>
-                    <p class="text-white text-[14px] font-medium">Cửa hàng Gundam không chỉ là nơi bày bán mô hình, mà còn là không gian nuôi dưỡng đam mê, nơi giấc mơ về những chiến binh cơ khí trở thành hiện thực.</p>
+                    <p class="text-white text-[14px] font-medium">Cửa hàng Gundam không chỉ là nơi bày bán mô hình, mà
+                        còn là không gian nuôi dưỡng đam mê, nơi giấc mơ về những chiến binh cơ khí trở thành hiện thực.
+                    </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="../../assets/img/banner.png" class="w-[350px]" alt="">    
+                    <img src="../../assets/img/banner.png" class="w-[350px]" alt="">
                 </div>
             </div>
         </div>
-        <div class="my-2 bg-gradient-to-b text-center lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-5 lg:mx-[220px]">
-            <p class="text-white font-semibold uppercase text-[22px] lg:text-[26px]">Vũ trụ Gundam thu nhỏ trong từng mô hình, chỉ có tại C3 GUNDAM.</p>
-            <p class="text-white font-medium my-1">Tại đây bạn có thể chọn được những mẫu Gundam yêu thích chính hãng từ BANDAI NAMCO.</p>
+        <div
+            class="my-2 bg-gradient-to-b text-center lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-5 lg:mx-[220px]">
+            <p class="text-white font-semibold uppercase text-[22px] lg:text-[26px]">Vũ trụ Gundam thu nhỏ trong từng mô
+                hình, chỉ có tại C3 GUNDAM.</p>
+            <p class="text-white font-medium my-1">Tại đây bạn có thể chọn được những mẫu Gundam yêu thích chính hãng từ
+                BANDAI NAMCO.</p>
         </div>
         <div class="my-2 grid lg:grid-cols-4 sm:grid-cols-1 md:grid-cols-2  gap-3 m-5 lg:mx-[220px]">
-            <button v-for="(choice, index) in listChoices" :key="index" class="w-full bg-gradient-to-b text-center flex flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
+            <button v-for="(choice, index) in listChoices" :key="index" @click.prevent="selectTypeProducts(choice.type)"
+                class="w-full bg-gradient-to-b text-center flex flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
                 <p class="text-[18px] font-semibold text-white">{{ choice.name }}</p>
-                <span class="lg:w-[100px] w-full h-1 bg-white"></span>
+                <span class="lg:w-[100px] w-full h-[2px] bg-white"></span>
                 <p class="text-[14px] text-white font-medium">> Hiển thị tất cả</p>
             </button>
         </div>
         <div class="mt-10 mb-20 grid lg:grid-cols-4 sm:grid-cols-1 md:grid-cols-2 gap-8 m-5 lg:mx-[220px]">
-            <div v-for="(product, index) in listProducts" :key="index" class="flex flex-col gap-3 items-center">
-                <img :src="product.img" class="w-full  [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
-                <p class="text-white text-[14px] text-center flex-grow">{{ product.name }}</p>
+            <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
+                <router-link to="">
+                    <img :src="product.img" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
+                </router-link>
+                <router-link to="" class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{ product.name }}</router-link>
                 <p class="text-white text-[14px]">Giá: {{ product.price }}</p>
                 <button class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
             </div>
         </div>
         <Footer />
+        <BackToTop />
     </div>
 </template>
 
