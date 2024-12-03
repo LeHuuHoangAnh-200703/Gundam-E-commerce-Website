@@ -53,6 +53,7 @@ const changeImage = (newImage) => {
                     <p class="text-white text-[20px] font-medium">RG 1/144 RX-0 UNICORN GUNDAM (BILIBILI 10TH
                         ANNIVERSARY VER)</p>
                     <div class="flex flex-col gap-1">
+                        <p class="text-white font-medium">Mã sản phẩm: SP29234</p>
                         <p class="text-white font-medium">Thương hiệu: Bandai</p>
                         <p class="text-white font-medium">Loại sản phẩm: RG</p>
                         <p class="text-white font-medium">Còn lại: 20</p>

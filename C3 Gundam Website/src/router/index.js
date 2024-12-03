@@ -4,6 +4,7 @@ import Homepage from '@/views/client/Homepage.vue';
 import Login from '@/views/auth/Login.vue';
 import Register from '@/views/auth/Register.vue';
 import Details from '@/views/client/Details.vue';
+import Orders from '@/views/client/Orders.vue';
 const routes = [
     {
         path: '/',
@@ -24,6 +25,11 @@ const routes = [
         path: '/details',
         name: 'Details',
         component: Details
+    },
+    {
+        path: '/orders',
+        name: 'Orders',
+        component: Orders
     },
 ];
 
