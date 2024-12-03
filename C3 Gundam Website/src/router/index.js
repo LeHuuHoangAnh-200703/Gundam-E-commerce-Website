@@ -7,6 +7,7 @@ import Details from '@/views/client/Details.vue';
 import Orders from '@/views/client/Orders.vue';
 import Carts from '@/views/client/Cart.vue';
 import Orders_History from '@/views/client/Orders_History.vue';
+import Profile from '@/views/client/Profile.vue';
 const routes = [
     {
         path: '/',
@@ -42,6 +43,11 @@ const routes = [
         path: '/orders_history',
         name: 'Orders_History',
         component: Orders_History
+    },
+    {
+        path: '/profile',
+        name: 'Profile',
+        component: Profile
     },
 ];
 

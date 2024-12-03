@@ -8,7 +8,7 @@ import BackToTop from '@/components/client/BackToTop.vue';
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
-        <Header @search="handleSearch" />
+        <Header />
         <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center">
             <div class="w-full m-4">
                 <div

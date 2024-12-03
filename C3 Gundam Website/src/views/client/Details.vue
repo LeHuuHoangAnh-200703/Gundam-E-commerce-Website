@@ -29,7 +29,7 @@ const changeImage = (newImage) => {
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
-        <Header @search="handleSearch" />
+        <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
             <p class="text-gray-300 font-semibold text-[13px]">Trang chủ > <span class="text-[#DB3F4C]">RG 1/144 RX-0
                     UNICORN GUNDAM (BILIBILI 10TH ANNIVERSARY VER)</span></p>
