@@ -39,7 +39,7 @@
                                 class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                         </div>
                         <button
-                            class="px-4 py-2 md:px-5 md:py-3 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px]">
+                            class="px-4 py-2 md:px-5 md:py-3 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
                             Đăng ký
                         </button>
                         <p class="mt-4 md:mt-8 text-center text-[14px] md:text-[16px]">

@@ -66,7 +66,7 @@ const changeImage = (newImage) => {
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
                         <li class="list-disc">Phân phối bởi C3 Gundam.</li>
                     </ul>
-                    <button class="bg-[#DB3F4C] px-5 py-3 text-center text-white">
+                    <button class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>2.350.000
                                 VNĐ</span></p>
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
