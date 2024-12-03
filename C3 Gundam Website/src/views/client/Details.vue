@@ -11,18 +11,19 @@ const images = [
     '/src/assets/img/DT3RG01.jpg',
 ];
 
-const selectedImage = ref(images[0]);
-const isTransitioning = ref(false);
+const selectedImage = ref(images[0]);  
+const showImage = ref(true);  
 
-const changeImage = (newImage) => {
-    if (newImage !== selectedImage.value) {
-        isTransitioning.value = true;
-        setTimeout(() => {
+const changeImage = (newImage) => {  
+    if (newImage !== selectedImage.value) {  
+        showImage.value = false;
+
+        setTimeout(() => {  
             selectedImage.value = newImage;
-            isTransitioning.value = false;
+            showImage.value = true;  
         }, 200);
-    }
-};
+    }  
+};     
 </script>
 
 
@@ -34,15 +35,14 @@ const changeImage = (newImage) => {
                     UNICORN GUNDAM (BILIBILI 10TH ANNIVERSARY VER)</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[40%]">
-                    <div class="overflow-hidden px-4 py-2">
-                        <img :src="selectedImage" 
-                             :class="{
-                                 'translate-x-full': isTransitioning, // Đẩy ảnh cũ sang trái
-                                 'translate-x-0': !isTransitioning // Hiển thị ảnh mới
-                             }" 
-                             class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] object-cover transform transition-transform duration-300" 
-                             alt="">
-                    </div>
+                    <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">  
+                        <img   
+                            :src="selectedImage"    
+                            :class="{'opacity-0': !showImage, 'transition-opacity duration-300': true}"   
+                            class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] w-full"
+                            alt=""  
+                        />  
+                    </div>    
                     <div class="flex gap-3 items-center justify-center">
                         <img v-for="(img, index) in images" :key="index" :src="img" @click="changeImage(img)"
                             class="w-[75px] border-2 transition-all hover:border-[#DB3F4C] cursor-pointer"
@@ -120,11 +120,4 @@ const changeImage = (newImage) => {
     </div>
 </template>
 
-<style scoped>
-.translate-x-full {
-    transform: translateX(-100%);
-}
-.translate-x-0 {
-    transform: translateX(0);
-}
-</style>
+<style scoped></style> 
