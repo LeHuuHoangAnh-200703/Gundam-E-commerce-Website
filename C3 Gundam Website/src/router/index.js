@@ -6,6 +6,7 @@ import Register from '@/views/auth/Register.vue';
 import Details from '@/views/client/Details.vue';
 import Orders from '@/views/client/Orders.vue';
 import Carts from '@/views/client/Cart.vue';
+import Orders_History from '@/views/client/Orders_History.vue';
 const routes = [
     {
         path: '/',
@@ -36,6 +37,11 @@ const routes = [
         path: '/carts',
         name: 'Carts',
         component: Carts
+    },
+    {
+        path: '/orders_history',
+        name: 'Orders_History',
+        component: Orders_History
     },
 ];
 

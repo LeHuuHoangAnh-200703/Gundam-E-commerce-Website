@@ -58,7 +58,7 @@ const changeImage = (newImage) => {
                         <p class="text-white font-medium">Loại sản phẩm: RG</p>
                         <p class="text-white font-medium">Còn lại: 20</p>
                     </div>
-                    <p class="text-white font-medium">Giá bán: 2.350.000 VNĐ</p>
+                    <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
                     <hr class="bg-gray-600">
                     <ul class="flex flex-col gap-2 text-white ml-4">
                         <li class="list-disc">Sản phẩm Gunpla chính hãng của Bandai, sản xuất tại Nhật Bản.</li>
@@ -73,7 +73,7 @@ const changeImage = (newImage) => {
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
                     </button>
                     <p class="text-white text-center font-medium">Hotline hỗ trợ: <span
-                            class="text-[#DB3F4C] font-semibold"><i class="fa-solid fa-phone-square"></i>
+                            class="text-[#FFD700] font-semibold"><i class="fa-solid fa-phone-square"></i>
                             079.965.8592</span> (7:30-22:30)</p>
                 </div>
             </div>

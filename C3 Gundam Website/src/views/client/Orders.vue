@@ -72,10 +72,10 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                                     <p class="text-white text-[14px] hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM
                                                         (BILIBILI
                                                         10TH ANNIVERSARY VER)</p>
-                                                    <p class="text-white text-[14px]">Mã sản phẩm: SP20234</p>
+                                                    <p class="text-white text-[14px]">Mã sản phẩm: <span class="text-[#FFD700]">SP20234</span></p>
                                                     <div class="flex lg:flex-row flex-col justify-between">
-                                                        <p class="text-white text-[14px]">Giá: 2.350.000 VNĐ</p>
-                                                        <p class="text-white text-[14px]">Số lượng: 2</p>
+                                                        <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                                        <p class="text-white text-[14px]">Số lượng: <span class="text-[#FFD700]">2</span></p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -89,9 +89,9 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                                 class="w-full text-white px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         </div>
                                         <p class="text-white text-[16px]">Hình thức thanh toán: <span
-                                                class="text-[#DB3F4C]">Thanh toán khi nhận hàng.</span></p>
+                                                class="text-[#FFD700]">Thanh toán khi nhận hàng.</span></p>
                                         <hr>
-                                        <p class="text-white text-[16px] text-end">Tổng cộng: 2.350.000 VNĐ</p>
+                                        <p class="text-white text-[16px] text-end">Tổng cộng: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
                                         <button type="submit"
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-auto">Đặt
                                             hàng</button>

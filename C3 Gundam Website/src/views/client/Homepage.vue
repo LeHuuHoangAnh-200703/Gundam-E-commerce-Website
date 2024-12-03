@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue"
-import Header from "@/components/client/Header.vue";
+import Header_Home from "@/components/client/Header_Home.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
 
@@ -143,7 +143,7 @@ const filteredProducts = computed(() => {
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
-        <Header @search="handleSearch" />
+        <Header_Home @search="handleSearch" />
         <div class="w-full bg-[#DB3F4C]">
             <div
                 class="flex lg:flex-row flex-col justify-center items-center lg:justify-between w-full p-5 lg:px-[210px]">
@@ -183,7 +183,7 @@ const filteredProducts = computed(() => {
                     <img :src="product.img" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                 </router-link>
                 <router-link to="" class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{ product.name }}</router-link>
-                <p class="text-white text-[14px]">Giá: {{ product.price }}</p>
+                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ product.price }}</span></p>
                 <button class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
             </div>
         </div>
