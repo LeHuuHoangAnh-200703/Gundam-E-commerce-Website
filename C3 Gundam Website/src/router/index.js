@@ -8,6 +8,7 @@ import Orders from '@/views/client/Orders.vue';
 import Carts from '@/views/client/Cart.vue';
 import Orders_History from '@/views/client/Orders_History.vue';
 import Profile from '@/views/client/Profile.vue';
+import EditProfile from '@/views/client/EditProfile.vue';
 const routes = [
     {
         path: '/',
@@ -48,6 +49,11 @@ const routes = [
         path: '/profile',
         name: 'Profile',
         component: Profile
+    },
+    {
+        path: '/editProfile',
+        name: 'Edit Profile',
+        component: EditProfile
     },
 ];
 
