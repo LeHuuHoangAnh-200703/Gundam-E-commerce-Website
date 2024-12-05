@@ -8,7 +8,7 @@ import BackToTop from '@/components/client/BackToTop.vue';
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <!-- <h1 class="text-center text-white text-[28px] font-semibold mt-6">Đơn hàng đã mua</h1>
+        <h1 class="text-center text-white text-[28px] font-semibold mt-6">Đơn hàng đã mua</h1>
         <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
             <div class="w-full m-4">
                 <div
@@ -30,7 +30,8 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                     (BILIBILI
                                     10TH ANNIVERSARY VER)</p>
                             </div>
-                            <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM (BILIBILI 10TH
+                            <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM
+                                (BILIBILI 10TH
                                 ANNIVERSARY VER)</p>
                             <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
                             <p class="text-[14px] text-white font-medium">Đơn giá: <span
@@ -48,7 +49,8 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                     (BILIBILI
                                     10TH ANNIVERSARY VER)</p>
                             </div>
-                            <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM (BILIBILI 10TH
+                            <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM
+                                (BILIBILI 10TH
                                 ANNIVERSARY VER)</p>
                             <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
                             <p class="text-[14px] text-white font-medium">Đơn giá: <span
@@ -57,20 +59,29 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                     class="text-[#FFD700]">2</span></p>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-2 lg:flex-row justify-center items-center lg:justify-between text-white font-semibold mb-4">
-                        <p class="text-[14px] lg:text-[16px] text-center lg:text-start">Lưu ý: <span class="text-[#FFD700]">Đơn hàng chỉ được hủy khi chưa được chuyển đi</span></p>
-                        <p class="text-[14px] lg:text-[16px] text-center lg:text-start">Tổng tiền: <span class="text-[#FFD700]">4.360.000 VNĐ</span></p>
+                    <div
+                        class="flex flex-col gap-2 lg:flex-row justify-center items-center lg:justify-between text-white font-semibold mb-4">
+                        <p class="text-[14px] lg:text-[16px] text-center lg:text-start">Lưu ý: <span
+                                class="text-[#FFD700]">Đơn hàng chỉ được hủy khi chưa được chuyển đi</span></p>
+                        <p class="text-[14px] lg:text-[16px] text-center lg:text-start">Tổng tiền: <span
+                                class="text-[#FFD700]">4.360.000 VNĐ</span></p>
                     </div>
-                    <button class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn hàng</button>
+                    <div class="flex gap-3 justify-end">
+                        <button class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</button>
+                        <button class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
+                            hàng</button>
+                        <button class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto">Đã nhận được
+                            hàng</button>
+                    </div>
                 </div>
             </div>
-        </div> -->
-        <div class="flex justify-center items-center m-auto w-full">
+        </div>
+        <!-- <div class="flex justify-center items-center m-auto w-full">
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có đơn hàng nào!</p>
                 <img src="../../assets/img/banner.png" class="w-[200px]" alt="">
             </div>
-        </div>
+        </div> -->
         <Footer />
         <BackToTop />
     </div>

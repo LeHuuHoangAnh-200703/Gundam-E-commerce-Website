@@ -169,7 +169,7 @@ const filteredProducts = computed(() => {
             <p class="text-white font-medium my-1">Tại đây bạn có thể chọn được những mẫu Gundam yêu thích chính hãng từ
                 BANDAI NAMCO.</p>
         </div>
-        <div class="my-2 grid lg:grid-cols-4 sm:grid-cols-1 md:grid-cols-2  gap-3 m-5 lg:mx-[210px]">
+        <div class="my-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 m-5 lg:mx-[210px]">
             <button v-for="(choice, index) in listChoices" :key="index" @click.prevent="selectTypeProducts(choice.type)"
                 class="w-full bg-gradient-to-b text-center flex flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
                 <p class="text-[18px] font-semibold text-white">{{ choice.name }}</p>
@@ -177,12 +177,14 @@ const filteredProducts = computed(() => {
                 <p class="text-[14px] text-white font-medium">> Hiển thị tất cả</p>
             </button>
         </div>
-        <div class="mt-10 mb-20 grid lg:grid-cols-4 sm:grid-cols-1 md:grid-cols-2 gap-8 m-5 lg:mx-[210px]">
+        <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
             <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link to="">
                     <img :src="product.img" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                 </router-link>
-                <router-link to="" class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{ product.name }}</router-link>
+                <router-link to=""
+                    class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
+                    product.name }}</router-link>
                 <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ product.price }}</span></p>
                 <button class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
             </div>

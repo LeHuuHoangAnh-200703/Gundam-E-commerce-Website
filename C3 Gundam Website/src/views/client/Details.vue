@@ -11,18 +11,18 @@ const images = [
     '/src/assets/img/DT3RG01.jpg',
 ];
 
-const selectedImage = ref(images[0]);  
-const showImage = ref(true);  
+const selectedImage = ref(images[0]);
+const showImage = ref(true);
 
-const changeImage = (newImage) => {  
-    if (newImage !== selectedImage.value) {  
+const changeImage = (newImage) => {
+    if (newImage !== selectedImage.value) {
         showImage.value = false;
 
-        setTimeout(() => {  
+        setTimeout(() => {
             selectedImage.value = newImage;
-            showImage.value = true;  
+            showImage.value = true;
         }, 200);
-    }  
+    }
 };     
 </script>
 
@@ -35,14 +35,11 @@ const changeImage = (newImage) => {
                     UNICORN GUNDAM (BILIBILI 10TH ANNIVERSARY VER)</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[40%]">
-                    <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">  
-                        <img   
-                            :src="selectedImage"    
-                            :class="{'opacity-0': !showImage, 'transition-opacity duration-300': true}"   
-                            class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] w-full"
-                            alt=""  
-                        />  
-                    </div>    
+                    <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
+                        <img :src="selectedImage"
+                            :class="{ 'opacity-0': !showImage, 'transition-opacity duration-300': true }"
+                            class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] w-full" alt="" />
+                    </div>
                     <div class="flex gap-3 items-center justify-center">
                         <img v-for="(img, index) in images" :key="index" :src="img" @click="changeImage(img)"
                             class="w-[75px] border-2 transition-all hover:border-[#DB3F4C] cursor-pointer"
@@ -67,7 +64,8 @@ const changeImage = (newImage) => {
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
                         <li class="list-disc">Phân phối bởi C3 Gundam.</li>
                     </ul>
-                    <button class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
+                    <button
+                        class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>2.350.000
                                 VNĐ</span></p>
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
@@ -89,36 +87,10 @@ const changeImage = (newImage) => {
                     là một trong những mẫu Gundam cực kỳ nổi tiếng với lượng fan đông đảo, và bạn sẽ không khỏi ấn tượng
                     về độ ngầu, độ hoành tráng của nó.</p>
             </div>
-            <div class="mb-20">
-                <div class="flex justify-center items-end">
-                    <p
-                        class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">
-                        Đánh giá</p>
-                    <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
-                </div>
-                <form action="" class="my-8 flex flex-col gap-4">
-                    <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-                        <label for="" class="font-semibold text-white mr-4">Chất lượng sản phẩm: </label>
-                        <select name="" id=""
-                            class="bg-transparent border-2 px-8 cursor-pointer py-2 text-white rounded-md">
-                            <option class="text-[#333] cursor-pointer" value="Rất tuyệt vời">Rất tuyệt vời</option>
-                            <option class="text-[#333] cursor-pointer" value="Tuyệt vời">Tuyệt vời</option>
-                            <option class="text-[#333] cursor-pointer" value="Bình thường">Bình thường</option>
-                            <option class="text-[#333] cursor-pointer" value="Rất tệ">Rất tệ</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <label for="description" class="font-semibold text-white mr-4">Mô tả:</label>
-                        <textarea class="w-full h-[150px] rounded-md outline-none p-5 font-semibold"
-                            placeholder="Đánh giá của bạn ..." name="description" id="description" cols="30"
-                            rows="10"></textarea>
-                    </div>
-                </form>
-            </div>
         </div>
         <Footer />
         <BackToTop />
     </div>
 </template>
 
-<style scoped></style> 
+<style scoped></style>
