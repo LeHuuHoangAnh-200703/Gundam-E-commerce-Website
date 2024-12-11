@@ -62,20 +62,28 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                     <div class="flex flex-col gap-4 overflow-hidden">
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
                                             <div class="flex gap-4">
-                                                <img src="../../assets/img/RG01.jpg" class="w-[50px] lg:w-[80px] border-2" alt="">
+                                                <img src="../../assets/img/RG01.jpg"
+                                                    class="w-[50px] lg:w-[80px] border-2" alt="">
                                                 <div class="overflow-hidden">
-                                                    <div class="w-56 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
-                                                        <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG 1/144 RX-0 UNICORN GUNDAM
-                                                        (BILIBILI
-                                                        10TH ANNIVERSARY VER)</p>
+                                                    <div
+                                                        class="w-56 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
+                                                        <p
+                                                            class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                                            RG 1/144 RX-0 UNICORN GUNDAM
+                                                            (BILIBILI
+                                                            10TH ANNIVERSARY VER)</p>
                                                     </div>
-                                                    <p class="text-white text-[14px] hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM
+                                                    <p class="text-white text-[14px] hidden lg:block">RG 1/144 RX-0
+                                                        UNICORN GUNDAM
                                                         (BILIBILI
                                                         10TH ANNIVERSARY VER)</p>
-                                                    <p class="text-white text-[14px]">Mã sản phẩm: <span class="text-[#FFD700]">SP20234</span></p>
+                                                    <p class="text-white text-[14px]">Mã sản phẩm: <span
+                                                            class="text-[#FFD700]">SP20234</span></p>
                                                     <div class="flex lg:flex-row flex-col justify-between">
-                                                        <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
-                                                        <p class="text-white text-[14px]">Số lượng: <span class="text-[#FFD700]">2</span></p>
+                                                        <p class="text-white text-[14px]">Giá: <span
+                                                                class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                                        <p class="text-white text-[14px]">Số lượng: <span
+                                                                class="text-[#FFD700]">2</span></p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -88,10 +96,18 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                             <input type="text" placeholder="Nhập mã giảm giá ..."
                                                 class="w-full text-white px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         </div>
-                                        <p class="text-white text-[16px]">Hình thức thanh toán: <span
-                                                class="text-[#FFD700]">Thanh toán khi nhận hàng.</span></p>
+                                        <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+                                            <label for="" class="font-semibold text-white mr-4">Hình thức thanh toán:
+                                            </label>
+                                            <select name="" id=""
+                                                class="bg-transparent border-2 px-8 cursor-pointer py-2 text-white rounded-md">
+                                                <option class="text-[#333] cursor-pointer" value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
+                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua ví Paypal">Thanh toán qua ví Paypal</option>
+                                            </select>
+                                        </div>
                                         <hr>
-                                        <p class="text-white text-[16px] text-end">Tổng cộng: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                        <p class="text-white text-[16px] text-end">Tổng cộng: <span
+                                                class="text-[#FFD700]">2.350.000 VNĐ</span></p>
                                         <button type="submit"
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-auto">Đặt
                                             hàng</button>

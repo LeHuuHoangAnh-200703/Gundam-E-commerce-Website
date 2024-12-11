@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
@@ -10,6 +10,82 @@ const images = [
     '/src/assets/img/DT2RG01.jpg',
     '/src/assets/img/DT3RG01.jpg',
 ];
+
+const comments = ref([
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+    {
+        img: "/src/assets/img/avatar.jpg",
+        name: "Lê Hữu Hoàng Anh",
+        date: "20-07-2024",
+        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
+        imgDetails: "/src/assets/img/DT1RG01.jpg"
+    },
+])
+
+const currentPage = ref(1);
+const commentsPerPage = 5;
+
+const paginatedComments = computed(() => {
+    const start = (currentPage.value - 1) * commentsPerPage;
+    return comments.value.slice(start, start + commentsPerPage);
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(comments.value.length / commentsPerPage);
+});
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+};
 
 const selectedImage = ref(images[0]);
 const showImage = ref(true);
@@ -86,6 +162,74 @@ const changeImage = (newImage) => {
                     - Mô hình Gundam chính hãng Bandai sở hữu đôi cánh sắc sảo tạo thành từ DRAGOON System độc đáo. Đây
                     là một trong những mẫu Gundam cực kỳ nổi tiếng với lượng fan đông đảo, và bạn sẽ không khỏi ấn tượng
                     về độ ngầu, độ hoành tráng của nó.</p>
+            </div>
+            <div class="my-20">
+                <div class="flex justify-center items-end">
+                    <p
+                        class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">
+                        Đánh giá</p>
+                    <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
+                </div>
+                <div class="bg-[#242424] py-4 px-4 lg:px-[40px] my-6 [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
+                    <div class="flex lg:flex-row flex-col gap-5 items-center justify-center lg:justify-between">
+                        <div class="flex flex-col gap-2">
+                            <p class="text-white text-[24px]"><span class="text-[30px]">4.8 </span>trên 5</p>
+                            <div class="flex gap-2">
+                                <i v-for="star in 5" :key="star" class="fa-solid fa-star text-[#FFD700]"></i>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 justify-center flex-wrap">
+                            <button
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Tất
+                                cả</button>
+                            <button
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">5
+                                sao</button>
+                            <button
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">4
+                                sao</button>
+                            <button
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">3
+                                sao</button>
+                            <button
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">2
+                                sao</button>
+                            <button
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">1
+                                sao</button>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="flex flex-col w-full">
+                        <div v-for="comment in paginatedComments" :key="comment.id" class="flex py-4 border-b flex-col gap-2 w-full">
+                            <div class="flex gap-4 w-full">
+                                <img :src="comment.img" class="w-[60px] rounded-full" alt="">
+                                <div class="">
+                                    <p class="text-white text-[14px] font-semibold">{{ comment.name }}</p>
+                                    <p class="text-white text-[14px] mb-1">{{ comment.date }}</p>
+                                    <div class="flex gap-1">
+                                        <i v-for="star in 5" :key="star"
+                                            class="fa-solid fa-star text-[#FFD700] text-[10px]"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <p class="my-4 text-white text-justify">{{ comment.description }}</p>
+                                <div class="flex gap-4">
+                                    <img :src="comment.imgDetails" class="w-[80px] lg:w-[100px]" alt="">
+                                    <img :src="comment.imgDetails" class="w-[80px] lg:w-[100px]" alt="">
+                                    <img :src="comment.imgDetails" class="w-[80px] lg:w-[100px]" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center items-center gap-4 mt-4">
+                        <button @click="prevPage" :disabled="currentPage === 1"
+                            class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Trước</button>
+                        <button @click="nextPage" :disabled="currentPage === totalPages"
+                            class="px-5 py-2 border-2 cursor-pointer bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Sau</button>
+                    </div>
+                </div>
             </div>
         </div>
         <Footer />

@@ -156,6 +156,8 @@ const filteredProducts = computed(() => {
                     <p class="text-white text-[14px] font-medium">Cửa hàng Gundam không chỉ là nơi bày bán mô hình, mà
                         còn là không gian nuôi dưỡng đam mê, nơi giấc mơ về những chiến binh cơ khí trở thành hiện thực.
                     </p>
+                    <p class="text-white text-[14px] font-semibold">Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang
+                    </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
                     <img src="../../assets/img/banner.png" class="w-[350px]" alt="">

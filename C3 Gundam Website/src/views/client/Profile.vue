@@ -28,17 +28,10 @@ import BackToTop from '@/components/client/BackToTop.vue';
                         <div class="text-center mt-12 pb-4">
                             <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">Lê Hữu
                                 Hoàng Anh</h3>
-                            <div class="text-base leading-normal mt-0 mb-2 font-bold text-white"><i
+                            <div class="text-base leading-normal mt-0 mb-4 font-bold text-white"><i
                                     class="fa-regular fa-envelope text-[#FFD700]"></i> lehuuhoanganhhg2003@gmail.com
                             </div>
-                            <div class="mb-2 text-blueGray-600 mt-10 font-medium text-white">
-                                <i class="fa-solid fa-location-dot text-[#FFD700]"></i>
-                                Long Mỹ - Hậu Giang
-                            </div>
-                            <div class="text-base leading-normal mt-0 mb-2 text-white"><i
-                                    class="fa-solid fa-phone-volume text-[#FFD700]"></i> 079-975-8592
-                            </div>
-                            <hr />
+                            <hr>
                             <div class="my-5 lg:text-[18px] text-[15px] font-medium text-white">
                                 <p>
                                     Chào mừng <span class="font-semibold text-[#FFD700]">Hoàng Anh</span> đã đến với
