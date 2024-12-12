@@ -56,7 +56,7 @@ const setRating = (star) => {
                             <label for="rating" class="font-semibold text-white mr-4">Chất lượng sản phẩm: </label>
                             <div id="rating" class="flex items-center gap-2">
                                 <span v-for="star in 5" :key="star" class="cursor-pointer">
-                                    <i :class="['fa-star', rating >= star ? 'fas text-yellow-400' : 'far text-gray-400']"
+                                    <i :class="['fa-star', rating >= star ? 'fas text-[#FFD700]' : 'far text-gray-400']"
                                         @click="setRating(star)"></i>
                                 </span>
                             </div>

@@ -12,6 +12,7 @@ import EditProfile from '@/views/client/EditProfile.vue';
 import Feedback from '@/views/client/Feedback.vue';
 import adminLogin from '@/views/auth/adminLogin.vue';
 import addAdmin from '@/views/auth/addAdmin.vue';
+import adminProducts from '@/views/admin/adminProducts.vue';
 
 const routes = [
     {
@@ -65,14 +66,19 @@ const routes = [
         component: Feedback
     },
     {
-        path: '/adminLogin',
+        path: '/admin/adminLogin',
         name: 'Admin Login',
         component: adminLogin
     },
     {
-        path: '/addAdmin',
+        path: '/admin/addAdmin',
         name: 'Add Admin',
         component: addAdmin
+    },
+    {
+        path: '/admin/adminProducts',
+        name: 'Admin Products',
+        component: adminProducts
     },
 ];
 
