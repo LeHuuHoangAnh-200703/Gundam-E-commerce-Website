@@ -101,8 +101,10 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                             </label>
                                             <select name="" id=""
                                                 class="bg-transparent border-2 px-8 cursor-pointer py-2 text-white rounded-md">
-                                                <option class="text-[#333] cursor-pointer" value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
-                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua ví Paypal">Thanh toán qua ví Paypal</option>
+                                                <option class="text-[#333] cursor-pointer"
+                                                    value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
+                                                <option class="text-[#333] cursor-pointer"
+                                                    value="Thanh toán qua ví Paypal">Thanh toán qua ví Paypal</option>
                                             </select>
                                         </div>
                                         <hr>

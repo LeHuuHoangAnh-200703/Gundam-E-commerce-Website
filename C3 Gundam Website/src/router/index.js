@@ -10,6 +10,9 @@ import Orders_History from '@/views/client/Orders_History.vue';
 import Profile from '@/views/client/Profile.vue';
 import EditProfile from '@/views/client/EditProfile.vue';
 import Feedback from '@/views/client/Feedback.vue';
+import adminLogin from '@/views/auth/adminLogin.vue';
+import addAdmin from '@/views/auth/addAdmin.vue';
+
 const routes = [
     {
         path: '/',
@@ -60,6 +63,16 @@ const routes = [
         path: '/feedback',
         name: 'Feedback',
         component: Feedback
+    },
+    {
+        path: '/adminLogin',
+        name: 'Admin Login',
+        component: adminLogin
+    },
+    {
+        path: '/addAdmin',
+        name: 'Add Admin',
+        component: addAdmin
     },
 ];
 

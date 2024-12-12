@@ -8,7 +8,7 @@ import BackToTop from '@/components/client/BackToTop.vue';
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <!-- <h1 class="text-center text-white text-[28px] font-semibold mt-6">Giỏ hàng của bạn</h1>
+        <h1 class="text-center text-white text-[28px] font-semibold mt-6">Giỏ hàng của bạn</h1>
         <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
             <div class="w-full m-4">
                 <div
@@ -69,13 +69,13 @@ import BackToTop from '@/components/client/BackToTop.vue';
                         hàng</button>
                 </div>
             </div>
-        </div> -->
-        <div class="flex justify-center items-center m-auto w-full">
+        </div>
+        <!-- <div class="flex justify-center items-center m-auto w-full">
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm nào!</p>
                 <img src="../../assets/img/banner.png" class="w-[200px]" alt="">
             </div>
-        </div>
+        </div> -->
         <Footer />
         <BackToTop />
     </div>
