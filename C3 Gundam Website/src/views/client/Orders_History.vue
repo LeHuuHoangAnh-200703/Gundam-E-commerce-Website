@@ -21,42 +21,66 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                 class="fa-solid fa-truck-fast"></i> Đơn hàng đã được chuyển đi và sẽ sớm đến bạn</p>
                     </div>
                     <hr class="my-3">
-                    <div class="flex gap-4 border-b-2 pb-4 mb-3">
-                        <img src="../../assets/img/RG01.jpg" class="w-[100px]" alt="">
-                        <div class="flex flex-col gap-1">
-                            <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
-                                <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG
-                                    1/144 RX-0 UNICORN GUNDAM
-                                    (BILIBILI
-                                    10TH ANNIVERSARY VER)</p>
+                    <div class="overflow-y-auto max-h-[250px] flex flex-col gap-4">
+                        <div class="flex gap-4 border-b-2 pb-4 mb-3">
+                            <img src="../../assets/img/RG01.jpg" class="w-[100px]" alt="">
+                            <div class="flex flex-col gap-1">
+                                <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
+                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG
+                                        1/144 RX-0 UNICORN GUNDAM
+                                        (BILIBILI
+                                        10TH ANNIVERSARY VER)</p>
+                                </div>
+                                <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN
+                                    GUNDAM
+                                    (BILIBILI 10TH
+                                    ANNIVERSARY VER)</p>
+                                <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
+                                <p class="text-[14px] text-white font-medium">Đơn giá: <span
+                                        class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                <p class="text-[14px] text-white font-medium">Số lượng: <span
+                                        class="text-[#FFD700]">2</span></p>
                             </div>
-                            <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM
-                                (BILIBILI 10TH
-                                ANNIVERSARY VER)</p>
-                            <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
-                            <p class="text-[14px] text-white font-medium">Đơn giá: <span
-                                    class="text-[#FFD700]">2.350.000 VNĐ</span></p>
-                            <p class="text-[14px] text-white font-medium">Số lượng: <span
-                                    class="text-[#FFD700]">2</span></p>
                         </div>
-                    </div>
-                    <div class="flex gap-4 border-b-2 pb-4 mb-3">
-                        <img src="../../assets/img/RG01.jpg" class="w-[100px]" alt="">
-                        <div class="flex flex-col gap-1">
-                            <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
-                                <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG
-                                    1/144 RX-0 UNICORN GUNDAM
-                                    (BILIBILI
-                                    10TH ANNIVERSARY VER)</p>
+                        <div class="flex gap-4 border-b-2 pb-4 mb-3">
+                            <img src="../../assets/img/RG01.jpg" class="w-[100px]" alt="">
+                            <div class="flex flex-col gap-1">
+                                <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
+                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG
+                                        1/144 RX-0 UNICORN GUNDAM
+                                        (BILIBILI
+                                        10TH ANNIVERSARY VER)</p>
+                                </div>
+                                <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN
+                                    GUNDAM
+                                    (BILIBILI 10TH
+                                    ANNIVERSARY VER)</p>
+                                <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
+                                <p class="text-[14px] text-white font-medium">Đơn giá: <span
+                                        class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                <p class="text-[14px] text-white font-medium">Số lượng: <span
+                                        class="text-[#FFD700]">2</span></p>
                             </div>
-                            <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN GUNDAM
-                                (BILIBILI 10TH
-                                ANNIVERSARY VER)</p>
-                            <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
-                            <p class="text-[14px] text-white font-medium">Đơn giá: <span
-                                    class="text-[#FFD700]">2.350.000 VNĐ</span></p>
-                            <p class="text-[14px] text-white font-medium">Số lượng: <span
-                                    class="text-[#FFD700]">2</span></p>
+                        </div>
+                        <div class="flex gap-4 border-b-2 pb-4 mb-3">
+                            <img src="../../assets/img/RG01.jpg" class="w-[100px]" alt="">
+                            <div class="flex flex-col gap-1">
+                                <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
+                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG
+                                        1/144 RX-0 UNICORN GUNDAM
+                                        (BILIBILI
+                                        10TH ANNIVERSARY VER)</p>
+                                </div>
+                                <p class="text-[14px] text-white font-medium hidden lg:block">RG 1/144 RX-0 UNICORN
+                                    GUNDAM
+                                    (BILIBILI 10TH
+                                    ANNIVERSARY VER)</p>
+                                <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
+                                <p class="text-[14px] text-white font-medium">Đơn giá: <span
+                                        class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                <p class="text-[14px] text-white font-medium">Số lượng: <span
+                                        class="text-[#FFD700]">2</span></p>
+                            </div>
                         </div>
                     </div>
                     <div

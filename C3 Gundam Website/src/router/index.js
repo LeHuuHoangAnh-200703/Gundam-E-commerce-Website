@@ -15,6 +15,8 @@ import addAdmin from '@/views/auth/addAdmin.vue';
 import adminProducts from '@/views/admin/adminProducts.vue';
 import addProduct from '@/views/admin/addProduct.vue';
 import editProduct from '@/views/admin/editProduct.vue';
+import listFeedBacks from '@/views/admin/listFeedBacks.vue';
+import listOrders from '@/views/admin/listOrders.vue';
 
 const routes = [
     {
@@ -91,6 +93,16 @@ const routes = [
         path: '/admin/editProduct',
         name: 'Edit Product',
         component: editProduct
+    },
+    {
+        path: '/admin/listFeedBacks',
+        name: 'List FeedBacks',
+        component: listFeedBacks
+    },
+    {
+        path: '/admin/listOrders',
+        name: 'List Orders',
+        component: listOrders
     },
 ];
 

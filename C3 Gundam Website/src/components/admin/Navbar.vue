@@ -9,7 +9,7 @@ const sidebarMenuMobile = [
     { name: "Danh sách nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Danh sách đơn hàng", icon: "fa-solid fa-bag-shopping", path: "ordersList" },
     { name: "Danh sách người dùng", icon: "fa-solid fa-users", path: "customers" },
-    { name: "Danh sách phản hồi", icon: "fa-solid fa-comments", path: "feedbacks" },
+    { name: "Danh sách đánh giá", icon: "fa-solid fa-comments", path: "feedbacks" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "createProducts" },
     { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
     { name: "Phiếu nhập", icon: "fa-solid fa-rectangle-list", path: "entryForm" },

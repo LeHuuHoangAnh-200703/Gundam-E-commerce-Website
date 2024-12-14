@@ -130,7 +130,7 @@ import SideBar from "@/components/admin/SideBar.vue";
                                 </div>
                                 <div class="flex justify-center lg:justify-end">
                                     <button type="submit"
-                                        class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#DC143C]">Thêm sản
+                                        class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Thêm sản
                                         phẩm</button>
                                 </div>
                             </div>
