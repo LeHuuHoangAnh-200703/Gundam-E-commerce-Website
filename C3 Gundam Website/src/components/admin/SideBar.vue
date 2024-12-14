@@ -2,6 +2,7 @@
 import {ref} from "vue";
 const status = ref(0);
 const sidebarMenu = [
+    { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
     { name: "Danh sách sản phẩm", icon: "fa-solid fa-igloo", path: "adminDashboard" },
     { name: "Danh sách nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Danh sách đơn hàng", icon: "fa-solid fa-bag-shopping", path: "ordersBook" },

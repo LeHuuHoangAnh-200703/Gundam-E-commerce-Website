@@ -4,6 +4,7 @@ const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
 
 const sidebarMenuMobile = [
+    { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
     { name: "Danh sách sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
     { name: "Danh sách nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Danh sách đơn hàng", icon: "fa-solid fa-bag-shopping", path: "ordersList" },

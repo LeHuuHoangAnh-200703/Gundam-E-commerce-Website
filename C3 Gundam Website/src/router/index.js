@@ -13,6 +13,8 @@ import Feedback from '@/views/client/Feedback.vue';
 import adminLogin from '@/views/auth/adminLogin.vue';
 import addAdmin from '@/views/auth/addAdmin.vue';
 import adminProducts from '@/views/admin/adminProducts.vue';
+import addProduct from '@/views/admin/addProduct.vue';
+import editProduct from '@/views/admin/editProduct.vue';
 
 const routes = [
     {
@@ -79,6 +81,16 @@ const routes = [
         path: '/admin/adminProducts',
         name: 'Admin Products',
         component: adminProducts
+    },
+    {
+        path: '/admin/addProduct',
+        name: 'Add Product',
+        component: addProduct
+    },
+    {
+        path: '/admin/editProduct',
+        name: 'Edit Product',
+        component: editProduct
     },
 ];
 

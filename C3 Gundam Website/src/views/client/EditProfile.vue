@@ -63,7 +63,7 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                 <div class="md:col-span-5 text-right mt-2">
                                     <div class="inline-flex items-end">
                                         <button type="submit"
-                                            class="bg-[#333f48] hover:bg-[#DB3F4C] text-white font-bold py-2 px-4 rounded">Cập
+                                            class="bg-[#333f48] hover:bg-[#DC143C] text-white font-bold py-2 px-4 rounded">Cập
                                             nhật</button>
                                     </div>
                                 </div>
