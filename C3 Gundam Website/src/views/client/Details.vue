@@ -63,6 +63,78 @@ const comments = ref([
     },
 ])
 
+const relatedProducts = ref([
+    {
+        img: '/src/assets/img/MG01.jpg',
+        name: 'SD WORLD HEROES 36 Onmitsu Gundam Aerial SDWH',
+        price: '1.245.000 VNĐ',
+        status: 'Còn hàng',
+    },
+    {
+        img: '/src/assets/img/MG02.jpg',
+        name: 'SD WORLD HEROES 37 Tenka Musou Daishogun SDWH',
+        price: '1.350.000 VNĐ',
+        status: 'Còn hàng',
+    },
+    {
+        img: '/src/assets/img/MG03.jpg',
+        name: 'SDCS Mighty Strike Freedom Gundam',
+        price: '370.000 VNĐ',
+        status: 'Còn hàng',
+    },
+    {
+        img: '/src/assets/img/MG04.jpg',
+        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
+        price: '1.500.000 VNĐ',
+        status: 'Còn hàng',
+    },
+    {
+        img: '/src/assets/img/MG04.jpg',
+        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
+        price: '1.500.000 VNĐ',
+        status: 'Còn hàng',
+    },
+    {
+        img: '/src/assets/img/MG04.jpg',
+        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
+        price: '1.500.000 VNĐ',
+        status: 'Còn hàng',
+    },
+    {
+        img: '/src/assets/img/MG04.jpg',
+        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
+        price: '1.500.000 VNĐ',
+        status: 'Còn hàng',
+    },
+]);
+
+// Sản phẩm liên quan
+const indexPage = ref(1);
+const itemsPerPage = 4;
+
+const totalPageProducts = computed(() => {
+    return Math.ceil(relatedProducts.value.length / itemsPerPage);
+});
+
+const paginatedProducts = computed(() => {
+    const start = (indexPage.value - 1) * itemsPerPage;
+    return relatedProducts.value.slice(start, start + itemsPerPage);
+});
+
+const nextPageProducts = () => {
+    if (indexPage.value < totalPageProducts.value) {
+        indexPage.value++;
+    }
+};
+
+const prevPageProducts = () => {
+    if (indexPage.value > 1) {
+        indexPage.value--;
+    }
+};
+
+
+// Đánh giá
 const currentPage = ref(1);
 const commentsPerPage = 5;
 
@@ -167,6 +239,56 @@ const changeImage = (newImage) => {
                 <div class="flex justify-center items-end">
                     <p
                         class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">
+                        Sản phẩm liên quan</p>
+                    <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
+                </div>
+                <div class="w-full my-6 overflow-x-auto">
+                    <div class="flex items-center justify-between w-full px-3">
+                        <button @click="prevPageProducts" :disabled="indexPage === 1"
+                            class="px-5 py-2 text-white hidden lg:block cursor-pointer font-semibold ease-out duration-300 transition-all">
+                            <i class="fa-solid fa-chevron-left text-[24px]"></i>
+                        </button>
+                        <div class="flex gap-5 transition-transform duration-300 pt-4">
+                            <div v-for="(product, index) in paginatedProducts" :key="index"
+                                class="flex flex-col gap-3 items-center w-[220px] sm:w-[180px] md:w-[200px] lg:w-[220px]">
+                                <router-link to="">
+                                    <img :src="product.img"
+                                        class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
+                                </router-link>
+                                <div
+                                    class="whitespace-nowrap text-[14px] text-ellipsis overflow-hidden max-w-48 text-white">
+                                    <router-link to=""
+                                        class="overflow-hidden text-ellipsis whitespace-nowrap text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">
+                                        {{ product.name }}
+                                    </router-link>
+                                </div>
+                                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ product.price
+                                        }}</span></p>
+                                <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.status }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <button @click="nextPageProducts" :disabled="indexPage === totalPageProducts"
+                            class="px-5 py-2 text-white hidden lg:block cursor-pointer font-semibold ease-out duration-300 transition-all">
+                            <i class="fa-solid fa-chevron-right text-[24px]"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-5 items-center justify-center lg:hidden my-4">
+                    <button @click="prevPageProducts" :disabled="indexPage === 1"
+                        class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">
+                        <i class="fa-solid fa-chevron-left text-[24px]"></i>
+                    </button>
+                    <button @click="nextPageProducts" :disabled="indexPage === totalPageProducts"
+                        class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">
+                        <i class="fa-solid fa-chevron-right text-[24px]"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="my-20">
+                <div class="flex justify-center items-end">
+                    <p
+                        class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">
                         Đánh giá</p>
                     <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
                 </div>
@@ -201,7 +323,8 @@ const changeImage = (newImage) => {
                     </div>
                     <hr class="my-4">
                     <div class="flex flex-col w-full">
-                        <div v-for="comment in paginatedComments" :key="comment.id" class="flex py-4 border-b flex-col gap-2 w-full">
+                        <div v-for="comment in paginatedComments" :key="comment.id"
+                            class="flex py-4 border-b flex-col gap-2 w-full">
                             <div class="flex gap-4 w-full">
                                 <img :src="comment.img" class="w-[60px] rounded-full" alt="">
                                 <div class="">
