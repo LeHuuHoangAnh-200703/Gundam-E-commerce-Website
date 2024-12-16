@@ -11,11 +11,11 @@ import SideBar from "@/components/admin/SideBar.vue";
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
                 <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                    <h1 class="font-bold text-[20px]">Quản lý sản phẩm</h1>
+                    <h1 class="font-bold text-[20px]">Quản lý nhân viên</h1>
                     <div class="flex justify-center flex-1 gap-2 max-w-xl">
                         <input type="text"
                             class="items-center w-full p-3 bg-white border border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
-                            placeholder="Tìm kiếm sản phẩm theo tên ..." />
+                            placeholder="Tìm kiếm nhân viên theo tên ..." />
                         <button
                             class="font-bold text-[12px] bg-[#DC143C] text-white px-4 py-2 rounded-md whitespace-nowrap">
                             Tìm kiếm
@@ -26,45 +26,21 @@ import SideBar from "@/components/admin/SideBar.vue";
                     <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                         <thead class="bg-[#1A1D27] text-white">
                             <tr>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã sản phẩm</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ảnh sản phẩm</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên sản phẩm</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đơn giá</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Loại sản phẩm</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Nhà cung cấp</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Còn lại</th>
-                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mô tả</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã nhân viên</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên nhân viên</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Email</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Chức vụ</th>
                                 <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                             </tr>
                         </thead>
                         <tbody class="w-full">
                             <tr class="border-t border-slate-500">
                                 <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">SP3240</td>
-                                <td>
-                                    <img class="w-[100px] py-2 max-w-full ml-7" src="../../assets/img/MG01.jpg"
-                                        alt="Hình ảnh sản phẩm" />
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                    <p class="overflow-hidden text-ellipsis whitespace-nowrap">RG 1/144 RX-0 UNICORN
-                                        GUNDAM (BILIBILI 10TH ANNIVERSARY VER)</p>
-                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                     1.230.000 VNĐ</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">RG
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">10
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">10
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                    <p class="overflow-hidden text-ellipsis text-[12px] whitespace-nowrap">RG 1/144 RX-0
-                                        UNICORN
-                                        GUNDAM (BILIBILI 10TH ANNIVERSARY VER) - Mô hình Gundam chính hãng Bandai sở hữu
-                                        đôi cánh sắc sảo tạo thành từ DRAGOON System độc đáo. Đây là một trong những mẫu
-                                        Gundam cực kỳ nổi tiếng với lượng fan đông đảo, và bạn sẽ không khỏi ấn tượng về
-                                        độ ngầu, độ hoành tráng của nó.</p>
                                 </td>
                                 <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
                                     <a href="`/admin/editProduct/`"
@@ -77,7 +53,7 @@ import SideBar from "@/components/admin/SideBar.vue";
                                     </form>
                                 </td>
                             </tr>
-                        </tbody>
+                        </tbody> 
                     </table>
                 </div>
             </div>

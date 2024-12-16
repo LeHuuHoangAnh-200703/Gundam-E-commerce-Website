@@ -17,6 +17,14 @@ import addProduct from '@/views/admin/addProduct.vue';
 import editProduct from '@/views/admin/editProduct.vue';
 import listFeedBacks from '@/views/admin/listFeedBacks.vue';
 import listOrders from '@/views/admin/listOrders.vue';
+import staffList from '@/views/admin/staffLists.vue';
+import editStaff from '@/views/admin/editStaff.vue';
+import customers from '@/views/admin/customers.vue';
+import listSuppliers from '@/views/admin/listSuppliers.vue';
+import editSupplier from '@/views/admin/editSupplier.vue';
+import listBills from '@/views/admin/listBills.vue';
+import editBill from '@/views/admin/editBill.vue';
+import listBillInfo from '@/views/admin/listBillInfo.vue';
 
 const routes = [
     {
@@ -103,6 +111,46 @@ const routes = [
         path: '/admin/listOrders',
         name: 'List Orders',
         component: listOrders
+    },
+    {
+        path: '/admin/staffList',
+        name: 'Staff List',
+        component: staffList
+    },
+    {
+        path: '/admin/editStaff',
+        name: 'Edit Staff',
+        component: editStaff
+    },
+    {
+        path: '/admin/customers',
+        name: 'Customers',
+        component: customers
+    },
+    {
+        path: '/admin/listSuppliers',
+        name: 'List Suppliers',
+        component: listSuppliers
+    },
+    {
+        path: '/admin/editSupplier',
+        name: 'Edit Supplier',
+        component: editSupplier
+    },
+    {
+        path: '/admin/listBills',
+        name: 'List Bills',
+        component: listBills
+    },
+    {
+        path: '/admin/editBill',
+        name: 'Edit Bill',
+        component: editBill
+    },
+    {
+        path: '/admin/listBillInfo',
+        name: 'List Bill Info',
+        component: listBillInfo
     },
 ];
 

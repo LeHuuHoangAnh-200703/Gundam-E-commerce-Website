@@ -30,14 +30,14 @@ const options = [
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
                 <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                    <h1 class="font-bold text-[20px]">Danh sách đơn hàng</h1>
+                    <h1 class="font-bold text-[20px]">Quản lý đơn hàng</h1>
                 </div>
                 <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
                     <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
                         <div class="flex flex-col gap-2">
                             <p class="font-semibold text-[18px]">Điều chỉnh đơn hàng</p>
                             <button v-for="option in options" :key="option"
-                                class="border-2 px-5 py-3 flex justify-start items-center gap-4 rounded-md hover:border-[#003171] transition-all duration-300">
+                                class="border-2 px-5 py-3 flex justify-start items-center gap-4 rounded-md hover:border-[#003171] hover:text-[#003171] transition-all duration-300">
                                 <i :class="option.icon"></i> {{ option.name }}
                             </button>
                         </div>

@@ -41,16 +41,15 @@ import SideBar from "@/components/admin/SideBar.vue";
                                         </select>
                                     </div>
                                     <div class="flex flex-col gap-2 w-full">
-                                        <label for="brandProduct" class="text-[15px] font-semibold">Thương hiệu</label>
+                                        <label for="brandProduct" class="text-[15px] font-semibold">Nhà cung cấp</label>
                                         <select
                                             class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             name="" id="brandProduct">
-                                            <option value="Premium Bandai" class="text-[#003171] font-semibold">Premium
-                                                Bandai</option>
-                                            <option value="Gunpla - Gundam Plastic Models"
-                                                class="text-[#003171] font-semibold">Gunpla - Gundam Plastic Models
+                                            <option value="Bluefin Distribution" class="text-[#003171] font-semibold">Bluefin Distribution</option>
+                                            <option value="Bandai Namco"
+                                                class="text-[#003171] font-semibold">Bandai Namco
                                             </option>
-                                            <option value="Kotobukiya" class="text-[#003171] font-semibold">Kotobukiya
+                                            <option value="HobbyLink Japan (HLJ)" class="text-[#003171] font-semibold">HobbyLink Japan (HLJ)
                                             </option>
                                         </select>
                                     </div>
@@ -63,13 +62,7 @@ import SideBar from "@/components/admin/SideBar.vue";
                                         placeholder="Mô tả sản phẩm ..."></textarea>
                                 </div>
                             </div>
-                            <div class="lg:w-1/2 w-full flex flex-col gap-4">
-                                <div class="flex flex-col gap-2">
-                                    <label for="priceProduct" class="text-[15px] font-semibold">Giá bán sản phẩm</label>
-                                    <input type="text" id="priceProduct"
-                                        class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                        placeholder="Nhập giá bán sản phẩm ...">
-                                </div>
+                            <div class="lg:w-1/2 w-full flex flex-col gap-4 justify-between">
                                 <div class="flex flex-col gap-2">
                                     <label for="imageUpload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
                                             class="fa-solid fa-circle-info text-gray-300"></i></label>
