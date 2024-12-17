@@ -11,7 +11,7 @@ const sidebarMenuMobile = [
     { name: "Danh sách khách hàng", icon: "fa-solid fa-users", path: "customers" },
     { name: "Danh sách đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
     { name: "Quản lý nhà cung cấp", icon: "fa-solid fa-user-large", path: "listSuppliers" },
-    { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "listDiscounts" },
+    { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
     { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
     { name: "Phiếu nhập", icon: "fa-solid fa-rectangle-list", path: "listEntryForms" },

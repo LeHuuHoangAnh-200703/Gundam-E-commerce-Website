@@ -25,6 +25,11 @@ import editSupplier from '@/views/admin/editSupplier.vue';
 import listBills from '@/views/admin/listBills.vue';
 import editBill from '@/views/admin/editBill.vue';
 import listBillInfo from '@/views/admin/listBillInfo.vue';
+import listEntryForms from '@/views/admin/listEntryForms.vue';
+import editEntryForm from '@/views/admin/editEntryForm.vue';
+import listEntryFormInfo from '@/views/admin/listEntryFormInfo.vue';
+import discountCode from '@/views/admin/discountCode.vue';
+import editDiscountCode from '@/views/admin/editDiscountCode.vue';
 
 const routes = [
     {
@@ -151,6 +156,31 @@ const routes = [
         path: '/admin/listBillInfo',
         name: 'List Bill Info',
         component: listBillInfo
+    },
+    {
+        path: '/admin/listEntryForms',
+        name: 'List Entry Forms',
+        component: listEntryForms
+    },
+    {
+        path: '/admin/editEntryForm',
+        name: 'Edit Entry Form',
+        component: editEntryForm
+    },
+    {
+        path: '/admin/listEntryFormInfo',
+        name: 'list Entry Form Info',
+        component: listEntryFormInfo
+    },
+    {
+        path: '/admin/discountCode',
+        name: 'Discount Code',
+        component: discountCode
+    },
+    {
+        path: '/admin/editDiscountCode',
+        name: 'Edit Discount Code',
+        component: editDiscountCode
     },
 ];
 

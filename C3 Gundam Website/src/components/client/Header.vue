@@ -28,12 +28,12 @@ onMounted(() => {
                         class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                     </div>
                 </li>
-                <li class="group"><router-link to="">Lịch sử mua hàng</router-link>
+                <li class="group"><router-link to="/orders_history">Lịch sử mua hàng</router-link>
                     <div
                         class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                     </div>
                 </li>
-                <li class="group"><router-link to="">Tài khoản</router-link>
+                <li class="group"><router-link to="/profile">Tài khoản</router-link>
                     <div
                         class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                     </div>
@@ -45,11 +45,11 @@ onMounted(() => {
                 </li>
             </ul>
             <div class="flex lg:gap-10 gap-7 items-end">
-                <button class="relative">
+                <router-link to="/carts" class="relative">
                     <i class="fa-solid fa-cart-shopping text-white text-[24px]"></i>
                     <span
                         class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">0</span>
-                </button>
+                </router-link>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>
                 </button>
@@ -67,9 +67,9 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <router-link to="">Lịch sử mua hàng</router-link></li>
+                        class="fa-solid fa-bag-shopping"></i> <router-link to="/orders_history">Lịch sử mua hàng</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-user"></i> <router-link to="">Tài khoản</router-link></li>
+                        class="fa-solid fa-user"></i> <router-link to="/profile">Tài khoản</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>
             </ul>
