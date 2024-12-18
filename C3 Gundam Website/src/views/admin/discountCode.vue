@@ -10,7 +10,7 @@ import SideBar from "@/components/admin/SideBar.vue";
             <SideBar />
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)]">
+                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
                         <h1 class="font-bold text-[20px]">Quản lý mã giảm giá</h1>
                     </div>

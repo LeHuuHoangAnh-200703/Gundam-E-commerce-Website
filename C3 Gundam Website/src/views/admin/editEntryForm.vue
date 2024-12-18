@@ -10,39 +10,43 @@ import SideBar from "@/components/admin/SideBar.vue";
             <SideBar />
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
-                <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
-                    <h1 class="font-bold text-[20px]">Chỉnh sửa phiếu nhập</h1>
-                </div>
-                <div class="bg-white rounded-lg shadow-lg w-full lg:w-[70%] mx-auto p-4">
-                    <form action="">
-                        <div class="w-full flex flex-col lg:flex-row gap-8">
-                            <div class="w-full flex flex-col gap-4">
-                                <div class="flex flex-col gap-2">
-                                    <label for="idSupplier" class="text-[15px] font-semibold">Mã nhà cung cấp</label>
-                                    <input type="text" id="idSupplier"
-                                        class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                        placeholder="Nhập mã nhà cung cấp ...">
-                                </div>
-                                <div class="flex flex-col gap-2">
-                                    <label for="idStaff" class="text-[15px] font-semibold">Mã nhân viên</label>
-                                    <input type="text" id="idStaff"
-                                        class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                        placeholder="Nhập mã nhân viên ...">
-                                </div>
-                                <div class="flex flex-col gap-2">
-                                    <label for="date" class="text-[15px] font-semibold">Ngày nhập</label>
-                                    <input type="date" id="date"
-                                        class="p-2 border-2 rounded-md text-[14px] outline-none w-full focus:ring focus:ring-[#1A1D27]"
-                                        placeholder="Nhập ngày nhập ...">
-                                </div>
-                                <div class="flex justify-center lg:justify-end">
-                                    <button type="submit"
-                                        class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Chỉnh sửa
-                                        phiếu nhập</button>
+                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+                    <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
+                        <h1 class="font-bold text-[20px]">Chỉnh sửa phiếu nhập</h1>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg w-full lg:w-[70%] mx-auto p-4">
+                        <form action="">
+                            <div class="w-full flex flex-col lg:flex-row gap-8">
+                                <div class="w-full flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        <label for="idSupplier" class="text-[15px] font-semibold">Mã nhà cung
+                                            cấp</label>
+                                        <input type="text" id="idSupplier"
+                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Nhập mã nhà cung cấp ...">
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label for="idStaff" class="text-[15px] font-semibold">Mã nhân viên</label>
+                                        <input type="text" id="idStaff"
+                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Nhập mã nhân viên ...">
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label for="date" class="text-[15px] font-semibold">Ngày nhập</label>
+                                        <input type="date" id="date"
+                                            class="p-2 border-2 rounded-md text-[14px] outline-none w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Nhập ngày nhập ...">
+                                    </div>
+                                    <div class="flex justify-center lg:justify-end">
+                                        <button type="submit"
+                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Chỉnh
+                                            sửa
+                                            phiếu nhập</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
