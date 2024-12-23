@@ -3,6 +3,11 @@ import { ref } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';  
+
+const MaKhachHang = localStorage.getItem('MaKhachHang');
+const TenKhachHang = localStorage.getItem('TenKhachHang');
+const email = localStorage.getItem('Email');
+
 </script>
 
 
@@ -20,21 +25,20 @@ import BackToTop from '@/components/client/BackToTop.vue';
                             alt="">
                         <div class="flex justify-between items-center flex-col lg:flex-row gap-4 px-2 lg:px-24">
                             <p class="font-semibold text-[18px] text-white my-2">Mã tài khoản: <span
-                                    class="text-[#FFD700]">TK23345</span></p>
+                                    class="text-[#FFD700]">{{ MaKhachHang }}</span></p>
                             <a href=""
                                 class="px-3 py-2 sm:px-5 sm:py-2 bg-[#DB3F4C] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Chỉnh
                                 sửa hồ sơ</a>
                         </div>
                         <div class="text-center mt-12 pb-4">
-                            <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">Lê Hữu
-                                Hoàng Anh</h3>
+                            <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">{{ TenKhachHang }}</h3>
                             <div class="text-base leading-normal mt-0 mb-4 font-bold text-white"><i
-                                    class="fa-regular fa-envelope text-[#FFD700]"></i> lehuuhoanganhhg2003@gmail.com
+                                    class="fa-regular fa-envelope text-[#FFD700]"></i> {{ email }}
                             </div>
                             <hr>
                             <div class="my-5 lg:text-[18px] text-[15px] font-medium text-white">
                                 <p>
-                                    Chào mừng <span class="font-semibold text-[#FFD700]">Hoàng Anh</span> đã đến với
+                                    Chào mừng <span class="font-semibold text-[#FFD700]">{{ TenKhachHang }}</span> đã đến với
                                     C3 Gundam, chúng tôi mong rằng tại đây sẽ thõa mãn được những nhu cầu
                                     của bạn. Chúng tôi luôn sẳn sàng hỗ trợ bạn , nếu cần thì mong
                                     bạn liên hệ đến Hotline. Xin cám ơn!!

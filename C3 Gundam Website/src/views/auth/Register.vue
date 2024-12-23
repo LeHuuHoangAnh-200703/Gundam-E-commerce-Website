@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const errors = ref({});
+const router = useRouter();
 const formData = ref({
     nameCustomer: '',
     emailCustomer: '',
@@ -17,9 +18,8 @@ const notification = ref({
 });
 
 const register = async () => {
-    console.log(1);
     errors.value = {};
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
     if (!formData.value.nameCustomer) {
         errors.value.nameCustomer = "Tên không để trống khi đăng ký!";
@@ -33,18 +33,16 @@ const register = async () => {
 
     if (!formData.value.password) {
         errors.value.password = "Mật khẩu không để trống khi đăng ký!";
-    }
-    
-    if (formData.value.password.length < 6) {
+    } else if (formData.value.password.length < 6) {
         errors.value.password = "Mật khẩu phải tối thiểu 6 ký tự!";
     }
 
     if (!formData.value.confirmPassword) {
         errors.value.confirmPassword = "Vui lòng không để trống khi đăng ký!";
-    }
-    
-    if (formData.value.confirmPassword.length < 6) {
+    } else if (formData.value.confirmPassword.length < 6) {
         errors.value.confirmPassword = "Mật khẩu phải tối thiểu 6 ký tự!";
+    } else if (formData.value.confirmPassword !== formData.value.password) {
+        errors.value.confirmPassword = "Mật khẩu nhập lại không chính xác!";
     }
 
     if (Object.keys(errors.value).length > 0) {
@@ -56,19 +54,26 @@ const register = async () => {
             TenKhachHang: formData.value.nameCustomer,
             MatKhau: formData.value.password,
             Email: formData.value.emailCustomer,
+            NgayTao: new Date()
         };
 
         const response = await axios.post('http://localhost:3000/api/khachhang', dataToSend);
         notification.value = {
-            message: "Đăng ký thành công!",
+            message: "Đăng ký tài khoản thành công!",
             type: "success",
         };
+        setTimeout(() => {
+            router.push('/login');
+        }, 3000);
     } catch (error) {
         notification.value = {
             message: error.response?.data?.message || "Đăng ký thất bại!",
             type: "error",
         };
     }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
 };
 </script>
 
@@ -89,23 +94,32 @@ const register = async () => {
                                     nhập</label>
                                 <input type="text" v-model="formData.nameCustomer" placeholder="Nhập tên của bạn ..."
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <p v-if="errors.nameCustomer" class="text-red-500 text-sm my-2">{{ errors.nameCustomer
+                                    }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email của
                                     bạn</label>
                                 <input type="text" v-model="formData.emailCustomer" placeholder="test@gmail.com"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <p v-if="errors.emailCustomer" class="text-red-500 text-sm my-2">{{ errors.emailCustomer
+                                    }}
+                                </p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
                                 <input type="password" v-model="formData.password" placeholder="••••••••"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Nhập lại mật
                                     khẩu</label>
                                 <input type="password" v-model="formData.confirmPassword" placeholder="••••••••"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <p v-if="errors.confirmPassword" class="text-red-500 text-sm my-2">{{
+                                    errors.confirmPassword
+                                }}</p>
                             </div>
                             <button type="submit"
                                 class="px-4 py-2 md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
@@ -136,15 +150,21 @@ const register = async () => {
             </div>
         </div>
         <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message"
-                :class="`fixed top-4 right-4 p-5 bg-white shadow-lg rounded-lg z-10 flex items-center space-x-2 
-                        ${notification.type === 'success' ? 'border-l-8 border-green-500 text-green-600' : 'border-l-8 border-red-500 text-red-600'}`">
-                <p class="text-[18px] font-semibold">{{ notification.message }}</p>
+            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
+                'border-[#DB3F4C]': notification.type === 'error',
+                'border-[#40E0D0]': notification.type === 'success',
+            }]">
+                <div class="flex gap-2 justify-center items-center">
+                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                        class="w-[50px]" alt="">
+                    <p class="text-[16px] font-semibold"
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                            notification.message }}</p>
+                </div>
             </div>
         </transition>
     </div>
 </template>
-
 <style scoped>
 .slide-fade-enter-active,
 .slide-fade-leave-active {

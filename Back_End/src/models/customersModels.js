@@ -6,6 +6,7 @@ const customerSchema = new mongoose.Schema({
     TenKhachHang: String,
     Email: String,
     MatKhau: String,
+    NgayTao: { type: Date, required: true },
 });
 
 function generateMaKhachHang() {  

@@ -1,4 +1,66 @@
 <script setup>
+import { ref } from "vue";
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const errors = ref({});
+const router = useRouter();
+const formData = ref({
+    email: '',
+    password: '',
+});
+
+const notification = ref({
+    message: '',
+    type: ''
+});
+
+const login = async () => {
+    errors.value = {};
+    const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+
+    if (!formData.value.email) {
+        errors.value.email = "Email không được để trống!"
+    } else if (!emailRegex.test(formData.value.email)) {
+        errors.value.email = "Email không đúng định dạng!";
+    }
+
+    if (!formData.value.password) {
+        errors.value.password = "Mật khẩu không được để trống!";
+    } else if (!formData.value.password.length) {
+        errors.value.password = "Mật khẩu phải tối thiểu 6 ký tự!";
+    }
+
+    if (Object.keys(errors.value).length > 0) {
+        return;
+    }
+
+    try {
+        const response = await axios.post('http://localhost:3000/api/khachhang/login', {
+            email: formData.value.email,
+            password: formData.value.password
+        });
+        console.log(response.data);
+        localStorage.setItem('Email', response.data.customer.Email);
+        localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
+        localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);
+        notification.value = {
+            message: "Đăng nhập thành công!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.push('/');
+        }, 3000);
+    } catch (error) {
+        notification.value = {
+            message: error.response?.data?.message || "Có lỗi xảy ra!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
 </script>
 
 <template>
@@ -24,18 +86,24 @@
                         <p class="font-medium text-[14px] md:text-[16px] mb-6 text-center lg:text-start">
                             Vui lòng điền đầy đủ thông tin!
                         </p>
-                        <form action="" class="flex flex-col gap-4 w-full">
+                        <form @submit.prevent="login" method="POST" class="flex flex-col gap-4 w-full">
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email</label>
-                                <input type="text" placeholder="test@gmail.com"
+                                <input type="text" v-model="formData.email" placeholder="test@gmail.com"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <p v-if="errors.email" class="text-red-500 text-sm my-2">{{
+                                    errors.email
+                                }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
-                                <input type="password" placeholder="••••••••"
+                                <input type="password" v-model="formData.password" placeholder="••••••••"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <p v-if="errors.password" class="text-red-500 text-sm my-2">{{
+                                    errors.password
+                                }}</p>
                             </div>
-                            <button
+                            <button type="submit"
                                 class="px-4 py-2 inline-block md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
                                 Đăng nhập
                             </button>
@@ -51,7 +119,31 @@
                 </div>
             </div>
         </div>
+        <transition name="slide-fade" mode="out-in">
+            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
+                'border-[#DB3F4C]': notification.type === 'error',
+                'border-[#40E0D0]': notification.type === 'success',
+            }]">
+                <div class="flex gap-2 justify-center items-center">
+                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                        class="w-[50px]" alt="">
+                    <p class="text-[16px] font-semibold"
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                            notification.message }}</p>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
 
-<style></style>
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+</style>

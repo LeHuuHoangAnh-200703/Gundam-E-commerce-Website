@@ -1,6 +1,50 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted } from "vue";
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const userInfo = ref({
+  MaKhachHang: localStorage.getItem('MaKhachHang') || '',
+});
+const isLoggedIn = ref(!userInfo.value.MaKhachHang);
+const logout = () => {
+  localStorage.removeItem('TenKhachHang');
+  localStorage.removeItem('MaKhachHang');
+  localStorage.removeItem('Email');
+  userInfo.value.TenKhachHang = '';
+  userInfo.value.Email = '';
+  userInfo.value.MaKhachHang = '';
+  isLoggedIn.value = false;
+
+  router.push('/login');
+};
+
+const orders_history = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/orders_history');
+    }
+}
+
+const profile = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/profile');
+    } 
+}
+
+const carts = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/carts');
+    } 
+}
 const emit = defineEmits();
 const searchQuery = ref("");
 const handleSearch = () => {
@@ -40,17 +84,22 @@ onMounted(() => {
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><router-link to="/orders_history">Lịch sử mua hàng</router-link>
+                    <li class="group"><button @click.prevent="orders_history">Lịch sử mua hàng</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><router-link to="/profile">Tài khoản</router-link>
+                    <li class="group"><button @click.prevent="profile">Tài khoản</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><router-link to="/login">Đăng nhập</router-link>
+                    <li v-if="isLoggedIn" class="group"><router-link to="/login">Đăng nhập</router-link>
+                        <div
+                            class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
+                        </div>
+                    </li>
+                    <li v-else class="group"><button @click.prevent="logout">Đăng xuất</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
@@ -64,11 +113,11 @@ onMounted(() => {
                         placeholder="Tìm kiếm ...">
                     <i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-[20px] text-white"></i>
                 </div>
-                <router-link to="/carts" class="relative">
+                <button @click.prevent="carts" class="relative">
                     <i class="fa-solid fa-cart-shopping text-white text-[24px]"></i>
                     <span
                         class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">0</span>
-                </router-link>
+                </button>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>
                 </button>
@@ -92,11 +141,13 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <router-link to="/orders_history">Lịch sử mua hàng</router-link></li>
+                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Lịch sử mua hàng</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-user"></i> <router-link to="/profile">Tài khoản</router-link></li>
-                <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
+                        class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
+                <li v-if="isLoggedIn" class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>
+                <li v-else class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
+                        class="fa-solid fa-globe"></i> <router-link to="/login">Đăng xuất</router-link></li>
             </ul>
         </div>
     </header>
