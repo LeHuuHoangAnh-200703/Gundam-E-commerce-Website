@@ -3,6 +3,16 @@ import { ref } from "vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
+// Hàm mã hóa đầu vào
+const escapeHtml = (unsafe) => {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
 const errors = ref({});
 const router = useRouter();
 const formData = ref({
@@ -19,16 +29,20 @@ const notification = ref({
 
 const register = async () => {
     errors.value = {};
-    const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
     if (!formData.value.nameCustomer) {
         errors.value.nameCustomer = "Tên không để trống khi đăng ký!";
+    } else {
+        formData.value.nameCustomer = escapeHtml(formData.value.nameCustomer);
     }
 
     if (!formData.value.emailCustomer) {
         errors.value.emailCustomer = "Email không để trống khi đăng ký!";
     } else if (!emailRegex.test(formData.value.emailCustomer)) {
         errors.value.emailCustomer = "Email không đúng định dạng!";
+    } else {
+        formData.value.emailCustomer = escapeHtml(formData.value.emailCustomer);
     }
 
     if (!formData.value.password) {
@@ -82,29 +96,23 @@ const register = async () => {
         <div class="w-full max-w-4xl m-4">
             <div class="bg-[#242424] overflow-hidden p-2 rounded-md [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                 <div class="flex flex-col md:flex-row gap-10">
-                    <div
-                        class="flex text-white flex-col gap-4 p-5 w-full lg:w-1/2 justify-center items-center lg:items-start">
+                    <div class="flex text-white flex-col gap-4 p-5 w-full lg:w-1/2 justify-center items-center lg:items-start">
                         <p class="font-semibold text-[20px] md:text-[24px] text-center lg:text-start">ĐĂNG KÝ</p>
                         <p class="font-medium text-[14px] md:text-[16px] mb-6 text-center lg:text-start">
                             Vui lòng điền đầy đủ thông tin!
                         </p>
                         <form @submit.prevent="register" method="POST" class="flex flex-col gap-4 w-full">
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Tên đăng
-                                    nhập</label>
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Tên đăng nhập</label>
                                 <input type="text" v-model="formData.nameCustomer" placeholder="Nhập tên của bạn ..."
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.nameCustomer" class="text-red-500 text-sm my-2">{{ errors.nameCustomer
-                                    }}</p>
+                                <p v-if="errors.nameCustomer" class="text-red-500 text-sm my-2">{{ errors.nameCustomer }}</p>
                             </div>
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email của
-                                    bạn</label>
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email của bạn</label>
                                 <input type="text" v-model="formData.emailCustomer" placeholder="test@gmail.com"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.emailCustomer" class="text-red-500 text-sm my-2">{{ errors.emailCustomer
-                                    }}
-                                </p>
+                                <p v-if="errors.emailCustomer" class="text-red-500 text-sm my-2">{{ errors.emailCustomer }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
@@ -113,13 +121,10 @@ const register = async () => {
                                 <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Nhập lại mật
-                                    khẩu</label>
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Nhập lại mật khẩu</label>
                                 <input type="password" v-model="formData.confirmPassword" placeholder="••••••••"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.confirmPassword" class="text-red-500 text-sm my-2">{{
-                                    errors.confirmPassword
-                                }}</p>
+                                <p v-if="errors.confirmPassword" class="text-red-500 text-sm my-2">{{ errors.confirmPassword }}</p>
                             </div>
                             <button type="submit"
                                 class="px-4 py-2 md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
@@ -142,7 +147,7 @@ const register = async () => {
                                 C3 GUNDAM xin chào!
                             </p>
                             <p class="text-[14px] lg:text-[16px] text-white font-medium text-center">
-                                Vũ trụ Gundam đang chờ đón bạn, Hãy đăng ký tài khoản để có được trãi nghiệm tốt nhất!
+                                Vũ trụ Gundam đang chờ đón bạn, Hãy đăng ký tài khoản để có được trải nghiệm tốt nhất!
                             </p>
                         </div>
                     </div>
@@ -158,13 +163,13 @@ const register = async () => {
                     <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{ notification.message }}</p>
                 </div>
             </div>
         </transition>
     </div>
 </template>
+
 <style scoped>
 .slide-fade-enter-active,
 .slide-fade-leave-active {

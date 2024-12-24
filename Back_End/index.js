@@ -20,8 +20,12 @@ mongoose
   .catch((err) => console.log(err));
 
 const khachHangRoutes = require("./src/routes/customers");
+const adminRoutes = require("./src/routes/admins");
+const supplierRoutes = require("./src/routes/suppliers");
 
 app.use("/api/khachhang", khachHangRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/nhacungcap", supplierRoutes);
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

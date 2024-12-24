@@ -1,7 +1,18 @@
 <script setup>
+import router from "@/router";
 import { ref } from "vue";
 const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
+
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+
+const logout = () => {
+    localStorage.removeItem("TenAdmin");
+    localStorage.removeItem("ChucVu");
+
+    router.push("/admin/adminLogin");
+}
 
 const sidebarMenuMobile = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
@@ -34,8 +45,8 @@ const toggleNotification = () => {
             <div class="flex gap-3">
                 <img src="../../assets/img/avatar.jpg" class="w-[50px] rounded-full" alt="">
                 <div class="font-semibold flex flex-col justify-center">
-                    <p class="text-[14px]">Lê Hữu Hoàng Anh</p>
-                    <p class="text-[12px]">Chức vụ: <span class="text-[#DB3F4C]">Quản trị viên</span></p>
+                    <p class="text-[14px]">{{ TenAdmin }}</p>
+                    <p class="text-[12px]">Chức vụ: <span class="text-[#DB3F4C]">{{ ChucVu }}</span></p>
                 </div>
             </div>
             <div class="flex gap-3 justify-center items-center">
@@ -45,10 +56,10 @@ const toggleNotification = () => {
                             class="absolute top-0 right-0 w-2 h-2 group-hover:bg-[#FFD700] bg-[#DB3F4C] transition-all duration-200 rounded-full"></span>
                     </i>
                 </router-link>
-                <router-link to="" class="px-2 py-2 rounded-full group hidden lg:block">
+                <button @click.prevent="logout" class="px-2 py-2 rounded-full group hidden lg:block">
                     <i
                         class="fa-solid fa-right-from-bracket group-hover:text-[#DB3F4C] transition-all duration-200 text-[20px]"></i>
-                </router-link>
+                </button>
                 <button @click="toggleSideBar()" class="block lg:hidden">
                     <i class="fa-solid fa-bars text-[20px]"></i>
                 </button>
