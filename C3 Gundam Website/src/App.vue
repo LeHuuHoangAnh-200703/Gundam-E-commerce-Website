@@ -1,9 +1,12 @@
 <script setup>
+import Loading from '../../C3 Gundam Website/src/components/client/Loading.vue';
+import { isLoading } from '@/router';
 </script>
 
 <template>
   <div id="app">
-    <router-view></router-view>
+    <Loading :isLoading="isLoading" />
+      <router-view></router-view>
   </div>
 </template>
 

@@ -33,7 +33,7 @@ exports.createSupplier = async (req, res) => {
   }
 };
 
-exports.updateAdmin = async (req, res) => {
+exports.updatedSupplier = async (req, res) => {
   try {
     const supplier = await Supplier.findOne({
       MaNhaCungCap: req.params.maNCC,

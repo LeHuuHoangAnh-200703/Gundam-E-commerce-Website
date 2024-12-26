@@ -69,7 +69,7 @@ const addSupplier = async () => {
         };
     } catch (error) {
         notification.value = {
-            message: "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.",
+            message: error.response?.data?.message || "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.",
             type: "error",
         };
     }
@@ -90,6 +90,24 @@ const fetchSuppliers = async () => {
         console.error('Error fetching:', error);
     }
 };
+
+const deleteSupplier = async (maNCC) => {
+    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa không?");
+    if (!confirmDelete) return;
+
+    try {
+        const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
+        notification.value = {
+            message: "Xóa nhà cung cấp thành công!",
+            type: "success",
+        };
+    } catch(err) {
+        notification.value = {
+            message: error.response?.data?.message || "Xóa nhà cung cấp thất bại!",
+            type: "error",
+        };
+    }
+}
 
 onMounted(() => {
     fetchSuppliers();
@@ -167,10 +185,10 @@ onMounted(() => {
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ supplier.DiaChi }}</td>
                                     <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <a href="`/admin/editProduct/`"
+                                        <a :href="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <form>
+                                        <form @submit.prevent="deleteSupplier(supplier.MaNhaCungCap)">
                                             <button type="submit"
                                                 class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
                                                     class="fa-solid fa-trash"></i></button>
