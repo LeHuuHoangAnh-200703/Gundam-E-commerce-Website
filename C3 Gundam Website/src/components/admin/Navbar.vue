@@ -1,18 +1,14 @@
 <script setup>
 import router from "@/router";
-import { ref } from "vue";
+import axios from "axios";
+import { ref, onMounted } from "vue";
 const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
 
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ChucVu = localStorage.getItem("ChucVu");
 
-const logout = () => {
-    localStorage.removeItem("TenAdmin");
-    localStorage.removeItem("ChucVu");
-
-    router.push("/admin/adminLogin");
-}
+const listNatifications = ref([]);
 
 const sidebarMenuMobile = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
@@ -29,6 +25,12 @@ const sidebarMenuMobile = [
     { name: "Hóa đơn", icon: "fa-solid fa-scroll", path: "listBills" },
     { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "logout" },
 ];
+const logout = () => {
+    localStorage.removeItem("TenAdmin");
+    localStorage.removeItem("ChucVu");
+
+    router.push("/admin/adminLogin");
+}
 
 const toggleSideBar = () => {
     isSidebarVisible.value = !isSidebarVisible.value;
@@ -37,6 +39,34 @@ const toggleSideBar = () => {
 const toggleNotification = () => {
     isNotificationVisible.value = !isNotificationVisible.value;
 }
+
+const fetchNatifications = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/thongbao');
+        listNatifications.value = response.data.map(natification => {
+            return {
+                ...natification,
+                ThoiGian: new Date(natification.ThoiGian),
+            };
+        });
+        listNatifications.value.sort((a, b) => b.ThoiGian - a.ThoiGian);
+        console.log(response.data)
+    } catch (err) {
+        console.log("error fetching: ", err);
+    }
+}
+
+const formatDate = (date) => {
+    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
+    const formattedDate = date.toLocaleString('vi-VN', options);
+    
+    const [time, day] = formattedDate.split(', ');
+    return `${time}`;
+};
+
+onMounted(() => {
+    fetchNatifications();
+})
 </script>
 
 <template>
@@ -84,38 +114,21 @@ const toggleNotification = () => {
                     </ul>
                 </div>
             </div>
-            <div class="notification fixed top-28 w-full lg:w-96 bg-white shadow-lg p-4 rounded-lg z-10"
-                :class="{ 'lg:right-[25%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }">
+            <div class="notification fixed top-28 w-full lg:w-auto bg-white shadow-lg p-4 rounded-lg z-10"
+                :class="{ 'lg:right-[30%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }">
                 <div class="flex justify-between items-center">
                    <p class="font-semibold text-[18px]">Thông báo</p>
                     <i @click="toggleNotification()" class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"></i> 
                 </div>
                 <hr class="mt-2">
-                <div class="flex gap-3 items-center border-b py-2">
+                <div class="flex gap-3 items-center border-b py-2" v-for="(natification, index) in listNatifications" :key="index">
                     <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
                         <i class="fa-regular fa-bell text-[20px]"></i>
                     </div>
                     <div class="flex flex-col">
-                        <p class="font-semibold text-[16px]">Sản phẩm mới vừa được thêm.</p>
-                        <p class="text-[12px] font-medium text-gray-600">12:30 24-07-2024</p>
-                    </div>
-                </div>
-                <div class="flex gap-3 items-center border-b py-2">
-                    <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
-                        <i class="fa-regular fa-bell text-[20px]"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="font-semibold text-[16px]">Hóa đơn vừa được thêm.</p>
-                        <p class="text-[12px] font-medium text-gray-600">12:30 24-07-2024</p>
-                    </div>
-                </div>
-                <div class="flex gap-3 items-center border-b py-2">
-                    <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
-                        <i class="fa-regular fa-bell text-[20px]"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="font-semibold text-[16px]">Nhân viên vừa được thêm.</p>
-                        <p class="text-[12px] font-medium text-gray-600">12:30 24-07-2024</p>
+                        <p class="font-semibold text-[16px]">{{ natification.ThongBao }}</p>
+                        <p class="font-semibold text-[12px]">Người chỉnh sửa: <span class="text-[#DB3F4C]">{{ natification.NguoiChinhSua }} <span class="text-[#333]">/</span> {{ natification.ChucVu }}</span></p>
+                        <p class="text-[12px] font-medium text-gray-600">{{ formatDate(natification.ThoiGian) }}</p>
                     </div>
                 </div>
             </div>

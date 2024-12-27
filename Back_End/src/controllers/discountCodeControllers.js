@@ -67,11 +67,6 @@ exports.updatedDiscountCode = async (req, res) => {
 exports.deleteDiscountCode = async (req, res) => {
     const { idMaGG } = req.params;
     try {
-        // const existingOrder = await TheoDoiMuonSach.findOne({ MaDocGia: maDocGia });
-        // if (existingOrder) {
-        //   return res.status(400).json({ message: "Không thể xóa đọc giả vì họ đang có đơn mượn sách." });
-        // }
-
         const discountCode = await DiscountCode.findOneAndDelete({
             IdMaGiamGia: idMaGG,
         });

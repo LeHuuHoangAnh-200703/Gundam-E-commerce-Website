@@ -17,6 +17,10 @@ const escapeHtml = (unsafe) => {
 
 const errors = ref({});
 
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+const ThoiGian = new Date();
+
 const notification = ref({
     message: '',
     type: ''
@@ -99,6 +103,16 @@ const addDiscountCode = async () => {
         }
 
         const response = await axios.post('http://localhost:3000/api/magiamgia', dataToSend);
+
+        const notificationData = {
+            ThongBao: `Mã giảm giá ${formData.value.nameCode.toLowerCase()} vừa được thêm!`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+
         notification.value = {
             message: "Thêm mã giảm giá thành công!",
             type: "success",

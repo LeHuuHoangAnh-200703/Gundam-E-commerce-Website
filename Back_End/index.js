@@ -23,11 +23,13 @@ const khachHangRoutes = require("./src/routes/customers");
 const adminRoutes = require("./src/routes/admins");
 const supplierRoutes = require("./src/routes/suppliers");
 const discountCodeRoutes = require("./src/routes/discountCodes");
+const notificationRoutes = require("./src/routes/Notifications");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/nhacungcap", supplierRoutes);
 app.use("/api/magiamgia", discountCodeRoutes);
+app.use("/api/thongbao", notificationRoutes);
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

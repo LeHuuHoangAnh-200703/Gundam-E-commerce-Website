@@ -118,7 +118,7 @@ const editDiscountCode = async () => {
             dataToSend.GiamTien = formData.value.decreaseMoney;
         }
 
-        const response = await axios.post(`http://localhost:3000/api/magiamgia/${formData.value.idCode}`, dataToSend);
+        const response = await axios.put(`http://localhost:3000/api/magiamgia/${formData.value.idCode}`, dataToSend);
         notification.value = {
             message: "Cập nhật mã giảm giá thành công!",
             type: "success",
@@ -155,7 +155,7 @@ onMounted(() => {
                         <h1 class="font-bold text-[20px]">Chỉnh sửa mã giảm giá</h1>
                     </div>
                     <div class="bg-white rounded-lg shadow-lg w-full lg:w-[70%] mx-auto p-4">
-                        <form action="">
+                        <form @submit.prevent="editDiscountCode" method="POST">
                             <div class="w-full flex flex-col lg:flex-row gap-8">
                                 <div class="w-full flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">

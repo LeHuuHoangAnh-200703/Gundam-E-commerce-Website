@@ -11,19 +11,57 @@ const notification = ref({
     type: ''
 });
 
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+const ThoiGian = new Date();
+
 const fetchDiscountCode = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/magiamgia');
         listDiscountCodes.value = response.data.map(discountCode => {
             return {
                 ...discountCode,
-                NgayHetHan: new Date(discountCode.NgayHetHan).toLocaleDateString('vi-VN'),
+                NgayHetHan: new Date(discountCode.NgayHetHan),
             };
         });
         console.log(listDiscountCodes);
     } catch (error) {
         console.error('Error fetching:', error);
     }
+}
+
+const deleteDiscountCode = async (idMaGG, tenMaGG) => {
+    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa không?");
+    if (!confirmDelete) return;
+
+    try {
+        const response = await axios.delete(`http://localhost:3000/api/magiamgia/${idMaGG}`);
+        
+        const notificationData = {
+            ThongBao: `Mã giảm giá ${tenMaGG.toLowerCase()} vừa được xóa!`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+
+        notification.value = {
+            message: "Xóa mã giảm giá thành công!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.push('/admin/discountCode');
+        }, 3000);
+    } catch (err) {
+        notification.value = {
+            message: err.response?.data?.message || "Xóa mã mã giảm giá thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
 }
 
 function formatCurrency(value) {
@@ -58,9 +96,12 @@ onMounted(() => {
                                 <p v-else class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
                                     discountCode.GiamPhanTram }}%</p>
                                 <div class="flex lg:flex-row flex-col lg:justify-between">
-                                    <p class="font-semibold text-[14px]">Hạn sử dụng: {{ discountCode.NgayHetHan }}</p>
-                                    <p class="font-semibold text-[14px]">Số lượt sử dụng: {{ discountCode.SoLanSuDung }}
-                                    </p>
+                                    <p class="font-semibold text-[14px]">Hạn sử dụng: {{ new
+                                        Date(discountCode.NgayHetHan) < new Date() ? 'Hết hạn' :
+                                            discountCode.NgayHetHan.toLocaleDateString('vi-VN') }}</p>
+                                            <p class="font-semibold text-[14px]">Số lượt sử dụng: {{
+                                                discountCode.SoLanSuDung }}
+                                            </p>
                                 </div>
                                 <p class="font-semibold text-[14px]">Áp dụng với đơn: <span class="text-[#DB3F4C]">{{
                                     formatCurrency(discountCode.GiaApDung) }}
@@ -72,7 +113,7 @@ onMounted(() => {
                                     <router-link :to="`/admin/editDiscountCode/${discountCode.IdMaGiamGia}`"
                                         class="bg-[#00697F] text-white px-4 py-3 rounded-md transition-all duration-300 hover:bg-[#055565]"><i
                                             class="fa-solid fa-pen-to-square"></i></router-link>
-                                    <form>
+                                    <form @click="deleteDiscountCode(discountCode.IdMaGiamGia, discountCode.TenMaGiamGia)">
                                         <button type="submit"
                                             class="text-white bg-[#DC143C] px-4 py-3 rounded-md transition-all duration-300 hover:bg-[#B22222]"><i
                                                 class="fa-solid fa-trash"></i></button>
