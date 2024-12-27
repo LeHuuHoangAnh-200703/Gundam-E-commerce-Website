@@ -23,7 +23,6 @@ const notification = ref({
 });
 
 const formData = ref({
-    idCode: '',
     nameCode: '',
     applyToOrders: '',
     decreaseMoney: '',
@@ -33,26 +32,7 @@ const formData = ref({
     discountCode: '',
 })
 
-const fetchDiscountCode = async (idMaGG) => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/magiamgia/${idMaGG}`);
-        console.log(response.data)
-        formData.value.idCode = response.data.IdMaGiamGia;
-        formData.value.nameCode = response.data.TenMaGiamGia;
-        formData.value.applyToOrders = response.data.GiaApDung;
-        formData.value.decreaseMoney = response.data.GiamTien;
-        formData.value.percentReduction = response.data.GiamPhanTram;
-        formData.value.numberTimeUsed = response.data.SoLanSuDung;
-        formData.value.discountCode = response.data.MaGiamGia;
-        const date = new Date(response.data.NgayHetHan);
-        const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-        formData.value.expirationDate = localDate.toISOString().slice(0, 10);
-    } catch (err) {
-        console.error('Error fetching:', err);
-    }
-}
-
-const editDiscountCode = async () => {
+const addDiscountCode = async () => {
     errors.value = {};
 
     if (!formData.value.nameCode) {
@@ -118,9 +98,9 @@ const editDiscountCode = async () => {
             dataToSend.GiamTien = formData.value.decreaseMoney;
         }
 
-        const response = await axios.post(`http://localhost:3000/api/magiamgia/${formData.value.idCode}`, dataToSend);
+        const response = await axios.post('http://localhost:3000/api/magiamgia', dataToSend);
         notification.value = {
-            message: "Cập nhật mã giảm giá thành công!",
+            message: "Thêm mã giảm giá thành công!",
             type: "success",
         };
         setTimeout(() => {
@@ -128,7 +108,7 @@ const editDiscountCode = async () => {
         }, 3000);
     } catch (error) {
         notification.value = {
-            message: error.response?.data?.message || "Cập nhật mã giảm giá thất bại!",
+            message: error.response?.data?.message || "Thêm mã giảm giá thất bại!",
             type: "error",
         };
     }
@@ -136,12 +116,6 @@ const editDiscountCode = async () => {
         notification.value.message = '';
     }, 3000);
 }
-
-onMounted(() => {
-    const idMaGG = router.currentRoute.value.params.idMaGG;
-    console.log(idMaGG);
-    fetchDiscountCode(idMaGG);
-}); 
 </script>
 
 <template>
@@ -150,12 +124,12 @@ onMounted(() => {
             <SideBar />
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-120px)] pb-7">
+                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
-                        <h1 class="font-bold text-[20px]">Chỉnh sửa mã giảm giá</h1>
+                        <h1 class="font-bold text-[20px]">Thêm mã giảm giá</h1>
                     </div>
                     <div class="bg-white rounded-lg shadow-lg w-full lg:w-[70%] mx-auto p-4">
-                        <form action="">
+                        <form @submit.prevent="addDiscountCode" method="POST">
                             <div class="w-full flex flex-col lg:flex-row gap-8">
                                 <div class="w-full flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">
@@ -210,11 +184,11 @@ onMounted(() => {
                                     </div>
                                     <div class="flex gap-4">
                                         <div class="flex flex-col gap-2 w-full">
-                                            <label for="timeUsed" class="text-[15px] font-semibold">Số lượt sử
+                                            <label for="timeUsed" class="text-[15px] font-semibold">Số lần sử
                                                 dụng</label>
                                             <input type="number" v-model="formData.numberTimeUsed" id="timeUsed"
                                                 class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                                placeholder="Nhập số lượt sử dụng ...">
+                                                placeholder="Nhập số lần sử dụng ...">
                                             <p v-if="errors.numberTimeUsed" class="text-red-500 text-sm mt-2">{{
                                                 errors.numberTimeUsed }}</p>
                                         </div>
@@ -236,8 +210,7 @@ onMounted(() => {
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
                                         <button type="submit"
-                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Chỉnh
-                                            sửa
+                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Thêm
                                             mã giảm giá</button>
                                     </div>
                                 </div>

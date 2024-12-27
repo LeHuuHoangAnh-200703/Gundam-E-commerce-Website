@@ -29,6 +29,7 @@ import listEntryForms from "@/views/admin/listEntryForms.vue";
 import editEntryForm from "@/views/admin/editEntryForm.vue";
 import listEntryFormInfo from "@/views/admin/listEntryFormInfo.vue";
 import discountCode from "@/views/admin/discountCode.vue";
+import addDiscountCode from "@/views/admin/addDiscountCode.vue";
 import editDiscountCode from "@/views/admin/editDiscountCode.vue";
 import notFound from "@/views/errors/notFound.vue";
 
@@ -179,7 +180,12 @@ const routes = [
         component: discountCode,
     },
     {
-        path: "/admin/editDiscountCode",
+        path: "/admin/addDiscountCode",
+        name: "Add Discount Code",
+        component: addDiscountCode,
+    },
+    {
+        path: "/admin/editDiscountCode/:idMaGG",
         name: "Edit Discount Code",
         component: editDiscountCode,
     },

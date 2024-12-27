@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const discoundCodeSchema = new mongoose.Schema({
+const discountCodeSchema = new mongoose.Schema({
     IdMaGiamGia: String,
     TenMaGiamGia: String,
     GiaApDung: String,
@@ -16,15 +16,7 @@ function generateIdMaGiamGia() {
   return 'IDMGG' + Math.floor(10000 + Math.random() * 90000); 
 }
 
-discountCodeSchema.methods.getFormattedGiaApDung = function() {
-    return formatCurrency(this.GiaApDung);
-};
-
-discountCodeSchema.methods.getFormattedGiamTien = function() {
-    return formatCurrency(this.GiamTien);
-};
-
-discoundCodeSchema.pre("save", async function (next) {
+discountCodeSchema.pre("save", async function (next) {
   try {
     if (!this.IdMaGiamGia) {  
       this.IdMaGiamGia = generateIdMaGiamGia();  
@@ -35,4 +27,4 @@ discoundCodeSchema.pre("save", async function (next) {
   }
 });
 
-module.exports = mongoose.model("DiscountCode", discoundCodeSchema);
+module.exports = mongoose.model("DiscountCode", discountCodeSchema);

@@ -67,6 +67,9 @@ const addSupplier = async () => {
             message: "Thêm nhà cung cấp thành công!",
             type: "success",
         };
+        setTimeout(() => {
+            router.push('/admin/listSuppliers');
+        }, 3000);
     } catch (error) {
         notification.value = {
             message: error.response?.data?.message || "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.",
@@ -101,9 +104,12 @@ const deleteSupplier = async (maNCC) => {
             message: "Xóa nhà cung cấp thành công!",
             type: "success",
         };
+        setTimeout(() => {
+            router.push('/admin/listSuppliers');
+        }, 3000);
     } catch(err) {
         notification.value = {
-            message: error.response?.data?.message || "Xóa nhà cung cấp thất bại!",
+            message: err.response?.data?.message || "Xóa nhà cung cấp thất bại!",
             type: "error",
         };
     }
