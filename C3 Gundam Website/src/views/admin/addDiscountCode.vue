@@ -105,7 +105,7 @@ const addDiscountCode = async () => {
         const response = await axios.post('http://localhost:3000/api/magiamgia', dataToSend);
 
         const notificationData = {
-            ThongBao: `Mã giảm giá ${formData.value.nameCode.toLowerCase()} vừa được thêm!`,
+            ThongBao: `Vừa thêm mã giảm giá ${formData.value.nameCode.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
             ChucVu: ChucVu,
             ThoiGian: ThoiGian,

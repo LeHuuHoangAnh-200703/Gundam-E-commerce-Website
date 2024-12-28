@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema({
     LoaiSanPham: String,
     NhaCungCap: String,
     MoTa: String,
-    Images: String
+    Images: [String]
 });
 
 function generateMaSanPham() {  

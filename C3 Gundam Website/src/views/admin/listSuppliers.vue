@@ -69,7 +69,7 @@ const addSupplier = async () => {
         const response = await axios.post('http://localhost:3000/api/nhacungcap', dataToSend);
         
         const notificationData = {
-            ThongBao: `Nhà cung cấp ${formData.value.nameSupplier} vừa được thêm!`,
+            ThongBao: `Vừa thêm nhà cung cấp ${formData.value.nameSupplier}`,
             NguoiChinhSua: TenAdmin,
             ChucVu: ChucVu,
             ThoiGian: ThoiGian,
@@ -116,7 +116,7 @@ const deleteSupplier = async (maNCC, tenNCC) => {
         const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
         
         const notificationData = {
-            ThongBao: `Nhà cung cấp ${tenNCC} vừa được xóa!`,
+            ThongBao: `Vừa xóa nhà cung cấp ${tenNCC}`,
             NguoiChinhSua: TenAdmin,
             ChucVu: ChucVu,
             ThoiGian: ThoiGian,

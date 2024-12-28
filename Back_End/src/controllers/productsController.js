@@ -1,5 +1,22 @@
 const Product = require("../models/productModels");
+const path = require("path");
+const multer = require("multer");
 
+const storagePath = path.join(
+  __dirname,
+  "../../../C3 Gundam Website/src/assets/img"
+);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, storagePath);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
@@ -24,7 +41,10 @@ exports.getProduct = async (req, res) => {
 };
 
 exports.createProduct = async (req, res) => {
-  const product = new Product(req.body);
+  const product = new Product({
+    ...req.body,
+    Images: req.files ? req.files.map(file => file.filename) : []
+  });
   try {
     await product.save();
     res.status(200).json(product);
@@ -48,6 +68,10 @@ exports.updatedProduct = async (req, res) => {
     product.NhaCungCap = req.body.NhaCungCap || product.NhaCungCap;
     product.MoTa = req.body.MoTa || product.MoTa;
     product.Images = req.body.Images || product.Images;
+
+    if (req.file) {
+      product.Images = req.files.map(file => file.filename)
+    }
 
     const updatedProduct = await product.save();
     res.status(200).json(updatedProduct);
@@ -75,3 +99,5 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.upload = upload.array('Images', 10);

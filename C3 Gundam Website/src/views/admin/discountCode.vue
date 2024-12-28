@@ -38,7 +38,7 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
         const response = await axios.delete(`http://localhost:3000/api/magiamgia/${idMaGG}`);
         
         const notificationData = {
-            ThongBao: `Mã giảm giá ${tenMaGG.toLowerCase()} vừa được xóa!`,
+            ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
             ChucVu: ChucVu,
             ThoiGian: ThoiGian,

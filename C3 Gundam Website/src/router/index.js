@@ -93,101 +93,121 @@ const routes = [
         path: "/admin/addAdmin",
         name: "Add Admin",
         component: addAdmin,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/adminProducts",
         name: "Admin Products",
         component: adminProducts,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/addProduct",
         name: "Add Product",
         component: addProduct,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/editProduct",
         name: "Edit Product",
         component: editProduct,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listFeedBacks",
         name: "List FeedBacks",
         component: listFeedBacks,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listOrders",
         name: "List Orders",
         component: listOrders,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/staffList",
         name: "Staff List",
         component: staffList,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/editStaff",
         name: "Edit Staff",
         component: editStaff,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/customers",
         name: "Customers",
         component: customers,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listSuppliers",
         name: "List Suppliers",
         component: listSuppliers,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/editSupplier/:maNCC",
         name: "Edit Supplier",
         component: editSupplier,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listBills",
         name: "List Bills",
         component: listBills,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/editBill",
         name: "Edit Bill",
         component: editBill,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listBillInfo",
         name: "List Bill Info",
         component: listBillInfo,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listEntryForms",
         name: "List Entry Forms",
         component: listEntryForms,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/editEntryForm",
         name: "Edit Entry Form",
         component: editEntryForm,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/listEntryFormInfo",
         name: "list Entry Form Info",
         component: listEntryFormInfo,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/discountCode",
         name: "Discount Code",
         component: discountCode,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/addDiscountCode",
         name: "Add Discount Code",
         component: addDiscountCode,
+        meta: { requiresAuth: true },
     },
     {
         path: "/admin/editDiscountCode/:idMaGG",
         name: "Edit Discount Code",
         component: editDiscountCode,
+        meta: { requiresAuth: true },
     },
     {
         path: "/notFound",
@@ -211,7 +231,7 @@ router.beforeEach((to, from, next) => {
     isLoading.value = true;
 
     // Kiểm tra xem route có yêu cầu xác thực không
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (to.matched.some(record => record.meta.requiresAuth)) {
         // Kiểm tra trạng thái đăng nhập
         if (!localStorage.getItem("ChucVu")) {
             next({ path: "/admin/adminLogin" }); // Chuyển hướng đến trang đăng nhập

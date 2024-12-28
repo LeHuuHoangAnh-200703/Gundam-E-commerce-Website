@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -26,7 +28,7 @@ const formData = ref({
     typeProduct: '',
     supplier: '',
     description: '',
-    images: '',
+    images: [],
 });
 
 const notification = ref({
@@ -58,7 +60,7 @@ const addProduct = async () => {
 
     if (!formData.value.price) {
         errors.value.price = "Giá bán không được để trống.";
-    } else if ( formData.value.price < 0){
+    } else if (formData.value.price < 0) {
         errors.value.price = "Giá bán không được âm.";
     }
 
@@ -80,21 +82,50 @@ const addProduct = async () => {
         formData.value.description = escapeHtml(formData.value.description);
     }
 
+    if (formData.value.images.length < 4) {
+        errors.value.images = "Bạn cần thêm ít nhất 4 hình ảnh.";
+    }
+
     if (Object.keys(errors.value).length > 0) {
         return;
     }
 
     try {
-        const dataToSend = {
-            TenSanPham: formData.value.nameProduct,
-            GiaBan: formData.value.price,
-            LoaiSanPham: formData.value.typeProduct,
-            NhaCungCap: formData.value.supplier,
-            MoTa: formData.value.description,
-        }
-    } catch(err) {
+        const dataToSend = new FormData();
+        dataToSend.append('TenSanPham', formData.value.nameProduct);
+        dataToSend.append('GiaBan', formData.value.price);
+        dataToSend.append('LoaiSanPham', formData.value.typeProduct);
+        dataToSend.append('NhaCungCap', formData.value.supplier);
+        dataToSend.append('MoTa', formData.value.description);
+
+        formData.value.images.forEach(image => {
+            dataToSend.append('Images', image);
+        });
+        const response = await axios.post('http://localhost:3000/api/sanpham', dataToSend, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        const notificationData = {
+            ThongBao: `Vừa thêm sản phẩm ${formData.value.nameProduct}`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        
         notification.value = {
-            message: err.response?.data?.message || "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.",
+            message: "Thêm sản phẩm thành công!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.push('/admin/adminProducts');
+        }, 3000);
+    } catch (err) {
+        notification.value = {
+            message: err.response?.data?.message || "Thêm sản phẩm thất bại!",
             type: "error",
         };
     }
@@ -102,6 +133,15 @@ const addProduct = async () => {
         notification.value.message = '';
     }, 3000);
 }
+
+const handleFileUpload = (event) => {
+    const files = event.target.files;
+    formData.value.images = Array.from(files);
+};
+
+const imageUrls = computed(() => {
+    return formData.value.images.map(image => URL.createObjectURL(image));
+});
 
 onMounted(() => {
     fetchSuppliers();
@@ -127,18 +167,18 @@ onMounted(() => {
                                         <input type="text" v-model="formData.nameProduct" id="nameProduct"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Nhập tên sản phẩm ...">
-                                    <p v-if="errors.nameProduct" class="text-red-500 text-sm mt-2">{{
+                                        <p v-if="errors.nameProduct" class="text-red-500 text-sm mt-2">{{
                                             errors.nameProduct }}</p>
-                                        </div>
+                                    </div>
                                     <div class="flex flex-col gap-2">
                                         <label for="price" class="text-[15px] font-semibold">Giá bán sản
                                             phẩm</label>
                                         <input type="number" v-model="formData.price" id="price"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Nhập giá bán sản phẩm ...">
-                                    <p v-if="errors.price" class="text-red-500 text-sm mt-2">{{
+                                        <p v-if="errors.price" class="text-red-500 text-sm mt-2">{{
                                             errors.price }}</p>
-                                        </div>
+                                    </div>
                                     <div class="flex gap-4">
                                         <div class="flex flex-col gap-2 w-full">
                                             <label for="typeProduct" class="text-[15px] font-semibold">Loại sản
@@ -146,13 +186,14 @@ onMounted(() => {
                                             <select v-model="formData.typeProduct"
                                                 class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 name="" id="typeProduct">
-                                                <option value="" class="text-[#003171] font-semibold">Chọn loại sản phẩm phù hợp</option>
+                                                <option value="" class="text-[#003171] font-semibold">Chọn loại sản phẩm
+                                                    phù hợp</option>
                                                 <option value="RG" class="text-[#003171] font-semibold">RG</option>
                                                 <option value="MG" class="text-[#003171] font-semibold">MG</option>
                                                 <option value="PG" class="text-[#003171] font-semibold">PG</option>
                                             </select>
-                                        <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
-                                            errors.typeProduct }}</p>
+                                            <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
+                                                errors.typeProduct }}</p>
                                         </div>
                                         <div class="flex flex-col gap-2 w-full">
                                             <label for="brandProduct" class="text-[15px] font-semibold">Nhà cung
@@ -160,12 +201,15 @@ onMounted(() => {
                                             <select v-model="formData.supplier"
                                                 class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 name="" id="brandProduct">
-                                                <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp phù hợp</option>
-                                                <option v-for="(supplier, index) in listSuppliers" :key="index" :value="supplier.TenNhaCungCap"
-                                                    class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} - {{ supplier.TenNhaCungCap }}</option>
+                                                <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp
+                                                    phù hợp</option>
+                                                <option v-for="(supplier, index) in listSuppliers" :key="index"
+                                                    :value="supplier.TenNhaCungCap"
+                                                    class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} -
+                                                    {{ supplier.TenNhaCungCap }}</option>
                                             </select>
-                                        <p v-if="errors.supplier" class="text-red-500 text-sm mt-2">{{
-                                            errors.supplier }}</p>
+                                            <p v-if="errors.supplier" class="text-red-500 text-sm mt-2">{{
+                                                errors.supplier }}</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
@@ -174,77 +218,34 @@ onMounted(() => {
                                         <textarea type="text" v-model="formData.description" id="description"
                                             class="p-2 border-2 rounded-md text-[14px] h-32 outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Mô tả sản phẩm ..."></textarea>
-                                    <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
+                                        <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
                                             errors.description }}</p>
-                                        </div>
+                                    </div>
                                 </div>
                                 <div class="lg:w-1/2 w-full flex flex-col gap-4 justify-between">
                                     <div class="flex flex-col gap-2">
-                                        <label for="imageUpload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
+                                        <label for="image_upload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
                                                 class="fa-solid fa-circle-info text-gray-300"></i></label>
-                                        <div class="flex flex-col lg:flex-row gap-3">
-                                            <div class="flex flex-col lg:flex-row gap-3">
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_main"
-                                                        class="text-[12px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây, hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp
-                                                            để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_main">
-                                                </div>
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_details_1"
-                                                        class="text-[12px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây, hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp
-                                                            để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_details_1">
-                                                </div>
+                                        <label for="image_upload"
+                                            class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
+                                            <div class="text-[18px] text-slate-300" id="image_icon">
+                                                <i class="fa-regular fa-image"></i>
                                             </div>
-                                            <div class="flex flex-col gap-2">
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_details_2"
-                                                        class="text-[10px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây,
-                                                        hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_details_2">
-                                                </div>
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_details_3"
-                                                        class="text-[10px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây,
-                                                        hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_details_3">
-                                                </div>
+                                            <label for="image_upload" class="text-[12px] text-gray-500 cursor-pointer">
+                                                Thả hình ảnh vào đây, hoặc chọn <span
+                                                    class="text-[#003171] cursor-pointer">nhấp để duyệt</span>
+                                            </label>
+                                            <input type="file" class="hidden" id="image_upload" multiple
+                                                @change="handleFileUpload">
+                                            <div class="flex flex-wrap gap-2 mt-2">
+                                                <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
+                                                    class="w-24 h-24 object-cover border rounded-md" />
                                             </div>
-                                        </div>
-                                        <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{
-                                            errors.images }}</p>
-                                        <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 4 hình ảnh. Hãy chú ý đến
-                                            chất
-                                            lượng của các bức ảnh bạn thêm, tuân thủ các tiêu chuẩn về màu nền.</p>
+                                        </label>
+                                        <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{ errors.images }}
+                                        </p>
+                                        <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 1 hình ảnh. Hãy chú ý đến
+                                            chất lượng của các bức ảnh bạn thêm, tuân thủ các tiêu chuẩn về màu nền.</p>
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
                                         <button type="submit"

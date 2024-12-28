@@ -122,13 +122,15 @@ onMounted(async () => {
                         class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"></i>
                 </div>
                 <hr class="mt-2">
-                <div class="flex gap-3 items-center border-b py-2" v-for="(natification, index) in listNatifications"
+                <div class="flex gap-3 items-center border-b overflow-hidden py-2" v-for="(natification, index) in listNatifications"
                     :key="index">
                     <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
                         <i class="fa-regular fa-bell text-[20px]"></i>
                     </div>
                     <div class="flex flex-col">
-                        <p class="font-semibold text-[16px]">{{ natification.ThongBao }}</p>
+                        <div class="text-ellipsis whitespace-nowrap overflow-hidden max-w-[360px]">
+                            <a class="font-semibold text-[16px]">{{ natification.ThongBao }}</a>
+                        </div>
                         <p class="font-semibold text-[12px]">Người chỉnh sửa: <span class="text-[#DB3F4C]">{{
                             natification.NguoiChinhSua }} <span class="text-[#333]">/</span> {{ natification.ChucVu
                                 }}</span></p>
