@@ -1,7 +1,111 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import axios from 'axios';
+
+// Hàm mã hóa đầu vào
+const escapeHtml = (unsafe) => {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+const ThoiGian = new Date();
+
+const listSuppliers = ref([]);
+const errors = ref({});
+const formData = ref({
+    nameProduct: '',
+    price: '',
+    typeProduct: '',
+    supplier: '',
+    description: '',
+    images: '',
+});
+
+const notification = ref({
+    message: '',
+    type: ''
+});
+
+const fetchSuppliers = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/nhacungcap');
+        listSuppliers.value = response.data.map(supplier => {
+            return {
+                ...supplier
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching:', error);
+    }
+};
+
+const addProduct = async () => {
+    errors.value = {};
+
+    if (!formData.value.nameProduct) {
+        errors.value.nameProduct = "Tên sản phẩm không được để trống.";
+    } else {
+        formData.value.nameProduct = escapeHtml(formData.value.nameProduct);
+    }
+
+    if (!formData.value.price) {
+        errors.value.price = "Giá bán không được để trống.";
+    } else if ( formData.value.price < 0){
+        errors.value.price = "Giá bán không được âm.";
+    }
+
+    if (!formData.value.typeProduct) {
+        errors.value.typeProduct = "Loại sản phẩm không được để trống.";
+    }
+
+    if (!formData.value.supplier) {
+        errors.value.supplier = "Nhà cung cấp không được để trống.";
+    }
+
+    if (!formData.value.typeProduct) {
+        errors.value.price = "Nhà cung cấp không được để trống.";
+    }
+
+    if (!formData.value.description) {
+        errors.value.description = "Mô tả không được để trống.";
+    } else {
+        formData.value.description = escapeHtml(formData.value.description);
+    }
+
+    if (Object.keys(errors.value).length > 0) {
+        return;
+    }
+
+    try {
+        const dataToSend = {
+            TenSanPham: formData.value.nameProduct,
+            GiaBan: formData.value.price,
+            LoaiSanPham: formData.value.typeProduct,
+            NhaCungCap: formData.value.supplier,
+            MoTa: formData.value.description,
+        }
+    } catch(err) {
+        notification.value = {
+            message: err.response?.data?.message || "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
+
+onMounted(() => {
+    fetchSuppliers();
+})
 </script>
 
 <template>
@@ -15,58 +119,64 @@ import SideBar from "@/components/admin/SideBar.vue";
                         <h1 class="font-bold text-[20px]">Thêm sản phẩm</h1>
                     </div>
                     <div class="bg-white rounded-lg shadow-lg w-full p-4">
-                        <form action="">
+                        <form @submit.prevent="addProduct" method="POST">
                             <div class="w-full flex flex-col lg:flex-row gap-8">
                                 <div class="lg:w-1/2 w-full flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">
                                         <label for="nameProduct" class="text-[15px] font-semibold">Tên sản phẩm</label>
-                                        <input type="text" id="nameProduct"
+                                        <input type="text" v-model="formData.nameProduct" id="nameProduct"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Nhập tên sản phẩm ...">
-                                    </div>
+                                    <p v-if="errors.nameProduct" class="text-red-500 text-sm mt-2">{{
+                                            errors.nameProduct }}</p>
+                                        </div>
                                     <div class="flex flex-col gap-2">
-                                        <label for="priceProduct" class="text-[15px] font-semibold">Giá bán sản
+                                        <label for="price" class="text-[15px] font-semibold">Giá bán sản
                                             phẩm</label>
-                                        <input type="text" id="priceProduct"
+                                        <input type="number" v-model="formData.price" id="price"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Nhập giá bán sản phẩm ...">
-                                    </div>
+                                    <p v-if="errors.price" class="text-red-500 text-sm mt-2">{{
+                                            errors.price }}</p>
+                                        </div>
                                     <div class="flex gap-4">
                                         <div class="flex flex-col gap-2 w-full">
                                             <label for="typeProduct" class="text-[15px] font-semibold">Loại sản
                                                 phẩm</label>
-                                            <select
+                                            <select v-model="formData.typeProduct"
                                                 class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 name="" id="typeProduct">
+                                                <option value="" class="text-[#003171] font-semibold">Chọn loại sản phẩm phù hợp</option>
                                                 <option value="RG" class="text-[#003171] font-semibold">RG</option>
                                                 <option value="MG" class="text-[#003171] font-semibold">MG</option>
                                                 <option value="PG" class="text-[#003171] font-semibold">PG</option>
                                             </select>
+                                        <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
+                                            errors.typeProduct }}</p>
                                         </div>
                                         <div class="flex flex-col gap-2 w-full">
                                             <label for="brandProduct" class="text-[15px] font-semibold">Nhà cung
                                                 cấp</label>
-                                            <select
+                                            <select v-model="formData.supplier"
                                                 class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 name="" id="brandProduct">
-                                                <option value="Bluefin Distribution"
-                                                    class="text-[#003171] font-semibold">Bluefin Distribution</option>
-                                                <option value="Bandai Namco" class="text-[#003171] font-semibold">Bandai
-                                                    Namco
-                                                </option>
-                                                <option value="HobbyLink Japan (HLJ)"
-                                                    class="text-[#003171] font-semibold">HobbyLink Japan (HLJ)
-                                                </option>
+                                                <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp phù hợp</option>
+                                                <option v-for="(supplier, index) in listSuppliers" :key="index" :value="supplier.TenNhaCungCap"
+                                                    class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} - {{ supplier.TenNhaCungCap }}</option>
                                             </select>
+                                        <p v-if="errors.supplier" class="text-red-500 text-sm mt-2">{{
+                                            errors.supplier }}</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
                                         <label for="description" class="text-[15px] font-semibold">Mô tả sản phẩm <i
                                                 class="fa-solid fa-circle-info text-gray-300"></i></label>
-                                        <textarea type="text" id="description"
+                                        <textarea type="text" v-model="formData.description" id="description"
                                             class="p-2 border-2 rounded-md text-[14px] h-32 outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Mô tả sản phẩm ..."></textarea>
-                                    </div>
+                                    <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
+                                            errors.description }}</p>
+                                        </div>
                                 </div>
                                 <div class="lg:w-1/2 w-full flex flex-col gap-4 justify-between">
                                     <div class="flex flex-col gap-2">
@@ -130,6 +240,8 @@ import SideBar from "@/components/admin/SideBar.vue";
                                                 </div>
                                             </div>
                                         </div>
+                                        <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{
+                                            errors.images }}</p>
                                         <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 4 hình ảnh. Hãy chú ý đến
                                             chất
                                             lượng của các bức ảnh bạn thêm, tuân thủ các tiêu chuẩn về màu nền.</p>
@@ -145,6 +257,20 @@ import SideBar from "@/components/admin/SideBar.vue";
                         </form>
                     </div>
                 </div>
+                <transition name="slide-fade" mode="out-in">
+                    <div v-if="notification.message" :class="['fixed top-4 left-1/2 right-10 transform p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2 w-full max-w-sm', {
+                        'border-[#DB3F4C]': notification.type === 'error',
+                        'border-[#40E0D0]': notification.type === 'success',
+                    }]">
+                        <div class="flex gap-2 justify-center items-center">
+                            <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                                class="w-[50px]" alt="">
+                            <p class="text-[16px] font-semibold"
+                                :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                                    notification.message }}</p>
+                        </div>
+                    </div>
+                </transition>
             </div>
         </div>
     </div>
@@ -163,5 +289,16 @@ import SideBar from "@/components/admin/SideBar.vue";
 
 .fixed.translate-x-0 {
     transform: translateX(0);
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
 }
 </style>

@@ -14,6 +14,10 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+const ThoiGian = new Date();
+
 const listSuppliers = ref([]);
 const errors = ref({});
 const formData = ref({
@@ -63,6 +67,16 @@ const addSupplier = async () => {
         };
 
         const response = await axios.post('http://localhost:3000/api/nhacungcap', dataToSend);
+        
+        const notificationData = {
+            ThongBao: `Nhà cung cấp ${formData.value.nameSupplier} vừa được thêm!`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        
         notification.value = {
             message: "Thêm nhà cung cấp thành công!",
             type: "success",
@@ -94,12 +108,22 @@ const fetchSuppliers = async () => {
     }
 };
 
-const deleteSupplier = async (maNCC) => {
+const deleteSupplier = async (maNCC, tenNCC) => {
     const confirmDelete = confirm("Bạn có chắc chắn muốn xóa không?");
     if (!confirmDelete) return;
 
     try {
         const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
+        
+        const notificationData = {
+            ThongBao: `Nhà cung cấp ${tenNCC} vừa được xóa!`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        
         notification.value = {
             message: "Xóa nhà cung cấp thành công!",
             type: "success",
@@ -194,7 +218,7 @@ onMounted(() => {
                                         <a :href="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <form @submit.prevent="deleteSupplier(supplier.MaNhaCungCap)">
+                                        <form @submit.prevent="deleteSupplier(supplier.MaNhaCungCap, supplier.TenNhaCungCap)">
                                             <button type="submit"
                                                 class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
                                                     class="fa-solid fa-trash"></i></button>

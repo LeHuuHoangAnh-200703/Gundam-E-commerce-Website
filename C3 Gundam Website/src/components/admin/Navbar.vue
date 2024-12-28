@@ -50,7 +50,6 @@ const fetchNatifications = async () => {
             };
         });
         listNatifications.value.sort((a, b) => b.ThoiGian - a.ThoiGian);
-        console.log(response.data)
     } catch (err) {
         console.log("error fetching: ", err);
     }
@@ -59,14 +58,15 @@ const fetchNatifications = async () => {
 const formatDate = (date) => {
     const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
     const formattedDate = date.toLocaleString('vi-VN', options);
-    
+
     const [time, day] = formattedDate.split(', ');
     return `${time}`;
 };
 
-onMounted(() => {
+onMounted(async () => {
     fetchNatifications();
-})
+});
+
 </script>
 
 <template>
@@ -80,10 +80,10 @@ onMounted(() => {
                 </div>
             </div>
             <div class="flex gap-3 justify-center items-center">
-                <router-link to="" @click="toggleNotification()" class="px-2 py-2 rounded-full group">
+                <router-link to="" @click="toggleNotification();" class="px-2 py-2 rounded-full group">
                     <i class="fa-solid fa-bell relative transition-all duration-200 text-[20px]">
                         <span
-                            class="absolute top-0 right-0 w-2 h-2 group-hover:bg-[#FFD700] bg-[#DB3F4C] transition-all duration-200 rounded-full"></span>
+                            class="absolute top-0 right-0 w-2 h-2 bg-[#DB3F4C] transition-all duration-200 rounded-full"></span>
                     </i>
                 </router-link>
                 <button @click.prevent="logout" class="px-2 py-2 rounded-full group hidden lg:block">
@@ -117,17 +117,21 @@ onMounted(() => {
             <div class="notification fixed top-28 w-full lg:w-auto bg-white shadow-lg p-4 rounded-lg z-10"
                 :class="{ 'lg:right-[30%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }">
                 <div class="flex justify-between items-center">
-                   <p class="font-semibold text-[18px]">Thông báo</p>
-                    <i @click="toggleNotification()" class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"></i> 
+                    <p class="font-semibold text-[18px]">Thông báo</p>
+                    <i @click="toggleNotification()"
+                        class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"></i>
                 </div>
                 <hr class="mt-2">
-                <div class="flex gap-3 items-center border-b py-2" v-for="(natification, index) in listNatifications" :key="index">
+                <div class="flex gap-3 items-center border-b py-2" v-for="(natification, index) in listNatifications"
+                    :key="index">
                     <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
                         <i class="fa-regular fa-bell text-[20px]"></i>
                     </div>
                     <div class="flex flex-col">
                         <p class="font-semibold text-[16px]">{{ natification.ThongBao }}</p>
-                        <p class="font-semibold text-[12px]">Người chỉnh sửa: <span class="text-[#DB3F4C]">{{ natification.NguoiChinhSua }} <span class="text-[#333]">/</span> {{ natification.ChucVu }}</span></p>
+                        <p class="font-semibold text-[12px]">Người chỉnh sửa: <span class="text-[#DB3F4C]">{{
+                            natification.NguoiChinhSua }} <span class="text-[#333]">/</span> {{ natification.ChucVu
+                                }}</span></p>
                         <p class="text-[12px] font-medium text-gray-600">{{ formatDate(natification.ThoiGian) }}</p>
                     </div>
                 </div>
@@ -141,6 +145,7 @@ onMounted(() => {
     transform: translateX(100%);
     transition: transform 0.3s ease-in-out;
 }
+
 .fixed.translate-x-0 {
     transform: translateX(0);
 }
