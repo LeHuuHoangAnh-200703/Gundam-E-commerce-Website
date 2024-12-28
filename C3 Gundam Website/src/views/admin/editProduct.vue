@@ -1,7 +1,165 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+// Hàm mã hóa đầu vào
+const escapeHtml = (unsafe) => {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+const ThoiGian = new Date();
+const listSuppliers = ref([]);
+const errors = ref({});
+const formData = ref({
+    idSanPham: '',
+    nameProduct: '',
+    price: '',
+    typeProduct: '',
+    supplier: '',
+    description: '',
+    images: [],
+});
+
+const notification = ref({
+    message: '',
+    type: ''
+});
+
+const handleFileUpload = (event) => {
+    formData.value.images = Array.from(event.target.files);
+};
+
+const fetchSuppliers = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/nhacungcap');
+        listSuppliers.value = response.data.map(supplier => {
+            return {
+                ...supplier
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching:', error);
+    }
+};
+
+const fetchProduct = async (maSanPham) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/sanpham/${maSanPham}`);
+        formData.value.nameProduct = response.data.TenSanPham;
+        formData.value.price = response.data.GiaBan;
+        formData.value.typeProduct = response.data.LoaiSanPham;
+        formData.value.supplier = response.data.NhaCungCap;
+        formData.value.description = response.data.MoTa;
+        formData.value.idSanPham = response.data.MaSanPham;
+    } catch (err) {
+        console.log("error fetching:", err);
+    }
+}
+
+const editProduct = async () => {
+    errors.value = {};
+
+    if (!formData.value.nameProduct) {
+        errors.value.nameProduct = "Tên sản phẩm không được để trống.";
+    } else {
+        formData.value.nameProduct = escapeHtml(formData.value.nameProduct);
+    }
+
+    if (!formData.value.price) {
+        errors.value.price = "Giá bán không được để trống.";
+    } else if (formData.value.price < 0) {
+        errors.value.price = "Giá bán không được âm.";
+    }
+
+    if (!formData.value.typeProduct) {
+        errors.value.typeProduct = "Loại sản phẩm không được để trống.";
+    }
+
+    if (!formData.value.supplier) {
+        errors.value.supplier = "Nhà cung cấp không được để trống.";
+    }
+
+    if (!formData.value.typeProduct) {
+        errors.value.price = "Nhà cung cấp không được để trống.";
+    }
+
+    if (!formData.value.description) {
+        errors.value.description = "Mô tả không được để trống.";
+    } else {
+        formData.value.description = escapeHtml(formData.value.description);
+    }
+
+    if (Object.keys(errors.value).length > 0) {
+        return;
+    }
+
+    try {
+        const dataToSend = new FormData();
+        dataToSend.append('TenSanPham', formData.value.nameProduct);
+        dataToSend.append('GiaBan', formData.value.price);
+        dataToSend.append('LoaiSanPham', formData.value.typeProduct);
+        dataToSend.append('NhaCungCap', formData.value.supplier);
+        dataToSend.append('MoTa', formData.value.description);
+
+        if (formData.value.images.length > 0) {
+            formData.value.images.forEach(image => {
+                dataToSend.append('Images', image);
+            });
+        } 
+        const response = await axios.put(`http://localhost:3000/api/sanpham/${formData.value.idSanPham}`, dataToSend, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+  
+        const notificationData = {
+            ThongBao: `Vừa cập nhật sản phẩm ${formData.value.nameProduct}`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+
+        notification.value = {
+            message: "Cập nhật sản phẩm thành công!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.push('/admin/adminProducts');
+        }, 3000);
+    } catch (error) {
+        notification.value = {
+            message: error.response?.data?.message || "Cập nhật sản phẩm thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
+
+const imageUrls = computed(() => {
+    return formData.value.images.map(image => URL.createObjectURL(image));
+});
+
+onMounted(() => {
+    const idSanPham = router.currentRoute.value.params.maSanPham;
+    console.log(idSanPham);
+    fetchProduct(idSanPham);
+    fetchSuppliers();
+})
 </script>
 
 <template>
@@ -15,137 +173,99 @@ import SideBar from "@/components/admin/SideBar.vue";
                         <h1 class="font-bold text-[20px]">Chỉnh sửa sản phẩm</h1>
                     </div>
                     <div class="bg-white rounded-lg shadow-lg w-full p-4">
-                        <form action="">
+                        <form @submit.prevent="editProduct" method="POST">
                             <div class="w-full flex flex-col lg:flex-row gap-8">
                                 <div class="lg:w-1/2 w-full flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">
                                         <label for="nameProduct" class="text-[15px] font-semibold">Tên sản phẩm</label>
-                                        <input type="text" id="nameProduct"
+                                        <input type="text" v-model="formData.nameProduct" id="nameProduct"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Nhập tên sản phẩm ...">
+                                        <p v-if="errors.nameProduct" class="text-red-500 text-sm mt-2">{{
+                                            errors.nameProduct }}</p>
                                     </div>
                                     <div class="flex flex-col gap-2">
-                                        <label for="priceProduct" class="text-[15px] font-semibold">Giá bán sản
+                                        <label for="price" class="text-[15px] font-semibold">Giá bán sản
                                             phẩm</label>
-                                        <input type="text" id="priceProduct"
+                                        <input type="number" v-model="formData.price" id="price"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Nhập giá bán sản phẩm ...">
+                                        <p v-if="errors.price" class="text-red-500 text-sm mt-2">{{
+                                            errors.price }}</p>
                                     </div>
                                     <div class="flex gap-4">
                                         <div class="flex flex-col gap-2 w-full">
                                             <label for="typeProduct" class="text-[15px] font-semibold">Loại sản
                                                 phẩm</label>
-                                            <select
+                                            <select v-model="formData.typeProduct"
                                                 class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 name="" id="typeProduct">
+                                                <option value="" class="text-[#003171] font-semibold">Chọn loại sản phẩm
+                                                    phù hợp</option>
                                                 <option value="RG" class="text-[#003171] font-semibold">RG</option>
                                                 <option value="MG" class="text-[#003171] font-semibold">MG</option>
                                                 <option value="PG" class="text-[#003171] font-semibold">PG</option>
                                             </select>
+                                            <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
+                                                errors.typeProduct }}</p>
                                         </div>
                                         <div class="flex flex-col gap-2 w-full">
-                                            <label for="brandProduct" class="text-[15px] font-semibold">Thương
-                                                hiệu</label>
-                                            <select
+                                            <label for="brandProduct" class="text-[15px] font-semibold">Nhà cung
+                                                cấp</label>
+                                            <select v-model="formData.supplier"
                                                 class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 name="" id="brandProduct">
-                                                <option value="Premium Bandai" class="text-[#003171] font-semibold">
-                                                    Premium
-                                                    Bandai</option>
-                                                <option value="Gunpla - Gundam Plastic Models"
-                                                    class="text-[#003171] font-semibold">Gunpla - Gundam Plastic Models
-                                                </option>
-                                                <option value="Kotobukiya" class="text-[#003171] font-semibold">
-                                                    Kotobukiya
-                                                </option>
+                                                <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp
+                                                    phù hợp</option>
+                                                <option v-for="(supplier, index) in listSuppliers" :key="index"
+                                                    :value="supplier.TenNhaCungCap"
+                                                    class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} -
+                                                    {{ supplier.TenNhaCungCap }}</option>
                                             </select>
+                                            <p v-if="errors.supplier" class="text-red-500 text-sm mt-2">{{
+                                                errors.supplier }}</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
                                         <label for="description" class="text-[15px] font-semibold">Mô tả sản phẩm <i
                                                 class="fa-solid fa-circle-info text-gray-300"></i></label>
-                                        <textarea type="text" id="description"
+                                        <textarea type="text" v-model="formData.description" id="description"
                                             class="p-2 border-2 rounded-md text-[14px] h-32 outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="Mô tả sản phẩm ..."></textarea>
+                                        <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
+                                            errors.description }}</p>
                                     </div>
                                 </div>
-                                <div class="lg:w-1/2 w-full flex flex-col gap-4">
+                                <div class="lg:w-1/2 w-full flex flex-col gap-4 justify-between">
                                     <div class="flex flex-col gap-2">
-                                        <label for="priceProduct" class="text-[15px] font-semibold">Giá bán sản
-                                            phẩm</label>
-                                        <input type="text" id="priceProduct"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập giá bán sản phẩm ...">
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="imageUpload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
+                                        <label for="image_upload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
                                                 class="fa-solid fa-circle-info text-gray-300"></i></label>
-                                        <div class="flex flex-col lg:flex-row gap-3">
-                                            <div class="flex flex-col lg:flex-row gap-3">
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_main"
-                                                        class="text-[12px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây, hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp
-                                                            để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_main">
-                                                </div>
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_details_1"
-                                                        class="text-[12px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây, hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp
-                                                            để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_details_1">
-                                                </div>
+                                        <label for="image_upload"
+                                            class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
+                                            <div class="text-[18px] text-slate-300" id="image_icon">
+                                                <i class="fa-regular fa-image"></i>
                                             </div>
-                                            <div class="flex flex-col gap-2">
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_details_2"
-                                                        class="text-[10px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây,
-                                                        hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_details_2">
-                                                </div>
-                                                <div
-                                                    class="border-2 border-gray-400 cursor-pointer border-dashed rounded-md p-4 text-center flex flex-col items-center justify-center">
-                                                    <div class="text-[18px] text-slate-300" id="image_icon">
-                                                        <i class="fa-regular fa-image"></i>
-                                                    </div>
-                                                    <label for="image_details_3"
-                                                        class="text-[10px] text-gray-500 cursor-pointer">Thả
-                                                        hình ảnh vào
-                                                        đây,
-                                                        hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp để
-                                                            duyệt</span></label>
-                                                    <input type="file" class="hidden" id="image_details_3">
-                                                </div>
+                                            <label for="image_upload" class="text-[12px] text-gray-500 cursor-pointer">
+                                                Thả hình ảnh vào đây, hoặc chọn <span
+                                                    class="text-[#003171] cursor-pointer">nhấp để duyệt</span>
+                                            </label>
+                                            <input type="file" class="hidden" id="image_upload" multiple
+                                                @change="handleFileUpload">
+                                            <div class="flex flex-wrap gap-2 mt-2">
+                                                <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
+                                                    class="w-24 h-24 object-cover border rounded-md" />
                                             </div>
-                                        </div>
-                                        <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 4 hình ảnh. Hãy chú ý đến
-                                            chất
-                                            lượng của các bức ảnh bạn thêm, tuân thủ các tiêu chuẩn về màu nền.</p>
+                                        </label>
+                                        <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{ errors.images }}
+                                        </p>
+                                        <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 1 hình ảnh. Hãy chú ý đến
+                                            chất lượng của các bức ảnh bạn thêm, tuân thủ các tiêu chuẩn về màu nền.</p>
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
                                         <button type="submit"
-                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Chỉnh
-                                            sửa sản
+                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Cập
+                                            nhật
+                                            sản
                                             phẩm</button>
                                     </div>
                                 </div>
@@ -153,6 +273,20 @@ import SideBar from "@/components/admin/SideBar.vue";
                         </form>
                     </div>
                 </div>
+                <transition name="slide-fade" mode="out-in">
+                    <div v-if="notification.message" :class="['fixed top-4 left-1/2 right-10 transform p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2 w-full max-w-sm', {
+                        'border-[#DB3F4C]': notification.type === 'error',
+                        'border-[#40E0D0]': notification.type === 'success',
+                    }]">
+                        <div class="flex gap-2 justify-center items-center">
+                            <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                                class="w-[50px]" alt="">
+                            <p class="text-[16px] font-semibold"
+                                :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                                    notification.message }}</p>
+                        </div>
+                    </div>
+                </transition>
             </div>
         </div>
     </div>
@@ -171,5 +305,16 @@ import SideBar from "@/components/admin/SideBar.vue";
 
 .fixed.translate-x-0 {
     transform: translateX(0);
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
 }
 </style>

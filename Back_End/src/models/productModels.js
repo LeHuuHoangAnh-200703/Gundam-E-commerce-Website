@@ -7,7 +7,8 @@ const productSchema = new mongoose.Schema({
     LoaiSanPham: String,
     NhaCungCap: String,
     MoTa: String,
-    Images: [String]
+    Images: [String],
+    TrangThai: { type: String, enum: ['Đang bán', 'Ngừng kinh doanh'], default: 'Đang bán' },
 });
 
 function generateMaSanPham() {  

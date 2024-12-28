@@ -5,7 +5,6 @@ import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
 
 const listProducts = ref([]);
-
 const fectchProducts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/sanpham');
@@ -18,6 +17,26 @@ const fectchProducts = async () => {
         console.error('Error fetching:', error);
     }
 }
+
+const updateStatus = async (maSanPham, tenSanPham) => {
+    const confirmUpdate = confirm("Bạn có chắc chắn về việc cập nhật trạng thái này không?");
+    if (!confirmUpdate) return;
+    try {
+        const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`);
+        
+        const notificationData = {
+            ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        
+    } catch (error) {
+        console.error('Error updating order status:', error);
+    }
+};
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -34,7 +53,7 @@ onMounted(() => {
             <SideBar />
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-120px)] pb-7">
+                <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px]">Quản lý sản phẩm</h1>
                         <div class="flex justify-center flex-1 gap-2 max-w-xl">
@@ -48,7 +67,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div
-                        class="shadow-lg rounded-lg border-2 border-gray-300">
+                        class="shadow-lg rounded-lg border-2 border-gray-300 overflow-auto">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">
                                 <tr>
@@ -59,6 +78,7 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Loại sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Nhà cung cấp</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Còn lại</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Trạng thái</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mô tả</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                                 </tr>
@@ -67,7 +87,7 @@ onMounted(() => {
                                 <tr class="border-t border-slate-500" v-for="(product, index) in listProducts" :key="index">
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ product.MaSanPham }}</td>
                                     <td>
-                                        <img class="w-[100px] py-2 max-w-full ml-7" :src="`/src/assets/img/${product.Images[3]}`"
+                                        <img class="w-[100px] py-2 max-w-full ml-7" :src="`/src/assets/img/${product.Images[0]}`"
                                             alt="Hình ảnh sản phẩm" />
                                     </td>
                                     <td
@@ -82,18 +102,19 @@ onMounted(() => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">10
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ product.TrangThai }}
+                                    </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis text-[12px] whitespace-nowrap">{{ product.MoTa }}</p>
                                     </td>
                                     <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <a href="`/admin/editProduct/`"
+                                        <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <form>
-                                            <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
-                                                    class="fa-solid fa-trash"></i></button>
+                                        <form @submit="updateStatus(product.MaSanPham, product.TenSanPham)">
+                                            <button type="submit" 
+                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i class="fa-solid fa-repeat"></i></button>
                                         </form>
                                     </td>
                                 </tr>

@@ -108,7 +108,7 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
-        path: "/admin/editProduct",
+        path: "/admin/editProduct/:maSanPham",
         name: "Edit Product",
         component: editProduct,
         meta: { requiresAuth: true },

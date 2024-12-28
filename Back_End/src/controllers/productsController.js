@@ -67,10 +67,14 @@ exports.updatedProduct = async (req, res) => {
     product.LoaiSanPham = req.body.LoaiSanPham || product.LoaiSanPham;
     product.NhaCungCap = req.body.NhaCungCap || product.NhaCungCap;
     product.MoTa = req.body.MoTa || product.MoTa;
-    product.Images = req.body.Images || product.Images;
 
-    if (req.file) {
-      product.Images = req.files.map(file => file.filename)
+    // Kiểm tra xem có hình ảnh mới không
+    if (req.files && req.files.length > 0) {
+      // Nếu có hình ảnh mới, xóa hết hình ảnh cũ
+      product.Images = req.files.map(file => file.filename);
+    } else {
+      // Nếu không có hình ảnh mới, giữ lại hình ảnh cũ
+      product.Images = product.Images;
     }
 
     const updatedProduct = await product.save();
@@ -80,24 +84,23 @@ exports.updatedProduct = async (req, res) => {
   }
 };
 
-exports.deleteProduct = async (req, res) => {
-  const { maSanPham } = req.params;
-  try {
-    // const existingOrder = await TheoDoiMuonSach.findOne({ MaDocGia: maDocGia });
-    // if (existingOrder) {
-    //   return res.status(400).json({ message: "Không thể xóa đọc giả vì họ đang có đơn mượn sách." });
-    // }
+exports.updateProductStatus = async (req, res) => {
+    const { maSanPham } = req.body;
+    try {
+        const updatedProduct = await Product.findOneAndUpdate(
+            maSanPham,
+            { TrangThai: 'Ngừng kinh doanh' },
+            { new: true }
+        );
 
-    const product = await Product.findOneAndDelete({
-      MaSanPham: maSanPham,
-    });
-    if (!product) {
-      return res.status(404).json({ message: "Sản phẩm không tồn tại." });
+        if (!updatedProduct) {
+            return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+        }
+
+        res.json(updatedProduct);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
-    res.status(200).json({ message: "Sản phẩm đã được xóa." });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
 };
 
 exports.upload = upload.array('Images', 10);

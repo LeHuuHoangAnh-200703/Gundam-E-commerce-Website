@@ -49,6 +49,10 @@ const fetchSuppliers = async () => {
     }
 };
 
+const handleFileUpload = (event) => {
+    formData.value.images = Array.from(event.target.files);
+};
+
 const addProduct = async () => {
     errors.value = {};
 
@@ -133,11 +137,6 @@ const addProduct = async () => {
         notification.value.message = '';
     }, 3000);
 }
-
-const handleFileUpload = (event) => {
-    const files = event.target.files;
-    formData.value.images = Array.from(files);
-};
 
 const imageUrls = computed(() => {
     return formData.value.images.map(image => URL.createObjectURL(image));
