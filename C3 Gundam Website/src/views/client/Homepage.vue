@@ -3,6 +3,10 @@ import { ref, onMounted, computed } from "vue"
 import Header_Home from "@/components/client/Header_Home.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const listChoices = [
     {
@@ -23,104 +27,7 @@ const listChoices = [
     },
 ]
 
-const listProducts = ref([
-    {
-        name: "SD WORLD HEROES 16 SEITEN TAISEI GOKU QITIAN DASHENG IMPULSE GUNDAM DOUZHAN SHENGFO WUKONG SDWH",
-        price: "250.000 VNĐ",
-        img: "/src/assets/img/SD04.jpg",
-        type: "MG"
-    },
-    {
-        name: "SD WORLD HEROES 25 LEIF GUNDAM GP04 SDWH",
-        price: "220.000 VNĐ",
-        img: "/src/assets/img/SD03.jpg",
-        type: "PG"
-    },
-    {
-        name: "SD WORLD HEROES 36 Onmitsu Gundam Aerial SDWH",
-        price: "300.000 VNĐ",
-        img: "/src/assets/img/SD01.jpg",
-        type: "RG"
-    },
-    {
-        name: "SDCS F-KUNOICHI KAI F9 No.1 (Gundam Build Metaverse) HGBM",
-        price: "340.000 VNĐ",
-        img: "/src/assets/img/SD02.jpg",
-        type: "RG"
-    },
-    {
-        name: "MG 1/100 ZGMF-X20A Strike Freedom Gundam",
-        price: "1.050.000 VNĐ",
-        img: "/src/assets/img/MG01.jpg",
-        type: "MG"
-    },
-    {
-        name: "MG 1/100 GUNDAM EX IMPULSE [P-Bandai]",
-        price: "1.080.000 VNĐ",
-        img: "/src/assets/img/MG02.jpg",
-        type: "MG"
-    },
-    {
-        name: "FULL MECHANICS 1/100 XVX-016 GUNDAM AERIAL",
-        price: "1.000.000 VNĐ",
-        img: "/src/assets/img/MG03.jpg",
-        type: "MG"
-    },
-    {
-        name: "MG 1/100 GUNDAM ASTRAY RED FRAME FLIGHT UNIT [P-BANDAI]",
-        price: "1.900.000 VNĐ",
-        img: "/src/assets/img/MG04.jpg",
-        type: "MG"
-    },
-    {
-        name: "PG 1/60 RX-0 UNICORN GUNDAM FINAL BATTLE VER [P-BANDAI]",
-        price: "9.000.000 VNĐ",
-        img: "/src/assets/img/PG01.jpg",
-        type: "PG"
-    },
-    {
-        name: "PG 1/60 GAT - X105 + AQME-YM1 PERFECT STRIKE GUNDAM",
-        price: "5.500.000 VNĐ",
-        img: "/src/assets/img/PG02.jpg",
-        type: "PG"
-    },
-    {
-        name: "PG 1/60 RX-0 UNICORN GUNDAM PERFECTIBILITY [P-Bandai]",
-        price: "10.500.000 VNĐ",
-        img: "/src/assets/img/PG03.jpg",
-        type: "PG"
-    },
-    {
-        name: "PG 1/60 MBF-P02 GUNDAM ASTRAY RED FRAME",
-        price: "4.500.000 VNĐ",
-        img: "/src/assets/img/PG04.jpg",
-        type: "PG"
-    },
-    {
-        name: "RG 1/144 ZGMF-X20A STRIKE FREEDOM GUNDAM (TITANIUM FINISH) [P-Bandai]",
-        price: "2.350.000 VNĐ",
-        img: "/src/assets/img/RG01.jpg",
-        type: "RG"
-    },
-    {
-        name: "RG 18 1/144 00 RAISER",
-        price: "800.000 VNĐ",
-        img: "/src/assets/img/RG02.jpg",
-        type: "RG"
-    },
-    {
-        name: "RG 1/144 RX-0 UNICORN GUNDAM (BILIBILI 10TH ANNIVERSARY VER)",
-        price: "2.050.000 VNĐ",
-        img: "/src/assets/img/RG03.jpg",
-        type: "RG"
-    },
-    {
-        name: "RG 09 1/144 JUSTICE GUNDAM",
-        price: "580.000 VNĐ",
-        img: "/src/assets/img/RG04.jpg",
-        type: "RG"
-    },
-]);
+const listProducts = ref([]);
 
 const searchQuery = ref("");
 const selectedType = ref("All");
@@ -132,13 +39,34 @@ const handleSearch = (query) => {
   searchQuery.value = query;
 };
 
+const fectchProducts = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/sanpham');
+        listProducts.value = response.data.map(product => {
+            return {
+                ...product,
+            }
+        })
+    } catch(err) {
+        console.log("error fetching: ", err);
+    }
+}
+
 const filteredProducts = computed(() => {
   return listProducts.value.filter(product => {
-    const matchesType = selectedType.value === "All" || product.type === selectedType.value;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
+    const matchesSearch = product.TenSanPham.toLowerCase().includes(searchQuery.value.toLowerCase());
     return matchesType && matchesSearch;
   });
 });
+
+function formatCurrency(value) {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+onMounted(() => {
+    fectchProducts();
+})
 </script>
 
 <template>
@@ -182,12 +110,12 @@ const filteredProducts = computed(() => {
         <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
             <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link to="">
-                    <img :src="product.img" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
+                    <img :src="`/src/assets/img/${product.Images[0]}`" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                 </router-link>
                 <router-link to=""
                     class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
-                    product.name }}</router-link>
-                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ product.price }}</span></p>
+                    product.TenSanPham }}</router-link>
+                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan) }} VNĐ</span></p>
                 <button class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
             </div>
         </div>
