@@ -1,13 +1,32 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';  
+import axios from 'axios';
 
-const MaKhachHang = localStorage.getItem('MaKhachHang');
-const TenKhachHang = localStorage.getItem('TenKhachHang');
-const email = localStorage.getItem('Email');
+const name = ref('');
+const email = ref('');
+const maKhachHang = ref('');
+const image = ref('');
 
+const fetchCustomer = async (idKhachHang) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        name.value = response.data.TenKhachHang;
+        email.value = response.data.Email;
+        maKhachHang.value = response.data.MaKhachHang;
+        image.value = response.data.Image;
+        console.log(image.value)
+    } catch (err) {
+        console.log("Error fetching:", err);
+    }
+} 
+
+onMounted(() => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    fetchCustomer(MaKhachHang);
+})
 </script>
 
 
@@ -20,25 +39,25 @@ const email = localStorage.getItem('Email');
                     class="image_profile relative w-full h-[350px] bg-center bg-cover bg-no-repeat rounded-md [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div
                         class="bg-[#242424] w-[90%] z-10 absolute top-32 left-[50%] translate-x-[-50%] mx-auto shadow-lg rounded-md pt-[50px] px-2 sm:px-10 pb-10 sm:pb-0 h-fit [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
-                        <img src="../../assets/img/avatar.jpg"
+                        <img :src="image ? `/src/assets/img/${image}` : '/src/assets/img/avatar.jpg'"
                             class="w-[100px] h-[100px] bg-[#fff] rounded-full shadow-lg absolute left-1/2 translate-x-[-50%] -top-[50px] bg-center bg-cover"
                             alt="">
                         <div class="flex justify-between items-center flex-col lg:flex-row gap-4 px-2 lg:px-24">
                             <p class="font-semibold text-[18px] text-white my-2">Mã tài khoản: <span
-                                    class="text-[#FFD700]">{{ MaKhachHang }}</span></p>
-                            <a href=""
+                                    class="text-[#FFD700]">{{ maKhachHang }}</span></p>
+                            <router-link :to="`/editProfile/${maKhachHang}`"
                                 class="px-3 py-2 sm:px-5 sm:py-2 bg-[#DB3F4C] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Chỉnh
-                                sửa hồ sơ</a>
+                                sửa hồ sơ</router-link>
                         </div>
                         <div class="text-center mt-12 pb-4">
-                            <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">{{ TenKhachHang }}</h3>
+                            <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">{{ name }}</h3>
                             <div class="text-base leading-normal mt-0 mb-4 font-bold text-white"><i
                                     class="fa-regular fa-envelope text-[#FFD700]"></i> {{ email }}
                             </div>
                             <hr>
                             <div class="my-5 lg:text-[18px] text-[15px] font-medium text-white">
                                 <p>
-                                    Chào mừng <span class="font-semibold text-[#FFD700]">{{ TenKhachHang }}</span> đã đến với
+                                    Chào mừng <span class="font-semibold text-[#FFD700]">{{ name }}</span> đã đến với
                                     C3 Gundam, chúng tôi mong rằng tại đây sẽ thõa mãn được những nhu cầu
                                     của bạn. Chúng tôi luôn sẳn sàng hỗ trợ bạn , nếu cần thì mong
                                     bạn liên hệ đến Hotline. Xin cám ơn!!

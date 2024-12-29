@@ -75,7 +75,7 @@ const routes = [
         component: Profile,
     },
     {
-        path: "/editProfile",
+        path: "/editProfile/:maKhachHang",
         name: "Edit Profile",
         component: EditProfile,
     },

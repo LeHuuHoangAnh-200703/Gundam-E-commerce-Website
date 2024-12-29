@@ -6,6 +6,7 @@ const customerSchema = new mongoose.Schema({
     TenKhachHang: String,
     Email: String,
     MatKhau: String,
+    Image: String,
     NgayTao: { type: Date, required: true },
 });
 

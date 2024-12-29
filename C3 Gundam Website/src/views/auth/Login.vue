@@ -100,7 +100,7 @@ const login = async () => {
                         <form @submit.prevent="login" method="POST" class="flex flex-col gap-4 w-full">
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email</label>
-                                <input type="text" v-model="formData.email" placeholder="test@gmail.com"
+                                <input type="email" v-model="formData.email" placeholder="test@gmail.com"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                 <p v-if="errors.email" class="text-red-500 text-sm my-2">{{ errors.email }}</p>
                             </div>
