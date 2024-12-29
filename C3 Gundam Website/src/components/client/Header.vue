@@ -105,7 +105,7 @@ onMounted(() => {
                 </button>
             </div>
         </div>
-        <div class="sidebar fixed top-0 -left-[100%] w-full h-full bg-[#1A1D27] p-4 z-10">
+        <div class="sidebar fixed top-0 -left-[100%] w-full h-full bg-[#1A1D27] p-4 z-20">
             <div class="flex justify-between items-center">
                 <h1 class="font-bold text-white text-[24px] font-bungee"><span class="text-[#DB3F4C]">C3</span>
                     GunDam</h1>

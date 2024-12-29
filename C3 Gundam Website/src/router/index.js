@@ -50,12 +50,12 @@ const routes = [
         component: Register,
     },
     {
-        path: "/details",
+        path: "/details/:maSanPham",
         name: "Details",
         component: Details,
     },
     {
-        path: "/orders",
+        path: "/orders/:maSanPham",
         name: "Orders",
         component: Orders,
     },

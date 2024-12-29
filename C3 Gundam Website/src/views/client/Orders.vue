@@ -1,8 +1,38 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
-import BackToTop from '@/components/client/BackToTop.vue';  
+import BackToTop from '@/components/client/BackToTop.vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const images = ref([]);
+const nameProducts = ref('');
+const maSanPham = ref('');
+const price = ref('');
+
+const fetchProduct = async (idProduct) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/sanpham/${idProduct}`);
+        images.value = response.data.Images;
+        nameProducts.value = response.data.TenSanPham;
+        maSanPham.value = response.data.MaSanPham;
+        price.value = response.data.GiaBan;
+    } catch (err) {
+        console.log("error fetching:", err);
+    }
+}
+
+function formatCurrency(value) {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+onMounted(() => {
+    const idProduct = router.currentRoute.value.params.maSanPham;
+    console.log(idProduct)
+    fetchProduct(idProduct);
+})
 </script>
 
 
@@ -61,30 +91,23 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                     <hr>
                                     <div class="flex flex-col gap-4 overflow-hidden">
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
-                                            <div class="flex gap-4">
-                                                <img src="../../assets/img/RG01.jpg"
+                                            <div class="flex gap-4 items-start">
+                                                <img :src="`/src/assets/img/${images[0]}`"
                                                     class="w-[50px] lg:w-[80px] border-2" alt="">
                                                 <div class="overflow-hidden">
                                                     <div
-                                                        class="w-56 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
+                                                        class="w-52 lg:w-96 whitespace-nowrap text-ellipsis overflow-hidden">
                                                         <p
                                                             class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                                            RG 1/144 RX-0 UNICORN GUNDAM
-                                                            (BILIBILI
-                                                            10TH ANNIVERSARY VER)</p>
+                                                            {{ nameProducts }}</p>
                                                     </div>
-                                                    <p class="text-white text-[14px] hidden lg:block">RG 1/144 RX-0
-                                                        UNICORN GUNDAM
-                                                        (BILIBILI
-                                                        10TH ANNIVERSARY VER)</p>
                                                     <p class="text-white text-[14px]">Mã sản phẩm: <span
-                                                            class="text-[#FFD700]">SP20234</span></p>
-                                                    <div class="flex lg:flex-row flex-col justify-between">
-                                                        <p class="text-white text-[14px]">Giá: <span
-                                                                class="text-[#FFD700]">2.350.000 VNĐ</span></p>
-                                                        <p class="text-white text-[14px]">Số lượng: <span
-                                                                class="text-[#FFD700]">2</span></p>
-                                                    </div>
+                                                            class="text-[#FFD700]">{{ maSanPham }}</span></p>
+
+                                                    <p class="text-white text-[14px]">Giá: <span
+                                                            class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                                    <p class="text-white text-[14px]">Số lượng: <span
+                                                            class="text-[#FFD700]">2</span></p>
                                                 </div>
                                             </div>
                                         </div>

@@ -1,15 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
-const images = [
-    '/src/assets/img/RG01.jpg',
-    '/src/assets/img/DT1RG01.jpg',
-    '/src/assets/img/DT2RG01.jpg',
-    '/src/assets/img/DT3RG01.jpg',
-];
+const router = useRouter();
 
 const comments = ref([
     {
@@ -63,50 +60,46 @@ const comments = ref([
     },
 ])
 
-const relatedProducts = ref([
-    {
-        img: '/src/assets/img/MG01.jpg',
-        name: 'SD WORLD HEROES 36 Onmitsu Gundam Aerial SDWH',
-        price: '1.245.000 VNĐ',
-        status: 'Còn hàng',
-    },
-    {
-        img: '/src/assets/img/MG02.jpg',
-        name: 'SD WORLD HEROES 37 Tenka Musou Daishogun SDWH',
-        price: '1.350.000 VNĐ',
-        status: 'Còn hàng',
-    },
-    {
-        img: '/src/assets/img/MG03.jpg',
-        name: 'SDCS Mighty Strike Freedom Gundam',
-        price: '370.000 VNĐ',
-        status: 'Còn hàng',
-    },
-    {
-        img: '/src/assets/img/MG04.jpg',
-        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
-        price: '1.500.000 VNĐ',
-        status: 'Còn hàng',
-    },
-    {
-        img: '/src/assets/img/MG04.jpg',
-        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
-        price: '1.500.000 VNĐ',
-        status: 'Còn hàng',
-    },
-    {
-        img: '/src/assets/img/MG04.jpg',
-        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
-        price: '1.500.000 VNĐ',
-        status: 'Còn hàng',
-    },
-    {
-        img: '/src/assets/img/MG04.jpg',
-        name: 'SD WORLD HEROES 38 Onmitsu Gundam Aerial SDWH',
-        price: '1.500.000 VNĐ',
-        status: 'Còn hàng',
-    },
-]);
+const relatedProducts = ref([]);
+
+const nameProduct = ref('');
+const price = ref('');
+const typeProduct = ref('');
+const supplier = ref('');
+const idProduct = ref('');
+const images = ref([]);
+const description = ref('');
+const selectedImage = ref();
+const fetchProduct = async (idSanPham) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/sanpham/${idSanPham}`);
+        idProduct.value = response.data.MaSanPham;
+        nameProduct.value = response.data.TenSanPham;
+        description.value = response.data.MoTa;
+        images.value = response.data.Images;
+        price.value = response.data.GiaBan;
+        supplier.value = response.data.NhaCungCap;
+        typeProduct.value = response.data.LoaiSanPham;
+
+        if (images.value.length > 0) {
+            selectedImage.value = images.value[0];
+        }
+    } catch (err) {
+        console.log("error feching: ", err);
+    }
+}
+
+const fetchRelatedProducts = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/sanpham');
+        relatedProducts.value = response.data.filter(relatedProduct =>
+            relatedProduct.LoaiSanPham === typeProduct.value && relatedProduct.MaSanPham !== idProduct.value
+        );
+        console.log(relatedProducts.value)
+    } catch (err) {
+        console.log("error feching: ", err);
+    }
+}
 
 // Sản phẩm liên quan
 const indexPage = ref(1);
@@ -159,7 +152,6 @@ const prevPage = () => {
     }
 };
 
-const selectedImage = ref(images[0]);
 const showImage = ref(true);
 
 const changeImage = (newImage) => {
@@ -171,7 +163,26 @@ const changeImage = (newImage) => {
             showImage.value = true;
         }, 200);
     }
-};     
+};
+
+function formatCurrency(value) {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+onMounted(() => {
+    const idSanPham = router.currentRoute.value.params.maSanPham;
+    fetchProduct(idSanPham);
+    fetchRelatedProducts();
+    window.scrollTo(0, 0);
+})
+
+watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
+    if (newIdSanPham) {
+        fetchProduct(newIdSanPham);
+        fetchRelatedProducts();
+        window.scrollTo(0, 0);
+    }
+});
 </script>
 
 
@@ -179,45 +190,47 @@ const changeImage = (newImage) => {
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
-            <p class="text-gray-300 font-semibold text-[13px]">Trang chủ > <span class="text-[#DB3F4C]">RG 1/144 RX-0
-                    UNICORN GUNDAM (BILIBILI 10TH ANNIVERSARY VER)</span></p>
+            <p class="text-gray-300 font-semibold text-[13px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
+                    }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[40%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
-                        <img :src="selectedImage"
+                        <img :src="`/src/assets/img/${selectedImage}`"
                             :class="{ 'opacity-0': !showImage, 'transition-opacity duration-300': true }"
                             class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] w-full" alt="" />
                     </div>
                     <div class="flex gap-3 items-center justify-center">
-                        <img v-for="(img, index) in images" :key="index" :src="img" @click="changeImage(img)"
+                        <img v-for="(img, index) in images" :key="index" :src="`/src/assets/img/${img}`"
+                            @click="changeImage(img)"
                             class="w-[75px] border-2 transition-all hover:border-[#DB3F4C] cursor-pointer"
                             :class="{ 'border-[#DB3F4C]': img === selectedImage }" alt="" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-4 w-full lg:w-[60%]">
-                    <p class="text-white text-[20px] font-medium">RG 1/144 RX-0 UNICORN GUNDAM (BILIBILI 10TH
-                        ANNIVERSARY VER)</p>
+                    <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
                     <div class="flex flex-col gap-1">
-                        <p class="text-white font-medium">Mã sản phẩm: SP29234</p>
-                        <p class="text-white font-medium">Thương hiệu: Bandai</p>
-                        <p class="text-white font-medium">Loại sản phẩm: RG</p>
+                        <p class="text-white font-medium">Mã sản phẩm: {{ idProduct }}</p>
+                        <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
+                        <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
                         <p class="text-white font-medium">Còn lại: 20</p>
                     </div>
-                    <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                    <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">{{ formatCurrency(price) }}
+                            VNĐ</span></p>
                     <hr class="bg-gray-600">
                     <ul class="flex flex-col gap-2 text-white ml-4">
                         <li class="list-disc">Sản phẩm Gunpla chính hãng của Bandai, sản xuất tại Nhật Bản.</li>
                         <li class="list-disc">Sản phẩm giúp phát triển trí não và rèn luyện tính kiên nhẫn cho người
                             chơi.</li>
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
-                        <li class="list-disc">Phân phối bởi C3 Gundam.</li>
+                        <li class="list-disc">Phân phối bởi SOTSU-SUNRISE.</li>
                     </ul>
-                    <button
+                    <router-link :to="`/orders/${idProduct}`"
                         class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
-                        <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>2.350.000
+                        <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>{{
+                                formatCurrency(price) }}
                                 VNĐ</span></p>
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
-                    </button>
+                    </router-link>
                     <p class="text-white text-center font-medium">Hotline hỗ trợ: <span
                             class="text-[#FFD700] font-semibold"><i class="fa-solid fa-phone-square"></i>
                             079.965.8592</span> (7:30-22:30)</p>
@@ -230,10 +243,7 @@ const changeImage = (newImage) => {
                         Giới thiệu</p>
                     <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
                 </div>
-                <p class="my-8 text-gray-300 text-justify">RG 1/144 RX-0 UNICORN GUNDAM (BILIBILI 10TH ANNIVERSARY VER)
-                    - Mô hình Gundam chính hãng Bandai sở hữu đôi cánh sắc sảo tạo thành từ DRAGOON System độc đáo. Đây
-                    là một trong những mẫu Gundam cực kỳ nổi tiếng với lượng fan đông đảo, và bạn sẽ không khỏi ấn tượng
-                    về độ ngầu, độ hoành tráng của nó.</p>
+                <p class="my-8 text-gray-300 text-justify">{{ description }}</p>
             </div>
             <div class="my-20">
                 <div class="flex justify-center items-end">
@@ -250,21 +260,21 @@ const changeImage = (newImage) => {
                         </button>
                         <div class="flex gap-5 transition-transform duration-300 pt-4">
                             <div v-for="(product, index) in paginatedProducts" :key="index"
-                                class="flex flex-col gap-3 items-center w-[220px] sm:w-[180px] md:w-[200px] lg:w-[220px]">
-                                <router-link to="">
-                                    <img :src="product.img"
+                                class="flex flex-col gap-2 items-center w-[220px] sm:w-[180px] md:w-[200px] lg:w-[220px]">
+                                <router-link :to="`/details/${product.MaSanPham}`">
+                                    <img :src="`/src/assets/img/${product.Images[0]}`"
                                         class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                                 </router-link>
                                 <div
                                     class="whitespace-nowrap text-[14px] text-ellipsis overflow-hidden max-w-48 text-white">
-                                    <router-link to=""
+                                    <router-link :to="`/details/${product.MaSanPham}`"
                                         class="overflow-hidden text-ellipsis whitespace-nowrap text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">
-                                        {{ product.name }}
+                                        {{ product.TenSanPham }}
                                     </router-link>
                                 </div>
-                                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ product.price
-                                        }}</span></p>
-                                <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.status }}</span>
+                                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan)
+                                        }} VNĐ</span></p>
+                                <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai }}</span>
                                 </p>
                             </div>
                         </div>
