@@ -187,13 +187,13 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
-        path: "/admin/editEntryForm",
+        path: "/admin/editEntryForm/:maPN",
         name: "Edit Entry Form",
         component: editEntryForm,
         meta: { requiresAuth: true },
     },
     {
-        path: "/admin/listEntryFormInfo",
+        path: "/admin/listEntryFormInfo/:maPN",
         name: "list Entry Form Info",
         component: listEntryFormInfo,
         meta: { requiresAuth: true },

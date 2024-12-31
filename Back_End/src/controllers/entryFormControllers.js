@@ -12,9 +12,9 @@ exports.getAllEntryForms = async (req, res) => {
 exports.getEntryForm = async (req, res) => {
   try {
     const entryForm = await EntryForm.findOne({
-      MaPhieuNhap: req.params.maPhieuNhap,
+      MaPhieuNhap: req.params.maPN,
     });
-    if (!MaPhieuNhap) {
+    if (!entryForm) {
       res.status(400).json({ message: "Phiếu nhập không tồn tại!" });
     }
     res.status(200).json(entryForm);
@@ -43,6 +43,9 @@ exports.updatedEntryForm = async (req, res) => {
     }
 
     entryForm.MaNhaCungCap = req.body.MaNhaCungCap || entryForm.MaNhaCungCap;
+    entryForm.TenNhaCungCap = req.body.TenNhaCungCap || entryForm.TenNhaCungCap;
+    entryForm.MaNhanVien = req.body.MaNhanVien || entryForm.MaNhanVien;
+    entryForm.TenNhanVien = req.body.TenNhanVien || entryForm.TenNhanVien;
 
     const updatedEntryForm = await entryForm.save();
     res.status(200).json(updatedEntryForm);
@@ -54,11 +57,6 @@ exports.updatedEntryForm = async (req, res) => {
 exports.deleteEntryForm = async (req, res) => {
   const { maPN } = req.params;
   try {
-    // const existingOrder = await TheoDoiMuonSach.findOne({ MaDocGia: maDocGia });
-    // if (existingOrder) {
-    //   return res.status(400).json({ message: "Không thể xóa đọc giả vì họ đang có đơn mượn sách." });
-    // }
-
     const entryForm = await EntryForm.findOneAndDelete({
       MaPhieuNhap: maPN,
     });

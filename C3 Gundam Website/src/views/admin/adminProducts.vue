@@ -5,7 +5,7 @@ import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
 
 const listProducts = ref([]);
-const fectchProducts = async () => {
+const fetchProducts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/sanpham');
         listProducts.value = response.data.map(product => {
@@ -13,6 +13,7 @@ const fectchProducts = async () => {
                 ...product,
             }
         });
+        console.log(listProducts.value)
     } catch (error) {
         console.error('Error fetching:', error);
     }
@@ -43,7 +44,7 @@ function formatCurrency(value) {
 }
 
 onMounted(() => {
-    fectchProducts();
+    fetchProducts();
 })
 </script>
 
@@ -100,7 +101,7 @@ onMounted(() => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ product.NhaCungCap }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">10
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"> {{ product.SoLuong }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ product.TrangThai }}
                                     </td>

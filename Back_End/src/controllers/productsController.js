@@ -1,4 +1,5 @@
 const Product = require("../models/productModels");
+const EntryFormInfo = require("../models/entryFormInfoModels");
 const path = require("path");
 const multer = require("multer");
 
@@ -18,13 +19,32 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 exports.getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.status(200).json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+  try {  
+    // Bước 1: Lấy tất cả sản phẩm  
+    const products = await Product.find();  
+
+    // Bước 2: Lấy số lượng từ chi tiết phiếu nhập  
+    const quantities = await EntryFormInfo.aggregate([  
+      { $group: { _id: "$MaSanPham", totalQuantity: { $sum: "$SoLuong" } } }  
+    ]);  
+
+    // Bước 3: Tạo map số lượng  
+    const quantityMap = {};  
+    quantities.forEach(item => {  
+      quantityMap[item._id] = item.totalQuantity;  
+    });  
+
+    // Bước 4: Kết hợp số lượng vào sản phẩm  
+    const result = products.map(product => ({  
+      ...product._doc,  
+      SoLuong: quantityMap[product.MaSanPham] || 0 // Nếu không có số lượng, gán mặc định là 0  
+    }));  
+
+    res.status(200).json(result);  
+  } catch (err) {  
+    res.status(500).json({ message: err.message });  
+  }  
+};  
 
 exports.getProduct = async (req, res) => {
   try {

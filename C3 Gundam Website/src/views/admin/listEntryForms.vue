@@ -188,17 +188,12 @@ onMounted(() => {
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatDate(entryForm.NgayNhap) }}</td>
                                     <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <router-link to="`/admin/editProduct/`"
+                                        <router-link :to="`/admin/editEntryForm/${entryForm.MaPhieuNhap}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></router-link>
-                                        <router-link to="`/admin/editProduct/`"
+                                        <router-link :to="`/admin/listEntryFormInfo/${entryForm.MaPhieuNhap}`"
                                             class="inline-block bg-[#003171] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#0c2d58] whitespace-nowrap"><i
                                                 class="fa-solid fa-hashtag"></i></router-link>
-                                        <form>
-                                            <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
-                                                    class="fa-solid fa-trash"></i></button>
-                                        </form>
                                     </td>
                                 </tr>
                             </tbody>

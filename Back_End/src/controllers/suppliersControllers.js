@@ -24,14 +24,24 @@ exports.getSupplier = async (req, res) => {
 };
 
 exports.createSupplier = async (req, res) => {
-  const supplier = new Supplier(req.body);
   try {
+    // Kiểm tra xem tên nhà cung cấp đã tồn tại (không phân biệt hoa thường)
+    const existingSupplier = await Supplier.findOne({
+      TenNhaCungCap: { $regex: new RegExp(`^${req.body.TenNhaCungCap}$`, "i") },
+    });
+    if (existingSupplier) {
+      return res
+        .status(400)
+        .json({ message: "Tên nhà cung cấp đã tồn tại trong cơ sở dữ liệu" });
+    }
+    const supplier = new Supplier(req.body);
     await supplier.save();
     res.status(200).json(supplier);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 exports.updatedSupplier = async (req, res) => {
   try {
@@ -42,6 +52,18 @@ exports.updatedSupplier = async (req, res) => {
       return res.status(404).json({ message: "Nhà cung cấp không tồn tại" });
     }
 
+    // Nếu có cập nhật tên nhà cung cấp, kiểm tra tên trùng (không phân biệt hoa thường)
+    if (req.body.TenNhaCungCap) {
+      const existingSupplier = await Supplier.findOne({
+        TenNhaCungCap: { $regex: new RegExp(`^${req.body.TenNhaCungCap}$`, "i") },
+        MaNhaCungCap: { $ne: req.params.maNCC }, // Loại trừ nhà cung cấp hiện tại
+      });
+      if (existingSupplier) {
+        return res
+          .status(400)
+          .json({ message: "Tên nhà cung cấp đã tồn tại trong cơ sở dữ liệu" });
+      }
+    }
     supplier.TenNhaCungCap = req.body.TenNhaCungCap || supplier.TenNhaCungCap;
     supplier.DienThoai = req.body.DienThoai || supplier.DienThoai;
     supplier.DiaChi = req.body.DiaChi || supplier.DiaChi;
@@ -52,6 +74,7 @@ exports.updatedSupplier = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 exports.deleteSupplier = async (req, res) => {
   const { maNCC } = req.params;
