@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import { ref, computed } from "vue";
 const status = ref(0);
 const sidebarMenu = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
@@ -16,6 +16,16 @@ const sidebarMenu = [
     { name: "Hóa đơn", icon: "fa-solid fa-scroll", path: "listBills" },
 ];
 
+const ChucVu = ref(localStorage.getItem("ChucVu"));
+
+const filteredSidebarMenu = computed(() => {
+    if (ChucVu.value === 'Quản trị viên') {
+        return sidebarMenu;
+    } else {
+        return sidebarMenu.filter((item, index) => index !== 2 && index !== 9);
+    }
+});
+
 const saveStatus = (index) => {
     console.log(index);
     status.value = index;
@@ -29,7 +39,7 @@ const saveStatus = (index) => {
             Gundam Store</p>
         <hr class="mb-8 mx-8">
         <ul class="flex flex-col space-y-1 text-[12px] font-semibold px-8 text-white mb-8">
-            <router-link :to="sidebar.path" v-for="(sidebar, index) in sidebarMenu" :key="index" @click="saveStatus(index)"
+            <router-link :to="sidebar.path" v-for="(sidebar, index) in filteredSidebarMenu" :key="index" @click="saveStatus(index)"
                 :class="{ 'active-link': status === index }"
                 class="flex gap-3 items-center font-semibold cursor-pointer px-2 py-3 hover:bg-[#DB3F4C] rounded-md transition-all duration-200">
                 <i :class="sidebar.icon"></i>

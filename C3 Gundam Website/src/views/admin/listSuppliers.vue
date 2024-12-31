@@ -3,97 +3,18 @@ import { ref, onMounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
-// Hàm mã hóa đầu vào
-const escapeHtml = (unsafe) => {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-};
-
+const router = useRouter();
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ChucVu = localStorage.getItem("ChucVu");
 const ThoiGian = new Date();
-
 const listSuppliers = ref([]);
-const errors = ref({});
-const formData = ref({
-    nameSupplier: '',
-    phone: '',
-    address: '',
-});
 
 const notification = ref({
     message: '',
     type: ''
 });
-
-const addSupplier = async () => {
-    errors.value = {};
-    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
-
-    if (!formData.value.nameSupplier) {
-        errors.value.nameSupplier = "Tên nhà cung cấp không để trống khi thêm!";
-    } else {
-        formData.value.nameSupplier = escapeHtml(formData.value.nameSupplier);
-    }
-
-    if (!formData.value.phone) {
-        errors.value.phone = "Số điện thoại không để trống khi thêm tài khoản!";
-    } else if (!phoneRegex.test(formData.value.phone)) {
-        errors.value.phone = "Số điện thoại không đúng định dạng!";
-    } else if (formData.value.phone.length !== 10) {
-        errors.value.phone = "Số điện thoại phải có 10 ký tự!";
-    }
-
-    if (!formData.value.address) {
-        errors.value.address = "Địa chỉ không để trống khi thêm tài khoản!";
-    } else {
-        formData.value.address = escapeHtml(formData.value.address);
-    }
-
-    if (Object.keys(errors.value).length > 0) {
-        return;
-    }
-
-    try {
-        const dataToSend = {
-            TenNhaCungCap: formData.value.nameSupplier,
-            DienThoai: formData.value.phone,
-            DiaChi: formData.value.address,
-        };
-
-        const response = await axios.post('http://localhost:3000/api/nhacungcap', dataToSend);
-        
-        const notificationData = {
-            ThongBao: `Vừa thêm nhà cung cấp ${formData.value.nameSupplier}`,
-            NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
-            ThoiGian: ThoiGian,
-        };
-
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
-        
-        notification.value = {
-            message: "Thêm nhà cung cấp thành công!",
-            type: "success",
-        };
-        setTimeout(() => {
-            router.push('/admin/listSuppliers');
-        }, 3000);
-    } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.",
-            type: "error",
-        };
-    }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 3000);
-};
 
 const fetchSuppliers = async () => {
     try {
@@ -114,7 +35,7 @@ const deleteSupplier = async (maNCC, tenNCC) => {
 
     try {
         const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
-        
+
         const notificationData = {
             ThongBao: `Vừa xóa nhà cung cấp ${tenNCC}`,
             NguoiChinhSua: TenAdmin,
@@ -123,7 +44,7 @@ const deleteSupplier = async (maNCC, tenNCC) => {
         };
 
         await axios.post('http://localhost:3000/api/thongbao', notificationData);
-        
+
         notification.value = {
             message: "Xóa nhà cung cấp thành công!",
             type: "success",
@@ -131,7 +52,7 @@ const deleteSupplier = async (maNCC, tenNCC) => {
         setTimeout(() => {
             router.push('/admin/listSuppliers');
         }, 3000);
-    } catch(err) {
+    } catch (err) {
         notification.value = {
             message: err.response?.data?.message || "Xóa nhà cung cấp thất bại!",
             type: "error",
@@ -151,46 +72,12 @@ onMounted(() => {
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
-                    <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
+                    <div class="flex gap-4 justify-between items-center">
                         <h1 class="font-bold text-[20px]">Quản lý nhà cung cấp</h1>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-lg w-full lg:w-[70%] mx-auto p-4">
-                        <form @submit.prevent="addSupplier" method="POST">
-                            <div class="w-full flex flex-col lg:flex-row gap-8">
-                                <div class="w-full flex flex-col gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label for="nameSupplier" class="text-[15px] font-semibold">Tên nhà cung
-                                            cấp</label>
-                                        <input type="text" v-model="formData.nameSupplier" id="nameSupplier"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập tên nhà cung cấp ...">
-                                        <p v-if="errors.nameSupplier" class="text-red-500 text-sm mt-2">{{
-                                            errors.nameSupplier }}</p>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="phoneSupplier" class="text-[15px] font-semibold">Số điện
-                                            thoại</label>
-                                        <input type="text" v-model="formData.phone" id="phoneSupplier"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập số điện thoại ...">
-                                        <p v-if="errors.phone" class="text-red-500 text-sm mt-2">{{ errors.phone }}</p>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="addressSupplier" class="text-[15px] font-semibold">Địa chỉ</label>
-                                        <input type="text" v-model="formData.address" id="addressSupplier"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập địa chỉ ...">
-                                        <p v-if="errors.address" class="text-red-500 text-sm mt-2">{{ errors.address }}
-                                        </p>
-                                    </div>
-                                    <div class="flex justify-center lg:justify-end">
-                                        <button type="submit"
-                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Thêm
-                                            nhà cung cấp</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+                        <router-link to="/admin/addSupplier"
+                            class="bg-[#003171] text-white font-bold w-[50px] h-[50px] rounded-full flex justify-center items-center">
+                            <i class="fa-solid fa-plus"></i>
+                        </router-link>
                     </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
@@ -204,11 +91,14 @@ onMounted(() => {
                                 </tr>
                             </thead>
                             <tbody class="w-full">
-                                <tr class="border-t border-slate-500" v-for="(supplier, index) in listSuppliers" :key="index">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ supplier.MaNhaCungCap }}</td>
+                                <tr class="border-t border-slate-500" v-for="(supplier, index) in listSuppliers"
+                                    :key="index">
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ supplier.MaNhaCungCap
+                                        }}</td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                        <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ supplier.TenNhaCungCap }}</p>
+                                        <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{
+                                            supplier.TenNhaCungCap }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ supplier.DienThoai }}</td>
@@ -218,7 +108,8 @@ onMounted(() => {
                                         <a :href="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <form @submit.prevent="deleteSupplier(supplier.MaNhaCungCap, supplier.TenNhaCungCap)">
+                                        <form
+                                            @submit.prevent="deleteSupplier(supplier.MaNhaCungCap, supplier.TenNhaCungCap)">
                                             <button type="submit"
                                                 class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
                                                     class="fa-solid fa-trash"></i></button>

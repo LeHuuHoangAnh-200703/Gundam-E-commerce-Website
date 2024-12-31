@@ -21,6 +21,7 @@ import staffList from "@/views/admin/staffLists.vue";
 import editStaff from "@/views/admin/editStaff.vue";
 import customers from "@/views/admin/customers.vue";
 import listSuppliers from "@/views/admin/listSuppliers.vue";
+import addSupplier from "@/views/admin/addSupplier.vue";
 import editSupplier from "@/views/admin/editSupplier.vue";
 import listBills from "@/views/admin/listBills.vue";
 import editBill from "@/views/admin/editBill.vue";
@@ -147,6 +148,12 @@ const routes = [
         path: "/admin/listSuppliers",
         name: "List Suppliers",
         component: listSuppliers,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/addSupplier",
+        name: "Add supplier",
+        component: addSupplier,
         meta: { requiresAuth: true },
     },
     {

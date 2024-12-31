@@ -25,6 +25,7 @@ const supplierRoutes = require("./src/routes/suppliers");
 const discountCodeRoutes = require("./src/routes/discountCodes");
 const notificationRoutes = require("./src/routes/Notifications");
 const productRoutes = require("./src/routes/products");
+const entryFormRoutes = require("./src/routes/entryForms");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
@@ -32,6 +33,7 @@ app.use("/api/nhacungcap", supplierRoutes);
 app.use("/api/magiamgia", discountCodeRoutes);
 app.use("/api/thongbao", notificationRoutes);
 app.use("/api/sanpham", productRoutes);
+app.use("/api/phieunhap", entryFormRoutes);
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

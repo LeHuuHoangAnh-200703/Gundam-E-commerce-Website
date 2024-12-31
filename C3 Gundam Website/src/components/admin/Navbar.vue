@@ -1,12 +1,12 @@
 <script setup>
 import router from "@/router";
 import axios from "axios";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const ChucVu = ref(localStorage.getItem("ChucVu"));
 
 const listNatifications = ref([]);
 
@@ -63,6 +63,14 @@ const formatDate = (date) => {
     return `${time}`;
 };
 
+const filteredSidebarMenu = computed(() => {
+    if (ChucVu.value === 'Quản trị viên') {
+        return sidebarMenuMobile;
+    } else {
+        return sidebarMenuMobile.filter((item, index) => index !== 2 && index !== 9);
+    }
+});
+
 onMounted(async () => {
     fetchNatifications();
 });
@@ -102,11 +110,11 @@ onMounted(async () => {
                                 class="text-[#DB3F4C]">C3
                             </span>
                             Gundam Store</p>
-                        <i @click="toggleSideBar()" class="fa-regular fa-circle-xmark text-white text-4xl"></i>
+                        <i @click="toggleSideBar()" class="fa-regular fa-circle-xmark cursor-pointer text-white text-4xl"></i>
                     </div>
                     <hr>
                     <ul class="flex flex-col text-white">
-                        <router-link to="" v-for="(sidebar, index) in sidebarMenuMobile" :key="index"
+                        <router-link to="" v-for="(sidebar, index) in filteredSidebarMenu" :key="index"
                             class="flex gap-3 items-center font-semibold cursor-pointer py-3 hover:text-[#DB3F4C] rounded-md transition-all duration-200">
                             <i :class="sidebar.icon"></i>
                             {{ sidebar.name }}
