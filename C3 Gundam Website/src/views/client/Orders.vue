@@ -32,6 +32,7 @@ const notification = ref({
 
 const tenKhachHang = ref(localStorage.getItem("TenKhachHang"));
 const emailKhachHang = ref(localStorage.getItem("Email"));
+const maKhachHang = ref(localStorage.getItem("MaKhachHang"));
 
 const images = ref([]);
 const nameProducts = ref('');
@@ -88,8 +89,12 @@ const addOrders = async () => {
         return;
     }
 
+    const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
+    if (!confirmUpdate) return;
+
     try {
         const dataToSend = {
+            MaKhachHang: maKhachHang.value,
             TenKhachHang: tenKhachHang.value,
             Email: emailKhachHang.value,
             DienThoai: formData.value.phone,
@@ -110,8 +115,6 @@ const addOrders = async () => {
         console.log("Dữ liệu gửi đi:", dataToSend);
 
         const response = await axios.post('http://localhost:3000/api/donhang', dataToSend);
-        const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
-        if (!confirmUpdate) return;
         notification.value = {
             message: "Đặt hàng thành công!",
             type: "success",

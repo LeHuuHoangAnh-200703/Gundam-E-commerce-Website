@@ -7,5 +7,6 @@ router.get("/:maDonHang", orderController.getOrder);
 router.post("/", orderController.createOrder);
 router.put("/:maDonHang", orderController.updatedOrder);
 router.delete("/:maDonHang",orderController.deleteOrder);
+router.get("/khachhang/:maKhachHang", orderController.getOrderById);
 
 module.exports = router;

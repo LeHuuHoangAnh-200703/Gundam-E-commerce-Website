@@ -24,13 +24,26 @@ exports.getOrder = async (req, res) => {
     }
 };
 
-exports.createOrder = async (req, res) => {
-    const { discountCode, totalPrice } = req.body;
-    let finalPrice = totalPrice;  
+exports.getOrderById = async (req, res) => {
+    const { maKhachHang } = req.params;
     try {
-        if (discountCode) {
-            const discount = await DiscountCode.find({ MaGiamGia: discountCode });
+        const orders = await Order.find({ MaKhachHang: maKhachHang });
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng nào cho mã khách hàng này!" });
+        }
+        res.json(orders);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}
 
+exports.createOrder = async (req, res) => {
+    const { MaGiamGia, TongDon } = req.body;
+    let finalPrice = TongDon;
+    try {
+        if (MaGiamGia) {
+            const discount = await DiscountCode.findOne({ MaGiamGia: MaGiamGia });
+            console.log(MaGiamGia);
             if (!discount) {
                 return res.status(400).json({ message: "Mã giảm giá không tồn tại." });
             }
@@ -40,35 +53,37 @@ exports.createOrder = async (req, res) => {
                 return res.status(400).json({ message: "Mã giảm giá đã hết hạn." });
             }
 
-            if (discount.SoLanSuDung <= 0 ) {
+            if (discount.SoLanSuDung <= 0) {
                 return res.status(400).json({ message: "Mã giảm giá đã hết lượt sử dụng." });
             }
 
-            const giaApDung = Number(discount.GiaApDung);  
+            const giaApDung = Number(discount.GiaApDung);
             const giamTien = Number(discount.GiamTien || 0);
             const giamPhanTram = discount.GiamPhanTram || 0;
-            if (totalPrice >= giaApDung) {
-                if (discount.GiamTien) {
+
+            if (TongDon >= giaApDung) {
+                if (giamTien > 0) {
                     finalPrice -= giamTien;
-                }
-
-                if (discount.GiamPhanTram) {
+                    console.log(`Giảm tiền: ${giamTien}. Giá trị sau khi giảm: ${finalPrice}`);
+                } else if (giamPhanTram > 0) {
                     finalPrice -= (finalPrice * (giamPhanTram / 100));
+                    console.log(`Giảm phần trăm: ${giamPhanTram}%. Giá trị sau khi giảm: ${finalPrice}`);
                 }
 
-                if (finalPrice < 0) {  
-                    finalPrice = 0;  
-                }  
+                if (finalPrice < 0) {
+                    finalPrice = 0;
+                }
 
-                discount.SoLanSuDung--;
+                discount.SoLanSuDung -= 1;
                 await discount.save();
-            } else {  
-                return res.status(400).json({ message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });  
-            }  
+            } else {
+                return res.status(400).json({ message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });
+            }
         }
-        const order = new Order({ ...req.body, totalPrice: finalPrice });
+
+        const order = new Order({ ...req.body, TongDon: finalPrice });
         await order.save();
-        res.status(200).json(order); 
+        res.status(200).json(order);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

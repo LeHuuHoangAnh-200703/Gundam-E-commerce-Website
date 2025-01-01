@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
     MaDonHang: String,
+    MaKhachHang: String,
     TenKhachHang: String,
     Email: String,
     DienThoai: String,
@@ -18,7 +19,7 @@ const orderSchema = new mongoose.Schema({
     TongDon: Number,
     GhiChu: String,
     NgayDatHang: Date,
-    TrangThaiDon: { type: String, enum: ['Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Giao hàng thành công'], default: 'Đang chờ xác nhận' },
+    TrangThaiDon: { type: String, enum: ['Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Đã giao thành công', 'Đã nhận được hàng'], default: 'Đang chờ xác nhận' },
 });
 
 function generateMaDonHang() {  
