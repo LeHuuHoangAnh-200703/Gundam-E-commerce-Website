@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
@@ -111,6 +111,10 @@ const editProfile = async () => {
     }, 3000);
 }
 
+const imageUrls = computed(() => {
+    return formData.value.image.map(img => URL.createObjectURL(img));
+});
+
 onMounted(() => {
     const idKhachHang = router.currentRoute.value.params.maKhachHang;
     console.log(idKhachHang);
@@ -177,9 +181,11 @@ onMounted(() => {
                                 </div>
                                 <div
                                     class="border-2 md:col-span-5 p-5 h-[200px] rounded-md flex justify-center items-center">
-                                    <img id="imagePreview" class="hidden" src="#" alt="Image Preview"
-                                        style="max-width:200px; max-height:200px">
-                                    <div class="text-[60px] text-slate-300" id="image_icon">
+                                    <div v-if="imageUrls.length > 0">
+                                        <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
+                                            class="w-40 h-40 object-cover" />
+                                    </div>
+                                    <div v-else class="text-[60px] text-slate-300" id="image_icon">
                                         <i class="fa-regular fa-image"></i>
                                     </div>
                                 </div>

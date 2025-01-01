@@ -6,11 +6,18 @@ const orderSchema = new mongoose.Schema({
     Email: String,
     DienThoai: String,
     DiaChiNhanHang: String,
-    SanPhamDaMua: [String],
+    SanPhamDaMua: [{  
+        TenSanPham: String,  
+        MaSanPham: String,  
+        Gia: Number,  
+        SoLuong: Number,  
+        HinhAnh: String  
+    }],
     MaGiamGia: String,
     HinhThucThanhToan: String,
-    TongDon: String,
+    TongDon: Number,
     GhiChu: String,
+    NgayDatHang: Date,
     TrangThaiDon: { type: String, enum: ['Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Giao hàng thành công'], default: 'Đang chờ xác nhận' },
 });
 

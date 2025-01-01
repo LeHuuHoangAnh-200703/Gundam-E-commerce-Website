@@ -40,7 +40,7 @@ onMounted(() => {
                     <div
                         class="bg-[#242424] w-[90%] z-10 absolute top-32 left-[50%] translate-x-[-50%] mx-auto shadow-lg rounded-md pt-[50px] px-2 sm:px-10 pb-10 sm:pb-0 h-fit [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                         <img :src="image ? `/src/assets/img/${image}` : '/src/assets/img/avatar.jpg'"
-                            class="w-[100px] h-[100px] bg-[#fff] rounded-full shadow-lg absolute left-1/2 translate-x-[-50%] -top-[50px] bg-center bg-cover"
+                            class="w-[100px] h-[100px] bg-[#fff] rounded-full shadow-lg absolute left-1/2 translate-x-[-50%] -top-[50px] bg-center bg-cover object-cover"
                             alt="">
                         <div class="flex justify-between items-center flex-col lg:flex-row gap-4 px-2 lg:px-24">
                             <p class="font-semibold text-[18px] text-white my-2">Mã tài khoản: <span

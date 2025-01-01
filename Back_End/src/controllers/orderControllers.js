@@ -1,4 +1,5 @@
 const Order = require("../models/orderModels");
+const DiscountCode = require("../models/discountCodeModels");
 
 exports.getAllOrders = async (req, res) => {
     try {
@@ -24,10 +25,50 @@ exports.getOrder = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-    const order = new Order(req.body);
+    const { discountCode, totalPrice } = req.body;
+    let finalPrice = totalPrice;  
     try {
+        if (discountCode) {
+            const discount = await DiscountCode.find({ MaGiamGia: discountCode });
+
+            if (!discount) {
+                return res.status(400).json({ message: "Mã giảm giá không tồn tại." });
+            }
+
+            const currentDay = new Date();
+            if (currentDay > discount.NgayHetHan) {
+                return res.status(400).json({ message: "Mã giảm giá đã hết hạn." });
+            }
+
+            if (discount.SoLanSuDung <= 0 ) {
+                return res.status(400).json({ message: "Mã giảm giá đã hết lượt sử dụng." });
+            }
+
+            const giaApDung = Number(discount.GiaApDung);  
+            const giamTien = Number(discount.GiamTien || 0);
+            const giamPhanTram = discount.GiamPhanTram || 0;
+            if (totalPrice >= giaApDung) {
+                if (discount.GiamTien) {
+                    finalPrice -= giamTien;
+                }
+
+                if (discount.GiamPhanTram) {
+                    finalPrice -= (finalPrice * (giamPhanTram / 100));
+                }
+
+                if (finalPrice < 0) {  
+                    finalPrice = 0;  
+                }  
+
+                discount.SoLanSuDung--;
+                await discount.save();
+            } else {  
+                return res.status(400).json({ message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });  
+            }  
+        }
+        const order = new Order({ ...req.body, totalPrice: finalPrice });
         await order.save();
-        res.status(200).json(order);
+        res.status(200).json(order); 
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
