@@ -46,18 +46,36 @@ exports.getAllProducts = async (req, res) => {
   }  
 };  
 
-exports.getProduct = async (req, res) => {
-  try {
-    const product = await Product.findOne({
-      MaSanPham: req.params.maSanPham,
-    });
-    if (!product) {
-      res.status(400).json({ message: "Sản phẩm không tồn tại!" });
-    }
-    return res.status(200).json(product);
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
+exports.getProduct = async (req, res) => {  
+  try {  
+    const product = await Product.findOne({ MaSanPham: req.params.maSanPham });  
+    
+    if (!product) {  
+      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });  
+    }  
+
+    // Lấy vé đã nhập vào database  
+    const quantities = await EntryFormInfo.aggregate([  
+      { $match: { MaSanPham: req.params.maSanPham } }, // Lọc theo sản phẩm  
+      { $group: { _id: "$MaSanPham", totalQuantity: { $sum: "$SoLuong" } } }  
+    ]);  
+
+    // Tạo map số lượng  
+    const quantityMap = {};  
+    quantities.forEach(item => {  
+      quantityMap[item._id] = item.totalQuantity;  
+    });  
+
+    // Kết hợp số lượng vào sản phẩm  
+    const result = {  
+      ...product._doc,  
+      SoLuong: quantityMap[product.MaSanPham] || 0
+    };  
+
+    return res.status(200).json(result);  
+  } catch (err) {  
+    return res.status(500).json({ message: err.message });  
+  }  
 };
 
 exports.createProduct = async (req, res) => {

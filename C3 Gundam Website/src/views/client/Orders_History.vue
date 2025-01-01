@@ -2,14 +2,41 @@
 import { ref } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
-import BackToTop from '@/components/client/BackToTop.vue';  
+import BackToTop from '@/components/client/BackToTop.vue';
+
+const options = [
+    {
+        name: "Đang chờ xác nhận",
+        icon: "fa-solid fa-wallet"
+    },
+    {
+        name: "Đang chờ lấy hàng",
+        icon: "fa-solid fa-box"
+    },
+    {
+        name: "Đã được chuyển đi",
+        icon: "fa-solid fa-truck-fast"
+    },
+    {
+        name: "Đã nhận được hàng",
+        icon: "fa-solid fa-thumbs-up"
+    },
+]
 </script>
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <h1 class="text-center text-white text-[28px] font-semibold mt-6">Đơn hàng đã mua</h1>
         <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
+            <div class="flex flex-col gap-4 justify-center items-center mb-4">
+                <h1 class="text-center text-white text-[28px] font-semibold mt-6">Thông tin đơn hàng</h1>
+                <div class="flex gap-4">
+                    <button v-for="option in options" :key="option"
+                        class="border-2 px-5 py-3 bg-white flex justify-start items-center gap-4 rounded-md hover:bg-[#003171] hover:text-white transition-all duration-300">
+                        <i :class="option.icon"></i> {{ option.name }}
+                    </button>
+                </div>
+            </div>
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] flex flex-col mb-5 overflow-hidden px-4 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">

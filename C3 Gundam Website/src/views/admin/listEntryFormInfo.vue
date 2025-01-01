@@ -184,7 +184,7 @@ onMounted(() => {
                                             <option v-for="(product, index) in listProducts" :key="index"
                                                 :value="product.MaSanPham" class="text-[#003171] font-semibold">{{
                                                     product.MaSanPham }} -
-                                                {{ product.TenSanPham }}</option>
+                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ</option>
                                         </select>
                                         <p v-if="errors.idProduct" class="text-red-500 text-sm mt-2">{{
                                             errors.idProduct }}</p>

@@ -7,11 +7,37 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+const errors = ref({});
+const escapeHtml = (unsafe) => {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+const formData = ref({
+    address: '',
+    phone: '',
+    description: '',
+    discountCode: '',
+    payment: '',
+});
+
+const notification = ref({
+    message: '',
+    type: ''
+});
+
+const tenKhachHang = ref(localStorage.getItem("TenKhachHang"));
+const emailKhachHang = ref(localStorage.getItem("Email"));
+
 const images = ref([]);
 const nameProducts = ref('');
 const maSanPham = ref('');
 const price = ref('');
-
+const quantity = ref('');
 const fetchProduct = async (idProduct) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${idProduct}`);
@@ -24,13 +50,39 @@ const fetchProduct = async (idProduct) => {
     }
 }
 
+const addOrders = async () => {
+    errors.value = {};
+    const phoneRegex = /^0[1-9][0-9]{8}$|^0[1-9]{1}[0-9]{9}$|^(0[1-9]{1}[0-9]{1})( ?|-)?(\\(0[1-9]{1}[0-9]{1}\\))?( ?|-)?[0-9]{3} ?[0-9]{3}$/  
+
+    if (!formData.value.address) {
+        errors.value.address = "Địa chỉ không được trống.";
+    } else {
+        formData.value.address = escapeHtml(formData.value.address);
+    }
+
+    if (!formData.value.phone) {
+        errors.value.phone = "Điện thoại không được để trống.";
+    } else if (!phoneRegex.test(formData.value.phone)) {
+        errors.value.phone = "Điện thoại không hợp lệ.";
+    } else {
+        formData.value.phone = escapeHtml(formData.value.phone);
+    }
+
+    if (formData.value.description) {  
+        formData.value.description = escapeHtml(formData.value.description);  
+    } 
+}
+
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 onMounted(() => {
     const idProduct = router.currentRoute.value.params.maSanPham;
-    console.log(idProduct)
+    const soluong = router.currentRoute.value.query.quantity;
+    quantity.value = soluong;
+    console.log(soluong);
+    console.log(idProduct);
     fetchProduct(idProduct);
 })
 </script>
@@ -51,15 +103,15 @@ onMounted(() => {
                                     <hr>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
-                                        <input type="text" placeholder="test@gmail.com"
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Họ
+                                            tên</label>
+                                        <input type="text" v-model="tenKhachHang" readonly placeholder="Nhập họ tên của bạn ..."
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Họ
-                                            tên</label>
-                                        <input type="text" placeholder="Nhập họ tên của bạn ..."
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
+                                        <input type="text" v-model="emailKhachHang" readonly placeholder="test@gmail.com"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full flex lg:flex-row flex-col gap-4">
@@ -105,9 +157,10 @@ onMounted(() => {
                                                             class="text-[#FFD700]">{{ maSanPham }}</span></p>
 
                                                     <p class="text-white text-[14px]">Giá: <span
-                                                            class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                                            class="text-[#FFD700]">{{ formatCurrency(price) }}
+                                                            VNĐ</span></p>
                                                     <p class="text-white text-[14px]">Số lượng: <span
-                                                            class="text-[#FFD700]">2</span></p>
+                                                            class="text-[#FFD700]">{{ quantity }}</span></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -144,10 +197,35 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+            <transition name="slide-fade" mode="out-in">
+                <div v-if="notification.message" :class="['fixed top-4 left-1/2 right-10 transform p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2 w-full max-w-sm', {
+                    'border-[#DB3F4C]': notification.type === 'error',
+                    'border-[#40E0D0]': notification.type === 'success',
+                }]">
+                    <div class="flex gap-2 justify-center items-center">
+                        <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                            class="w-[50px]" alt="">
+                        <p class="text-[16px] font-semibold"
+                            :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                                notification.message }}</p>
+                    </div>
+                </div>
+            </transition>
         </div>
         <Footer />
         <BackToTop />
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+</style>

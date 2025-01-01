@@ -69,10 +69,13 @@ const supplier = ref('');
 const idProduct = ref('');
 const images = ref([]);
 const description = ref('');
+const quantity = ref('');
 const selectedImage = ref();
+const orderQuantity = ref(1);
 const fetchProduct = async (idSanPham) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${idSanPham}`);
+        console.log(response.data)
         idProduct.value = response.data.MaSanPham;
         nameProduct.value = response.data.TenSanPham;
         description.value = response.data.MoTa;
@@ -80,6 +83,7 @@ const fetchProduct = async (idSanPham) => {
         price.value = response.data.GiaBan;
         supplier.value = response.data.NhaCungCap;
         typeProduct.value = response.data.LoaiSanPham;
+        quantity.value = response.data.SoLuong;
 
         if (images.value.length > 0) {
             selectedImage.value = images.value[0];
@@ -169,6 +173,18 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function decreaseQuantity() {
+    if (orderQuantity.value > 1) {
+        return orderQuantity.value --;
+    }
+}
+
+function increaseQuantity() {  
+    if (orderQuantity.value < quantity.value) {  
+        orderQuantity.value ++; 
+    }  
+};  
+
 onMounted(() => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
     fetchProduct(idSanPham);
@@ -193,7 +209,7 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
             <p class="text-gray-300 font-semibold text-[13px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
                     }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
-                <div class="flex flex-col gap-3 w-full lg:w-[40%]">
+                <div class="flex flex-col gap-3 w-full lg:w-[45%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
                         <img :src="`/src/assets/img/${selectedImage}`"
                             :class="{ 'opacity-0': !showImage, 'transition-opacity duration-300': true }"
@@ -206,16 +222,22 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                             :class="{ 'border-[#DB3F4C]': img === selectedImage }" alt="" />
                     </div>
                 </div>
-                <div class="flex flex-col gap-4 w-full lg:w-[60%]">
+                <div class="flex flex-col gap-4 w-full lg:w-[55%]">
                     <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Mã sản phẩm: {{ idProduct }}</p>
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
-                        <p class="text-white font-medium">Còn lại: 20</p>
+                        <p class="text-white font-medium">Còn lại: {{ quantity }} sản phẩm</p>
                     </div>
                     <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">{{ formatCurrency(price) }}
                             VNĐ</span></p>
+                    <p class="text-white font-medium">Số lượng: </p>
+                    <div class="flex gap-4 items-center">
+                        <button @click="decreaseQuantity" class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i class="fa-solid fa-minus"></i></button>
+                        <input type="number" v-model="orderQuantity" min="1" :max="orderQuantity" class="text-[20px] text-white bg-transparent border-b-2 w-[50px] text-center p-1">
+                        <button @click="increaseQuantity" class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i class="fa-solid fa-plus"></i></button>
+                    </div>
                     <hr class="bg-gray-600">
                     <ul class="flex flex-col gap-2 text-white ml-4">
                         <li class="list-disc">Sản phẩm Gunpla chính hãng của Bandai, sản xuất tại Nhật Bản.</li>
@@ -224,7 +246,7 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
                         <li class="list-disc">Phân phối bởi SOTSU-SUNRISE.</li>
                     </ul>
-                    <router-link :to="`/orders/${idProduct}`"
+                    <router-link :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
                         class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>{{
                                 formatCurrency(price) }}
