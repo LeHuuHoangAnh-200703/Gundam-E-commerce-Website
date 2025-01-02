@@ -123,10 +123,10 @@ exports.updatedProduct = async (req, res) => {
 };
 
 exports.updateProductStatus = async (req, res) => {
-    const { maSanPham } = req.body;
+    const { maSanPham } = req.params;
     try {
         const updatedProduct = await Product.findOneAndUpdate(
-            maSanPham,
+            { MaSanPham: maSanPham },
             { TrangThai: 'Ngừng kinh doanh' },
             { new: true }
         );

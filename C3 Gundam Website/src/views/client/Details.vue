@@ -61,7 +61,10 @@ const comments = ref([
 ])
 
 const relatedProducts = ref([]);
-
+const notification = ref({
+    message: '',
+    type: ''
+});
 const nameProduct = ref('');
 const price = ref('');
 const typeProduct = ref('');
@@ -70,6 +73,7 @@ const idProduct = ref('');
 const images = ref([]);
 const description = ref('');
 const quantity = ref('');
+const status = ref('');
 const selectedImage = ref();
 const orderQuantity = ref(1);
 const fetchProduct = async (idSanPham) => {
@@ -84,7 +88,7 @@ const fetchProduct = async (idSanPham) => {
         supplier.value = response.data.NhaCungCap;
         typeProduct.value = response.data.LoaiSanPham;
         quantity.value = response.data.SoLuong;
-
+        status.value = response.data.TrangThai;
         if (images.value.length > 0) {
             selectedImage.value = images.value[0];
         }
@@ -175,15 +179,26 @@ function formatCurrency(value) {
 
 function decreaseQuantity() {
     if (orderQuantity.value > 1) {
-        return orderQuantity.value --;
+        return orderQuantity.value--;
     }
 }
 
-function increaseQuantity() {  
-    if (orderQuantity.value < quantity.value) {  
-        orderQuantity.value ++; 
-    }  
-};  
+function increaseQuantity() {
+    if (orderQuantity.value < quantity.value) {
+        orderQuantity.value++;
+    }
+};
+
+function handleDisabledClick() {
+    notification.value = {
+        message: "Sản phẩm hiện tại đã ngừng kinh doanh!",
+        type: "error",
+    };
+
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
 
 onMounted(() => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
@@ -200,7 +215,6 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
     }
 });
 </script>
-
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
@@ -234,9 +248,14 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                             VNĐ</span></p>
                     <p class="text-white font-medium">Số lượng: </p>
                     <div class="flex gap-4 items-center">
-                        <button @click="decreaseQuantity" class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i class="fa-solid fa-minus"></i></button>
-                        <input type="number" v-model="orderQuantity" min="1" :max="orderQuantity" class="text-[20px] text-white bg-transparent border-b-2 w-[50px] text-center p-1">
-                        <button @click="increaseQuantity" class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i class="fa-solid fa-plus"></i></button>
+                        <button @click="decreaseQuantity"
+                            class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i
+                                class="fa-solid fa-minus"></i></button>
+                        <input type="number" v-model="orderQuantity" min="1" :max="orderQuantity"
+                            class="text-[20px] text-white bg-transparent border-b-2 w-[50px] text-center p-1">
+                        <button @click="increaseQuantity"
+                            class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i
+                                class="fa-solid fa-plus"></i></button>
                     </div>
                     <hr class="bg-gray-600">
                     <ul class="flex flex-col gap-2 text-white ml-4">
@@ -246,12 +265,22 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
                         <li class="list-disc">Phân phối bởi SOTSU-SUNRISE.</li>
                     </ul>
-                    <router-link :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
+                    <router-link v-if="status === 'Đang bán' && quantity > 0" :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
                         class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>{{
-                                formatCurrency(price) }}
+                            formatCurrency(price) }}
                                 VNĐ</span></p>
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
+                    </router-link>
+                    <router-link to="" v-else-if="status === 'Ngừng kinh doanh'" @click.prevent="handleDisabledClick"
+                        class="bg-gray-400 px-5 py-3 text-center text-white transition-all duration-300 hover:bg-gray-600">
+                        <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Sản phẩm hiện tại đã ngừng kinh doanh</p>
+                        <p class="text-[12px] lg:text-[14px]">Chọn sản phẩm khác nhé</p>
+                    </router-link>
+                    <router-link to="" v-else-if="quantity === 0"
+                        class="bg-gray-400 px-5 py-3 text-center text-white transition-all duration-300 hover:bg-gray-600">
+                        <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Sản phẩm hiện tại đã hết hàng</p>
+                        <p class="text-[12px] lg:text-[14px]">Chọn sản phẩm khác nhé</p>
                     </router-link>
                     <p class="text-white text-center font-medium">Hotline hỗ trợ: <span
                             class="text-[#FFD700] font-semibold"><i class="fa-solid fa-phone-square"></i>
@@ -294,9 +323,11 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                                         {{ product.TenSanPham }}
                                     </router-link>
                                 </div>
-                                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan)
+                                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{
+                                    formatCurrency(product.GiaBan)
                                         }} VNĐ</span></p>
-                                <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai }}</span>
+                                <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai
+                                        }}</span>
                                 </p>
                             </div>
                         </div>
@@ -389,7 +420,32 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
         </div>
         <Footer />
         <BackToTop />
+        <transition name="slide-fade" mode="out-in">
+            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
+                'border-[#DB3F4C]': notification.type === 'error',
+                'border-[#40E0D0]': notification.type === 'success',
+            }]">
+                <div class="flex gap-2 justify-center items-center">
+                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                        class="w-[50px]" alt="">
+                    <p class="text-[16px] font-semibold"
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                        notification.message }}</p>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+</style>

@@ -106,7 +106,7 @@ const addOrders = async () => {
                 SoLuong: quantity.value,
                 HinhAnh: images.value[0]
             },
-            MaGiamGia: formData.value.discountCode || 'Không sử dụng',
+            MaGiamGia: formData.value.discountCode,
             HinhThucThanhToan: formData.value.payment,
             TongDon: totalPrice.value,
             NgayDatHang: new Date(),

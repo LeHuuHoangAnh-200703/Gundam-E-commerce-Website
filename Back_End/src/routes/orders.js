@@ -8,5 +8,6 @@ router.post("/", orderController.createOrder);
 router.put("/:maDonHang", orderController.updatedOrder);
 router.delete("/:maDonHang",orderController.deleteOrder);
 router.get("/khachhang/:maKhachHang", orderController.getOrderById);
+router.patch("/trangthai/:maDonHang", orderController.updatedStatus);
 
 module.exports = router;

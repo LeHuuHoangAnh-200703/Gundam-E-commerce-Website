@@ -43,7 +43,6 @@ exports.createOrder = async (req, res) => {
     try {
         if (MaGiamGia) {
             const discount = await DiscountCode.findOne({ MaGiamGia: MaGiamGia });
-            console.log(MaGiamGia);
             if (!discount) {
                 return res.status(400).json({ message: "Mã giảm giá không tồn tại." });
             }
@@ -64,10 +63,8 @@ exports.createOrder = async (req, res) => {
             if (TongDon >= giaApDung) {
                 if (giamTien > 0) {
                     finalPrice -= giamTien;
-                    console.log(`Giảm tiền: ${giamTien}. Giá trị sau khi giảm: ${finalPrice}`);
                 } else if (giamPhanTram > 0) {
                     finalPrice -= (finalPrice * (giamPhanTram / 100));
-                    console.log(`Giảm phần trăm: ${giamPhanTram}%. Giá trị sau khi giảm: ${finalPrice}`);
                 }
 
                 if (finalPrice < 0) {
@@ -98,8 +95,8 @@ exports.updatedOrder = async (req, res) => {
             return res.status(404).json({ message: "Đơn hàng không tồn tại" });
         }
 
-        const updatedDiscountCode = await discountCode.save();
-        res.status(200).json(updatedDiscountCode);
+        const updatedOrder = await order.save();
+        res.status(200).json(updatedOrder);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -111,7 +108,7 @@ exports.deleteOrder = async (req, res) => {
         const order = await Order.findOneAndDelete({
             MaDonHang: maDonHang,
         });
-        if (!Order) {
+        if (!order) {
             return res.status(404).json({ message: "Đơn hàng không tồn tại." });
         }
         res.status(200).json({ message: "Đơn hàng đã được xóa." });
@@ -119,3 +116,24 @@ exports.deleteOrder = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.updatedStatus = async (req, res) => {
+    const { maDonHang} = req.params;
+    const { newStatus } = req.body;
+    try {  
+        const updatedOrder = await Order.findOneAndUpdate(  
+            { MaDonHang: maDonHang },  
+            { TrangThaiDon: newStatus },  
+            { new: true } 
+        );  
+
+        if (!updatedOrder) {  
+            return res.status(404).json({ message: 'Đơn hàng không tìm thấy.' });  
+        }  
+
+        res.status(200).json(updatedOrder);  
+    } catch (error) {  
+        console.error("Error updating order status: ", error);  
+        res.status(500).json({ message: 'Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.' });  
+    }
+}

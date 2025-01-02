@@ -47,6 +47,7 @@ const fectchProducts = async () => {
                 ...product,
             }
         })
+        console.log(listProducts.value)
     } catch(err) {
         console.log("error fetching: ", err);
     }
@@ -116,7 +117,9 @@ onMounted(() => {
                     class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
                     product.TenSanPham }}</router-link>
                 <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan) }} VNĐ</span></p>
-                <button class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
+                <button v-if="product.TrangThai === 'Đang bán'" class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
+                <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'" class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
+                <button v-else-if="product.SoLuong < 0" class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
             </div>
         </div>
         <Footer />

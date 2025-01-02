@@ -5,7 +5,11 @@ const notificationSchema = new mongoose.Schema({
     ThongBao: String,
     NguoiChinhSua: String,
     ChucVu: String,
-    ThoiGian: Date,
+    ThoiGian: {
+        type: Date,
+        default: Date.now,
+        expires: 2592000,
+    },
 });
 
 function generateMaThongBao() {  

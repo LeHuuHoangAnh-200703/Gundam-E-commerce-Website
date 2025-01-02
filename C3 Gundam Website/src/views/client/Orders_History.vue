@@ -19,13 +19,16 @@ const options = [
         icon: "fa-solid fa-truck-fast"
     },
     {
-        name: "Đã nhận được hàng",
+        name: "Đã giao thành công",
         icon: "fa-solid fa-thumbs-up"
     },
 ]
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
-
+const notification = ref({
+    message: '',
+    type: ''
+});
 const listOrders = ref([]);
 const fetchOrders = async (maKhachHang) => {
     try {
@@ -33,13 +36,42 @@ const fetchOrders = async (maKhachHang) => {
         listOrders.value = response.data.map(order => {
             return {
                 ...order,
-                NgayDatHang: new Date(order.NgayDatHang).toLocaleDateString('vi-VN')
+                NgayDatHang: new Date(order.NgayDatHang)
             }
         })
+        listOrders.value.sort((a, b) => b.NgayDatHang - a.NgayDatHang);
     } catch (err) {
         console.log("Error fetching: ", err);
     }
 }
+
+const deleteOrder = async (maDonHang) => {
+    const confirmDelete = confirm("Bạn có chắc chắn muốn hủy đơn không?");
+    if (!confirmDelete) return;
+    try {
+        const response = await axios.delete(`http://localhost:3000/api/donhang/${maDonHang}`);
+        notification.value = {
+            message: "Hủy đơn hàng thành công!",
+            type: "success",
+        };
+        listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
+    } catch (error) {
+        notification.value = {
+            message: error.response?.data?.message || "Hủy đơn hàng thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
+
+const formatDate = (date) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
+    const formattedDate = date.toLocaleDateString('vi-VN', options);
+
+    return formattedDate;
+};
 
 function formatCurrency(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -68,7 +100,7 @@ onMounted(() => {
                     class="bg-[#242424] flex flex-col mb-5 overflow-hidden px-4 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div
                         class="flex flex-col gap-2 lg:flex-row justify-center items-center lg:justify-between text-white font-semibold">
-                        <p class="text-[14px]">Ngày đặt hàng: <span class="text-[#FFD700]">{{ order.NgayDatHang
+                        <p class="text-[14px]">Ngày đặt hàng: <span class="text-[#FFD700]">{{ formatDate(order.NgayDatHang)
                                 }}</span></p>
                         <p class="text-[14px] text-center lg:text-start">
                             {{ order.TrangThaiDon }}</p>
@@ -105,7 +137,7 @@ onMounted(() => {
                             </div>
                             <div>
                                 <p class="text-white text-[14px]">Email: {{ order.Email }}</p>
-                                <p class="text-white text-[14px]">Mã giảm giá: {{ order.MaGiamGia }}</p>
+                                <p class="text-white text-[14px]">Mã giảm giá: {{ order.MaGiamGia === "" ? "Không sử dụng" : order.MaGiamGia }}</p>
                                 <p class="text-white text-[14px]">Hình thức thanh toán: {{ order.HinhThucThanhToan }}
                                 </p>
                                 <p class="text-white text-[14px]">Ghi chú: {{ order.GhiChu }}</p>
@@ -123,14 +155,15 @@ onMounted(() => {
                     <div class="flex gap-3 justify-end">
                         <button :class="order.TrangThaiDon === 'Đã nhận được hàng' ? 'block' : 'hidden'"
                             class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</button>
-                        <button
+                        <button @click.prevent="deleteOrder(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đang chờ xác nhận' || order.TrangThaiDon === 'Đang chờ lấy hàng') ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
                             hàng</button>
-                        <button :class="order.TrangThaiDon === 'Đã giao thành công' ? 'block' : 'hidden'"
+                        <button :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
                             class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto">Đã nhận được
                             hàng</button>
                     </div>
+                    <p :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'" class="font-medium text-white text-center lg:text-end mt-3">Vui lòng chỉ xác nhận khi bạn đã nhận được hàng.</p>
                 </div>
             </div>
             <div v-else class="flex justify-center items-center m-auto w-full">
@@ -143,7 +176,31 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
+        <transition name="slide-fade" mode="out-in">
+            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
+                'border-[#DB3F4C]': notification.type === 'error',
+                'border-[#40E0D0]': notification.type === 'success',
+            }]">
+                <div class="flex gap-2 justify-center items-center">
+                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                        class="w-[50px]" alt="">
+                    <p class="text-[16px] font-semibold"
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{ notification.message }}</p>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+</style>
