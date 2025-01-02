@@ -22,8 +22,12 @@ const options = [
         icon: "fa-solid fa-truck-fast"
     },
     {
-        name: "Đã giao thành công",
+        name: "Đã nhận được hàng",
         icon: "fa-solid fa-thumbs-up"
+    },
+    {
+        name: "Đã giao thành công",
+        icon: "fa-solid fa-circle-check"
     },
 ]
 

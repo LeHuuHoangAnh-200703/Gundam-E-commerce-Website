@@ -20,7 +20,7 @@ const options = [
     },
     {
         name: "Đã giao thành công",
-        icon: "fa-solid fa-thumbs-up"
+        icon: "fa-solid fa-circle-check"
     },
 ]
 
@@ -66,10 +66,44 @@ const deleteOrder = async (maDonHang) => {
     }, 3000);
 }
 
+const updatedStatus = async (maDonHang, currentStatus) => {
+    const statusOrder = ["Đang chờ xác nhận", "Đang chờ lấy hàng", "Đã được chuyển đi", "Đã nhận được hàng", "Đã giao thành công"];
+    const currentIndex = statusOrder.indexOf(currentStatus);
+
+    if (currentIndex === -1 || currentIndex >= statusOrder.length - 1) {
+        alert("Trạng thái đơn hàng không hợp lệ hoặc đã ở trạng thái cuối cùng.");
+        return;
+    }
+
+    const newStatus = statusOrder[currentIndex + 1];
+
+    const confirmUpdate = confirm('Bạn có chắc chắn nhận được đơn hàng chưa?');
+    if (!confirmUpdate) return;
+
+    try {
+        const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
+            newStatus: newStatus,
+        });
+        await fetchOrders(maKhachHang);
+    } catch (err) {
+        console.error("Error updating status:", err);
+    }
+};
+
+const selectedType = ref("");
+const selectTypeOrders = (type) => {
+  selectedType.value = type;
+};
+
+const filterOrders = computed(() => {
+    return listOrders.value.filter(order => {
+        const matchesType = order.TrangThaiDon === selectedType.value;
+        return matchesType;
+    })
+})
 const formatDate = (date) => {
     const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
     const formattedDate = date.toLocaleDateString('vi-VN', options);
-
     return formattedDate;
 };
 
@@ -89,18 +123,19 @@ onMounted(() => {
             <div class="flex flex-col gap-4 justify-center items-center mb-4">
                 <h1 class="text-center text-white text-[28px] font-semibold mt-6">Thông tin đơn hàng</h1>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                    <button v-for="option in options" :key="option"
+                    <button v-for="option in options" :key="option" @click="selectTypeOrders(option.name)"
                         class="border-2 px-10 lg:px-5 py-3 bg-white flex justify-start items-center gap-4 rounded-md hover:bg-[#008B8B] hover:text-white transition-all duration-300">
                         <i :class="option.icon"></i> {{ option.name }}
                     </button>
                 </div>
             </div>
-            <div class="w-full m-4" v-if="listOrders.length > 0">
-                <div v-for="(order, index) in listOrders" :key="index"
+            <div class="w-full m-4" v-if="filterOrders.length > 0">
+                <div v-for="(order, index) in filterOrders" :key="index"
                     class="bg-[#242424] flex flex-col mb-5 overflow-hidden px-4 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div
                         class="flex flex-col gap-2 lg:flex-row justify-center items-center lg:justify-between text-white font-semibold">
-                        <p class="text-[14px]">Ngày đặt hàng: <span class="text-[#FFD700]">{{ formatDate(order.NgayDatHang)
+                        <p class="text-[14px]">Ngày đặt hàng: <span class="text-[#FFD700]">{{
+                            formatDate(order.NgayDatHang)
                                 }}</span></p>
                         <p class="text-[14px] text-center lg:text-start">
                             {{ order.TrangThaiDon }}</p>
@@ -153,17 +188,20 @@ onMounted(() => {
                             formatCurrency(order.TongDon) }} VNĐ</span></p>
                     </div>
                     <div class="flex gap-3 justify-end">
-                        <button :class="order.TrangThaiDon === 'Đã nhận được hàng' ? 'block' : 'hidden'"
+                        <button :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
                             class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</button>
                         <button @click.prevent="deleteOrder(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đang chờ xác nhận' || order.TrangThaiDon === 'Đang chờ lấy hàng') ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
                             hàng</button>
-                        <button :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
+                        <button @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
+                            :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
                             class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto">Đã nhận được
                             hàng</button>
                     </div>
-                    <p :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'" class="font-medium text-white text-center lg:text-end mt-3">Vui lòng chỉ xác nhận khi bạn đã nhận được hàng.</p>
+                    <p :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
+                        class="font-medium text-white text-center lg:text-end mt-3">Vui lòng chỉ xác nhận khi bạn đã
+                        nhận được hàng.</p>
                 </div>
             </div>
             <div v-else class="flex justify-center items-center m-auto w-full">
@@ -185,7 +223,8 @@ onMounted(() => {
                     <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{ notification.message }}</p>
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                        notification.message }}</p>
                 </div>
             </div>
         </transition>
