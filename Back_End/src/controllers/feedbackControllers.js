@@ -1,5 +1,22 @@
 const FeedBack = require("../models/feedbackModels");
+const path = require("path");
+const multer = require("multer");
 
+const storagePath = path.join(
+  __dirname,
+  "../../../C3 Gundam Website/src/assets/img_feedback"
+);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, storagePath);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 exports.getAllFeedBacks = async (req, res) => {
     try {
         const feedBacks = await FeedBack.find();
@@ -24,7 +41,11 @@ exports.getFeedBack = async (req, res) => {
 };
 
 exports.createFeedBack = async (req, res) => {
-    const feedBack = new FeedBack(req.body);
+    const feedBack = new FeedBack({
+        ...req.body,
+        SanPhamDaDanhGia: JSON.parse(req.body.SanPhamDaDanhGia),
+        HinhAnhSanPham: req.files ? req.files.map(file => file.filename) : []
+    });
     try {
         await feedBack.save();
         res.status(200).json(feedBack);
@@ -47,3 +68,5 @@ exports.deleteFeedBack = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.upload = upload.array('HinhAnhSanPham', 10);

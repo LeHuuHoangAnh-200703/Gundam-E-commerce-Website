@@ -22,7 +22,6 @@ const notification = ref({
     type: ''
 });
 const setRating = (star) => {
-    console.log(star);
     rating.value = star;
 };
 
@@ -36,10 +35,10 @@ const escapeHtml = (unsafe) => {
 };
 
 const fetchProduct = async (maDonHang) => {
-    try {  
+    try {
         const response = await axios.get(`http://localhost:3000/api/donhang/${maDonHang}`);
         listOrders.value = response.data.SanPhamDaMua;
-        console.log(listOrders.value)
+        formData.value.nameCustomer = response.data.TenKhachHang;
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -49,8 +48,7 @@ const fetchCustomer = async (maKhachHang) => {
     try {
         const result = await axios.get(`http://localhost:3000/api/khachhang/${maKhachHang}`);
         avatar.value = result.data.Image;
-        console.log(avatar.value)
-    } catch(err) {
+    } catch (err) {
         console.log("Error fetching: ", err);
     }
 }
@@ -62,8 +60,8 @@ const handleFileUpload = (event) => {
 const createFeedBack = async () => {
     errors.value = {};
 
-    if (!formData.value.quality) {
-        errors.value.quality = "Vui lòng đánh giá chất lượng.";
+    if (rating.value <= 0) {
+        errors.value.rating = "Vui lòng đánh giá chất lượng.";
     }
 
     if (formData.value.description) {
@@ -77,6 +75,45 @@ const createFeedBack = async () => {
     if (Object.keys(errors.value).length > 0) {
         return;
     }
+
+    const danhSachSanPham = listOrders.value.map(product => ({
+        TenSanPham: product.TenSanPham || '',
+        MaSanPham: product.MaSanPham || '',
+        Gia: product.Gia || 0,
+        SoLuong: product.SoLuong || 0,
+        LoaiSanPham: product.LoaiSanPham || '',
+        HinhAnh: product.HinhAnh || ''
+    }))
+
+    try {
+        const dataToSend = new FormData();
+        dataToSend.append('TenKhachHang', formData.value.nameCustomer);
+        dataToSend.append('ChatLuong', rating.value);
+        dataToSend.append('HinhAnhKhachHang', avatar.value);
+        dataToSend.append('MoTa', formData.value.description);
+        dataToSend.append('NgayDang', new Date());
+        dataToSend.append('SanPhamDaDanhGia', JSON.stringify(danhSachSanPham));
+        formData.value.images.forEach(image => {
+            dataToSend.append('HinhAnhSanPham', image);
+        });
+
+        const response = await axios.post('http://localhost:3000/api/danhgia', dataToSend);
+        notification.value = {
+            message: "Cảm ơn bạn đã góp ý về sản phẩm!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.push('/orders_history');
+        }, 3000);
+    } catch (error) {
+        notification.value = {
+            message: error.response?.data?.message || "Đánh giá thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
 }
 
 const imageUrls = computed(() => {
@@ -85,7 +122,6 @@ const imageUrls = computed(() => {
 
 onMounted(() => {
     const idDanhGia = router.currentRoute.value.params.maDanhGia;
-    console.log(idDanhGia);
     fetchProduct(idDanhGia);
     const maKhachHang = localStorage.getItem('MaKhachHang');
     fetchCustomer(maKhachHang);
@@ -104,13 +140,14 @@ onMounted(() => {
                     <div class="flex gap-4 border-b-2 pb-4 mb-3" v-for="(order, index) in listOrders" :key="index">
                         <img :src="`/src/assets/img/${order.HinhAnh}`" class="w-[60px]" alt="">
                         <div class="flex flex-col gap-1 justify-center">
-                            <div class="whitespace-nowrap text-ellipsis overflow-hidden">
-                                <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{ order.TenSanPham }}</p>
+                            <div class="lg:w-full w-56 whitespace-nowrap text-ellipsis overflow-hidden">
+                                <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{
+                                    order.TenSanPham }}</p>
                             </div>
                             <p class="text-[14px] text-white font-medium">Loại sản phẩm: {{ order.LoaiSanPham }}</p>
                         </div>
                     </div>
-                    <form action="" class="my-4 flex flex-col gap-4">
+                    <form @submit.prevent="createFeedBack" method="POST" class="my-4 flex flex-col gap-4">
                         <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
                             <label for="rating" class="font-semibold text-white mr-4">Chất lượng sản phẩm: </label>
                             <div id="rating" class="flex items-center gap-2">
@@ -119,10 +156,12 @@ onMounted(() => {
                                         @click="setRating(star)"></i>
                                 </span>
                             </div>
+                            <p v-if="errors.rating" class="text-red-500 text-sm mt-2">{{ errors.rating }}</p>
                         </div>
                         <div class="flex flex-col gap-4">
                             <label for="description" class="font-semibold text-white mr-4">Mô tả:</label>
-                            <textarea class="w-full h-[150px] rounded-md outline-none p-5 font-semibold"
+                            <textarea v-model="formData.description"
+                                class="w-full h-[150px] rounded-md outline-none p-5 font-semibold"
                                 placeholder="Đánh giá của bạn ..." name="description" id="description" cols="30"
                                 rows="10"></textarea>
                             <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{ errors.description }}</p>
@@ -139,12 +178,11 @@ onMounted(() => {
                                     Thả hình ảnh vào đây, hoặc chọn <span class="text-[#003171] cursor-pointer">nhấp để
                                         duyệt</span>
                                 </label>
-                                <input type="file" class="hidden" id="image_upload" multiple
-                                                @change="handleFileUpload">
-                                            <div class="flex flex-wrap gap-2 mt-2">
-                                                <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
-                                                    class="w-24 h-24 object-cover border rounded-md" />
-                                            </div>
+                                <input type="file" class="hidden" id="image_upload" multiple @change="handleFileUpload">
+                                <div class="flex flex-wrap justify-center gap-2 mt-2">
+                                    <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
+                                        class="w-24 h-24 object-cover border rounded-md" />
+                                </div>
                             </label>
                             <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{ errors.images }}</p>
                             <p class="text-white text-sm">Bạn có thể thêm tối đa 10 hình ảnh. Hãy chú ý đến
@@ -178,7 +216,8 @@ onMounted(() => {
                     <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{ notification.message }}</p>
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                            notification.message }}</p>
                 </div>
             </div>
         </transition>

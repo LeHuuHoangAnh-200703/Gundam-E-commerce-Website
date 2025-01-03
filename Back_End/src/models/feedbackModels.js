@@ -12,7 +12,8 @@ const feedbackSchema = new mongoose.Schema({
         TenSanPham: String,  
         MaSanPham: String,  
         Gia: Number,  
-        SoLuong: Number,  
+        SoLuong: Number, 
+        LoaiSanPham: String, 
         HinhAnh: String  
     }],
 });

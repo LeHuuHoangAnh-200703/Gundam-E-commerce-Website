@@ -8,57 +8,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const comments = ref([
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-    {
-        img: "/src/assets/img/avatar.jpg",
-        name: "Lê Hữu Hoàng Anh",
-        date: "20-07-2024",
-        description: "Lần đầu tiên mua hàng tại shop nhưng rất hài lòng. Giao hàng nhanh 2 ngày là tới, test thử thì thấy âm thanh cũng khá ok so với tầm giá rẻ như thế, sài lâu dài mới biết là tai nghe có bền hay không. Giá rẻ nhưng thiết kế khá đẹp, màu xinh cực, nhìn khá sịn sò, dây tay nghe chắc chắn. Anh shipper dễ thương và thân thiện.",
-        imgDetails: "/src/assets/img/DT1RG01.jpg"
-    },
-])
+const comments = ref([])
 
 const relatedProducts = ref([]);
 const notification = ref({
@@ -108,6 +58,32 @@ const fetchRelatedProducts = async () => {
         console.log("error feching: ", err);
     }
 }
+
+const fetchFeedBacks = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/danhgia');
+        comments.value = response.data.filter(comment =>
+            comment.SanPhamDaDanhGia && 
+            Array.isArray(comment.SanPhamDaDanhGia) &&
+            comment.SanPhamDaDanhGia.some(product => product.MaSanPham === idProduct.value)
+        ).map(comment => ({
+                ...comment,
+                NgayDang: new Date(comment.NgayDang)
+            }))
+            .sort((a, b) => b.NgayDang - a.NgayDang);
+        console.log("comments", comments.value);
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+
+const formatDate = (date) => {
+    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
+    const formattedDate = date.toLocaleString('vi-VN', options);
+
+    const [time, day] = formattedDate.split(', ');
+    return `${time}`;
+};
 
 // Sản phẩm liên quan
 const indexPage = ref(1);
@@ -204,13 +180,15 @@ onMounted(() => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
     fetchProduct(idSanPham);
     fetchRelatedProducts();
+    fetchFeedBacks();
     window.scrollTo(0, 0);
 })
 
 watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
     if (newIdSanPham) {
-        fetchProduct(newIdSanPham);
+        fetchProduct(idSanPham);
         fetchRelatedProducts();
+        fetchFeedBacks();
         window.scrollTo(0, 0);
     }
 });
@@ -389,22 +367,20 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                         <div v-for="comment in paginatedComments" :key="comment.id"
                             class="flex py-4 border-b flex-col gap-2 w-full">
                             <div class="flex gap-4 w-full">
-                                <img :src="comment.img" class="w-[60px] rounded-full" alt="">
+                                <img :src="`/src/assets/img/${comment.HinhAnhKhachHang}`" class="w-[60px] rounded-full object-cover" alt="">
                                 <div class="">
-                                    <p class="text-white text-[14px] font-semibold">{{ comment.name }}</p>
-                                    <p class="text-white text-[14px] mb-1">{{ comment.date }}</p>
+                                    <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
+                                    <p class="text-white text-[14px] mb-1">{{ formatDate(comment.NgayDang) }}</p>
                                     <div class="flex gap-1">
-                                        <i v-for="star in 5" :key="star"
+                                        <i v-for="star in comment.ChatLuong" :key="star"
                                             class="fa-solid fa-star text-[#FFD700] text-[10px]"></i>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <p class="my-4 text-white text-justify">{{ comment.description }}</p>
+                                <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
                                 <div class="flex gap-4">
-                                    <img :src="comment.imgDetails" class="w-[80px] lg:w-[100px]" alt="">
-                                    <img :src="comment.imgDetails" class="w-[80px] lg:w-[100px]" alt="">
-                                    <img :src="comment.imgDetails" class="w-[80px] lg:w-[100px]" alt="">
+                                    <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index" :src="`/src/assets/img_feedback/${img}`" class="w-[80px] lg:w-[100px]" alt="">
                                 </div>
                             </div>
                         </div>
