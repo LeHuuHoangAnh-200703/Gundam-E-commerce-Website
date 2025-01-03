@@ -37,6 +37,7 @@ const maKhachHang = ref(localStorage.getItem("MaKhachHang"));
 const images = ref([]);
 const nameProducts = ref('');
 const maSanPham = ref('');
+const type = ref('');
 const price = ref(0);
 const quantity = ref(1);
 const totalPrice = ref(0);
@@ -47,6 +48,7 @@ const fetchProduct = async (idProduct) => {
         nameProducts.value = response.data.TenSanPham;
         maSanPham.value = response.data.MaSanPham;
         price.value = Number(response.data.GiaBan);
+        type.value = response.data.LoaiSanPham;
     } catch (err) {
         console.log("error fetching:", err);
     }
@@ -104,6 +106,7 @@ const addOrders = async () => {
                 MaSanPham: maSanPham.value,
                 Gia: price.value,
                 SoLuong: quantity.value,
+                LoaiSanPham: type.value,
                 HinhAnh: images.value[0]
             },
             MaGiamGia: formData.value.discountCode,

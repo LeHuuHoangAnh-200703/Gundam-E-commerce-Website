@@ -28,6 +28,7 @@ const productRoutes = require("./src/routes/products");
 const entryFormRoutes = require("./src/routes/entryForms");
 const entryFormInfoRoutes = require("./src/routes/entryFormInfos");
 const orderRoutes = require("./src/routes/orders");
+const feeabackRoutes = require("./src/routes/feedbacks");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
@@ -38,6 +39,7 @@ app.use("/api/sanpham", productRoutes);
 app.use("/api/phieunhap", entryFormRoutes);
 app.use("/api/chitietphieunhap", entryFormInfoRoutes);
 app.use("/api/donhang", orderRoutes);
+app.use("/api/danhgia", feeabackRoutes);
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

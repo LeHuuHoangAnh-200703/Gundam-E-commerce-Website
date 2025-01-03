@@ -28,23 +28,27 @@ exports.getAllProducts = async (req, res) => {
       { $group: { _id: "$MaSanPham", totalQuantity: { $sum: "$SoLuong" } } }  
     ]);  
 
-    // Bước 3: Tạo map số lượng  
+    // Bước 3: Tạo map số lượng
     const quantityMap = {};  
     quantities.forEach(item => {  
-      quantityMap[item._id] = item.totalQuantity;  
+      quantityMap[item._id.toString()] = item.totalQuantity;  
     });  
 
     // Bước 4: Kết hợp số lượng vào sản phẩm  
-    const result = products.map(product => ({  
-      ...product._doc,  
-      SoLuong: quantityMap[product.MaSanPham] || 0 // Nếu không có số lượng, gán mặc định là 0  
-    }));  
+    const result = products.map(product => {
+      const productId = product.MaSanPham?.toString(); // Chuyển mã sản phẩm thành chuỗi để so sánh
+      return {
+        ...product._doc,
+        SoLuong: quantityMap[productId] || 0 // Nếu không có số lượng, gán mặc định là 0
+      };
+    });  
 
     res.status(200).json(result);  
   } catch (err) {  
     res.status(500).json({ message: err.message });  
   }  
-};  
+};
+  
 
 exports.getProduct = async (req, res) => {  
   try {  

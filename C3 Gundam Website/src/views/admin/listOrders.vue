@@ -52,11 +52,19 @@ const fetchOrders = async () => {
 }
 
 const updatedStatus = async (maDonHang, currentStatus) => {
+    const confirmUpdate = confirm('Bạn có chắc chắn cập nhật đơn hàng này chưa?');
+    if (!confirmUpdate) return;
     const currentIndex = options.findIndex(option => option.name === currentStatus);
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= options.length) {
-        alert("Đơn hàng đã ở trạng thái cuối cùng.");
+        notification.value = {
+            message: "Trạng thái đơn hàng đã ở trạng thái cuối cùng.",
+            type: "error",
+        };
+        setTimeout(() => {
+            notification.value.message = '';
+        }, 3000);
         return;
     }
 
@@ -133,7 +141,7 @@ onMounted(() => {
                                                 class="text-[16px] overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                                                 {{ product.TenSanPham }}</p>
                                         </div>
-                                        <p class="text-[14px] font-semibold">Mã sản phẩm: <span class="text-[#003171] font-medium">{{ product.MaSanPham }}</span></p>
+                                        <p class="text-[14px] font-semibold">Loại sản phẩm: <span class="text-[#003171] font-medium">{{ product.LoaiSanPham }}</span></p>
                                         <p class="text-[14px] font-semibold">Đơn giá: <span
                                                 class="text-[#003171] font-medium">{{ formatCurrency(product.Gia) }} VNĐ</span></p>
                                         <p class="text-[14px] font-semibold">Số lượng: <span

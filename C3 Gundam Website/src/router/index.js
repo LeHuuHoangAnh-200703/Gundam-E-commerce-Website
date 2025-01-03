@@ -81,7 +81,7 @@ const routes = [
         component: EditProfile,
     },
     {
-        path: "/feedback",
+        path: "/feedback/:maDanhGia",
         name: "Feedback",
         component: Feedback,
     },

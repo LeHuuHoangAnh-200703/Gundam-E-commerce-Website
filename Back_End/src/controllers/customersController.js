@@ -33,11 +33,11 @@ exports.getCustomer = async (req, res) => {
       MaKhachHang: req.params.maKhachHang,
     });
     if (!customer) {
-      res.status(400).json({ message: "Khách hàng không tồn tại!" });
+      return res.status(400).json({ message: "Khách hàng không tồn tại!" });
     }
-    res.status(200).json(customer);
+    return res.status(200).json(customer);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 

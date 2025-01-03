@@ -71,7 +71,13 @@ const updatedStatus = async (maDonHang, currentStatus) => {
     const currentIndex = statusOrder.indexOf(currentStatus);
 
     if (currentIndex === -1 || currentIndex >= statusOrder.length - 1) {
-        alert("Trạng thái đơn hàng không hợp lệ hoặc đã ở trạng thái cuối cùng.");
+        notification.value = {
+            message: "Trạng thái đơn hàng không hợp lệ hoặc đã ở trạng thái cuối cùng.",
+            type: "error",
+        };
+        setTimeout(() => {
+            notification.value.message = '';
+        }, 3000);
         return;
     }
 
@@ -92,7 +98,7 @@ const updatedStatus = async (maDonHang, currentStatus) => {
 
 const selectedType = ref("");
 const selectTypeOrders = (type) => {
-  selectedType.value = type;
+    selectedType.value = type;
 };
 
 const filterOrders = computed(() => {
@@ -153,7 +159,8 @@ onMounted(() => {
                                 </div>
                                 <p class="text-[14px] font-semibold text-white hidden lg:block">{{ product.TenSanPham }}
                                 </p>
-                                <p class="text-[14px] text-white font-medium">Mã sản phẩm: {{ product.MaSanPham }}</p>
+                                <p class="text-[14px] text-white font-medium">Loại sản phẩm: {{ product.LoaiSanPham }}
+                                </p>
                                 <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">{{
                                     formatCurrency(product.Gia) }} VNĐ</span></p>
                                 <p class="text-[14px] text-white font-medium">Số lượng: <span class="text-[#FFD700]">{{
@@ -188,8 +195,9 @@ onMounted(() => {
                             formatCurrency(order.TongDon) }} VNĐ</span></p>
                     </div>
                     <div class="flex gap-3 justify-end">
-                        <button :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
-                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</button>
+                        <router-link :to="`/feedback/${order.MaDonHang}`"
+                            :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
+                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</router-link>
                         <button @click.prevent="deleteOrder(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đang chờ xác nhận' || order.TrangThaiDon === 'Đang chờ lấy hàng') ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
@@ -224,7 +232,7 @@ onMounted(() => {
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
                         :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                        notification.message }}</p>
+                            notification.message }}</p>
                 </div>
             </div>
         </transition>
