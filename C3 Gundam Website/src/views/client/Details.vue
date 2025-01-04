@@ -5,11 +5,10 @@ import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import ListFeedBacks from '../admin/listFeedBacks.vue';
 
 const router = useRouter();
 
-const comments = ref([])
+const comments = ref([]);
 
 const relatedProducts = ref([]);
 const notification = ref({
@@ -62,19 +61,27 @@ const fetchRelatedProducts = async () => {
 const fetchFeedBacks = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/danhgia');
-        comments.value = response.data.filter(comment =>
+        const allComments = response.data.filter(comment =>
             comment.SanPhamDaDanhGia &&
             Array.isArray(comment.SanPhamDaDanhGia) &&
             comment.SanPhamDaDanhGia.some(product => product.MaSanPham === idProduct.value)
         ).map(comment => ({
             ...comment,
             NgayDang: new Date(comment.NgayDang)
-        }))
-            .sort((a, b) => b.NgayDang - a.NgayDang);
+        }));
+
+        // Phân tách đánh giá của bạn và các đánh giá khác
+        const myComments = allComments.filter(comment => comment.MaKhachHang === idCustomer);
+        const otherComments = allComments.filter(comment => comment.MaKhachHang !== idCustomer);
+
+        // Gộp đánh giá của bạn và các đánh giá khác, đưa đánh giá của bạn lên đầu
+        comments.value = [...myComments, ...otherComments.sort((a, b) => b.NgayDang - a.NgayDang)];
+        console.log(comments.value);
     } catch (err) {
         console.log("Error fetching: ", err);
     }
-}
+};
+
 
 const deleteFeedback = async (idDanhGia) => {
     const confirmUpdate = confirm('Bạn có chắc chắn muốn xóa đánh giá này?');
@@ -239,7 +246,7 @@ onMounted(async () => {
     window.scrollTo(0, 0);
 })
 
-watch(async () => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
+watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
     if (newIdSanPham) {
         fetchProduct(newIdSanPham);
         fetchRelatedProducts();
@@ -247,6 +254,8 @@ watch(async () => router.currentRoute.value.params.maSanPham, (newIdSanPham) => 
         window.scrollTo(0, 0);
     }
 });
+
+console.log(Math.ceil(totalQuality) && !Number.isInteger(totalQuality))
 </script>
 
 <template>
@@ -394,10 +403,7 @@ watch(async () => router.currentRoute.value.params.maSanPham, (newIdSanPham) => 
                     <div class="flex lg:flex-row flex-col gap-5 items-center justify-center lg:justify-between">
                         <div class="flex flex-col gap-2">
                             <p class="text-white text-[24px]"><span class="text-[30px]">{{ totalQuality }} </span> trên
-                                5</p>
-                            <div class="flex gap-2">
-                                <i v-for="star in 5" :key="star" class="fa-solid fa-star text-[#FFD700]"></i>
-                            </div>
+                                5 <i class="fa-solid fa-star text-[#FFD700]"></i></p>
                         </div>
                         <div class="flex gap-4 justify-center flex-wrap">
                             <button @click.prevent="selected(6)"
@@ -416,25 +422,26 @@ watch(async () => router.currentRoute.value.params.maSanPham, (newIdSanPham) => 
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-4 w-full">
                                     <img :src="`/src/assets/img/${comment.HinhAnhKhachHang}`"
-                                        class="w-[60px] rounded-full object-cover" alt="">
+                                        class="w-[60px] h-[60px] rounded-full object-cover" alt="">
                                     <div class="">
                                         <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
-                                        <p class="text-white text-[14px] mb-1">{{ formatDate(comment.NgayDang) }}</p>
-                                        <div class="flex gap-1">
+                                        <div class="flex gap-1 my-1">
                                             <i v-for="star in 5" :key="star" :class="{
                                                 'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
                                                 'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
                                             }"></i>
                                         </div>
+                                        <p class="text-gray-400 text-[14px] mb-1">{{ formatDate(comment.NgayDang) }}</p>
                                     </div>
                                 </div>
-                                <button type="submit" @click.prevent="deleteFeedback(comment.MaDanhGia)" :class="comment.MaKhachHang === idCustomer ? 'block' : 'hidden'"
+                                <button type="submit" @click.prevent="deleteFeedback(comment.MaDanhGia)"
+                                    :class="comment.MaKhachHang === idCustomer ? 'block' : 'hidden'"
                                     class="inline-block font-medium bg-white py-2 px-4 mb-4 border-2 rounded-md transition-all duration-300 hover:border-[#DC143C] hover:text-[#DC143C] whitespace-nowrap"><i
                                         class="fa-solid fa-trash"></i></button>
                             </div>
                             <div class="flex flex-col">
                                 <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
-                                <div class="flex gap-4">
+                                <div class="flex gap-4 flex-wrap">
                                     <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
                                         :src="`/src/assets/img_feedback/${img}`" class="w-[80px] lg:w-[100px]" alt="">
                                 </div>

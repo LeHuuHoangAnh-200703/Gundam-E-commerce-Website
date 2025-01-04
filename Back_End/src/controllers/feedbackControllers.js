@@ -3,17 +3,17 @@ const path = require("path");
 const multer = require("multer");
 
 const storagePath = path.join(
-  __dirname,
-  "../../../C3 Gundam Website/src/assets/img_feedback"
+    __dirname,
+    "../../../C3 Gundam Website/src/assets/img_feedback"
 );
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, storagePath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+    destination: (req, file, cb) => {
+        cb(null, storagePath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    },
 });
 
 const upload = multer({ storage: storage });
@@ -40,7 +40,27 @@ exports.getFeedBack = async (req, res) => {
     }
 };
 
+const bannedWords = [
+    "ngu",
+    "đần",
+    "ngu dốt",
+    "khốn nạn",
+    "vô học",
+    "đồ rác rưởi",
+    "thằng", "con", "mày", "đồ dốt", "đồ điên",
+    "chết tiệt", "vô dụng", "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại", "Địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc", "đm nó", "con cat", "con cac",
+    "M nó", "đồ cút", "thằng chó", "Con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "Thằng chó", "đồ chó", "đồ con chó", "Đồ mạt hạng", "đồ vô học", "đồ khốn", "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "Thằng lừa đảo", "đồ thất đức", "Lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct", "Đ mày", "dmtt", "cmnr"
+];
+
+const containsBannedWords = (text) => {
+    return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
+};
+
 exports.createFeedBack = async (req, res) => {
+    if (containsBannedWords(req.body.MoTa)) {
+        return res.status(400).json({ message: "Mô tả chứa nội dung không phù hợp!" });
+    }
+
     const feedBack = new FeedBack({
         ...req.body,
         SanPhamDaDanhGia: JSON.parse(req.body.SanPhamDaDanhGia),
