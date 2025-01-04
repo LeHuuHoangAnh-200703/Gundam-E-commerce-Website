@@ -12,6 +12,7 @@ const avatar = ref('');
 const errors = ref({});
 const formData = ref({
     nameCustomer: '',
+    idCustomer: '',
     description: '',
     images: [],
 })
@@ -34,11 +35,12 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 
-const fetchProduct = async (maDonHang) => {
+const fetchOrder= async (maDonHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/donhang/${maDonHang}`);
         listOrders.value = response.data.SanPhamDaMua;
         formData.value.nameCustomer = response.data.TenKhachHang;
+        formData.value.idCustomer = response.data.MaKhachHang;
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -88,6 +90,7 @@ const createFeedBack = async () => {
     try {
         const dataToSend = new FormData();
         dataToSend.append('TenKhachHang', formData.value.nameCustomer);
+        dataToSend.append('MaKhachHang', formData.value.idCustomer);
         dataToSend.append('ChatLuong', rating.value);
         dataToSend.append('HinhAnhKhachHang', avatar.value);
         dataToSend.append('MoTa', formData.value.description);
@@ -122,7 +125,7 @@ const imageUrls = computed(() => {
 
 onMounted(() => {
     const idDanhGia = router.currentRoute.value.params.maDanhGia;
-    fetchProduct(idDanhGia);
+    fetchOrder(idDanhGia);
     const maKhachHang = localStorage.getItem('MaKhachHang');
     fetchCustomer(maKhachHang);
 })

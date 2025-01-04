@@ -5,6 +5,7 @@ import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import ListFeedBacks from '../admin/listFeedBacks.vue';
 
 const router = useRouter();
 
@@ -15,6 +16,7 @@ const notification = ref({
     message: '',
     type: ''
 });
+const idCustomer = localStorage.getItem('MaKhachHang');
 const nameProduct = ref('');
 const price = ref('');
 const typeProduct = ref('');
@@ -29,7 +31,6 @@ const orderQuantity = ref(1);
 const fetchProduct = async (idSanPham) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${idSanPham}`);
-        console.log(response.data)
         idProduct.value = response.data.MaSanPham;
         nameProduct.value = response.data.TenSanPham;
         description.value = response.data.MoTa;
@@ -53,7 +54,6 @@ const fetchRelatedProducts = async () => {
         relatedProducts.value = response.data.filter(relatedProduct =>
             relatedProduct.LoaiSanPham === typeProduct.value && relatedProduct.MaSanPham !== idProduct.value
         );
-        console.log(relatedProducts.value)
     } catch (err) {
         console.log("error feching: ", err);
     }
@@ -63,18 +63,38 @@ const fetchFeedBacks = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/danhgia');
         comments.value = response.data.filter(comment =>
-            comment.SanPhamDaDanhGia && 
+            comment.SanPhamDaDanhGia &&
             Array.isArray(comment.SanPhamDaDanhGia) &&
             comment.SanPhamDaDanhGia.some(product => product.MaSanPham === idProduct.value)
         ).map(comment => ({
-                ...comment,
-                NgayDang: new Date(comment.NgayDang)
-            }))
+            ...comment,
+            NgayDang: new Date(comment.NgayDang)
+        }))
             .sort((a, b) => b.NgayDang - a.NgayDang);
-        console.log("comments", comments.value);
     } catch (err) {
         console.log("Error fetching: ", err);
     }
+}
+
+const deleteFeedback = async (idDanhGia) => {
+    const confirmUpdate = confirm('Bạn có chắc chắn muốn xóa đánh giá này?');
+    if (!confirmUpdate) return;
+    try {
+        const response = await axios.delete(`http://localhost:3000/api/danhgia/${idDanhGia}`);
+        notification.value = {
+            message: "Xóa đánh giá thành công!",
+            type: "success",
+        };
+        await fetchFeedBacks();
+    } catch (err) {
+        notification.value = {
+            message: err.response?.data?.message || "Xóa đánh giá thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
 }
 
 const formatDate = (date) => {
@@ -89,14 +109,24 @@ const formatDate = (date) => {
 const indexPage = ref(1);
 const itemsPerPage = 4;
 
+// Tính tổng số trang của danh sách sản phẩm liên quan
 const totalPageProducts = computed(() => {
+    // Dùng Math.ceil để làm tròn lên số trang, đảm bảo tất cả sản phẩm được hiển thị
     return Math.ceil(relatedProducts.value.length / itemsPerPage);
+    // `relatedProducts.value.length`: Tổng số sản phẩm liên quan
+    // `itemsPerPage`: Số lượng sản phẩm hiển thị trên mỗi trang
 });
 
+// Tính danh sách sản phẩm thuộc trang hiện tại
 const paginatedProducts = computed(() => {
     const start = (indexPage.value - 1) * itemsPerPage;
+    // `indexPage.value`: Số trang hiện tại (bắt đầu từ 1)
+    // `start`: Chỉ số bắt đầu của sản phẩm trên trang hiện tại
+
     return relatedProducts.value.slice(start, start + itemsPerPage);
+    // Lấy danh sách sản phẩm từ chỉ số `start` đến chỉ số `start + itemsPerPage` (không bao gồm `start + itemsPerPage`)
 });
+
 
 const nextPageProducts = () => {
     if (indexPage.value < totalPageProducts.value) {
@@ -115,37 +145,43 @@ const prevPageProducts = () => {
 const currentPage = ref(1);
 const commentsPerPage = 5;
 
+// Tính toán danh sách bình luận thuộc trang hiện tại
 const paginatedComments = computed(() => {
-    const start = (currentPage.value - 1) * commentsPerPage;
-    return comments.value.slice(start, start + commentsPerPage);
+    const start = (currentPage.value - 1) * commentsPerPage; // Xác định chỉ số bắt đầu của bình luận
+    return comments.value.slice(start, start + commentsPerPage); // Trả về danh sách bình luận thuộc trang hiện tại
 });
 
+// Tính tổng số trang dựa trên số lượng bình luận
 const totalPages = computed(() => {
-    return Math.ceil(comments.value.length / commentsPerPage);
+    return Math.ceil(comments.value.length / commentsPerPage); // Làm tròn lên để đảm bảo hiển thị đủ số trang
 });
 
+// Chuyển sang trang tiếp theo
 const nextPage = () => {
-    if (currentPage.value < totalPages.value) {
-        currentPage.value++;
+    if (currentPage.value < totalPages.value) { // Kiểm tra nếu chưa phải trang cuối
+        currentPage.value++; // Tăng giá trị trang hiện tại lên 1
     }
 };
 
+// Quay lại trang trước
 const prevPage = () => {
-    if (currentPage.value > 1) {
-        currentPage.value--;
+    if (currentPage.value > 1) { // Kiểm tra nếu không phải trang đầu tiên
+        currentPage.value--; // Giảm giá trị trang hiện tại xuống 1
     }
 };
 
-const showImage = ref(true);
+// Hiển thị và chuyển đổi hình ảnh sản phẩm
+const showImage = ref(true); // Biến kiểm soát trạng thái hiển thị hình ảnh (true: hiện, false: ẩn)
 
+// Hàm thay đổi hình ảnh được hiển thị
 const changeImage = (newImage) => {
-    if (newImage !== selectedImage.value) {
-        showImage.value = false;
+    if (newImage !== selectedImage.value) { // Nếu hình ảnh mới khác hình ảnh hiện tại
+        showImage.value = false; // Ẩn hình ảnh hiện tại để tạo hiệu ứng chuyển đổi
 
         setTimeout(() => {
-            selectedImage.value = newImage;
-            showImage.value = true;
-        }, 200);
+            selectedImage.value = newImage; // Cập nhật hình ảnh được chọn
+            showImage.value = true; // Hiển thị hình ảnh mới
+        }, 200); // Thời gian tạo hiệu ứng chuyển đổi là 200ms
     }
 };
 
@@ -176,17 +212,36 @@ function handleDisabledClick() {
     }, 3000);
 }
 
-onMounted(() => {
+const totalQuality = computed(() => {
+    if (!comments.value.length) return 0;
+    const total = comments.value.reduce((sum, comment) => sum + (comment.ChatLuong || 0), 0); // Tính tổng điểm
+    const average = total / comments.value.length;
+    return average.toFixed(1);
+});
+
+const selectedStar = ref(6);
+const selected = (item) => {
+    return selectedStar.value = item;
+}
+
+const chooseFeedBackWithStar = computed(() => {
+    return paginatedComments.value.filter(comment => {
+        const chooseStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
+        return chooseStar;
+    });
+})
+
+onMounted(async () => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
-    fetchProduct(idSanPham);
+    await fetchProduct(idSanPham);
     fetchRelatedProducts();
     fetchFeedBacks();
     window.scrollTo(0, 0);
 })
 
-watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
+watch(async () => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
     if (newIdSanPham) {
-        fetchProduct(idSanPham);
+        fetchProduct(newIdSanPham);
         fetchRelatedProducts();
         fetchFeedBacks();
         window.scrollTo(0, 0);
@@ -243,7 +298,8 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
                         <li class="list-disc">Phân phối bởi SOTSU-SUNRISE.</li>
                     </ul>
-                    <router-link v-if="status === 'Đang bán' && quantity > 0" :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
+                    <router-link v-if="status === 'Đang bán' && quantity > 0"
+                        :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
                         class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>{{
                             formatCurrency(price) }}
@@ -252,7 +308,8 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                     </router-link>
                     <router-link to="" v-else-if="status === 'Ngừng kinh doanh'" @click.prevent="handleDisabledClick"
                         class="bg-gray-400 px-5 py-3 text-center text-white transition-all duration-300 hover:bg-gray-600">
-                        <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Sản phẩm hiện tại đã ngừng kinh doanh</p>
+                        <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Sản phẩm hiện tại đã ngừng kinh
+                            doanh</p>
                         <p class="text-[12px] lg:text-[14px]">Chọn sản phẩm khác nhé</p>
                     </router-link>
                     <router-link to="" v-else-if="quantity === 0"
@@ -336,53 +393,59 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                 <div class="bg-[#242424] py-4 px-4 lg:px-[40px] my-6 [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div class="flex lg:flex-row flex-col gap-5 items-center justify-center lg:justify-between">
                         <div class="flex flex-col gap-2">
-                            <p class="text-white text-[24px]"><span class="text-[30px]">4.8 </span>trên 5</p>
+                            <p class="text-white text-[24px]"><span class="text-[30px]">{{ totalQuality }} </span> trên
+                                5</p>
                             <div class="flex gap-2">
                                 <i v-for="star in 5" :key="star" class="fa-solid fa-star text-[#FFD700]"></i>
                             </div>
                         </div>
                         <div class="flex gap-4 justify-center flex-wrap">
-                            <button
+                            <button @click.prevent="selected(6)"
                                 class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Tất
                                 cả</button>
-                            <button
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">5
-                                sao</button>
-                            <button
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">4
-                                sao</button>
-                            <button
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">3
-                                sao</button>
-                            <button
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">2
-                                sao</button>
-                            <button
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">1
+                            <button v-for="(star, index) in 5" :key="index" @click.prevent="selected(star)"
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">{{
+                                    star }}
                                 sao</button>
                         </div>
                     </div>
                     <hr class="my-4">
-                    <div class="flex flex-col w-full">
-                        <div v-for="comment in paginatedComments" :key="comment.id"
+                    <div class="flex flex-col w-full" v-if="chooseFeedBackWithStar.length > 0">
+                        <div v-for="comment in chooseFeedBackWithStar" :key="comment.id"
                             class="flex py-4 border-b flex-col gap-2 w-full">
-                            <div class="flex gap-4 w-full">
-                                <img :src="`/src/assets/img/${comment.HinhAnhKhachHang}`" class="w-[60px] rounded-full object-cover" alt="">
-                                <div class="">
-                                    <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
-                                    <p class="text-white text-[14px] mb-1">{{ formatDate(comment.NgayDang) }}</p>
-                                    <div class="flex gap-1">
-                                        <i v-for="star in comment.ChatLuong" :key="star"
-                                            class="fa-solid fa-star text-[#FFD700] text-[10px]"></i>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-4 w-full">
+                                    <img :src="`/src/assets/img/${comment.HinhAnhKhachHang}`"
+                                        class="w-[60px] rounded-full object-cover" alt="">
+                                    <div class="">
+                                        <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
+                                        <p class="text-white text-[14px] mb-1">{{ formatDate(comment.NgayDang) }}</p>
+                                        <div class="flex gap-1">
+                                            <i v-for="star in 5" :key="star" :class="{
+                                                'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
+                                                'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
+                                            }"></i>
+                                        </div>
                                     </div>
                                 </div>
+                                <button type="submit" @click.prevent="deleteFeedback(comment.MaDanhGia)" :class="comment.MaKhachHang === idCustomer ? 'block' : 'hidden'"
+                                    class="inline-block font-medium bg-white py-2 px-4 mb-4 border-2 rounded-md transition-all duration-300 hover:border-[#DC143C] hover:text-[#DC143C] whitespace-nowrap"><i
+                                        class="fa-solid fa-trash"></i></button>
                             </div>
                             <div class="flex flex-col">
                                 <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
                                 <div class="flex gap-4">
-                                    <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index" :src="`/src/assets/img_feedback/${img}`" class="w-[80px] lg:w-[100px]" alt="">
+                                    <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
+                                        :src="`/src/assets/img_feedback/${img}`" class="w-[80px] lg:w-[100px]" alt="">
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div v-else class="flex justify-center items-center m-auto w-full">
+                        <div class="flex flex-col items-center justify-center gap-3">
+                            <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại
+                                không có đánh giá nào!</p>
+                            <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
                         </div>
                     </div>
                     <div class="flex justify-center items-center gap-4 mt-4">
@@ -406,7 +469,7 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
                         :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                        notification.message }}</p>
+                            notification.message }}</p>
                 </div>
             </div>
         </transition>
