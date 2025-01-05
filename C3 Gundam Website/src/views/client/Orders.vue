@@ -79,10 +79,9 @@ const initializePayPalButton = () => {
         },
         onApprove: async (data, actions) => {
             const order = await actions.order.capture();
-            console.log('Thanh toán thành công:', order);
-
             // Sau khi thanh toán thành công, gửi dữ liệu đặt hàng
             await addOrders();
+            console.log('Thanh toán thành công:', order);
         },
         onError: (err) => {
             console.error('Lỗi khi thanh toán PayPal:', err);

@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const paypal = require('@paypal/checkout-server-sdk');
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +19,10 @@ mongoose
     console.log("Connected to MongoDB");
   })
   .catch((err) => console.log(err));
+
+// Thiết lập PayPal client  
+const environment = new paypal.core.SandboxEnvironment('AShJqcyTWgvzRR2HWrM29MpJ9MJLtIisWReNqNnzc38KtBx8we-iL0xhmJhXCK3h90BeLy6PWnRfasLv', 'EH97r0PPBN9vtj4j9-nNV5qos0GOiLcXiP-Z_SDEDXul2y6pOIUbQQ68krZGCYCy3vNR51OlWRt8SYA4');   
+const client = new paypal.core.PayPalHttpClient(environment); 
 
 const khachHangRoutes = require("./src/routes/customers");
 const adminRoutes = require("./src/routes/admins");
