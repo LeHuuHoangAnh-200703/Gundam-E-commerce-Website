@@ -33,7 +33,6 @@ const notification = ref({
 const tenKhachHang = ref(localStorage.getItem("TenKhachHang"));
 const emailKhachHang = ref(localStorage.getItem("Email"));
 const maKhachHang = ref(localStorage.getItem("MaKhachHang"));
-
 const images = ref([]);
 const nameProducts = ref('');
 const maSanPham = ref('');
@@ -41,6 +40,7 @@ const type = ref('');
 const price = ref(0);
 const quantity = ref(1);
 const totalPrice = ref(0);
+const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
 const fetchProduct = async (idProduct) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${idProduct}`);
@@ -57,6 +57,43 @@ const fetchProduct = async (idProduct) => {
 watch([price, quantity], () => {
     totalPrice.value = price.value * quantity.value;
 });
+
+const initializePayPalButton = () => {
+    if (typeof paypal === 'undefined') {
+        console.error('PayPal SDK chưa được tải.');
+        return;
+    }
+    const paypalButtonsContainer = document.getElementById('paypal-button-container');
+    if (paypalButtonsContainer) {
+        paypalButtonsContainer.innerHTML = '';  // Xóa nội dung cũ
+    }
+    paypal.Buttons({
+        createOrder: (data, actions) => {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: totalPrice.value.toFixed(2), // Tổng giá trị đơn hàng
+                    },
+                }],
+            });
+        },
+        onApprove: async (data, actions) => {
+            const order = await actions.order.capture();
+            console.log('Thanh toán thành công:', order);
+
+            // Sau khi thanh toán thành công, gửi dữ liệu đặt hàng
+            await addOrders();
+        },
+        onError: (err) => {
+            console.error('Lỗi khi thanh toán PayPal:', err);
+            notification.value = {
+                message: 'Đã xảy ra lỗi khi thanh toán qua PayPal!',
+                type: 'error',
+            };
+        },
+    }).render('#paypal-button-container'); // Render nút PayPal
+};
+
 const addOrders = async () => {
     errors.value = {};
     const phoneRegex = /^0[1-9][0-9]{8}$|^0[1-9]{1}[0-9]{9}$|^(0[1-9]{1}[0-9]{1})( ?|-)?(\\(0[1-9]{1}[0-9]{1}\\))?( ?|-)?[0-9]{3} ?[0-9]{3}$/
@@ -146,6 +183,15 @@ onMounted(() => {
     quantity.value = Number(soluong) || 1;
     fetchProduct(idProduct);
 })
+
+watch(() => formData.value.payment, (newPayment) => {
+    if (newPayment === 'Thanh toán qua Paypal') {
+        isPayPalReady.value = true;  // Hiển thị nút PayPal
+        initializePayPalButton();
+    } else {
+        isPayPalReady.value = false;  // Ẩn nút PayPal
+    }
+});
 </script>
 
 <template>
@@ -256,7 +302,7 @@ onMounted(() => {
                                                 <option class="text-[#333] cursor-pointer"
                                                     value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
                                                 <option class="text-[#333] cursor-pointer"
-                                                    value="Thanh toán qua ví Paypal">Thanh toán qua ví Paypal</option>
+                                                    value="Thanh toán qua Paypal">Thanh toán qua Paypal</option>
                                             </select>
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">{{
                                                 errors.payment }}</p>
@@ -265,8 +311,11 @@ onMounted(() => {
                                         <p class="text-white text-[16px] text-end">Tổng cộng: <span
                                                 class="text-[#FFD700]"> {{ formatCurrency(totalPrice) }} VNĐ</span></p>
                                         <button type="submit"
-                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-auto">Đặt
+                                            :class="(formData.payment === 'Thanh toán khi nhận hàng' || formData.payment === '') ? 'block' : 'hidden'"
+                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">Đặt
                                             hàng</button>
+                                        <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -287,7 +336,8 @@ onMounted(() => {
                     <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{ notification.message }}</p>
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                        notification.message }}</p>
                 </div>
             </div>
         </transition>
