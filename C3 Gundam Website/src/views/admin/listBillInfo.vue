@@ -12,7 +12,7 @@ import SideBar from "@/components/admin/SideBar.vue";
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
-                        <h1 class="font-bold text-[20px]">Quản lý chi tiết hóa đơn</h1>
+                        <h1 class="font-bold text-[20px] uppercase">Quản lý chi tiết hóa đơn</h1>
                     </div>
                     <div class="bg-white rounded-lg shadow-lg w-full lg:w-[70%] mx-auto p-4">
                         <form action="">

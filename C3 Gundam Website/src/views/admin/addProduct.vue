@@ -155,7 +155,7 @@ onMounted(() => {
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-120px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                        <h1 class="font-bold text-[20px]">Thêm sản phẩm</h1>
+                        <h1 class="font-bold text-[20px] uppercase">Thêm sản phẩm</h1>
                     </div>
                     <div class="bg-white rounded-lg shadow-lg w-full p-4">
                         <form @submit.prevent="addProduct" method="POST">

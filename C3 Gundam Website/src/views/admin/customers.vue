@@ -12,7 +12,7 @@ import SideBar from "@/components/admin/SideBar.vue";
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                        <h1 class="font-bold text-[20px]">Quản lý khách hàng</h1>
+                        <h1 class="font-bold text-[20px] uppercase">Quản lý khách hàng</h1>
                         <div class="flex justify-center flex-1 gap-2 max-w-xl">
                             <input type="text"
                                 class="items-center w-full p-3 bg-white border border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"

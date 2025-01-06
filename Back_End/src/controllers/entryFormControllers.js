@@ -15,11 +15,11 @@ exports.getEntryForm = async (req, res) => {
       MaPhieuNhap: req.params.maPN,
     });
     if (!entryForm) {
-      res.status(400).json({ message: "Phiếu nhập không tồn tại!" });
+      return res.status(400).json({ message: "Phiếu nhập không tồn tại!" });
     }
-    res.status(200).json(entryForm);
+    return res.status(200).json(entryForm);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 

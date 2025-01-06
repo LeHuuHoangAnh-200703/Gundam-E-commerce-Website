@@ -12,7 +12,7 @@ import SideBar from "@/components/admin/SideBar.vue";
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
-                        <h1 class="font-bold text-[20px]">Cập nhật thông tin</h1>
+                        <h1 class="font-bold text-[20px] uppercase">Cập nhật thông tin</h1>
                     </div>
                     <div class="relative flex flex-col gap-4 w-full overflow-auto max-h-[calc(100vh-150px)]">
                         <div class="flex-grow lg:px-24 p-4">

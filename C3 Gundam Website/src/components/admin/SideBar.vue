@@ -12,7 +12,7 @@ const sidebarMenu = [
     { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
     { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
-    { name: "Phiếu nhập", icon: "fa-solid fa-rectangle-list", path: "listEntryForms" },
+    { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
     { name: "Hóa đơn", icon: "fa-solid fa-scroll", path: "listBills" },
 ];
 

@@ -28,6 +28,7 @@ import editBill from "@/views/admin/editBill.vue";
 import listBillInfo from "@/views/admin/listBillInfo.vue";
 import listEntryForms from "@/views/admin/listEntryForms.vue";
 import editEntryForm from "@/views/admin/editEntryForm.vue";
+import inventory from "@/views/admin/inventory.vue";
 import listEntryFormInfo from "@/views/admin/listEntryFormInfo.vue";
 import discountCode from "@/views/admin/discountCode.vue";
 import addDiscountCode from "@/views/admin/addDiscountCode.vue";
@@ -178,6 +179,12 @@ const routes = [
         path: "/admin/listBillInfo",
         name: "List Bill Info",
         component: listBillInfo,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/inventoryLits",
+        name: "Inventory Lits",
+        component: inventory,
         meta: { requiresAuth: true },
     },
     {

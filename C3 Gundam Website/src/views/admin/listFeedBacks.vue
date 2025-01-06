@@ -69,7 +69,7 @@ onMounted(() => {
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
                 <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                    <h1 class="font-bold text-[20px]">Quản lý đánh giá</h1>
+                    <h1 class="font-bold text-[20px] uppercase">Quản lý đánh giá</h1>
                 </div>
                 <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
                     <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
