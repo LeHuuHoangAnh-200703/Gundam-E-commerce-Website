@@ -58,41 +58,6 @@ watch([price, quantity], () => {
     totalPrice.value = price.value * quantity.value;
 });
 
-const initializePayPalButton = () => {
-    if (typeof paypal === 'undefined') {
-        console.error('PayPal SDK chưa được tải.');
-        return;
-    }
-    const paypalButtonsContainer = document.getElementById('paypal-button-container');
-    if (paypalButtonsContainer) {
-        paypalButtonsContainer.innerHTML = '';  // Xóa nội dung cũ
-    }
-    paypal.Buttons({
-        createOrder: (data, actions) => {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: totalPrice.value.toFixed(2), // Tổng giá trị đơn hàng
-                    },
-                }],
-            });
-        },
-        onApprove: async (data, actions) => {
-            const order = await actions.order.capture();
-            // Sau khi thanh toán thành công, gửi dữ liệu đặt hàng
-            await addOrders();
-            console.log('Thanh toán thành công:', order);
-        },
-        onError: (err) => {
-            console.error('Lỗi khi thanh toán PayPal:', err);
-            notification.value = {
-                message: 'Đã xảy ra lỗi khi thanh toán qua PayPal!',
-                type: 'error',
-            };
-        },
-    }).render('#paypal-button-container'); // Render nút PayPal
-};
-
 const addOrders = async () => {
     errors.value = {};
     const phoneRegex = /^0[1-9][0-9]{8}$|^0[1-9]{1}[0-9]{9}$|^(0[1-9]{1}[0-9]{1})( ?|-)?(\\(0[1-9]{1}[0-9]{1}\\))?( ?|-)?[0-9]{3} ?[0-9]{3}$/
@@ -124,11 +89,22 @@ const addOrders = async () => {
     }
 
     if (Object.keys(errors.value).length > 0) {
+        notification.value = {
+            message: "Vui lòng kiểm tra lại thông tin.",
+            type: "error",
+        };
         return;
     }
 
-    const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
-    if (!confirmUpdate) return;
+    if (formData.value.payment !== 'Thanh toán qua Paypal') {
+        const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
+        if (!confirmUpdate) return;
+    }
+
+    let trangThaiThanhToan = 'Khi nhận được hàng';
+    if (formData.value.payment === 'Thanh toán qua Paypal') {
+        trangThaiThanhToan = 'Đã thanh toán qua PayPal';
+    }
 
     try {
         const dataToSend = {
@@ -149,7 +125,8 @@ const addOrders = async () => {
             HinhThucThanhToan: formData.value.payment,
             TongDon: totalPrice.value,
             NgayDatHang: new Date(),
-            GhiChu: formData.value.description || 'Không có ghi chú'
+            GhiChu: formData.value.description || 'Không có ghi chú',
+            TrangThaiThanhToan: trangThaiThanhToan,
         }
         console.log("Dữ liệu gửi đi:", dataToSend);
 
@@ -171,6 +148,60 @@ const addOrders = async () => {
         notification.value.message = '';
     }, 3000);
 }
+
+const initializePayPalButton = () => {
+    if (typeof paypal === 'undefined') {
+        console.error('PayPal SDK chưa được tải.');
+        return;
+    }
+    const paypalButtonsContainer = document.getElementById('paypal-button-container');
+    if (paypalButtonsContainer) {
+        paypalButtonsContainer.innerHTML = '';  // Xóa nội dung cũ
+    }
+    const vndToUsdRate = 24000; // Tỷ giá cố định (Ví dụ: 1 USD = 24,000 VND)
+    paypal.Buttons({
+        createOrder: (data, actions) => {
+            const usdPrice = (totalPrice.value / vndToUsdRate).toFixed(2); // Chuyển đổi VND sang USD
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: usdPrice, // Giá trị đã chuyển đổi
+                        currency_code: 'USD' // Đơn vị tiền tệ là USD
+                    },
+                }],
+            });
+        },
+        onApprove: async (data, actions) => {
+            try {
+                const order = await actions.order.capture();
+                await addOrders();
+
+                if (notification.value.type === 'success') {
+                    notification.value = {
+                        message: 'Thanh toán qua PayPal và đặt hàng thành công!',
+                        type: 'success',
+                    };
+                }
+            } catch (error) {
+                console.error('Lỗi khi xử lý đơn hàng sau thanh toán PayPal:', error);
+                notification.value = {
+                    message: 'Thanh toán thành công nhưng không thể lưu đơn hàng!',
+                    type: 'error',
+                };
+            }
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 3000);
+        },
+        onError: (err) => {
+            console.error('Lỗi khi thanh toán PayPal:', err);
+            notification.value = {
+                message: 'Đã xảy ra lỗi khi thanh toán qua PayPal!',
+                type: 'error',
+            };
+        },
+    }).render('#paypal-button-container');
+};
 
 function formatCurrency(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -196,7 +227,7 @@ watch(() => formData.value.payment, (newPayment) => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header />
-        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center">
+        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center mb-20">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
@@ -336,7 +367,7 @@ watch(() => formData.value.payment, (newPayment) => {
                         class="w-[50px]" alt="">
                     <p class="text-[16px] font-semibold"
                         :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                        notification.message }}</p>
+                            notification.message }}</p>
                 </div>
             </div>
         </transition>

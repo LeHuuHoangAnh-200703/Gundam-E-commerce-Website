@@ -20,6 +20,7 @@ const orderSchema = new mongoose.Schema({
     TongDon: Number,
     GhiChu: String,
     NgayDatHang: Date,
+    TrangThaiThanhToan: String,
     TrangThaiDon: { type: String, enum: ['Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Đã nhận được hàng', 'Đã giao thành công'], default: 'Đang chờ xác nhận' },
 });
 

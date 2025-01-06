@@ -134,7 +134,6 @@ const paginatedProducts = computed(() => {
     // Lấy danh sách sản phẩm từ chỉ số `start` đến chỉ số `start + itemsPerPage` (không bao gồm `start + itemsPerPage`)
 });
 
-
 const nextPageProducts = () => {
     if (indexPage.value < totalPageProducts.value) {
         indexPage.value++;
@@ -146,7 +145,6 @@ const prevPageProducts = () => {
         indexPage.value--;
     }
 };
-
 
 // Đánh giá
 const currentPage = ref(1);

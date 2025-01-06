@@ -74,7 +74,7 @@ onMounted(() => {
                 <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
                     <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
                         <div class="flex flex-col gap-2">
-                            <p class="text-[24px] font-semibold"><span class="text-[30px]">4.8 </span>trên 5 <i
+                            <p class="text-[24px] font-semibold"><span class="text-[30px]">{{ totalQuality }}</span> trên 5 <i
                                     class="fa-solid fa-star text-[#FFD700]"></i></p>
                         </div>
                         <div class="flex flex-col gap-2">
@@ -135,8 +135,10 @@ onMounted(() => {
                                     <div class="">
                                         <p class="text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
                                         <div class="flex gap-1 my-1">
-                                            <i v-for="star in 5" :key="star"
-                                                class="fa-solid fa-star text-[#FFD700] text-[10px]"></i>
+                                            <i v-for="star in 5" :key="star" :class="{
+                                                'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
+                                                'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
+                                            }"></i>
                                         </div>
                                         <p class="text-[12px] font-semibold mb-1">{{ formatDate(comment.NgayDang) }}</p>
                                     </div>

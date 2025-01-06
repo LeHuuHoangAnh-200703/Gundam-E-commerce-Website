@@ -172,13 +172,13 @@ onMounted(() => {
                         <h1 class="text-[16px] font-semibold text-white">Thông tin nhận hàng</h1>
                         <div class="flex lg:flex-row flex-col justify-between">
                             <div>
-                                <p class="text-white text-[14px]">Mã khách hàng: {{ order.MaKhachHang }}</p>
                                 <p class="text-white text-[14px]">Họ tên: {{ order.TenKhachHang }}</p>
                                 <p class="text-white text-[14px]">Điện thoại: {{ order.DienThoai }}</p>
                                 <p class="text-white text-[14px]">Điạ chỉ: {{ order.DiaChiNhanHang }}</p>
+                                <p class="text-white text-[14px]">Email: {{ order.Email }}</p>
                             </div>
                             <div>
-                                <p class="text-white text-[14px]">Email: {{ order.Email }}</p>
+                                <p class="text-white text-[14px]">Trạng thái: {{ order.TrangThaiThanhToan }}</p>
                                 <p class="text-white text-[14px]">Mã giảm giá: {{ order.MaGiamGia === "" ? "Không sử dụng" : order.MaGiamGia }}</p>
                                 <p class="text-white text-[14px]">Hình thức thanh toán: {{ order.HinhThucThanhToan }}
                                 </p>
