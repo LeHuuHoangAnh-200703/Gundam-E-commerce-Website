@@ -1,5 +1,5 @@
 const Product = require("../models/productModels");
-const EntryFormInfo = require("../models/entryFormInfoModels");
+const Inventory = require("../models/inventoryModels");
 const path = require("path");
 const multer = require("multer");
 
@@ -19,67 +19,59 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 exports.getAllProducts = async (req, res) => {
-  try {  
-    // Bước 1: Lấy tất cả sản phẩm  
-    const products = await Product.find();  
+  try {
+    // Lấy tất cả sản phẩm từ bảng Product
+    const products = await Product.find();
 
-    // Bước 2: Lấy số lượng từ chi tiết phiếu nhập  
-    const quantities = await EntryFormInfo.aggregate([  
-      { $group: { _id: "$MaSanPham", totalQuantity: { $sum: "$SoLuong" } } }  
-    ]);  
+    // Lấy tất cả dữ liệu tồn kho từ bảng Inventory
+    const inventories = await Inventory.find();
 
-    // Bước 3: Tạo map số lượng
-    const quantityMap = {};  
-    quantities.forEach(item => {  
-      quantityMap[item._id.toString()] = item.totalQuantity;  
-    });  
+    // Tạo một Map để ánh xạ Mã Sản Phẩm -> Số lượng tồn kho
+    const inventoryMap = {};
+    inventories.forEach(inventory => {
+      inventoryMap[inventory.MaSanPham.toString()] = inventory.SoLuongTon;
+    });
 
-    // Bước 4: Kết hợp số lượng vào sản phẩm  
+    // Kết hợp dữ liệu tồn kho với danh sách sản phẩm
     const result = products.map(product => {
-      const productId = product.MaSanPham?.toString(); // Chuyển mã sản phẩm thành chuỗi để so sánh
+      const productId = product.MaSanPham?.toString(); // Lấy mã sản phẩm để ánh xạ
       return {
-        ...product._doc,
-        SoLuong: quantityMap[productId] || 0 // Nếu không có số lượng, gán mặc định là 0
+        ...product._doc, // Giữ nguyên dữ liệu sản phẩm
+        SoLuong: inventoryMap[productId] || 0, // Thêm số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
       };
-    });  
+    });
 
-    res.status(200).json(result);  
-  } catch (err) {  
-    res.status(500).json({ message: err.message });  
-  }  
+    // Trả về kết quả
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
   
 
-exports.getProduct = async (req, res) => {  
-  try {  
-    const product = await Product.findOne({ MaSanPham: req.params.maSanPham });  
-    
-    if (!product) {  
-      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });  
-    }  
+exports.getProduct = async (req, res) => {
+  try {
+    // Lấy thông tin sản phẩm từ bảng Product
+    const product = await Product.findOne({ MaSanPham: req.params.maSanPham });
 
-    // Lấy vé đã nhập vào database  
-    const quantities = await EntryFormInfo.aggregate([  
-      { $match: { MaSanPham: req.params.maSanPham } }, // Lọc theo sản phẩm  
-      { $group: { _id: "$MaSanPham", totalQuantity: { $sum: "$SoLuong" } } }  
-    ]);  
+    if (!product) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+    }
 
-    // Tạo map số lượng  
-    const quantityMap = {};  
-    quantities.forEach(item => {  
-      quantityMap[item._id] = item.totalQuantity;  
-    });  
+    // Lấy thông tin tồn kho từ bảng Inventory
+    const inventory = await Inventory.findOne({ MaSanPham: req.params.maSanPham });
 
-    // Kết hợp số lượng vào sản phẩm  
-    const result = {  
-      ...product._doc,  
-      SoLuong: quantityMap[product.MaSanPham] || 0
-    };  
+    // Kết hợp dữ liệu tồn kho với thông tin sản phẩm
+    const result = {
+      ...product._doc, // Giữ nguyên thông tin sản phẩm
+      SoLuong: inventory ? inventory.SoLuongTon : 0, // Lấy số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
+    };
 
-    return res.status(200).json(result);  
-  } catch (err) {  
-    return res.status(500).json({ message: err.message });  
-  }  
+    // Trả về kết quả
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 exports.createProduct = async (req, res) => {

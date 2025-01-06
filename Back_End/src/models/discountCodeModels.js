@@ -9,6 +9,7 @@ const discountCodeSchema = new mongoose.Schema({
     SoLanSuDung: Number,
     NgayHetHan: Date,
     MaGiamGia: String,
+    NgayTao: Date,
 });
 
 function generateIdMaGiamGia() {  

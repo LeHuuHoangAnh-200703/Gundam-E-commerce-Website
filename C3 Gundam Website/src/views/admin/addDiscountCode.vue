@@ -94,6 +94,7 @@ const addDiscountCode = async () => {
             SoLanSuDung: formData.value.numberTimeUsed,
             NgayHetHan: formData.value.expirationDate,
             MaGiamGia: formData.value.discountCode,
+            NgayTao: new Date(),
         }
 
         if (formData.value.percentReduction) {

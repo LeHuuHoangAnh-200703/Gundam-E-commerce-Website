@@ -1,7 +1,44 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import axios from 'axios';
+
+const listCustomers = ref([]);
+const searchValue = ref('');
+const fetchCustomers = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/khachhang');
+        listCustomers.value = response.data.map(customer => {
+            return {
+                ...customer,
+                NgayTao: new Date(customer.NgayTao)
+            }
+        })
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+
+const findNameCustomers = computed(() => {
+    if (!searchValue.value) {
+        return listCustomers.value;
+    }
+    return listCustomers.value.filter(customer => {
+        return customer.TenKhachHang.includes(searchValue.value);
+    })
+})
+
+const formatDate = (date) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
+    const formattedDate = date.toLocaleDateString('vi-VN', options);
+
+    return formattedDate;
+};
+
+onMounted(() => {
+    fetchCustomers();
+})
 </script>
 
 <template>
@@ -13,41 +50,32 @@ import SideBar from "@/components/admin/SideBar.vue";
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý khách hàng</h1>
-                        <div class="flex justify-center flex-1 gap-2 max-w-xl">
-                            <input type="text"
-                                class="items-center w-full p-3 bg-white border border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                        <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
+                            <input type="text" v-model="searchValue"
+                                class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
                                 placeholder="Tìm kiếm khách hàng theo tên ..." />
-                            <button
-                                class="font-bold text-[12px] bg-[#DC143C] text-white px-4 py-2 rounded-md whitespace-nowrap">
-                                Tìm kiếm
-                            </button>
+                            <i class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
                         </div>
                     </div>
                     <div
-                        class="shadow-lg rounded-lg border-2 border-gray-300">
+                        class="shadow-lg border-2 border-gray-300">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">
                                 <tr>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">STT</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã khách hàng</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên khách hàng</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Email</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày tham gia</th>
                                 </tr>
                             </thead>
                             <tbody class="w-full">
-                                <tr class="border-t border-slate-500">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">SP3240</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        1.230.000 VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">RG
-                                    </td>
-                                    <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <form>
-                                            <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
-                                                    class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </td>
+                                <tr class="border-t border-slate-500" v-for="(customer, index) in findNameCustomers" :key="index">
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ index + 1 }}</td>
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ customer.MaKhachHang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ customer.TenKhachHang }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ customer.Email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ formatDate(customer.NgayTao) }}</td>
                                 </tr>
                             </tbody>
                         </table>

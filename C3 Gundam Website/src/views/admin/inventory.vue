@@ -64,7 +64,7 @@ onMounted (() => {
                             </thead>
                             <tbody class="w-full">
                                 <tr class="border-t border-slate-500" v-for="(inventory, index) in inventoryLists" :key="index">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ index+1 }}</td>
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ index + 1 }}</td>
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ inventory.MaSanPham }}</td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">

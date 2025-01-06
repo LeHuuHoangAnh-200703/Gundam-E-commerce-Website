@@ -1,6 +1,6 @@
 const Order = require("../models/orderModels");
 const DiscountCode = require("../models/discountCodeModels");
-
+const Inventory = require("../models/inventoryModels");
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find();
@@ -38,9 +38,14 @@ exports.getOrderById = async (req, res) => {
 }
 
 exports.createOrder = async (req, res) => {
-    const { MaGiamGia, TongDon } = req.body;
+    let { MaGiamGia, TongDon, SanPhamDaMua } = req.body;
     let finalPrice = TongDon;
     try {
+        // Xử lý nếu SanPhamDaMua là object
+        if (SanPhamDaMua && !Array.isArray(SanPhamDaMua)) {
+            SanPhamDaMua = [SanPhamDaMua];
+        }
+
         if (MaGiamGia) {
             const discount = await DiscountCode.findOne({ MaGiamGia: MaGiamGia });
             if (!discount) {
@@ -78,6 +83,20 @@ exports.createOrder = async (req, res) => {
             }
         }
 
+        for (const sp of SanPhamDaMua) {
+            const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham});
+            if (!inventory) {
+                return res.status(400).json({ message: `Sản phẩm không tồn tại trong kho.` });
+            }
+
+            if (inventory.SoLuongTon < sp.SoLuong) {
+                return res.status(400).json({ message: `Số lượng sản phẩm không đủ.` });
+            }
+
+            inventory.SoLuongTon -= sp.SoLuong;
+            await inventory.save();
+        }
+
         const order = new Order({ ...req.body, TongDon: finalPrice });
         await order.save();
         res.status(200).json(order);
@@ -108,6 +127,15 @@ exports.deleteOrder = async (req, res) => {
         const order = await Order.findOneAndDelete({
             MaDonHang: maDonHang,
         });
+
+        for (const sp of order.SanPhamDaMua) {
+            const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
+            if (inventory) {
+                inventory.SoLuongTon += sp.SoLuong;
+                await inventory.save();
+            }
+        }
+
         if (!order) {
             return res.status(404).json({ message: "Đơn hàng không tồn tại." });
         }

@@ -1,10 +1,29 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
 
 const listProducts = ref([]);
+const types = ref([
+    {
+        name: "Tất cả",
+        type: "All",
+    },
+    {
+        name: "RG",
+        type: "RG",
+    },
+    {
+        name: "MG",
+        type: "MG",
+    },
+    {
+        name: "PG",
+        type: "PG",
+    },
+]);
+
 const fetchProducts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/sanpham');
@@ -24,7 +43,7 @@ const updateStatus = async (maSanPham, tenSanPham) => {
     if (!confirmUpdate) return;
     try {
         const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`);
-        
+
         const notificationData = {
             ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
             NguoiChinhSua: TenAdmin,
@@ -33,11 +52,23 @@ const updateStatus = async (maSanPham, tenSanPham) => {
         };
 
         await axios.post('http://localhost:3000/api/thongbao', notificationData);
-        
+
     } catch (error) {
         console.error('Error updating order status:', error);
     }
 };
+
+const selectedType = ref('All');
+const selected = async (type) => {
+    return selectedType.value = type;
+}
+
+const findProducts = computed(() => {
+    return listProducts.value.filter(product => {
+        const chooseType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
+        return chooseType;
+    })
+})
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -57,18 +88,11 @@ onMounted(() => {
                 <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý sản phẩm</h1>
-                        <div class="flex justify-center flex-1 gap-2 max-w-xl">
-                            <input type="text"
-                                class="items-center w-full p-3 bg-white border border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
-                                placeholder="Tìm kiếm sản phẩm theo tên ..." />
-                            <button
-                                class="font-bold text-[12px] bg-[#DC143C] text-white px-4 py-2 rounded-md whitespace-nowrap">
-                                Tìm kiếm
-                            </button>
+                        <div class="flex justify-center lg:justify-end items-center flex-wrap flex-1 gap-4">
+                            <button @click.prevent="selected(item.type)" class="bg-white px-8 py-3 shadow font-semibold border-2 border-s-transparent hover:border-[#003171] hover:text-[#003171] transition-all duration-300" v-for="(item, index) in types" :key="index">{{ item.name }}</button>
                         </div>
                     </div>
-                    <div
-                        class="shadow-lg rounded-lg border-2 border-gray-300 overflow-auto">
+                    <div class="shadow-lg border-2 border-gray-300 overflow-auto">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">
                                 <tr>
@@ -85,37 +109,46 @@ onMounted(() => {
                                 </tr>
                             </thead>
                             <tbody class="w-full">
-                                <tr class="border-t border-slate-500" v-for="(product, index) in listProducts" :key="index">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ product.MaSanPham }}</td>
+                                <tr class="border-t border-slate-500" v-for="(product, index) in findProducts"
+                                    :key="index">
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ product.MaSanPham }}
+                                    </td>
                                     <td>
-                                        <img class="w-[100px] py-2 max-w-full ml-7" :src="`/src/assets/img/${product.Images[0]}`"
-                                            alt="Hình ảnh sản phẩm" />
+                                        <img class="w-[100px] py-2 max-w-full ml-7"
+                                            :src="`/src/assets/img/${product.Images[0]}`" alt="Hình ảnh sản phẩm" />
                                     </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                        <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham }}</p>
+                                        <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham
+                                            }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatCurrency(product.GiaBan) }} VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ product.LoaiSanPham }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        product.LoaiSanPham }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ product.NhaCungCap }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        product.NhaCungCap }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"> {{ product.SoLuong }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                        {{ product.SoLuong }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ product.TrangThai }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        product.TrangThai }}
                                     </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                        <p class="overflow-hidden text-ellipsis text-[12px] whitespace-nowrap">{{ product.MoTa }}</p>
+                                        <p class="overflow-hidden text-ellipsis text-[12px] whitespace-nowrap">{{
+                                            product.MoTa }}</p>
                                     </td>
                                     <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
                                         <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
                                         <form @submit="updateStatus(product.MaSanPham, product.TenSanPham)">
-                                            <button type="submit" 
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i class="fa-solid fa-repeat"></i></button>
+                                            <button type="submit"
+                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
+                                                    class="fa-solid fa-repeat"></i></button>
                                         </form>
                                     </td>
                                 </tr>

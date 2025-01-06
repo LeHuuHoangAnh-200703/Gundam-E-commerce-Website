@@ -1,7 +1,53 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const staffLists = ref([]);
+const searchValue = ref('');
+const idAdmin = localStorage.getItem('MaAdmin');
+const notification = ref({
+    message: '',
+    type: ''
+});
+
+const fetchStaffs = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/admin');
+        staffLists.value = response.data.filter(staff =>
+            staff.MaAdmin !== idAdmin
+        ).map(staff => ({
+            ...staff,
+            NgayTao: new Date(staff.NgayTao)
+        }));
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+
+const findNameAdmin = computed(() => {
+    if (!searchValue.value) {
+        return staffLists.value;
+    }
+    return staffLists.value.filter(staff => {
+        const chooseName = staff.TenAdmin.toLowerCase().includes(searchValue.value.toLowerCase());
+        return chooseName;
+    })
+})
+
+const formatDate = (date) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
+    const formattedDate = date.toLocaleDateString('vi-VN', options);
+
+    return formattedDate;
+};
+
+onMounted(() => {
+    fetchStaffs();
+})
 </script>
 
 <template>
@@ -13,37 +59,40 @@ import SideBar from "@/components/admin/SideBar.vue";
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý nhân viên</h1>
-                        <div class="flex justify-center flex-1 gap-2 max-w-xl">
-                            <input type="text"
+                        <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
+                            <input type="text" v-model="searchValue"
                                 class="items-center w-full p-3 bg-white border border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
                                 placeholder="Tìm kiếm nhân viên theo tên ..." />
-                            <button
-                                class="font-bold text-[12px] bg-[#DC143C] text-white px-4 py-2 rounded-md whitespace-nowrap">
-                                Tìm kiếm
-                            </button>
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
                         </div>
                     </div>
-                    <div
-                        class="shadow-lg rounded-lg border-2 border-gray-300">
+                    <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">
                                 <tr>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">STT</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã nhân viên</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên nhân viên</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Email</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Chức vụ</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày Tạo</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                                 </tr>
                             </thead>
                             <tbody class="w-full">
-                                <tr class="border-t border-slate-500">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">SP3240</td>
+                                <tr class="border-t border-slate-500" v-for="(staff, index) in findNameAdmin"
+                                    :key="index">
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ index + 1 }}</td>
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ staff.MaAdmin }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        1.230.000 VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">RG
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">10
-                                    </td>
+                                        {{ staff.TenAdmin }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        staff.Email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        staff.ChucVu }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        formatDate(staff.NgayTao) }}</td>
                                     <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
                                         <a href="`/admin/editProduct/`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
