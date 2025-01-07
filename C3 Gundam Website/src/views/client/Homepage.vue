@@ -28,15 +28,18 @@ const listChoices = [
 ]
 
 const listProducts = ref([]);
-
+const notification = ref({
+    message: '',
+    type: ''
+});
 const searchQuery = ref("");
 const selectedType = ref("All");
 const selectTypeProducts = (type) => {
-  selectedType.value = type;
+    selectedType.value = type;
 };
 
 const handleSearch = (query) => {
-  searchQuery.value = query;
+    searchQuery.value = query;
 };
 
 const fectchProducts = async () => {
@@ -48,17 +51,38 @@ const fectchProducts = async () => {
             }
         })
         console.log(listProducts.value)
-    } catch(err) {
+    } catch (err) {
         console.log("error fetching: ", err);
     }
 }
 
+const addToCart = async (idProDuct) => {
+    try {
+        const response = await axios.post(`http://localhost:3000/api/giohang/${idProDuct}`);
+        notification.value = {
+            message: "Thêm giỏ hàng thành công!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.push('/carts');
+        }, 3000);
+    } catch (error) {
+        notification.value = {
+            message: error.response?.data?.message || "Thêm giỏ hàng thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
+
 const filteredProducts = computed(() => {
-  return listProducts.value.filter(product => {
-    const matchesType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
-    const matchesSearch = product.TenSanPham.toLowerCase().includes(searchQuery.value.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+    return listProducts.value.filter(product => {
+        const matchesType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
+        const matchesSearch = product.TenSanPham.toLowerCase().includes(searchQuery.value.toLowerCase());
+        return matchesType && matchesSearch;
+    });
 });
 
 function formatCurrency(value) {
@@ -111,20 +135,50 @@ onMounted(() => {
         <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
             <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link :to="`/details/${product.MaSanPham}`">
-                    <img :src="`/src/assets/img/${product.Images[0]}`" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
+                    <img :src="`/src/assets/img/${product.Images[0]}`"
+                        class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                 </router-link>
                 <router-link :to="`/details/${product.MaSanPham}`"
                     class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
-                    product.TenSanPham }}</router-link>
-                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan) }} VNĐ</span></p>
-                <button v-if="product.TrangThai === 'Đang bán'" class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
-                <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'" class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
-                <button v-else-if="product.SoLuong < 0" class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
+                        product.TenSanPham }}</router-link>
+                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan) }}
+                        VNĐ</span></p>
+                <button @click.prevent="addToCart(product.MaSanPham)" v-if="product.TrangThai === 'Đang bán'"
+                    class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
+                <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'"
+                    class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
+                <button v-else-if="product.SoLuong < 0"
+                    class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
             </div>
         </div>
         <Footer />
         <BackToTop />
+        <transition name="slide-fade" mode="out-in">
+            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
+                'border-[#DB3F4C]': notification.type === 'error',
+                'border-[#40E0D0]': notification.type === 'success',
+            }]">
+                <div class="flex gap-2 justify-center items-center">
+                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                        class="w-[50px]" alt="">
+                    <p class="text-[16px] font-semibold"
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                            notification.message }}</p>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
-<style></style>
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+</style>

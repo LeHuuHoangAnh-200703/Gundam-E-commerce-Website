@@ -127,7 +127,7 @@ onMounted(() => {
         <Header />
         <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
             <div class="flex flex-col gap-4 justify-center items-center mb-4">
-                <h1 class="text-center text-white text-[28px] font-semibold mt-6">Thông tin đơn hàng</h1>
+                <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Thông tin đơn hàng</h1>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                     <button v-for="option in options" :key="option" @click="selectTypeOrders(option.name)"
                         class="border-2 px-10 lg:px-5 py-3 bg-white flex justify-start items-center gap-4 rounded-md hover:bg-[#008B8B] hover:text-white transition-all duration-300">

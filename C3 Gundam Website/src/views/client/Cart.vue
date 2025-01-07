@@ -1,19 +1,49 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';  
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const carts = ref([]);
+const fetchCarts = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/giohang');
+        carts.value = response.data.map(cart => {
+            return {
+                ...cart
+            }
+        });
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+
+function formatCurrency(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+const totalPrice = computed(() => {
+    return carts.value.reduce((sum, cart) => {
+        return sum + cart.GiaBan * cart.SoLuong;
+    }, 0);
+});
+
+onMounted(() => {
+    fetchCarts();
+})
 </script>
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <h1 class="text-center text-white text-[28px] font-semibold mt-6">Giỏ hàng của bạn</h1>
-        <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
+        <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Giỏ hàng của bạn</h1>
+        <div v-if="carts.length > 0" class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] flex flex-col mb-7 overflow-hidden px-4 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
-                    <div
+                    <div v-for="(cart, index) in carts" :key="index"
                         class="flex flex-col items-center gap-5 lg:flex-row space-x-0 lg:space-x-[60px] py-3 lg:items-center lg:justify-between">
                         <div class="flex gap-4 items-center">
                             <div class="inline-flex items-center lg:mr-4">
@@ -32,29 +62,25 @@ import BackToTop from '@/components/client/BackToTop.vue';
                                     </span>
                                 </label>
                             </div>
-                            <img src="../../assets/img/RG01.jpg" class="w-[80px] h-auto" alt="">
+                            <img :src="`/src/assets/img/${cart.HinhAnh}`" class="w-[80px] h-auto" alt="">
                             <div class="flex flex-col gap-1 justify-center">
                                 <div class="w-48 lg:w-60 whitespace-nowrap text-ellipsis overflow-hidden">
-                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">RG
-                                        1/144 RX-0 UNICORN GUNDAM
-                                        (BILIBILI
-                                        10TH ANNIVERSARY VER)</p>
+                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{ cart.TenSanPham }}</p>
                                 </div>
-                                <p class="text-[14px] text-white font-medium">Loại sản phẩm: RG</p>
-                                <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                <p class="text-[14px] text-white font-medium">Loại sản phẩm: {{ cart.LoaiSanPham }}</p>
                             </div>
                         </div>
                         <div class="flex gap-2">
                             <button
                                 class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">-</button>
                             <input id="quantity" name="total_amount" value="1" style="appearance: textfield;"
-                                type="number" min="1"
+                                type="number" min="1" v-model="cart.SoLuong"
                                 class="text-lg bg-transparent border-gray-600 text-white border-2 rounded-md font-semibold h-10 w-16 text-center" />
                             <button
                                 class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">+</button>
                         </div>
                         <div class="flex gap-5 justify-between items-center">
-                            <p class="text-[14px] text-white font-medium">Tổng tiền: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                            <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">{{ formatCurrency(cart.DonGia) }} VNĐ</span></p>
                             <form action="" method="POST" class="flex items-center justify-end ml-auto">
                                 <button type="submit"
                                     class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">
@@ -64,18 +90,22 @@ import BackToTop from '@/components/client/BackToTop.vue';
                         </div>
                     </div>
                     <hr>
-                    <button type="submit"
-                        class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đặt
+                    <div class="flex justify-end items-end flex-col">
+                        <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                        <button type="submit"
+                        class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
                         hàng</button>
+                    </div>
+                    
                 </div>
             </div>
         </div>
-        <!-- <div class="flex justify-center items-center m-auto w-full">
+        <div v-else class="flex justify-center items-center m-auto w-full">
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm nào!</p>
                 <img src="../../assets/img/banner.png" class="w-[200px]" alt="">
             </div>
-        </div> -->
+        </div>
         <Footer />
         <BackToTop />
     </div>

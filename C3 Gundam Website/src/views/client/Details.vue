@@ -252,8 +252,6 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
         window.scrollTo(0, 0);
     }
 });
-
-console.log(Math.ceil(totalQuality) && !Number.isInteger(totalQuality))
 </script>
 
 <template>
