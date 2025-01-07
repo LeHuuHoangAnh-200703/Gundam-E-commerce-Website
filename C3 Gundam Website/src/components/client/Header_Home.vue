@@ -1,22 +1,23 @@
 <script setup>
+import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const userInfo = ref({
-  MaKhachHang: localStorage.getItem('MaKhachHang') || '',
+    MaKhachHang: localStorage.getItem('MaKhachHang') || '',
 });
 const isLoggedIn = ref(!userInfo.value.MaKhachHang);
 const logout = () => {
-  localStorage.removeItem('TenKhachHang');
-  localStorage.removeItem('MaKhachHang');
-  localStorage.removeItem('Email');
-  userInfo.value.TenKhachHang = '';
-  userInfo.value.Email = '';
-  userInfo.value.MaKhachHang = '';
-  isLoggedIn.value = false;
+    localStorage.removeItem('TenKhachHang');
+    localStorage.removeItem('MaKhachHang');
+    localStorage.removeItem('Email');
+    userInfo.value.TenKhachHang = '';
+    userInfo.value.Email = '';
+    userInfo.value.MaKhachHang = '';
+    isLoggedIn.value = false;
 
-  router.push('/login');
+    router.push('/login');
 };
 
 const orders_history = () => {
@@ -34,7 +35,7 @@ const profile = () => {
         router.push('/login');
     } else {
         router.push('/profile');
-    } 
+    }
 }
 
 const carts = () => {
@@ -43,13 +44,27 @@ const carts = () => {
         router.push('/login');
     } else {
         router.push('/carts');
-    } 
+    }
 }
 const emit = defineEmits();
 const searchQuery = ref("");
 const handleSearch = () => {
-  emit('search', searchQuery.value);
+    emit('search', searchQuery.value);
 };
+
+const cartLists = ref([]);
+const fetchCarts = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/giohang');
+        cartLists.value = response.data.map(cart => {
+            return {
+                ...cart,
+            }
+        })
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
 
 onMounted(() => {
     const openMenu = $(".open-menu");
@@ -65,10 +80,12 @@ onMounted(() => {
     })
 
     $(".search-input").on("keydown", (event) => {
-    if (event.key === "Enter") {
-      emit('search', searchQuery.value);
-    }
-  });
+        if (event.key === "Enter") {
+            emit('search', searchQuery.value);
+        }
+    });
+
+    fetchCarts();
 });
 </script>
 
@@ -76,7 +93,8 @@ onMounted(() => {
     <header>
         <div class="relative px-5 lg:px-10 py-4 flex justify-between items-center">
             <div class="flex gap-6">
-                <router-link to="/" class="font-bold text-white text-[24px] font-bungee"><span class="text-[#DB3F4C]">C3</span>
+                <router-link to="/" class="font-bold text-white text-[24px] font-bungee"><span
+                        class="text-[#DB3F4C]">C3</span>
                     GunDam</router-link>
                 <ul class="lg:flex hidden gap-5 items-center text-white font-semibold text-[16px]">
                     <li class="group"><router-link to="/">Trang chủ</router-link>
@@ -116,7 +134,7 @@ onMounted(() => {
                 <button @click.prevent="carts" class="relative">
                     <i class="fa-solid fa-cart-shopping text-white text-[24px]"></i>
                     <span
-                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">0</span>
+                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{ cartLists.length }}</span>
                 </button>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>
@@ -141,10 +159,12 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Lịch sử mua hàng</button></li>
+                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Lịch sử mua
+                        hàng</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
-                <li v-if="isLoggedIn" class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
+                <li v-if="isLoggedIn"
+                    class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>
                 <li v-else class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng xuất</router-link></li>

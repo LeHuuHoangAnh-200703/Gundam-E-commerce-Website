@@ -65,7 +65,7 @@ const addToCart = async (idProDuct) => {
         };
         setTimeout(() => {
             router.push('/carts');
-        }, 3000);
+        }, 1000);
     } catch (error) {
         notification.value = {
             message: error.response?.data?.message || "Thêm giỏ hàng thất bại!",

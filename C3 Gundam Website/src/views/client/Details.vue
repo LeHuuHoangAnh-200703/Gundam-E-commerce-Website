@@ -82,7 +82,6 @@ const fetchFeedBacks = async () => {
     }
 };
 
-
 const deleteFeedback = async (idDanhGia) => {
     const confirmUpdate = confirm('Bạn có chắc chắn muốn xóa đánh giá này?');
     if (!confirmUpdate) return;

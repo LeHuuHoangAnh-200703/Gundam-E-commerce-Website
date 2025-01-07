@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const router = useRouter();
 const userInfo = ref({
@@ -46,6 +47,20 @@ const carts = () => {
     } 
 }
 
+const cartLists = ref([]);
+const fetchCarts = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/giohang');
+        cartLists.value = response.data.map(cart => {
+            return {
+                ...cart,
+            }
+        })
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+
 onMounted(() => {
     const openMenu = $(".open-menu");
     const closeMenu = $(".close-menu");
@@ -58,6 +73,8 @@ onMounted(() => {
     closeMenu.click(() => {
         sideBar.animate({ left: "-100%" }, 400);
     })
+
+    fetchCarts();
 });
 </script>
 
@@ -98,7 +115,7 @@ onMounted(() => {
                 <button @click.prevent="carts" class="relative">
                     <i class="fa-solid fa-cart-shopping text-white text-[24px]"></i>
                     <span
-                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">0</span>
+                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{ cartLists.length }}</span>
                 </button>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>

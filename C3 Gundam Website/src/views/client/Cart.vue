@@ -2,12 +2,17 @@
 import { ref, onMounted, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
-import BackToTop from '@/components/client/BackToTop.vue';  
+import BackToTop from '@/components/client/BackToTop.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const carts = ref([]);
+const notification = ref({
+    message: '',
+    type: ''
+});
+
 const fetchCarts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/giohang');
@@ -21,9 +26,41 @@ const fetchCarts = async () => {
     }
 }
 
+const deleteCart = async (idGioHang) => {
+    try {
+        const response = await axios.delete(`http://localhost:3000/api/giohang/${idGioHang}`);
+        notification.value = {
+            message: "Xóa sản phẩm khỏi giỏ hàng thành công!",
+            type: "success",
+        };
+        setTimeout(() => {
+            router.replace('/carts');
+        }, 1000);
+    } catch (error) {
+        notification.value = {
+            message: error.response?.data?.message || "Xóa sản phẩm khỏi giỏ hàng thất bại!",
+            type: "error",
+        };
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
+
 function formatCurrency(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
+
+const decreaseQuantity = (cart) => {
+    if (cart.SoLuong > 1) {
+        cart.SoLuong--;
+    }
+};
+
+const increaseQuantity = (cart) => {
+    cart.SoLuong++;
+};
+
 const totalPrice = computed(() => {
     return carts.value.reduce((sum, cart) => {
         return sum + cart.GiaBan * cart.SoLuong;
@@ -65,23 +102,25 @@ onMounted(() => {
                             <img :src="`/src/assets/img/${cart.HinhAnh}`" class="w-[80px] h-auto" alt="">
                             <div class="flex flex-col gap-1 justify-center">
                                 <div class="w-48 lg:w-60 whitespace-nowrap text-ellipsis overflow-hidden">
-                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{ cart.TenSanPham }}</p>
+                                    <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{
+                                        cart.TenSanPham }}</p>
                                 </div>
                                 <p class="text-[14px] text-white font-medium">Loại sản phẩm: {{ cart.LoaiSanPham }}</p>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button
+                            <button @click="decreaseQuantity(cart)"
                                 class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">-</button>
                             <input id="quantity" name="total_amount" value="1" style="appearance: textfield;"
                                 type="number" min="1" v-model="cart.SoLuong"
                                 class="text-lg bg-transparent border-gray-600 text-white border-2 rounded-md font-semibold h-10 w-16 text-center" />
-                            <button
+                            <button @click="increaseQuantity(cart)"
                                 class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">+</button>
                         </div>
                         <div class="flex gap-5 justify-between items-center">
-                            <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">{{ formatCurrency(cart.DonGia) }} VNĐ</span></p>
-                            <form action="" method="POST" class="flex items-center justify-end ml-auto">
+                            <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">{{
+                                formatCurrency(cart.DonGia * cart.SoLuong) }} VNĐ</span></p>
+                            <form @click="deleteCart(cart.MaGioHang)">
                                 <button type="submit"
                                     class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">
                                     <i class="fa-solid fa-trash"></i>
@@ -91,24 +130,50 @@ onMounted(() => {
                     </div>
                     <hr>
                     <div class="flex justify-end items-end flex-col">
-                        <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span class="text-[#FFD700]">2.350.000 VNĐ</span></p>
-                        <button type="submit"
-                        class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
-                        hàng</button>
+                        <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span
+                                class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                        <button type="submit" class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
+                            hàng</button>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
         <div v-else class="flex justify-center items-center m-auto w-full">
             <div class="flex flex-col items-center justify-center gap-3">
-                <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm nào!</p>
+                <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm
+                    nào!</p>
                 <img src="../../assets/img/banner.png" class="w-[200px]" alt="">
             </div>
         </div>
         <Footer />
         <BackToTop />
+        <transition name="slide-fade" mode="out-in">
+            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
+                'border-[#DB3F4C]': notification.type === 'error',
+                'border-[#40E0D0]': notification.type === 'success',
+            }]">
+                <div class="flex gap-2 justify-center items-center">
+                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                        class="w-[50px]" alt="">
+                    <p class="text-[16px] font-semibold"
+                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                            notification.message }}</p>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+</style>
