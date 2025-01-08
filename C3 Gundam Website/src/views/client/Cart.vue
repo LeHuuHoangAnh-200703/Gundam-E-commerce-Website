@@ -13,9 +13,9 @@ const notification = ref({
     type: ''
 });
 
-const fetchCarts = async () => {
+const fetchCarts = async (maKhachHang) => {
     try {
-        const response = await axios.get('http://localhost:3000/api/giohang');
+        const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
         carts.value = response.data.map(cart => {
             return {
                 ...cart
@@ -68,7 +68,8 @@ const totalPrice = computed(() => {
 });
 
 onMounted(() => {
-    fetchCarts();
+    const maKhachHang = localStorage.getItem("MaKhachHang");
+    fetchCarts(maKhachHang);
 })
 </script>
 

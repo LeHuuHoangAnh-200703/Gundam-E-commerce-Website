@@ -48,14 +48,14 @@ const carts = () => {
 }
 
 const cartLists = ref([]);
-const fetchCarts = async () => {
+const fetchCarts = async (maKhachHang) => {
     try {
-        const response = await axios.get('http://localhost:3000/api/giohang');
+        const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
         cartLists.value = response.data.map(cart => {
             return {
-                ...cart,
+                ...cart
             }
-        })
+        });
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -74,7 +74,8 @@ onMounted(() => {
         sideBar.animate({ left: "-100%" }, 400);
     })
 
-    fetchCarts();
+    const maKhachHang = localStorage.getItem("MaKhachHang");
+    fetchCarts(maKhachHang);
 });
 </script>
 

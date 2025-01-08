@@ -57,8 +57,19 @@ const fectchProducts = async () => {
 }
 
 const addToCart = async (idProDuct) => {
+    const maKhachHang = localStorage.getItem("MaKhachHang");
+    if (!maKhachHang) {
+        notification.value = {
+            message: "Bạn cần đăng nhập trước khi thêm sản phẩm vào giỏ hàng!",
+            type: "error",
+        };
+        router.push('/login');
+        return;
+    }
     try {
-        const response = await axios.post(`http://localhost:3000/api/giohang/${idProDuct}`);
+        const response = await axios.post(`http://localhost:3000/api/giohang/${idProDuct}`, {
+            MaKhachHang: maKhachHang,
+        });
         notification.value = {
             message: "Thêm giỏ hàng thành công!",
             type: "success",

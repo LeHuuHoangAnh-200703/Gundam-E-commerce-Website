@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const cartSchema = new mongoose.Schema({
     MaGioHang: String,
+    MaKhachHang: String,
     MaSanPham: String,
     TenSanPham: String,
     LoaiSanPham: String,
