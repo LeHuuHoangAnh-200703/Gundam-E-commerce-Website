@@ -134,8 +134,8 @@ onMounted(() => {
                                 <p class="text-[14px] font-semibold">{{ order.TrangThaiDon }}</p>
                             </div>
                             <hr>
-                            <div class="overflow-y-auto max-h-[250px] flex flex-col gap-4">
-                                <div class="flex gap-4 border-b-2 pb-4 mb-3 overflow-hidden"
+                            <div class="overflow-y-auto max-h-[300px] flex flex-col gap-4">
+                                <div class="flex gap-4 border-b-2 pb-4 mb-3 overflow-hidden items-start"
                                     v-for="(product, index) in order.SanPhamDaMua" :key="index">
                                     <img :src="`/src/assets/img/${product.HinhAnh}`" class="w-[100px]" alt="">
                                     <div class="flex flex-col gap-1 overflow-hidden">
@@ -183,7 +183,7 @@ onMounted(() => {
                                 </div>
                             </div>
                             <div class="flex justify-center lg:justify-end">
-                                <button @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
+                                <button :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'hidden' : 'block'" @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
                                     class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">{{
                                     order.TrangThaiDon }}</button>
                             </div>

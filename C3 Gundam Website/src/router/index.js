@@ -34,6 +34,7 @@ import discountCode from "@/views/admin/discountCode.vue";
 import addDiscountCode from "@/views/admin/addDiscountCode.vue";
 import editDiscountCode from "@/views/admin/editDiscountCode.vue";
 import notFound from "@/views/errors/notFound.vue";
+import OrderProducts from "@/views/client/OrderProducts.vue";
 
 const routes = [
     {
@@ -60,6 +61,11 @@ const routes = [
         path: "/orders/:maSanPham",
         name: "Orders",
         component: Orders,
+    },
+    {
+        path: "/orders",
+        name: "Order Products",
+        component: OrderProducts,
     },
     {
         path: "/carts",

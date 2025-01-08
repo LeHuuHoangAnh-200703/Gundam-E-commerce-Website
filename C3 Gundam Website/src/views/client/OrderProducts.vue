@@ -30,35 +30,13 @@ const notification = ref({
     type: ''
 });
 
-const listProducts = ref([]);
+const selectedProducts = ref([]);
 
 const tenKhachHang = ref(localStorage.getItem("TenKhachHang"));
 const emailKhachHang = ref(localStorage.getItem("Email"));
 const maKhachHang = ref(localStorage.getItem("MaKhachHang"));
-const images = ref([]);
-const nameProducts = ref('');
-const maSanPham = ref('');
-const type = ref('');
-const price = ref(0);
-const quantity = ref(1);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
-const fetchProduct = async (idProduct) => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/sanpham/${idProduct}`);
-        images.value = response.data.Images;
-        nameProducts.value = response.data.TenSanPham;
-        maSanPham.value = response.data.MaSanPham;
-        price.value = Number(response.data.GiaBan);
-        type.value = response.data.LoaiSanPham;
-    } catch (err) {
-        console.log("error fetching:", err);
-    }
-}
-
-watch([price, quantity], () => {
-    totalPrice.value = price.value * quantity.value;
-});
 
 const addOrders = async () => {
     errors.value = {};
@@ -109,20 +87,22 @@ const addOrders = async () => {
     }
 
     try {
+        const sanPhamDaMua = selectedProducts.value.map(product => ({
+            TenSanPham: product.TenSanPham,
+            MaSanPham: product.MaSanPham,
+            Gia: product.DonGia,
+            SoLuong: product.SoLuong,
+            LoaiSanPham: product.LoaiSanPham,
+            HinhAnh: product.HinhAnh,
+        }));
+
         const dataToSend = {
             MaKhachHang: maKhachHang.value,
             TenKhachHang: tenKhachHang.value,
             Email: emailKhachHang.value,
             DienThoai: formData.value.phone,
             DiaChiNhanHang: formData.value.address,
-            SanPhamDaMua: {
-                TenSanPham: nameProducts.value,
-                MaSanPham: maSanPham.value,
-                Gia: price.value,
-                SoLuong: quantity.value,
-                LoaiSanPham: type.value,
-                HinhAnh: images.value[0]
-            },
+            SanPhamDaMua: sanPhamDaMua,
             MaGiamGia: formData.value.discountCode,
             HinhThucThanhToan: formData.value.payment,
             TongDon: totalPrice.value,
@@ -140,6 +120,7 @@ const addOrders = async () => {
         setTimeout(() => {
             router.push('/orders_history');
         }, 3000);
+        localStorage.removeItem("selectedProducts");
     } catch (error) {
         notification.value = {
             message: error.response?.data?.message || "Đặt hàng thất bại!",
@@ -210,11 +191,18 @@ function formatCurrency(value) {
 }
 
 onMounted(() => {
-    const idProduct = router.currentRoute.value.params.maSanPham;
-    const soluong = router.currentRoute.value.query.quantity;
-    quantity.value = Number(soluong) || 1;
-    fetchProduct(idProduct);
-})
+    const data = localStorage.getItem('selectedProducts');
+    if (data) {
+        selectedProducts.value = JSON.parse(data);
+    }
+    calculateTotalPrice();
+});
+
+const calculateTotalPrice = () => {
+    totalPrice.value = selectedProducts.value.reduce((sum, product) => {
+        return sum + product.DonGia * product.SoLuong;
+    }, 0);
+};
 
 watch(() => formData.value.payment, (newPayment) => {
     if (newPayment === 'Thanh toán qua Paypal') {
@@ -290,24 +278,24 @@ watch(() => formData.value.payment, (newPayment) => {
                                     <hr>
                                     <div class="flex flex-col gap-4 overflow-hidden">
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
-                                            <div class="flex gap-4 items-start">
-                                                <img :src="`/src/assets/img/${images[0]}`"
+                                            <div class="flex gap-4 items-start" v-for="(product, index) in selectedProducts" :key="index">
+                                                <img :src="`/src/assets/img/${product.HinhAnh}`"
                                                     class="w-[50px] lg:w-[80px] border-2" alt="">
                                                 <div class="overflow-hidden">
                                                     <div
                                                         class="w-52 lg:w-96 whitespace-nowrap text-ellipsis overflow-hidden">
                                                         <p
                                                             class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                                            {{ nameProducts }}</p>
+                                                            {{ product.TenSanPham }}</p>
                                                     </div>
                                                     <p class="text-white text-[14px]">Mã sản phẩm: <span
-                                                            class="text-[#FFD700]">{{ maSanPham }}</span></p>
+                                                            class="text-[#FFD700]">{{ product.MaSanPham }}</span></p>
 
                                                     <p class="text-white text-[14px]">Giá: <span
-                                                            class="text-[#FFD700]">{{ formatCurrency(price) }}
+                                                            class="text-[#FFD700]">{{ formatCurrency(product.DonGia) }}
                                                             VNĐ</span></p>
                                                     <p class="text-white text-[14px]">Số lượng: <span
-                                                            class="text-[#FFD700]">{{ quantity }}</span></p>
+                                                            class="text-[#FFD700]">{{ product.SoLuong }}</span></p>
                                                 </div>
                                             </div>
                                         </div>

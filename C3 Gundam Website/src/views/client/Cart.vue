@@ -18,7 +18,8 @@ const fetchCarts = async (maKhachHang) => {
         const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
         carts.value = response.data.map(cart => {
             return {
-                ...cart
+                ...cart,
+                isSelected: false
             }
         });
     } catch (err) {
@@ -67,6 +68,20 @@ const totalPrice = computed(() => {
     }, 0);
 });
 
+const goToOrderPage = () => {
+    const selectedProducts = carts.value.filter(cart => cart.isSelected);
+    if (selectedProducts.length === 0) {
+        notification.value = {
+            message: "Vui lòng chọn ít nhất một sản phẩm!",
+            type: "error",
+        };
+        setTimeout(() => notification.value.message = '', 3000);
+        return;
+    }
+    localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+    router.push('/orders');
+};
+
 onMounted(() => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
     fetchCarts(maKhachHang);
@@ -86,7 +101,7 @@ onMounted(() => {
                         <div class="flex gap-4 items-center">
                             <div class="inline-flex items-center lg:mr-4">
                                 <label class="flex items-center cursor-pointer relative">
-                                    <input type="checkbox"
+                                    <input type="checkbox" v-model="cart.isSelected"
                                         class="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-[#DB3F4C] checked:border-[#DB3F4C]"
                                         id="check2" />
                                     <span
@@ -133,7 +148,7 @@ onMounted(() => {
                     <div class="flex justify-end items-end flex-col">
                         <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span
                                 class="text-[#FFD700]">2.350.000 VNĐ</span></p>
-                        <button type="submit" class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
+                        <button @click.prevent="goToOrderPage" type="submit" class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
                             hàng</button>
                     </div>
 
