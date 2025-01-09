@@ -8,5 +8,6 @@ router.post("/", customersController.createCustomer);
 router.put("/:maKhachHang", customersController.upload, customersController.updateCustomer);
 router.delete("/:maKhachHang", customersController.deleteCustomer);
 router.post("/login", customersController.login);
+router.post("/thongtin", customersController.createInfoCustomer);
 
 module.exports = router;

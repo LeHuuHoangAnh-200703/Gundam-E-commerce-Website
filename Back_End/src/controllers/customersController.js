@@ -56,6 +56,16 @@ exports.createCustomer = async (req, res) => {
   }
 };
 
+exports.createInfoCustomer = async (req, res) => {
+  const customer = new Customer(req.body);
+  try {
+    await customer.save();
+    res.status(200).json(customer);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.updateCustomer = async (req, res) => {
   try {
     const customer = await Customer.findOne({

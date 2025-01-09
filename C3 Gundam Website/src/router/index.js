@@ -35,6 +35,7 @@ import addDiscountCode from "@/views/admin/addDiscountCode.vue";
 import editDiscountCode from "@/views/admin/editDiscountCode.vue";
 import notFound from "@/views/errors/notFound.vue";
 import OrderProducts from "@/views/client/OrderProducts.vue";
+import AddInfoOrder from "@/views/client/AddInfoOrder.vue";
 
 const routes = [
     {
@@ -81,6 +82,11 @@ const routes = [
         path: "/profile",
         name: "Profile",
         component: Profile,
+    },
+    {
+        path: "/addInfoOrder/:maKhachHang",
+        name: "AddInfoOrder",
+        component: AddInfoOrder,
     },
     {
         path: "/editProfile/:maKhachHang",

@@ -8,6 +8,10 @@ const customerSchema = new mongoose.Schema({
     MatKhau: String,
     Image: String,
     NgayTao: { type: Date, required: true },
+    DanhSachDiaChi: [{  
+        DienThoai: String,  
+        DiaChi: String,   
+    }],
 });
 
 function generateMaKhachHang() {  

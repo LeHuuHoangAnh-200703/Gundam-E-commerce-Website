@@ -227,9 +227,9 @@ watch(() => formData.value.payment, (newPayment) => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center mb-20">
+        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center flex-grow">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
