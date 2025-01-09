@@ -48,10 +48,6 @@ const deleteCart = async (idGioHang) => {
     }, 3000);
 }
 
-function formatCurrency(value) {
-    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
 const decreaseQuantity = (cart) => {
     if (cart.SoLuong > 1) {
         cart.SoLuong--;
@@ -61,12 +57,6 @@ const decreaseQuantity = (cart) => {
 const increaseQuantity = (cart) => {
     cart.SoLuong++;
 };
-
-const totalPrice = computed(() => {
-    return carts.value.reduce((sum, cart) => {
-        return sum + cart.GiaBan * cart.SoLuong;
-    }, 0);
-});
 
 const deleteSelectedCarts = async () => {
     // Lọc các sản phẩm đã được chọn (isSelected = true) và lấy danh sách ID của chúng
@@ -91,7 +81,6 @@ const deleteSelectedCarts = async () => {
     }
 };
 
-
 const goToOrderPage = async () => {
     const selectedProducts = carts.value.filter(cart => cart.isSelected);
     if (selectedProducts.length === 0) {
@@ -106,6 +95,18 @@ const goToOrderPage = async () => {
     await deleteSelectedCarts();
     router.push('/orders');
 };
+
+const totalPrice = computed(() => {
+    return carts.value
+        .filter(cart => cart.isSelected)
+        .reduce((sum, cart) => {
+            return sum + cart.DonGia * cart.SoLuong;
+        }, 0);
+});
+
+function formatCurrency(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
 onMounted(() => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
@@ -172,7 +173,7 @@ onMounted(() => {
                     <hr>
                     <div class="flex justify-end items-end flex-col">
                         <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span
-                                class="text-[#FFD700]">2.350.000 VNĐ</span></p>
+                                class="text-[#FFD700]">{{ formatCurrency(totalPrice) }} VNĐ</span></p>
                         <button @click.prevent="goToOrderPage" type="submit" class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
                             hàng</button>
                     </div>
