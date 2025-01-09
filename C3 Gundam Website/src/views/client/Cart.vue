@@ -68,7 +68,31 @@ const totalPrice = computed(() => {
     }, 0);
 });
 
-const goToOrderPage = () => {
+const deleteSelectedCarts = async () => {
+    // Lọc các sản phẩm đã được chọn (isSelected = true) và lấy danh sách ID của chúng
+    const selectedCartIds = carts.value.filter(cart => cart.isSelected).map(cart => cart.MaGioHang);
+    if (selectedCartIds.length === 0) {
+        notification.value = {
+            message: "Vui lòng chọn ít nhất một sản phẩm để xóa!",
+            type: "error",
+        };
+        setTimeout(() => notification.value.message = '', 3000);
+        return;
+    }
+
+    try {
+        // Dùng Promise.all để xóa tất cả các sản phẩm đã chọn cùng lúc
+        const deletePromises = selectedCartIds.map(id => axios.delete(`http://localhost:3000/api/giohang/${id}`));
+        await Promise.all(deletePromises);
+        carts.value = carts.value.filter(cart => !selectedCartIds.includes(cart.MaGioHang));
+
+    } catch (err) {
+        console.log("Error delete cart: ", err);
+    }
+};
+
+
+const goToOrderPage = async () => {
     const selectedProducts = carts.value.filter(cart => cart.isSelected);
     if (selectedProducts.length === 0) {
         notification.value = {
@@ -79,6 +103,7 @@ const goToOrderPage = () => {
         return;
     }
     localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+    await deleteSelectedCarts();
     router.push('/orders');
 };
 
