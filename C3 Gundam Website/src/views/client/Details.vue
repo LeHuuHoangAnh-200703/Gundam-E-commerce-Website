@@ -256,7 +256,7 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header />
-        <div class="relative my-5 m-5 lg:mx-[210px]">
+        <div class="relative my-5 m-5 lg:mx-[210px] xl:mx-[100px]">
             <p class="text-gray-300 font-semibold text-[13px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
                     }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">

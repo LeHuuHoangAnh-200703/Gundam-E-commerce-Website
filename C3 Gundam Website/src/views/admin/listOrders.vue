@@ -111,7 +111,7 @@ onMounted(() => {
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
                 <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                    <h1 class="font-bold text-[20px] uppercase">Quản lý đơn hàng</h1>
+                    <h1 class="font-bold text-[20px] xl:text-[16px] uppercase">Quản lý đơn hàng</h1>
                 </div>
                 <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
                     <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
@@ -119,19 +119,19 @@ onMounted(() => {
                             <p class="font-semibold text-[18px]">Điều chỉnh đơn hàng</p>
                             <button v-for="option in options" :key="option"
                                 @click.prevent="selectTypeOrders(option.name)"
-                                class="border-2 px-5 py-3 flex justify-start items-center gap-4 rounded-md hover:border-[#003171] hover:text-[#003171] transition-all duration-300">
+                                class="border-2 px-5 py-3 flex xl:text-[14px] justify-start items-center gap-4 rounded-md hover:border-[#003171] hover:text-[#003171] transition-all duration-300">
                                 <i :class="option.icon"></i> {{ option.name }}
                             </button>
                         </div>
                     </div>
                     <div v-if="filterOrders.length > 0"
-                        class="flex flex-col gap-8 w-full overflow-y-auto max-h-[calc(100vh-200px)]">
+                        class="flex flex-col gap-8 w-full overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
                         <div v-for="(order, index) in filterOrders" :key="index"
                             class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex flex-col gap-4">
                             <div class="flex flex-col lg:flex-row items-center justify-center lg:justify-between">
-                                <p class="text-[14px] font-semibold">Ngày đặt hàng: <span class="text-[#003171]">{{
+                                <p class="text-[14px] xl:text-[12px] font-semibold">Ngày đặt hàng: <span class="text-[#003171]">{{
                                         formatDate(order.NgayDatHang) }}</span></p>
-                                <p class="text-[14px] font-semibold">{{ order.TrangThaiDon }}</p>
+                                <p class="text-[14px] xl:text-[12px] font-semibold">{{ order.TrangThaiDon }}</p>
                             </div>
                             <hr>
                             <div class="overflow-y-auto max-h-[300px] flex flex-col gap-4">
@@ -141,15 +141,15 @@ onMounted(() => {
                                     <div class="flex flex-col gap-1 overflow-hidden">
                                         <div class="whitespace-nowrap text-ellipsis overflow-hidden">
                                             <p
-                                                class="text-[16px] overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                                                class="text-[16px] xl:text-[14px] overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                                                 {{ product.TenSanPham }}</p>
                                         </div>
-                                        <p class="text-[14px] font-semibold">Loại sản phẩm: <span
+                                        <p class="text-[14px] xl:text-[12px] font-semibold">Loại sản phẩm: <span
                                                 class="text-[#003171] font-medium">{{ product.LoaiSanPham }}</span></p>
-                                        <p class="text-[14px] font-semibold">Đơn giá: <span
+                                        <p class="text-[14px] xl:text-[12px] font-semibold">Đơn giá: <span
                                                 class="text-[#003171] font-medium">{{ formatCurrency(product.Gia) }}
                                                 VNĐ</span></p>
-                                        <p class="text-[14px] font-semibold">Số lượng: <span
+                                        <p class="text-[14px] xl:text-[12px] font-semibold">Số lượng: <span
                                                 class="text-[#003171] font-medium">{{ product.SoLuong }}</span></p>
                                     </div>
                                 </div>
@@ -157,26 +157,26 @@ onMounted(() => {
                             <div class="flex flex-col gap-3">
                                 <h3 class="text-[18px] font-semibold">Thông tin khách hàng</h3>
                                 <div class="flex flex-col lg:flex-row lg:justify-between">
-                                    <div>
-                                        <p class="font-medium text-[14px]">Mã khách hàng: <span class="font-semibold">{{
+                                    <div v-for="(address, index) in order.DiaChiNhanHang" :key="index">
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Mã khách hàng: <span class="font-semibold">{{
                                                 order.MaKhachHang }}</span></p>
-                                        <p class="font-medium text-[14px]">Tên khách hàng: <span
-                                                class="font-semibold">{{ order.TenKhachHang }}</span></p>
-                                        <p class="font-medium text-[14px]">Số điện thoại: <span class="font-semibold">{{
-                                                order.DienThoai }}</span></p>
-                                        <p class="font-medium text-[14px]">Địa chỉ nhận hàng: <span
-                                                class="font-semibold">{{ order.DiaChiNhanHang }}</span></p>
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Tên khách hàng: <span
+                                                class="font-semibold">{{ address.TenNguoiNhan }}</span></p>
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Số điện thoại: <span class="font-semibold">{{
+                                                address.DienThoai }}</span></p>
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Địa chỉ nhận hàng: <span
+                                                class="font-semibold">{{ address.DiaChi }}</span></p>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-[14px]">Trạng thái: <span class="font-semibold">{{
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Trạng thái: <span class="font-semibold">{{
                                                 order.TrangThaiThanhToan }}</span></p>
-                                        <p class="font-medium text-[14px]">Hình thức thanh toán: <span
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Hình thức thanh toán: <span
                                                 class="font-semibold">{{ order.HinhThucThanhToan }}</span></p>
-                                        <p class="font-medium text-[14px]">Mã giảm giá: <span class="font-semibold">{{
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Mã giảm giá: <span class="font-semibold">{{
                                             order.MaGiamGia === "" ? "Không sử dụng" : order.MaGiamGia }}</span></p>
-                                        <p class="font-medium text-[14px]">Ghi chú: <span class="font-semibold">{{
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Ghi chú: <span class="font-semibold">{{
                                                 order.GhiChu }}</span></p>
-                                        <p class="font-medium text-[14px]">Tổng đơn: <span
+                                        <p class="font-medium text-[14px] xl:text-[12px]">Tổng đơn: <span
                                                 class="font-semibold text-[#003171]">{{ formatCurrency(order.TongDon) }}
                                                 VNĐ</span></p>
                                     </div>

@@ -87,7 +87,7 @@ onMounted(() => {
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                        <h1 class="font-bold text-[20px] uppercase">Quản lý sản phẩm</h1>
+                        <h1 class="font-bold text-[20px] uppercase xl:text-[16px]">Quản lý sản phẩm</h1>
                         <div class="flex justify-center lg:justify-end items-center flex-wrap flex-1 gap-4">
                             <button @click.prevent="selected(item.type)" class="bg-white px-8 py-3 shadow font-semibold border-2 border-s-transparent hover:border-[#003171] hover:text-[#003171] transition-all duration-300" v-for="(item, index) in types" :key="index">{{ item.name }}</button>
                         </div>

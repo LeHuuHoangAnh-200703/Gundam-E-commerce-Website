@@ -19,7 +19,6 @@ const escapeHtml = (unsafe) => {
 };
 const formData = ref({
     address: '',
-    phone: '',
     description: '',
     discountCode: '',
     payment: '',
@@ -32,29 +31,29 @@ const notification = ref({
 
 const selectedProducts = ref([]);
 
-const tenKhachHang = ref(localStorage.getItem("TenKhachHang"));
-const emailKhachHang = ref(localStorage.getItem("Email"));
-const maKhachHang = ref(localStorage.getItem("MaKhachHang"));
+const maKhachHang = localStorage.getItem("MaKhachHang");
+const nameCustomer = ref('');
+const emailCustomer = ref('');
+const listAddress = ref([]);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
 
+const fetchCustomer = async (idKhachHang) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        nameCustomer.value = response.data.TenKhachHang;
+        emailCustomer.value = response.data.Email;
+        listAddress.value = response.data.DanhSachDiaChi;
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
 const addOrders = async () => {
     errors.value = {};
-    const phoneRegex = /^0[1-9][0-9]{8}$|^0[1-9]{1}[0-9]{9}$|^(0[1-9]{1}[0-9]{1})( ?|-)?(\\(0[1-9]{1}[0-9]{1}\\))?( ?|-)?[0-9]{3} ?[0-9]{3}$/
 
     if (!formData.value.address) {
-        errors.value.address = "Địa chỉ không được trống.";
-    } else {
-        formData.value.address = escapeHtml(formData.value.address);
-    }
-
-    if (!formData.value.phone) {
-        errors.value.phone = "Điện thoại không được để trống.";
-    } else if (!phoneRegex.test(formData.value.phone)) {
-        errors.value.phone = "Điện thoại không hợp lệ.";
-    } else {
-        formData.value.phone = escapeHtml(formData.value.phone);
-    }
+        errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
+    } 
 
     if (formData.value.description) {
         formData.value.description = escapeHtml(formData.value.description);
@@ -69,10 +68,6 @@ const addOrders = async () => {
     }
 
     if (Object.keys(errors.value).length > 0) {
-        notification.value = {
-            message: "Vui lòng kiểm tra lại thông tin.",
-            type: "error",
-        };
         return;
     }
 
@@ -97,10 +92,9 @@ const addOrders = async () => {
         }));
 
         const dataToSend = {
-            MaKhachHang: maKhachHang.value,
-            TenKhachHang: tenKhachHang.value,
-            Email: emailKhachHang.value,
-            DienThoai: formData.value.phone,
+            MaKhachHang: maKhachHang,
+            TenKhachHang: nameCustomer.value,
+            Email: emailCustomer.value,
             DiaChiNhanHang: formData.value.address,
             SanPhamDaMua: sanPhamDaMua,
             MaGiamGia: formData.value.discountCode,
@@ -196,6 +190,7 @@ onMounted(() => {
         selectedProducts.value = JSON.parse(data);
     }
     calculateTotalPrice();
+    fetchCustomer(maKhachHang);
 });
 
 const calculateTotalPrice = () => {
@@ -217,7 +212,7 @@ watch(() => formData.value.payment, (newPayment) => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center flex-grow">
+        <div class="relative my-5 m-2 lg:mx-[200px] xl:mx-[100px] flex justify-center items-center flex-grow">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
@@ -232,36 +227,29 @@ watch(() => formData.value.payment, (newPayment) => {
                                         <label for=""
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Họ
                                             tên</label>
-                                        <input type="text" v-model="tenKhachHang" readonly
+                                        <input type="text" v-model="nameCustomer" readonly
                                             placeholder="Nhập họ tên của bạn ..."
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full">
                                         <label for=""
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
-                                        <input type="text" v-model="emailKhachHang" readonly
+                                        <input type="text" v-model="emailCustomer" readonly
                                             placeholder="test@gmail.com"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
-                                    <div class="w-full flex lg:flex-row flex-col gap-4">
-                                        <div class="w-full lg:w-[60%]">
-                                            <label for=""
-                                                class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa
-                                                chỉ nhận hàng</label>
-                                            <input type="text" v-model="formData.address" placeholder="Nhập địa chỉ ..."
-                                                class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                            <p v-if="errors.address" class="text-red-500 text-sm mt-2">{{
-                                                errors.address }}</p>
-                                        </div>
-                                        <div class="w-full lg:w-[40%]">
-                                            <label for=""
-                                                class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Số
-                                                điện thoại</label>
-                                            <input type="text" v-model="formData.phone" placeholder="079-xxx-xxxx"
-                                                class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                            <p v-if="errors.phone" class="text-red-500 text-sm mt-2">{{
-                                                errors.phone }}</p>
-                                        </div>
+                                    <div class="w-full">
+                                        <label for=""
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa chỉ nhận hàng:
+                                        </label>
+                                        <select name="" id="" v-model="formData.address"
+                                            class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
+                                            <option class="text-[#333] cursor-pointer" value="">Chọn địa chỉ nhận hàng</option>
+                                            <option v-for="(address, index) in listAddress" :key="index" :value="address" class="text-[#333] cursor-pointer">
+                                                {{ address.TenNguoiNhan }} / {{ address.DienThoai }} / {{ address.DiaChi }}</option>
+                                        </select>
+                                        <p v-if="errors.address" class="text-red-500 text-sm mt-2">{{
+                                            errors.address }}</p>
                                     </div>
                                     <div class="w-full">
                                         <label for=""

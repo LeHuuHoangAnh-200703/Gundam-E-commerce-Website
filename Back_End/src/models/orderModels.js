@@ -5,7 +5,11 @@ const orderSchema = new mongoose.Schema({
     MaKhachHang: String,
     TenKhachHang: String,
     Email: String,
-    DiaChiNhanHang: [String],
+    DiaChiNhanHang: [{
+      TenNguoiNhan: String,
+      DiaChi: String,
+      DienThoai: String
+    }],
     SanPhamDaMua: [{  
         TenSanPham: String,  
         MaSanPham: String,  

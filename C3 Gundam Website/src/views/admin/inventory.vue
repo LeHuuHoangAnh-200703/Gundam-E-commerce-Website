@@ -44,7 +44,7 @@ onMounted (() => {
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex gap-4 justify-between items-center">
-                        <h1 class="font-bold text-[20px] uppercase">Quản lý kho</h1>
+                        <h1 class="font-bold text-[20px] uppercase xl:text-[16px]">Quản lý kho</h1>
                         <router-link to="/admin/listEntryForms"
                             class="bg-[#003171] text-white font-bold w-[50px] h-[50px] rounded-full flex justify-center items-center">
                             <i class="fa-solid fa-plus"></i>

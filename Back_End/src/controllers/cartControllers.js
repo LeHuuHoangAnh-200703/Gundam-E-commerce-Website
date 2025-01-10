@@ -26,14 +26,13 @@ exports.getCart = async (req, res) => {
 
 exports.getCartByID = async (req, res) => {
     const { maKhachHang } = req.params;
-    console.log(maKhachHang)
     try {
         const cart = await Cart.find({
             MaKhachHang: maKhachHang,
         });
-        if (cart.length === 0) {
-            return res.status(400).json({ message: "Giỏ hàng không tồn tại!" });
-        }
+        // if (cart.length === 0) {
+        //     return res.status(400).json({ message: "Giỏ hàng không tồn tại!" });
+        // }
         return res.status(200).json(cart);
     } catch (err) {
         return res.status(500).json({ message: err.message });
@@ -43,7 +42,6 @@ exports.getCartByID = async (req, res) => {
 exports.createCart = async (req, res) => {
     const { maSanPham } = req.params;
     const { MaKhachHang } = req.body;
-    console.log(MaKhachHang)
     try {
         const product = await Product.findOne({ MaSanPham: maSanPham });
         const cart = await Cart.findOne({ MaSanPham: maSanPham });

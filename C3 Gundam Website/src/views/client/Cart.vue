@@ -16,6 +16,7 @@ const notification = ref({
 const fetchCarts = async (maKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
+        console.log(response.data)
         carts.value = response.data.map(cart => {
             return {
                 ...cart,
@@ -118,7 +119,7 @@ onMounted(() => {
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Giỏ hàng của bạn</h1>
-        <div v-if="carts.length > 0" class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
+        <div v-if="carts.length > 0" class="relative mb-5 m-2 lg:mx-[200px] xl:mx-[100px] flex items-center flex-col flex-grow">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] flex flex-col mb-7 overflow-hidden px-4 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
@@ -172,9 +173,10 @@ onMounted(() => {
                     </div>
                     <hr>
                     <div class="flex justify-end items-end flex-col">
-                        <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span
-                                class="text-[#FFD700]">{{ formatCurrency(totalPrice) }} VNĐ</span></p>
-                        <button @click.prevent="goToOrderPage" type="submit" class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
+                        <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span class="text-[#FFD700]">{{
+                                formatCurrency(totalPrice) }} VNĐ</span></p>
+                        <button @click.prevent="goToOrderPage" type="submit"
+                            class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
                             hàng</button>
                     </div>
 

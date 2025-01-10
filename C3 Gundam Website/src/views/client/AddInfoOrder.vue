@@ -17,10 +17,16 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+const selectedProvince = ref('');
+const selectedDistrict = ref('');
+const selectedWard = ref('');
+
 const errors = ref({});
 const formData = ref({
     name: '',
-    email: '',
     idKhachHang: '',
     phone: '',
     address: ''
@@ -31,10 +37,37 @@ const notification = ref({
     type: ''
 });
 
+const fetchProvinces = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/getProvinces');
+        provinces.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching provinces:", error);
+    }
+};
+
+const fetchDistricts = async (provinceId) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/getDistrict?province_id=${provinceId}`);
+        districts.value = response.data.data;
+        wards.value = [];
+    } catch (error) {
+        console.error("Error fetching districts:", error);
+    }
+};
+
+const fetchWards = async (districtId) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/getWard?district_id=${districtId}`);
+        wards.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching wards:", error);
+    }
+};
+
 const fetchCustomer = async (idKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
-        formData.value.email = response.data.Email;
         formData.value.idKhachHang = response.data.MaKhachHang;
     } catch (err) {
         console.log("Error fetching: ", err);
@@ -71,10 +104,11 @@ const addInfoOrder = async () => {
     }
 
     try {
+        const fullAddress = `${selectedWard.value}, ${selectedDistrict.value}, ${selectedProvince.value}`;
         const response = await axios.post(`http://localhost:3000/api/khachhang/thongtin/${formData.value.idKhachHang}`, {
             TenNguoiNhan: formData.value.name,
             DienThoai: formData.value.phone,
-            DiaChi: formData.value.address
+            DiaChi: fullAddress
         });
         notification.value = {
             message: "Thêm thông tin thành công!",
@@ -98,6 +132,7 @@ onMounted(() => {
     const idKhachHang = router.currentRoute.value.params.maKhachHang;
     console.log(idKhachHang);
     fetchCustomer(idKhachHang);
+    fetchProvinces();
 })
 </script>
 
@@ -105,7 +140,7 @@ onMounted(() => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center flex-grow">
+        <div class="relative my-5 m-2 lg:mx-[200px] xl:mx-[100px] flex justify-center items-center flex-grow">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
@@ -119,29 +154,49 @@ onMounted(() => {
                                 class="grid gap-4 gap-y-2 text-sm grid-cols-1 md:grid-cols-5"
                                 enctype="multipart/form-data">
                                 <div class="md:col-span-5 mb-2">
-                                    <label for="email" class="font-semibold text-[16px]">Địa chỉ email</label>
-                                    <input v-model="formData.email" type="text" readonly name="email" id="email"
-                                        class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent" value=""
-                                        placeholder="email@domain.com" />
-                                    <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
-                                </div>
-                                <div class="md:col-span-5 mb-2">
-                                    <label for="full_name" class="font-semibold text-[16px]">Họ tên người nhận hàng</label>
+                                    <label for="full_name" class="font-semibold text-[16px]">Họ tên người nhận
+                                        hàng</label>
                                     <input v-model="formData.name" type="text" name="name" id="full_name"
                                         placeholder="Nhập họ tên ..."
                                         class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent"
                                         value="" />
                                     <p v-if="errors.name" class="text-red-500 text-sm my-2">{{ errors.name }}</p>
                                 </div>
-                                <div class="md:col-span-3 mb-2">
-                                    <label for="address" class="font-semibold text-[16px]">Địa chỉ</label>
-                                    <input v-model="formData.address" type="text" name="address" id="address"
-                                        class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent outline-none" value=""
-                                        placeholder="Nhập địa chỉ nhận hàng ..." />
-                                    <p v-if="errors.address" class="text-red-500 text-sm my-2">{{ errors.address }}
-                                    </p>
+                                <div class="md:col-span-5 mb-2">
+                                    <label for="province" class="font-semibold text-[16px]">Tỉnh/Thành</label>
+                                    <select v-model="selectedProvince" @change="fetchDistricts(selectedProvince)"
+                                        class="h-10 border mt-1 rounded px-4 w-full bg-transparent">
+                                        <option value="" disabled>Chọn Tỉnh/Thành</option>
+                                        <option v-for="province in provinces" :key="province.province_id"
+                                            :value="province.province_name">
+                                            {{ province.province_name }}
+                                        </option>
+                                    </select>
                                 </div>
-                                <div class="md:col-span-2 mb-2">
+                                <div class="md:col-span-5 mb-2">
+                                    <label for="district" class="font-semibold text-[16px]">Quận/Huyện</label>
+                                    <select v-model="selectedDistrict" @change="fetchWards(selectedDistrict)"
+                                        class="h-10 border mt-1 rounded px-4 w-full bg-transparent"
+                                        :disabled="!selectedProvince">
+                                        <option value="" disabled>Chọn Quận/Huyện</option>
+                                        <option v-for="district in districts" :key="district.district_id"
+                                            :value="district.district_name">
+                                            {{ district.district_name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-5 mb-2">
+                                    <label for="ward" class="font-semibold text-[16px]">Phường/Xã</label>
+                                    <select v-model="selectedWard"
+                                        class="h-10 border mt-1 rounded px-4 w-full bg-transparent"
+                                        :disabled="!selectedDistrict">
+                                        <option value="" disabled>Chọn Phường/Xã</option>
+                                        <option v-for="ward in wards" :key="ward.ward_id" :value="ward.ward_name">
+                                            {{ ward.ward_name }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-5 mb-2">
                                     <label for="phone" class="font-semibold text-[16px]">Điện thoại</label>
                                     <input type="text" v-model="formData.phone" placeholder="079-xxx-xxxx"
                                         class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent" />
