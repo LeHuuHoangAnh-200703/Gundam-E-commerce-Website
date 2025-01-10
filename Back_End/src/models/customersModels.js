@@ -9,6 +9,7 @@ const customerSchema = new mongoose.Schema({
     Image: String,
     NgayTao: { type: Date, required: true },
     DanhSachDiaChi: [{  
+        TenNguoiNhan: String,
         DienThoai: String,  
         DiaChi: String,   
     }],

@@ -19,6 +19,9 @@ const escapeHtml = (unsafe) => {
 
 const errors = ref({});
 const formData = ref({
+    name: '',
+    email: '',
+    idKhachHang: '',
     phone: '',
     address: ''
 });
@@ -31,7 +34,6 @@ const notification = ref({
 const fetchCustomer = async (idKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
-        formData.value.name = response.data.TenKhachHang;
         formData.value.email = response.data.Email;
         formData.value.idKhachHang = response.data.MaKhachHang;
     } catch (err) {
@@ -39,8 +41,16 @@ const fetchCustomer = async (idKhachHang) => {
     }
 }
 
+console.log(formData.value.email)
+
 const addInfoOrder = async () => {
     errors.value = {};
+    const phoneRegex = /^0[1-9][0-9]{8}$|^0[1-9]{1}[0-9]{9}$|^(0[1-9]{1}[0-9]{1})( ?|-)?(\\(0[1-9]{1}[0-9]{1}\\))?( ?|-)?[0-9]{3} ?[0-9]{3}$/
+    if (!formData.value.name) {
+        errors.value.name = "Vui lòng nhập tên người nhận.";
+    } else {
+        formData.value.name = escapeHtml(formData.value.name);
+    }
 
     if (!formData.value.address) {
         errors.value.address = "Vui lòng nhập địa chỉ.";
@@ -50,6 +60,8 @@ const addInfoOrder = async () => {
 
     if (!formData.value.phone) {
         errors.value.phone = "Vui lòng nhập số điện thoại.";
+    } else if (phoneRegex.test(formData.value.phone)) {
+        errors.value.phone = "Số điện thoại không hợp lệ.";
     } else {
         formData.value.phone = escapeHtml(formData.value.phone);
     }
@@ -59,14 +71,11 @@ const addInfoOrder = async () => {
     }
 
     try {
-        const dataToSend = {
-            DanhSachDiaChi: {
-                DienThoai: formData.value.phone,
-                DiaChi: formData.value.address
-            }
-        }
-
-        const response = await axios.post('http://localhost:3000/api/khachhang/thongtin', dataToSend);
+        const response = await axios.post(`http://localhost:3000/api/khachhang/thongtin/${formData.value.idKhachHang}`, {
+            TenNguoiNhan: formData.value.name,
+            DienThoai: formData.value.phone,
+            DiaChi: formData.value.address
+        });
         notification.value = {
             message: "Thêm thông tin thành công!",
             type: "success",
@@ -110,19 +119,19 @@ onMounted(() => {
                                 class="grid gap-4 gap-y-2 text-sm grid-cols-1 md:grid-cols-5"
                                 enctype="multipart/form-data">
                                 <div class="md:col-span-5 mb-2">
-                                    <label for="full_name" class="font-semibold text-[16px]">Họ tên</label>
+                                    <label for="email" class="font-semibold text-[16px]">Địa chỉ email</label>
+                                    <input v-model="formData.email" type="text" readonly name="email" id="email"
+                                        class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent" value=""
+                                        placeholder="email@domain.com" />
+                                    <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
+                                </div>
+                                <div class="md:col-span-5 mb-2">
+                                    <label for="full_name" class="font-semibold text-[16px]">Họ tên người nhận hàng</label>
                                     <input v-model="formData.name" type="text" name="name" id="full_name"
                                         placeholder="Nhập họ tên ..."
                                         class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent"
                                         value="" />
                                     <p v-if="errors.name" class="text-red-500 text-sm my-2">{{ errors.name }}</p>
-                                </div>
-                                <div class="md:col-span-5 mb-2">
-                                    <label for="email" class="font-semibold text-[16px]">Địa chỉ email</label>
-                                    <input v-model="formData.email" type="text" name="email" id="email"
-                                        class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent" value=""
-                                        placeholder="email@domain.com" />
-                                    <p v-if="errors.email" class="text-red-500 text-sm my-2">{{ errors.email }}</p>
                                 </div>
                                 <div class="md:col-span-3 mb-2">
                                     <label for="address" class="font-semibold text-[16px]">Địa chỉ</label>

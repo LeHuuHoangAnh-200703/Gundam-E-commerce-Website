@@ -57,8 +57,21 @@ exports.createCustomer = async (req, res) => {
 };
 
 exports.createInfoCustomer = async (req, res) => {
-  const customer = new Customer(req.body);
+  const { maKhachHang } = req.params;
+  const { DiaChi, DienThoai, TenNguoiNhan } = req.body;
+
   try {
+    const customer = await Customer.findOneAndUpdate(
+      { MaKhachHang: maKhachHang },
+      {
+        $push: { DanhSachDiaChi: { TenNguoiNhan, DienThoai, DiaChi } }
+      },
+      { new: true }
+    );
+
+    if (!customer) {
+      return res.status(404).json({ message: "Khách hàng không tồn tại." });
+    }
     await customer.save();
     res.status(200).json(customer);
   } catch (err) {
@@ -83,9 +96,9 @@ exports.updateCustomer = async (req, res) => {
     }
 
     if (req.file) {
-      customer.Image = req.file.filename;  
+      customer.Image = req.file.filename;
     } else {
-      customer.Image = customer.Image; 
+      customer.Image = customer.Image;
     }
 
     const updatedCustomer = await customer.save();
