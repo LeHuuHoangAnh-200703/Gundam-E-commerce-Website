@@ -70,13 +70,10 @@ const fetchFeedBacks = async () => {
             NgayDang: new Date(comment.NgayDang)
         }));
 
-        // Phân tách đánh giá của bạn và các đánh giá khác
         const myComments = allComments.filter(comment => comment.MaKhachHang === idCustomer);
         const otherComments = allComments.filter(comment => comment.MaKhachHang !== idCustomer);
 
-        // Gộp đánh giá của bạn và các đánh giá khác, đưa đánh giá của bạn lên đầu
         comments.value = [...myComments, ...otherComments.sort((a, b) => b.NgayDang - a.NgayDang)];
-        console.log(comments.value);
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -238,15 +235,15 @@ const chooseFeedBackWithStar = computed(() => {
 onMounted(async () => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
     await fetchProduct(idSanPham);
-    fetchRelatedProducts();
+    await fetchRelatedProducts();
     fetchFeedBacks();
     window.scrollTo(0, 0);
 })
 
-watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
+watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => {
     if (newIdSanPham) {
-        fetchProduct(newIdSanPham);
-        fetchRelatedProducts();
+        await fetchProduct(newIdSanPham);
+        await fetchRelatedProducts();
         fetchFeedBacks();
         window.scrollTo(0, 0);
     }
@@ -438,7 +435,7 @@ watch(() => router.currentRoute.value.params.maSanPham, (newIdSanPham) => {
                                 <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
                                 <div class="flex gap-4 flex-wrap">
                                     <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                        :src="`/src/assets/img_feedback/${img}`" class="w-[80px] rounded lg:w-[100px]" alt="">
+                                        :src="`/src/assets/img_feedback/${img}`" class="w-[80px] rounded lg:w-[120px]" alt="">
                                 </div>
                             </div>
                         </div>

@@ -33,8 +33,8 @@ onMounted(() => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative mt-5 m-2 mb-10 lg:mx-[200px] flex items-center flex-col flex-grow">
-            <div class="w-full mb-[250px]">
+        <div class="relative mt-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
+            <div class="w-full">
                 <div
                     class="image_profile relative w-full h-[350px] bg-center bg-cover bg-no-repeat rounded-md [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div
