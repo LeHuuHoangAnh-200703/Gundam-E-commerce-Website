@@ -141,7 +141,7 @@ onMounted(() => {
                                                 phù hợp</option>
                                             <option v-for="(supplier, index) in listSuppliers" :key="index"
                                                 :value="supplier.MaNhaCungCap" class="text-[#003171] font-semibold">{{
-                                                supplier.MaNhaCungCap }} -
+                                                    supplier.MaNhaCungCap }} -
                                                 {{ supplier.TenNhaCungCap }}</option>
                                         </select>
                                         <p v-if="errors.idSupplier" class="text-red-500 text-sm mt-2">{{
@@ -157,47 +157,55 @@ onMounted(() => {
                         </form>
                     </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
-                        <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
-                            <thead class="bg-[#1A1D27] text-white">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã phiếu nhập</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã nhà cung cấp</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên nhà cung cấp</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã nhân viên</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên nhân viên</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày nhập</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
-                                </tr>
-                            </thead>
-                            <tbody class="w-full">
-                                <tr class="border-t border-slate-500" v-for="(entryForm, index) in listEntryForms"
-                                    :key="index">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ entryForm.MaPhieuNhap
-                                        }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ entryForm.MaNhaCungCap }}</td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                        <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-                                            {{ entryForm.TenNhaCungCap }}</p>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ entryForm.MaNhanVien }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ entryForm.TenNhanVien }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatDate(entryForm.NgayNhap) }}</td>
-                                    <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <router-link :to="`/admin/editEntryForm/${entryForm.MaPhieuNhap}`"
-                                            class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
-                                                class="fa-solid fa-pen-to-square"></i></router-link>
-                                        <router-link :to="`/admin/listEntryFormInfo/${entryForm.MaPhieuNhap}`"
-                                            class="inline-block bg-[#003171] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#0c2d58] whitespace-nowrap"><i
-                                                class="fa-solid fa-hashtag"></i></router-link>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="w-full overflow-x-auto">
+                            <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
+                                <thead class="bg-[#1A1D27] text-white">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã phiếu nhập</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã nhà cung cấp</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên nhà cung cấp
+                                        </th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã nhân viên</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên nhân viên</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày nhập</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="w-full">
+                                    <tr class="border-t border-slate-500" v-for="(entryForm, index) in listEntryForms"
+                                        :key="index">
+                                        <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{
+                                            entryForm.MaPhieuNhap
+                                            }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ entryForm.MaNhaCungCap }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
+                                            <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+                                                {{ entryForm.TenNhaCungCap }}</p>
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ entryForm.MaNhanVien }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ entryForm.TenNhanVien }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ formatDate(entryForm.NgayNhap) }}</td>
+                                        <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
+                                            <router-link :to="`/admin/editEntryForm/${entryForm.MaPhieuNhap}`"
+                                                class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
+                                                    class="fa-solid fa-pen-to-square"></i></router-link>
+                                            <router-link :to="`/admin/listEntryFormInfo/${entryForm.MaPhieuNhap}`"
+                                                class="inline-block bg-[#003171] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#0c2d58] whitespace-nowrap"><i
+                                                    class="fa-solid fa-hashtag"></i></router-link>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <transition name="slide-fade" mode="out-in">

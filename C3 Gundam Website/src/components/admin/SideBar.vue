@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 const status = ref(0);
 const sidebarMenu = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
@@ -27,9 +27,16 @@ const filteredSidebarMenu = computed(() => {
 });
 
 const saveStatus = (index) => {
-    console.log(index);
     status.value = index;
-}
+    localStorage.setItem("sidebarStatus", index);
+};
+
+onMounted(() => {
+    const savedStatus = localStorage.getItem("sidebarStatus");
+    if (savedStatus !== null) {
+        status.value = parseInt(savedStatus);
+    }
+});
 </script>
 
 <template>

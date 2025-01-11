@@ -160,7 +160,7 @@ onMounted(() => {
             <SideBar />
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+                <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-100px)] pb-7 overflow-auto">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
                         <h1 class="font-bold text-[20px] uppercase xl:text-[16px]">Quản lý chi tiết phiếu nhập</h1>
                     </div>
@@ -184,7 +184,8 @@ onMounted(() => {
                                             <option v-for="(product, index) in listProducts" :key="index"
                                                 :value="product.MaSanPham" class="text-[#003171] font-semibold">{{
                                                     product.MaSanPham }} -
-                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ</option>
+                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ
+                                            </option>
                                         </select>
                                         <p v-if="errors.idProduct" class="text-red-500 text-sm mt-2">{{
                                             errors.idProduct }}</p>
@@ -216,46 +217,56 @@ onMounted(() => {
                         </form>
                     </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
-                        <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
-                            <thead class="bg-[#1A1D27] text-white">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã phiếu nhập</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã sản phẩm</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên sản phẩm</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Số lượng</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Giá nhập</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tổng tiền</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày Nhập</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
-                                </tr>
-                            </thead>
-                            <tbody class="w-full">
-                                <tr class="border-t border-slate-500" v-for="(entryFormInfo, index) in listEntryFormInfos" :key="index">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ entryFormInfo.MaPhieuNhap }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ entryFormInfo.MaSanPham }}</td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
-                                        <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ entryFormInfo.TenSanPham }}</p>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ entryFormInfo.SoLuong }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatCurrency(entryFormInfo.GiaNhap) }} VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatCurrency(entryFormInfo.TongTien) }} VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatDate(entryFormInfo.NgayNhap) }}</td>    
-                                    <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <form>
-                                            <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
-                                                    class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="w-full overflow-x-auto">
+                            <table class="w-full bg-white whitespace-nowrap text-center text-gray-500 overflow-auto">
+                                <thead class="bg-[#1A1D27] text-white">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã phiếu nhập</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã sản phẩm</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên sản phẩm</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Số lượng</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Giá nhập</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tổng tiền</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày Nhập</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="w-full">
+                                    <tr class="border-t border-slate-500"
+                                        v-for="(entryFormInfo, index) in listEntryFormInfos" :key="index">
+                                        <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{
+                                            entryFormInfo.MaPhieuNhap }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ entryFormInfo.MaSanPham }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
+                                            <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{
+                                                entryFormInfo.TenSanPham }}</p>
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ entryFormInfo.SoLuong }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ formatCurrency(entryFormInfo.GiaNhap) }} VNĐ</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ formatCurrency(entryFormInfo.TongTien) }} VNĐ</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                            {{ formatDate(entryFormInfo.NgayNhap) }}</td>
+                                        <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
+                                            <form>
+                                                <button type="submit"
+                                                    class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
+                                                        class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <transition name="slide-fade" mode="out-in">

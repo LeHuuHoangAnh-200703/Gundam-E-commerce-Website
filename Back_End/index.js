@@ -39,7 +39,7 @@ const orderRoutes = require("./src/routes/orders");
 const feeabackRoutes = require("./src/routes/feedbacks");
 const inventoryRoutes = require("./src/routes/inventories");
 const cartRoutes = require("./src/routes/carts");
-// const locationRoutes = require("./src/routes/locations");
+const locationRoutes = require("./src/routes/locations");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
@@ -53,7 +53,7 @@ app.use("/api/donhang", orderRoutes);
 app.use("/api/danhgia", feeabackRoutes);
 app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
-// app.use("/api/location", locationRoutes);
+app.use("/api/location", locationRoutes);
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

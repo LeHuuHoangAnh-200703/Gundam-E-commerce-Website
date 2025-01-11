@@ -125,7 +125,7 @@ onMounted(() => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative mb-5 m-2 lg:mx-[200px] xl:mx-[100px] flex items-center flex-col flex-grow">
+        <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
             <div class="flex flex-col gap-4 justify-center items-center mb-4">
                 <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Thông tin đơn hàng</h1>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">

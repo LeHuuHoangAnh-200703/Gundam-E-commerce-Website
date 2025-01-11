@@ -20,9 +20,9 @@ const escapeHtml = (unsafe) => {
 const provinces = ref([]);
 const districts = ref([]);
 const wards = ref([]);
-const selectedProvince = ref('');
-const selectedDistrict = ref('');
-const selectedWard = ref('');
+const selectedProvince = ref({ id: '', name: '' });
+const selectedDistrict = ref({ id: '', name: '' });
+const selectedWard = ref({ id: '', name: '' });
 
 const errors = ref({});
 const formData = ref({
@@ -39,8 +39,8 @@ const notification = ref({
 
 const fetchProvinces = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/getProvinces');
-        provinces.value = response.data.data;
+        const response = await axios.get('http://localhost:3000/api/location/provinces');
+        provinces.value = response.data.results;
     } catch (error) {
         console.error("Error fetching provinces:", error);
     }
@@ -48,8 +48,8 @@ const fetchProvinces = async () => {
 
 const fetchDistricts = async (provinceId) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/getDistrict?province_id=${provinceId}`);
-        districts.value = response.data.data;
+        const response = await axios.get(`http://localhost:3000/api/location/districts?province_id=${provinceId}`);
+        districts.value = response.data.results;
         wards.value = [];
     } catch (error) {
         console.error("Error fetching districts:", error);
@@ -58,8 +58,8 @@ const fetchDistricts = async (provinceId) => {
 
 const fetchWards = async (districtId) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/getWard?district_id=${districtId}`);
-        wards.value = response.data.data;
+        const response = await axios.get(`http://localhost:3000/api/location/wards?district_id=${districtId}`);
+        wards.value = response.data.results;
     } catch (error) {
         console.error("Error fetching wards:", error);
     }
@@ -74,8 +74,6 @@ const fetchCustomer = async (idKhachHang) => {
     }
 }
 
-console.log(formData.value.email)
-
 const addInfoOrder = async () => {
     errors.value = {};
     const phoneRegex = /^0[1-9][0-9]{8}$|^0[1-9]{1}[0-9]{9}$|^(0[1-9]{1}[0-9]{1})( ?|-)?(\\(0[1-9]{1}[0-9]{1}\\))?( ?|-)?[0-9]{3} ?[0-9]{3}$/
@@ -85,15 +83,9 @@ const addInfoOrder = async () => {
         formData.value.name = escapeHtml(formData.value.name);
     }
 
-    if (!formData.value.address) {
-        errors.value.address = "Vui lòng nhập địa chỉ.";
-    } else {
-        formData.value.address = escapeHtml(formData.value.address);
-    }
-
     if (!formData.value.phone) {
         errors.value.phone = "Vui lòng nhập số điện thoại.";
-    } else if (phoneRegex.test(formData.value.phone)) {
+    } else if (!phoneRegex.test(formData.value.phone)) {
         errors.value.phone = "Số điện thoại không hợp lệ.";
     } else {
         formData.value.phone = escapeHtml(formData.value.phone);
@@ -104,7 +96,10 @@ const addInfoOrder = async () => {
     }
 
     try {
-        const fullAddress = `${selectedWard.value}, ${selectedDistrict.value}, ${selectedProvince.value}`;
+        console.log('Selected Province:', selectedProvince.value);
+        console.log('Selected District:', selectedDistrict.value);
+        console.log('Selected Ward:', selectedWard.value);
+        const fullAddress = `${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`;
         const response = await axios.post(`http://localhost:3000/api/khachhang/thongtin/${formData.value.idKhachHang}`, {
             TenNguoiNhan: formData.value.name,
             DienThoai: formData.value.phone,
@@ -136,11 +131,10 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative my-5 m-2 lg:mx-[200px] xl:mx-[100px] flex justify-center items-center flex-grow">
+        <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center flex-grow">
             <div class="w-full m-4">
                 <div
                     class="bg-[#242424] overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
@@ -164,34 +158,39 @@ onMounted(() => {
                                 </div>
                                 <div class="md:col-span-5 mb-2">
                                     <label for="province" class="font-semibold text-[16px]">Tỉnh/Thành</label>
-                                    <select v-model="selectedProvince" @change="fetchDistricts(selectedProvince)"
+                                    <select v-model="selectedProvince.id"
+                                        @change="(e) => fetchDistricts(selectedProvince.id)"
                                         class="h-10 border mt-1 rounded px-4 w-full bg-transparent">
                                         <option value="" disabled>Chọn Tỉnh/Thành</option>
-                                        <option v-for="province in provinces" :key="province.province_id"
-                                            :value="province.province_name">
+                                        <option class="text-black" v-for="province in provinces"
+                                            :key="province.province_id" :value="province.province_id"
+                                            @click="selectedProvince.name = province.province_name">
                                             {{ province.province_name }}
                                         </option>
                                     </select>
                                 </div>
                                 <div class="md:col-span-5 mb-2">
                                     <label for="district" class="font-semibold text-[16px]">Quận/Huyện</label>
-                                    <select v-model="selectedDistrict" @change="fetchWards(selectedDistrict)"
+                                    <select v-model="selectedDistrict.id"
+                                        @change="(e) => fetchWards(selectedDistrict.id)"
                                         class="h-10 border mt-1 rounded px-4 w-full bg-transparent"
                                         :disabled="!selectedProvince">
                                         <option value="" disabled>Chọn Quận/Huyện</option>
-                                        <option v-for="district in districts" :key="district.district_id"
-                                            :value="district.district_name">
+                                        <option class="text-black" v-for="district in districts"
+                                            :key="district.district_id" :value="district.district_id"
+                                            @click="selectedDistrict.name = district.district_name">
                                             {{ district.district_name }}
                                         </option>
                                     </select>
                                 </div>
                                 <div class="md:col-span-5 mb-2">
                                     <label for="ward" class="font-semibold text-[16px]">Phường/Xã</label>
-                                    <select v-model="selectedWard"
+                                    <select v-model="selectedWard.id"
                                         class="h-10 border mt-1 rounded px-4 w-full bg-transparent"
                                         :disabled="!selectedDistrict">
                                         <option value="" disabled>Chọn Phường/Xã</option>
-                                        <option v-for="ward in wards" :key="ward.ward_id" :value="ward.ward_name">
+                                        <option class="text-black" v-for="ward in wards" :key="ward.ward_id"
+                                            :value="ward.ward_id" @click="selectedWard.name = ward.ward_name">
                                             {{ ward.ward_name }}
                                         </option>
                                     </select>

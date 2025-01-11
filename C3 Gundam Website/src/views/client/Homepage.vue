@@ -110,7 +110,7 @@ onMounted(() => {
         <Header_Home @search="handleSearch" />
         <div class="w-full bg-[#DB3F4C]">
             <div
-                class="flex lg:flex-row flex-col justify-center items-center lg:justify-between w-full p-5 lg:px-[210px] xl:px-[100px]">
+                class="flex lg:flex-row flex-col justify-center items-center lg:justify-between w-full p-5 lg:px-[210px]">
                 <div class="flex flex-col gap-3 w-full lg:w-[50%] justify-center lg:justify-start items-start">
                     <p class="bg-[rgba(52,52,52,0.7)] text-white text-[14px] px-3 py-2 font-medium rounded-md">C3 GUNDAM
                         STORE</p>
@@ -129,13 +129,13 @@ onMounted(() => {
             </div>
         </div>
         <div
-            class="my-2 bg-gradient-to-b text-center lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-5 lg:mx-[210px] xl:mx-[100px]">
+            class="my-2 bg-gradient-to-b text-center lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-5 lg:mx-[210px]">
             <p class="text-white font-semibold uppercase text-[22px] lg:text-[26px]">Vũ trụ Gundam thu nhỏ trong từng mô
                 hình, chỉ có tại C3 GUNDAM.</p>
             <p class="text-white font-medium my-1">Tại đây bạn có thể chọn được những mẫu Gundam yêu thích chính hãng từ
                 BANDAI NAMCO.</p>
         </div>
-        <div class="my-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 m-5 lg:mx-[210px] xl:mx-[100px]">
+        <div class="my-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 m-5 lg:mx-[210px]">
             <button v-for="(choice, index) in listChoices" :key="index" @click.prevent="selectTypeProducts(choice.type)"
                 class="w-full bg-gradient-to-b text-center flex flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
                 <p class="text-[18px] font-semibold text-white">{{ choice.name }}</p>
@@ -143,7 +143,7 @@ onMounted(() => {
                 <p class="text-[14px] text-white font-medium">> Hiển thị tất cả</p>
             </button>
         </div>
-        <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px] xl:mx-[100px]">
+        <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
             <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link :to="`/details/${product.MaSanPham}`">
                     <img :src="`/src/assets/img/${product.Images[0]}`"
