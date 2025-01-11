@@ -51,6 +51,9 @@ exports.updateAdmin = async (req, res) => {
     admin.TenAdmin = req.body.TenAdmin || admin.TenAdmin;
     admin.Email = req.body.Email || admin.Email;
     admin.ChucVu = req.body.ChucVu || admin.ChucVu;
+    if (req.body.MatKhau) {
+      admin.MatKhau = req.body.MatKhau;
+    }
 
     const updatedAdmin = await admin.save();
     res.status(200).json(updatedAdmin);
@@ -62,11 +65,6 @@ exports.updateAdmin = async (req, res) => {
 exports.deleteAdmin = async (req, res) => {
   const { maAdmin } = req.params;
   try {
-    // const existingOrder = await TheoDoiMuonSach.findOne({ MaDocGia: maDocGia });
-    // if (existingOrder) {
-    //   return res.status(400).json({ message: "Không thể xóa đọc giả vì họ đang có đơn mượn sách." });
-    // }
-
     const admin = await Admin.findOneAndDelete({
       MaAdmin: maAdmin,
     });
@@ -87,6 +85,10 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Email không tồn tại." });
     }
 
+    if (admin.TrangThai === "Đã vô hiệu hóa") {
+      return res.status(400).json({ message: "Tài khoản này đã bị vô hiệu hóa."});
+    }
+
     const isMatch = await bcrypt.compare(password, admin.MatKhau);
     if (!isMatch) {
       return res.status(400).json({ message: "Mật khẩu không đúng." });
@@ -103,5 +105,20 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Có lỗi xảy ra, vui lòng thử lại." });
+  }
+};
+
+exports.updateStatus = async (req, res) => {
+  const { TrangThai } = req.body;
+  try {
+    const admin = await Admin.findOne({ MaAdmin: req.params.maAdmin });
+    if (!admin) {
+      return res.status(404).json({ message: "Không tìm thấy admin với mã này." });
+    }
+    admin.TrangThai = TrangThai;
+    await admin.save();
+    res.status(200).json({message: "Cập nhật trạng thái thành công."});
+  } catch (err) {
+    res.status(500).json({ message: "Có lỗi xảy ra trong quá trình cập nhật trạng thái.", error: err.message });
   }
 };

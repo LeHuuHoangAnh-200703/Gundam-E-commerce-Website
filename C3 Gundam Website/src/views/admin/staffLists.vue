@@ -28,6 +28,21 @@ const fetchStaffs = async () => {
     }
 }
 
+const updatedStatus = async (maAdmin, newStatus) => {
+    const confirmUpdate = confirm('Bạn có chắc chắn cập nhật đơn hàng này chưa?');
+    if (!confirmUpdate) return;
+    const nextStatus = newStatus === 'Đang sử dụng' ? 'Đã vô hiệu hóa' : 'Đang sử dụng';
+    try {
+        const response = await axios.patch(`http://localhost:3000/api/admin/trangthai/${maAdmin}`, {
+            TrangThai: nextStatus,
+        });
+        await fetchStaffs();
+        console.log("Status updated successfully:", response.data);
+    } catch (err) {
+        console.log("Error updating status:", err);
+    }
+};
+
 const findNameAdmin = computed(() => {
     if (!searchValue.value) {
         return staffLists.value;
@@ -58,7 +73,7 @@ onMounted(() => {
                 <Navbar />
                 <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                        <h1 class="font-bold text-[20px] uppercase xl:text-[16px]">Quản lý nhân viên</h1>
+                        <h1 class="font-bold text-[20px] uppercase">Quản lý nhân viên</h1>
                         <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
                             <input type="text" v-model="searchValue"
                                 class="items-center w-full p-3 bg-white border border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
@@ -77,6 +92,7 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Email</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Chức vụ</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày Tạo</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tình trạng</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                                 </tr>
                             </thead>
@@ -93,15 +109,15 @@ onMounted(() => {
                                         staff.ChucVu }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         formatDate(staff.NgayTao) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        staff.TrangThai }}</td>
                                     <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <a href="`/admin/editProduct/`"
+                                        <router-link :to="`/admin/editStaff/${staff.MaAdmin}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
-                                                class="fa-solid fa-pen-to-square"></i></a>
-                                        <form>
-                                            <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
-                                                    class="fa-solid fa-trash"></i></button>
-                                        </form>
+                                                class="fa-solid fa-pen-to-square"></i></router-link>
+                                        <button v-if="staff.TrangThai === 'Đang sử dụng'" type="submit" @click="updatedStatus(staff.MaAdmin, staff.TrangThai)"
+                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
+                                                class="fa-solid fa-repeat"></i></button>
                                     </td>
                                 </tr>
                             </tbody>

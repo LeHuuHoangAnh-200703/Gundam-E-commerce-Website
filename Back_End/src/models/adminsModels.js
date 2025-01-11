@@ -8,6 +8,7 @@ const adminSchema = new mongoose.Schema({
     ChucVu: String,
     MatKhau: String,
     NgayTao: { type: Date, required: true },
+    TrangThai: { type: String, enum: ['Đang sử dụng', 'Đã vô hiệu hóa'], default: 'Đang sử dụng' },
 });
 
 function generateMaAdmin() {  

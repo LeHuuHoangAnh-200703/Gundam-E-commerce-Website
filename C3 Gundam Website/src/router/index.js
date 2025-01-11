@@ -146,7 +146,7 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
-        path: "/admin/editStaff",
+        path: "/admin/editStaff/:maAdmin",
         name: "Edit Staff",
         component: editStaff,
         meta: { requiresAuth: true },
