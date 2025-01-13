@@ -15,7 +15,10 @@ const escapeHtml = (unsafe) => {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 };
-
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ChucVu = localStorage.getItem("ChucVu");
+const MaAdmin = localStorage.getItem("MaAdmin");
+const ThoiGian = new Date();
 const errors = ref({});
 const formData = ref({
     idSupplier: '',
@@ -78,6 +81,14 @@ const editSupplier = async () => {
         };
 
         const response = await axios.put(`http://localhost:3000/api/nhacungcap/${formData.value.idSupplier}`, dataToSend);
+        const notificationData = {
+            ThongBao: `Nhà cung cấp ${formData.value.nameSupplier} vừa được cập nhật thông tin.`,
+            NguoiChinhSua: TenAdmin,
+            ChucVu: ChucVu,
+            ThoiGian: ThoiGian,
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
         notification.value = {
             message: "Cập nhật thông tin thành công!",
             type: "success",

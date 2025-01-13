@@ -29,7 +29,7 @@ const fetchStaffs = async () => {
 }
 
 const updatedStatus = async (maAdmin, newStatus) => {
-    const confirmUpdate = confirm('Bạn có chắc chắn cập nhật đơn hàng này chưa?');
+    const confirmUpdate = confirm('Bạn có chắc chắn cập nhật thông tin này chưa?');
     if (!confirmUpdate) return;
     const nextStatus = newStatus === 'Đang sử dụng' ? 'Đã vô hiệu hóa' : 'Đang sử dụng';
     try {

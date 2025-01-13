@@ -36,6 +36,7 @@ import editDiscountCode from "@/views/admin/editDiscountCode.vue";
 import notFound from "@/views/errors/notFound.vue";
 import OrderProducts from "@/views/client/OrderProducts.vue";
 import AddInfoOrder from "@/views/client/AddInfoOrder.vue";
+import chatWithCustomer from "@/views/admin/chatWithCustomer.vue";
 
 const routes = [
     {
@@ -233,6 +234,12 @@ const routes = [
         path: "/admin/editDiscountCode/:idMaGG",
         name: "Edit Discount Code",
         component: editDiscountCode,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/chatWithCustomer/",
+        name: "Chat With Customer",
+        component: chatWithCustomer,
         meta: { requiresAuth: true },
     },
     {

@@ -4,7 +4,7 @@ import axios from "axios";
 import { ref, onMounted, computed } from "vue";
 const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
-
+const hasUnreadNotifications = ref(false);
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ChucVu = ref(localStorage.getItem("ChucVu"));
 
@@ -38,7 +38,10 @@ const toggleSideBar = () => {
 
 const toggleNotification = () => {
     isNotificationVisible.value = !isNotificationVisible.value;
-}
+    if (isNotificationVisible.value) {
+        hasUnreadNotifications.value = false;
+    }
+};
 
 const fetchNatifications = async () => {
     try {
@@ -50,6 +53,10 @@ const fetchNatifications = async () => {
             };
         });
         listNatifications.value.sort((a, b) => b.ThoiGian - a.ThoiGian);
+        // Hiển thị dấu chấm đỏ nếu có thông báo mới
+        if (listNatifications.value.length > 0) {
+            hasUnreadNotifications.value = true;
+        }
     } catch (err) {
         console.log("error fetching: ", err);
     }
@@ -72,7 +79,7 @@ const filteredSidebarMenu = computed(() => {
 });
 
 onMounted(async () => {
-    fetchNatifications();
+    await fetchNatifications();
 });
 
 </script>
@@ -91,7 +98,14 @@ onMounted(async () => {
                 <router-link to="" @click="toggleNotification();" class="px-2 py-2 rounded-full group">
                     <i class="fa-solid fa-bell relative transition-all duration-200 text-[20px]">
                         <span
-                            class="absolute top-0 right-0 w-2 h-2 bg-[#DB3F4C] transition-all duration-200 rounded-full"></span>
+                            v-if="hasUnreadNotifications"
+                            class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"></span>
+                    </i>
+                </router-link>
+                <router-link to="/admin/chatWithCustomer" class="px-2 py-2 rounded-full group">
+                    <i class="fa-solid fa-comment relative transition-all duration-200 text-[20px]">
+                        <span
+                            class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"></span>
                     </i>
                 </router-link>
                 <button @click.prevent="logout" class="px-2 py-2 rounded-full group hidden lg:block">
