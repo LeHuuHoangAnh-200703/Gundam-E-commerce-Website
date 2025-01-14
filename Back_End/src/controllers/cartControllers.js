@@ -83,6 +83,23 @@ exports.deleteCart = async (req, res) => {
     }
 };
 
+exports.updateCartItem = async (req, res) => {
+    const { maKhachHang, maSanPham, soLuong } = req.body;
+    try {
+        const cartItem = await Cart.findOne({ MaKhachHang: maKhachHang, MaSanPham: maSanPham });
+        if (!cartItem) {
+            return res.status(404).json({ message: "Sản phẩm không tồn tại trong giỏ hàng." });
+        }
+
+        cartItem.SoLuong = soLuong;
+        await cartItem.save();
+
+        res.status(200).json({ message: "Cập nhật giỏ hàng thành công!" });
+    } catch (err) {
+        res.status(500).json({ message: "Có lỗi xảy ra!", error: err.message });
+    }
+};
+
 exports.checkQuantity = async (req, res) => {
     const { maKhachHang } = req.params;
     try {
@@ -95,7 +112,6 @@ exports.checkQuantity = async (req, res) => {
         // Kiểm tra số lượng tồn kho
         for (const cartItem of cartItems) {
             const product = products.find(p => p.MaSanPham === cartItem.MaSanPham);
-            console.log(cartItem.SoLuong, product.SoLuongTon)
             if (!product) {
                 return res.status(400).json({
                     message: `Sản phẩm ${cartItem.TenSanPham} không tồn tại.`,
@@ -107,7 +123,7 @@ exports.checkQuantity = async (req, res) => {
                 });
             }
         }
-        return res.status(200).json({ message: "Tất cả sản phẩm đủ tồn kho." });
+        return res.status(200).json(cartItems);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

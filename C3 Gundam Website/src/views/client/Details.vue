@@ -285,7 +285,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <button @click="decreaseQuantity"
                             class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i
                                 class="fa-solid fa-minus"></i></button>
-                        <input type="number" v-model="orderQuantity" min="1" :max="orderQuantity"
+                        <input type="number" v-model="orderQuantity" readonly min="1" :max="orderQuantity"
                             class="text-[20px] text-white bg-transparent border-b-2 w-[50px] text-center p-1">
                         <button @click="increaseQuantity"
                             class="bg-gray-200 w-[40px] h-[40px] rounded-full flex justify-center items-center"><i

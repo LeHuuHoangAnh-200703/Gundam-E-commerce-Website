@@ -49,14 +49,29 @@ const deleteCart = async (idGioHang) => {
     }, 3000);
 }
 
+const updateCartItemQuantity = async (cart) => {
+    try {
+        await axios.put("http://localhost:3000/api/giohang", {
+            maKhachHang: cart.MaKhachHang,
+            maSanPham: cart.MaSanPham,
+            soLuong: cart.SoLuong,
+        });
+    } catch (err) {
+        console.log("Error update quantity: ", err);
+    }
+};
+
 const decreaseQuantity = (cart) => {
     if (cart.SoLuong > 1) {
         cart.SoLuong--;
     }
+    console.log(cart)
+    updateCartItemQuantity(cart);
 };
 
 const increaseQuantity = (cart) => {
     cart.SoLuong++;
+    updateCartItemQuantity(cart);
 };
 
 const deleteSelectedCarts = async () => {
@@ -105,7 +120,7 @@ const goToOrderPage = async () => {
         for (let i = 0; i < selectedProducts.length; i++) {
             const cart = selectedProducts[i];
             const stockData = stockResponses[i].data; // Dữ liệu tồn kho trả về từ API
-
+            console.log(stockData)
             const product = stockData.find(p => p.MaSanPham === cart.MaSanPham);
             if (!product || cart.SoLuong > product.SoLuongTon) {
                 notification.value = {
@@ -121,6 +136,7 @@ const goToOrderPage = async () => {
         await deleteSelectedCarts();
         router.push("/orders");
     } catch (err) {
+        console.log(err)
         notification.value = {
             message: err.response?.data?.message || "Có lỗi xảy ra khi kiểm tra tồn kho!",
             type: "error",
@@ -128,7 +144,6 @@ const goToOrderPage = async () => {
         setTimeout(() => (notification.value.message = ""), 3000);
     }
 };
-
 
 const totalPrice = computed(() => {
     return carts.value
