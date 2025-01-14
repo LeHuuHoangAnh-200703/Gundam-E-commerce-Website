@@ -9,5 +9,6 @@ router.put("/:maKhachHang", customersController.upload, customersController.upda
 router.delete("/:maKhachHang", customersController.deleteCustomer);
 router.post("/login", customersController.login);
 router.post("/thongtin/:maKhachHang", customersController.createInfoCustomer);
+router.post("/logout", customersController.logout);
 
 module.exports = router;

@@ -64,7 +64,7 @@ exports.createInfoCustomer = async (req, res) => {
     const customer = await Customer.findOneAndUpdate(
       { MaKhachHang: maKhachHang },
       {
-        $push: { DanhSachDiaChi: { TenNguoiNhan, DienThoai, DiaChi } }
+        $push: { DanhSachDiaChi: { TenNguoiNhan, DienThoai, DiaChi } },
       },
       { new: true }
     );
@@ -141,12 +141,15 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Mật khẩu không đúng." });
     }
+    customer.TrangThai = 1;
+    await customer.save();
     return res.status(200).json({
       message: "Đăng nhập thành công!",
       customer: {
         MaKhachHang: customer.MaKhachHang,
         TenKhachHang: customer.TenKhachHang,
         Email: customer.Email,
+        TrangThai: customer.TrangThai,
       },
     });
   } catch (error) {
@@ -154,4 +157,30 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.upload = upload.single('Image');
+exports.logout = async (req, res) => {
+  const { maKhachHang } = req.body;
+
+  try {
+    const customer = await Customer.findOne({ MaKhachHang: maKhachHang });
+
+    if (!customer) {
+      return res.status(404).json({ message: "Khách hàng không tồn tại." });
+    }
+
+    customer.TrangThai = 0;
+    await customer.save();
+
+    return res.status(200).json({
+      message: "Đăng xuất thành công!",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({
+        message: "Có lỗi xảy ra, vui lòng thử lại.",
+        error: error.message,
+      });
+  }
+};
+
+exports.upload = upload.single("Image");

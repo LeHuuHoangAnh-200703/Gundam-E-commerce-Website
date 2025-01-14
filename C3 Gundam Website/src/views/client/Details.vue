@@ -435,7 +435,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                 <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
                                 <div class="flex gap-4 flex-wrap">
                                     <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                        :src="`/src/assets/img_feedback/${img}`" class="w-[80px] rounded lg:w-[120px]" alt="">
+                                        :src="`/src/assets/img_feedback/${img}`" class="w-[80px] rounded" alt="">
                                 </div>
                             </div>
                         </div>

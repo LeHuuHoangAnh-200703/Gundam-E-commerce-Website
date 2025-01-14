@@ -56,6 +56,7 @@ const login = async () => {
         localStorage.setItem('Email', response.data.customer.Email);
         localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
         localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);
+        localStorage.setItem('TrangThai', response.data.customer.TrangThai);
         notification.value = {
             message: "Đăng nhập thành công!",
             type: "success",

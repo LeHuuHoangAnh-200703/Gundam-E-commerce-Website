@@ -115,13 +115,13 @@ const loginAdmin = async () => {
                                 Đăng nhập
                             </button>
                         </form>
-                        <p class="mt-4 md:mt-8 text-center text-[14px] md:text-[16px]">
+                        <!-- <p class="mt-4 md:mt-8 text-center text-[14px] md:text-[16px]">
                             Nếu chưa có tài khoản?
                             <router-link to="/admin/addAdmin"
                                 class="font-semibold text-[#DB3F4C] hover:text-[#5A2530] transition duration-150 ease-in-out">
                                 Đăng ký
                             </router-link>
-                        </p>
+                        </p> -->
                     </div>
                 </div>
             </div>

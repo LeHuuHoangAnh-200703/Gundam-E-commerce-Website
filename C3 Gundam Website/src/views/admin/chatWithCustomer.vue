@@ -150,7 +150,7 @@ import axios from 'axios';
                             <hr>
                             <div class="flex justify-between w-full gap-4 items-end">
                                 <input type="text"
-                                    class="items-center w-full p-3 bg-gray-200 text-[12px] shadow font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                                    class="items-center w-full h-full p-3 bg-gray-200 text-[12px] shadow font-semibold tracking-wider text-black rounded-md focus:outline-none"
                                     placeholder="Tin nhắn của bạn ...">
                                 <button
                                     class="flex justify-center items-center bg-[#4169E1] px-5 py-4 text-white rounded-md"><i

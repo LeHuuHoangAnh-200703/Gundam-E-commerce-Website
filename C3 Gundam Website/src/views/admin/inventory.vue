@@ -14,6 +14,7 @@ const fetchInventory = async () => {
                 NgayCapNhat: new Date(inventory.NgayCapNhat)
             }
         })
+        inventoryLists.value.sort((a, b) => b.NgayCapNhat - a.NgayCapNhat);
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -70,7 +71,7 @@ onMounted (() => {
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ inventory.TenSanPham }}</p>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ inventory.SoLuongTon }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ (inventory.SoLuongTon > 0) ? inventory.SoLuongTon : 'Hết hàng' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ formatCurrency(inventory.GiaNhapGanNhat) }} VNĐ</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ formatDate(inventory.NgayCapNhat) }}</td>
                                 </tr>

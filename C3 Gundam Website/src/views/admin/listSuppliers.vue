@@ -104,14 +104,14 @@ onMounted(() => {
                                         {{ supplier.DienThoai }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ supplier.DiaChi }}</td>
-                                    <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                        <a :href="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
-                                            class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
-                                                class="fa-solid fa-pen-to-square"></i></a>
+                                    <td class="flex justify-center gap-2 px-7 py-7">
+                                        <router-link :href="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
+                                            class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565]"><i
+                                                class="fa-solid fa-pen-to-square"></i></router-link>
                                         <form
                                             @submit.prevent="deleteSupplier(supplier.MaNhaCungCap, supplier.TenNhaCungCap)">
                                             <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
+                                                class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
                                                     class="fa-solid fa-trash"></i></button>
                                         </form>
                                     </td>

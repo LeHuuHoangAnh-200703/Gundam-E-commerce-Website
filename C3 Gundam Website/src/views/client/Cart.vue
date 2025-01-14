@@ -84,18 +84,51 @@ const deleteSelectedCarts = async () => {
 
 const goToOrderPage = async () => {
     const selectedProducts = carts.value.filter(cart => cart.isSelected);
+
     if (selectedProducts.length === 0) {
         notification.value = {
             message: "Vui lòng chọn ít nhất một sản phẩm!",
             type: "error",
         };
-        setTimeout(() => notification.value.message = '', 3000);
+        setTimeout(() => (notification.value.message = ""), 3000);
         return;
     }
-    localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
-    await deleteSelectedCarts();
-    router.push('/orders');
+
+    try {
+        // Kiểm tra tồn kho cho từng sản phẩm
+        const stockCheckPromises = selectedProducts.map(cart =>
+            axios.get(`http://localhost:3000/api/giohang/kiemtra/${cart.MaKhachHang}`)
+        );
+        const stockResponses = await Promise.all(stockCheckPromises);
+
+        // Duyệt qua từng sản phẩm đã chọn và kiểm tra số lượng tồn kho
+        for (let i = 0; i < selectedProducts.length; i++) {
+            const cart = selectedProducts[i];
+            const stockData = stockResponses[i].data; // Dữ liệu tồn kho trả về từ API
+
+            const product = stockData.find(p => p.MaSanPham === cart.MaSanPham);
+            if (!product || cart.SoLuong > product.SoLuongTon) {
+                notification.value = {
+                    message: `Sản phẩm ${cart.TenSanPham} chỉ còn ${product?.SoLuongTon || 0} trong kho!`,
+                    type: "error",
+                };
+                setTimeout(() => (notification.value.message = ""), 3000);
+                return;
+            }
+        }
+
+        localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
+        await deleteSelectedCarts();
+        router.push("/orders");
+    } catch (err) {
+        notification.value = {
+            message: err.response?.data?.message || "Có lỗi xảy ra khi kiểm tra tồn kho!",
+            type: "error",
+        };
+        setTimeout(() => (notification.value.message = ""), 3000);
+    }
 };
+
 
 const totalPrice = computed(() => {
     return carts.value

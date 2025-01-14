@@ -131,7 +131,7 @@ onMounted(() => {
                                         product.NhaCungCap }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ product.SoLuong }}
+                                        {{ (product.SoLuong > 0) ? product.SoLuong : 'Hết hàng' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         product.TrangThai }}
@@ -141,13 +141,13 @@ onMounted(() => {
                                         <p class="overflow-hidden text-ellipsis text-[12px] whitespace-nowrap">{{
                                             product.MoTa }}</p>
                                     </td>
-                                    <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
+                                    <td class="flex justify-center items-center gap-2 py-10">
                                         <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
                                         <form @submit="updateStatus(product.MaSanPham, product.TenSanPham)">
                                             <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#003171] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
+                                                class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
                                                     class="fa-solid fa-repeat"></i></button>
                                         </form>
                                     </td>

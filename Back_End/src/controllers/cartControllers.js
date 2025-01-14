@@ -1,5 +1,6 @@
 const Cart = require("../models/cartModels");
 const Product = require("../models/productModels");
+const Inventory = require("../models/inventoryModels");
 
 exports.getAllCarts = async (req, res) => {
     try {
@@ -46,7 +47,7 @@ exports.createCart = async (req, res) => {
         const product = await Product.findOne({ MaSanPham: maSanPham });
         const cart = await Cart.findOne({ MaSanPham: maSanPham });
         if (cart) {
-            cart.SoLuong ++;
+            cart.SoLuong++;
             await cart.save();
             res.status(200).json(cart);
         } else {
@@ -54,7 +55,7 @@ exports.createCart = async (req, res) => {
                 MaSanPham: maSanPham,
                 MaKhachHang: MaKhachHang,
                 TenSanPham: product.TenSanPham,
-                LoaiSanPham: product.LoaiSanPham,   
+                LoaiSanPham: product.LoaiSanPham,
                 DonGia: product.GiaBan,
                 HinhAnh: product.Images[0],
                 SoLuong: 1,
@@ -81,3 +82,33 @@ exports.deleteCart = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.checkQuantity = async (req, res) => {
+    const { maKhachHang } = req.params;
+    try {
+        const cartItems = await Cart.find({ MaKhachHang: maKhachHang });
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(400).json({ message: "Giỏ hàng trống!" });
+        }
+        const productIds = cartItems.map(item => item.MaSanPham); // Lấy id sản phẩm trong giỏ
+        const products = await Inventory.find({ MaSanPham: { $in: productIds } }); // Lấy sản phẩm trong kho
+        // Kiểm tra số lượng tồn kho
+        for (const cartItem of cartItems) {
+            const product = products.find(p => p.MaSanPham === cartItem.MaSanPham);
+            console.log(cartItem.SoLuong, product.SoLuongTon)
+            if (!product) {
+                return res.status(400).json({
+                    message: `Sản phẩm ${cartItem.TenSanPham} không tồn tại.`,
+                });
+            }
+            if (cartItem.SoLuong > product.SoLuongTon) {
+                return res.status(400).json({
+                    message: `Sản phẩm ${cartItem.TenSanPham} chỉ còn ${product.SoLuongTon} trong kho.`,
+                });
+            }
+        }
+        return res.status(200).json({ message: "Tất cả sản phẩm đủ tồn kho." });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}

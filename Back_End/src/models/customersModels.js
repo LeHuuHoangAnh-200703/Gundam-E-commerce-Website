@@ -13,6 +13,7 @@ const customerSchema = new mongoose.Schema({
         DienThoai: String,  
         DiaChi: String,   
     }],
+    TrangThai: { type: Number, default: 0 },
 });
 
 function generateMaKhachHang() {  

@@ -111,12 +111,12 @@ onMounted(() => {
                                         formatDate(staff.NgayTao) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         staff.TrangThai }}</td>
-                                    <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
+                                    <td class="flex justify-center items-center gap-2 px-7 py-7">
                                         <router-link :to="`/admin/editStaff/${staff.MaAdmin}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></router-link>
-                                        <button v-if="staff.TrangThai === 'Đang sử dụng'" type="submit" @click="updatedStatus(staff.MaAdmin, staff.TrangThai)"
-                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
+                                        <button type="submit" @click="updatedStatus(staff.MaAdmin, staff.TrangThai)"
+                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
                                                 class="fa-solid fa-repeat"></i></button>
                                     </td>
                                 </tr>

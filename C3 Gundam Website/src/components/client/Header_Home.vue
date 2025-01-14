@@ -8,16 +8,25 @@ const userInfo = ref({
     MaKhachHang: localStorage.getItem('MaKhachHang') || '',
 });
 const isLoggedIn = ref(!userInfo.value.MaKhachHang);
-const logout = () => {
-    localStorage.removeItem('TenKhachHang');
-    localStorage.removeItem('MaKhachHang');
-    localStorage.removeItem('Email');
+const logout = async () => {
+    const maKhachHang = localStorage.getItem("MaKhachHang");
+  try {
+    const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
+      maKhachHang
+    });
+
+    console.log(response.data.message);
+    localStorage.removeItem("MaKhachHang");
+    localStorage.removeItem("TenKhachHang");
+    localStorage.removeItem("TrangThai");
     userInfo.value.TenKhachHang = '';
     userInfo.value.Email = '';
     userInfo.value.MaKhachHang = '';
     isLoggedIn.value = false;
-
-    router.push('/login');
+    router.push("/login");
+  } catch (error) {
+    console.error("Đăng xuất thất bại:", error.response.data.message);
+  }
 };
 
 const orders_history = () => {
@@ -103,7 +112,7 @@ onMounted(() => {
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><button @click.prevent="orders_history">Lịch sử mua hàng</button>
+                    <li class="group"><button @click.prevent="orders_history">Theo dõi đơn hàng</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
@@ -160,8 +169,7 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Lịch sử mua
-                        hàng</button></li>
+                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Theo dõi đơn hàng</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
                 <li v-if="isLoggedIn"
