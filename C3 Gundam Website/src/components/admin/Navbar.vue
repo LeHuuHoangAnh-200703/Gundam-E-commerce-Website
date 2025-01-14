@@ -25,12 +25,30 @@ const sidebarMenuMobile = [
     { name: "Hóa đơn", icon: "fa-solid fa-scroll", path: "listBills" },
     { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "logout" },
 ];
-const logout = () => {
+// const logout = () => {
+//     localStorage.removeItem("TenAdmin");
+//     localStorage.removeItem("ChucVu");
+
+//     router.push("/admin/adminLogin");
+// }
+
+const logout = async () => {
+    const maAdmin = localStorage.getItem("MaAdmin");
+  try {
+    const response = await axios.post("http://localhost:3000/api/admin/logout", {
+      maAdmin
+    });
+
+    console.log(response.data.message);
     localStorage.removeItem("TenAdmin");
     localStorage.removeItem("ChucVu");
+    localStorage.removeItem("TrangThaiHoatDong");
 
     router.push("/admin/adminLogin");
-}
+  } catch (error) {
+    console.error("Đăng xuất thất bại:", error.response.data.message);
+  }
+};
 
 const toggleSideBar = () => {
     isSidebarVisible.value = !isSidebarVisible.value;

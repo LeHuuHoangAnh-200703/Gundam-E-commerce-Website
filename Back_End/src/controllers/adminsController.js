@@ -93,6 +93,8 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Mật khẩu không đúng." });
     }
+    admin.TrangThaiHoatDong = 1;
+    await admin.save();
     return res.status(200).json({
       message: "Đăng nhập thành công!",
       admin: {
@@ -101,10 +103,37 @@ exports.login = async (req, res) => {
         ChucVu: admin.ChucVu,
         Email: admin.Email,
         MatKhau: admin.MatKhau,
+        TrangThaiHoatDong: admin.TrangThaiHoatDong
       },
     });
   } catch (error) {
     res.status(500).json({ message: "Có lỗi xảy ra, vui lòng thử lại." });
+  }
+};
+
+exports.logout = async (req, res) => {
+  const { maAdmin } = req.body;
+
+  try {
+    const admin = await Admin.findOne({ MaAdmin: maAdmin });
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin không tồn tại." });
+    }
+
+    admin.TrangThaiHoatDong = 0;
+    await admin.save();
+
+    return res.status(200).json({
+      message: "Đăng xuất thành công!",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({
+        message: "Có lỗi xảy ra, vui lòng thử lại.",
+        error: error.message,
+      });
   }
 };
 

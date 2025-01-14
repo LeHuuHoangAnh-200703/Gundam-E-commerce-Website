@@ -37,6 +37,7 @@ import notFound from "@/views/errors/notFound.vue";
 import OrderProducts from "@/views/client/OrderProducts.vue";
 import AddInfoOrder from "@/views/client/AddInfoOrder.vue";
 import chatWithCustomer from "@/views/admin/chatWithCustomer.vue";
+import ChatBox from "@/views/client/ChatBox.vue";
 
 const routes = [
     {
@@ -83,6 +84,11 @@ const routes = [
         path: "/profile",
         name: "Profile",
         component: Profile,
+    },
+    {
+        path: "/chatbox",
+        name: "Chat Box",
+        component: ChatBox,
     },
     {
         path: "/addInfoOrder/:maKhachHang",

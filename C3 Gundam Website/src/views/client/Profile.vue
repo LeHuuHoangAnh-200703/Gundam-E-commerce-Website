@@ -77,6 +77,9 @@ onMounted(() => {
         <div class="h-[150px]"></div>
         <Footer />
         <BackToTop />
+        <router-link to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
+            <i class="fa-solid fa-comments text-white"></i>
+        </router-link>
     </div>
 </template>
 

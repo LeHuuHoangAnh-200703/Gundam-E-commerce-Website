@@ -9,5 +9,6 @@ router.put("/:maAdmin", adminsController.updateAdmin);
 router.delete("/:maAdmin", adminsController.deleteAdmin);
 router.post("/login", adminsController.login);
 router.patch("/trangthai/:maAdmin", adminsController.updateStatus);
+router.post("/logout", adminsController.logout);
 
 module.exports = router;
