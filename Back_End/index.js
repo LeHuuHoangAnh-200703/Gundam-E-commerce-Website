@@ -84,6 +84,13 @@ io.on("connection", (socket) => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
+
+// Thêm middleware để sử dụng Socket.IO trong các route
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
