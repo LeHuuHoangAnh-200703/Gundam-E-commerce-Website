@@ -4,12 +4,24 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const paypal = require('@paypal/checkout-server-sdk');
 const dotenv = require('dotenv');
+const http = require("http");
+const { Server } = require("socket.io");
 
 dotenv.config()
 
 const app = express();
 const PORT = 3000;
 
+// Tạo HTTP server từ Express
+const server = http.createServer(app);
+
+// Khởi tạo Socket.IO với HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Cho phép tất cả nguồn (có thể điều chỉnh)
+    methods: ["GET", "POST"],
+  },
+});
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -54,6 +66,24 @@ app.use("/api/danhgia", feeabackRoutes);
 app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
+
+// Socket.IO lắng nghe kết nối từ client
+io.on("connection", (socket) => {
+  console.log(`Client connected: ${socket.id}`);
+
+  // Lắng nghe sự kiện "message" từ client
+  socket.on("message", (data) => {
+    console.log(`Message received: ${data}`);
+
+    // Gửi lại dữ liệu cho tất cả các client
+    io.emit("message", data);
+  });
+
+  // Xử lý khi client ngắt kết nối
+  socket.on("disconnect", () => {
+    console.log(`Client disconnected: ${socket.id}`);
+  });
+});
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

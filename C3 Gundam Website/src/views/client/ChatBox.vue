@@ -277,7 +277,7 @@ watch(() => formData.value.payment, (newPayment) => {
                         </div>
                     </div>
                     <hr>
-                    <div class="flex justify-between w-full gap-4 items-end">
+                    <div class="flex justify-between w-full gap-4 items-center">
                         <input type="text"
                             class="items-center w-full h-full p-3 bg-gray-200 text-[12px] shadow font-semibold tracking-wider text-black rounded-md focus:outline-none"
                             placeholder="Tin nhắn của bạn ...">
