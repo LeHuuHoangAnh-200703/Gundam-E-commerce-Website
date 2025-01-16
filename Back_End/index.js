@@ -73,19 +73,34 @@ app.use("/api/tinnhan", messageRoutes);
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
-  // Lắng nghe sự kiện "message" từ client
-  socket.on("message", (data) => {
-    console.log(`Message received: ${data}`);
+  // Lắng nghe sự kiện gửi tin nhắn
+  socket.on("sendMessage", async (data) => {
+    const { NguoiGui, NoiDung, MaTinNhan } = data;
 
-    // Gửi lại dữ liệu cho tất cả các client
-    io.emit("message", data);
+    // Lưu tin nhắn vào MongoDB
+    try {
+      const newMessage = new Message({ NguoiGui, NoiDung, MaTinNhan });
+      await newMessage.save();
+
+      // Phát tin nhắn đến các thành viên trong phòng (nếu có)
+      io.to(MaTinNhan).emit("receiveMessage", newMessage);
+    } catch (error) {
+      console.error("Error saving message:", error);
+    }
   });
 
-  // Xử lý khi client ngắt kết nối
+  // Xử lý khi client tham gia vào một phòng chat
+  socket.on("joinRoom", (roomId) => {
+    socket.join(roomId);
+    console.log(`Client ${socket.id} joined room: ${roomId}`);
+  });
+
+  // Xử lý ngắt kết nối
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
+
 
 // Thêm middleware để sử dụng Socket.IO trong các route
 app.use((req, res, next) => {

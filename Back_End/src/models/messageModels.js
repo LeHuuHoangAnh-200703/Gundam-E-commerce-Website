@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-    MaTinNhan: { type: String, required: true },
-    MaCuocTroChuyen: { type: String, required: true },
+    MaTinNhan: { type: String, required: true, unique: true },
+    ChatId: { type: String, required: true},
     NguoiGui: { type: String, required: true },
     NoiDung: { type: String, required: true },
     ThoiGian: { type: Date, default: Date.now },
