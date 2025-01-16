@@ -36,7 +36,7 @@ mongoose
   .catch((err) => console.log(err));
 
 // Thiết lập PayPal client  
-const environment = new paypal.core.SandboxEnvironment('AShJqcyTWgvzRR2HWrM29MpJ9MJLtIisWReNqNnzc38KtBx8we-iL0xhmJhXCK3h90BeLy6PWnRfasLv', 'EH97r0PPBN9vtj4j9-nNV5qos0GOiLcXiP-Z_SDEDXul2y6pOIUbQQ68krZGCYCy3vNR51OlWRt8SYA4');   
+const environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);   
 const client = new paypal.core.PayPalHttpClient(environment); 
 
 const khachHangRoutes = require("./src/routes/customers");
@@ -52,6 +52,7 @@ const feeabackRoutes = require("./src/routes/feedbacks");
 const inventoryRoutes = require("./src/routes/inventories");
 const cartRoutes = require("./src/routes/carts");
 const locationRoutes = require("./src/routes/locations");
+const messageRoutes = require("./src/routes/messages");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
@@ -66,6 +67,7 @@ app.use("/api/danhgia", feeabackRoutes);
 app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
+app.use("/api/tinnhan", messageRoutes);
 
 // Socket.IO lắng nghe kết nối từ client
 io.on("connection", (socket) => {
@@ -91,6 +93,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
-  console.log(`listening on port ${PORT}`);
+// Chạy server
+server.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });

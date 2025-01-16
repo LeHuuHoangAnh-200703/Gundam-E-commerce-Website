@@ -153,6 +153,15 @@ const totalPrice = computed(() => {
         }, 0);
 });
 
+const chatBox = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/chatbox');
+    }
+}
+
 function formatCurrency(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -240,9 +249,9 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
-        <router-link to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
+        <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
-        </router-link>
+        </button>
         <transition name="slide-fade" mode="out-in">
             <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
                 'border-[#DB3F4C]': notification.type === 'error',
