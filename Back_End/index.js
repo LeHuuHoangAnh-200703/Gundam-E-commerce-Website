@@ -2,12 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const paypal = require('@paypal/checkout-server-sdk');
-const dotenv = require('dotenv');
+const paypal = require("@paypal/checkout-server-sdk");
+const dotenv = require("dotenv");
 const http = require("http");
 const { Server } = require("socket.io");
 
-dotenv.config()
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -35,9 +35,12 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-// Thiết lập PayPal client  
-const environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);   
-const client = new paypal.core.PayPalHttpClient(environment); 
+// Thiết lập PayPal client
+const environment = new paypal.core.SandboxEnvironment(
+  process.env.PAYPAL_CLIENT_ID,
+  process.env.PAYPAL_CLIENT_SECRET
+);
+const client = new paypal.core.PayPalHttpClient(environment);
 
 const khachHangRoutes = require("./src/routes/customers");
 const adminRoutes = require("./src/routes/admins");
@@ -69,23 +72,23 @@ app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/tinnhan", messageRoutes);
 
+const Message = require("./src/models/messageModels");
 // Socket.IO lắng nghe kết nối từ client
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
   // Lắng nghe sự kiện gửi tin nhắn
   socket.on("sendMessage", async (data) => {
-    const { NguoiGui, NoiDung, MaTinNhan } = data;
-
-    // Lưu tin nhắn vào MongoDB
+    console.log("Received message data:", data);
     try {
-      const newMessage = new Message({ NguoiGui, NoiDung, MaTinNhan });
-      await newMessage.save();
+      const newMessage = new Message(data);
+      console.log(newMessage)
+      await newMessage.save(); // Lưu vào MongoDB
 
-      // Phát tin nhắn đến các thành viên trong phòng (nếu có)
-      io.to(MaTinNhan).emit("receiveMessage", newMessage);
+      // Phát tin nhắn tới tất cả các client trong phòng hoặc cho các client cụ thể
+      io.to(data.ChatId).emit("receiveMessage", newMessage);
     } catch (error) {
-      console.error("Error saving message:", error);
+      console.error("Lỗi khi lưu tin nhắn:", error);
     }
   });
 
@@ -100,7 +103,6 @@ io.on("connection", (socket) => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
-
 
 // Thêm middleware để sử dụng Socket.IO trong các route
 app.use((req, res, next) => {

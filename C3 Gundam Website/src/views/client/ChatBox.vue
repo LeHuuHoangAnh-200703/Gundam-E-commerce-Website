@@ -4,10 +4,10 @@ import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import { io } from 'socket.io-client';
+import axios from 'axios';
 
-const errors = ref({});
 const message = ref('');
-const messages = ref([]); // Danh sách tin nhắn
+const messages = ref([]);
 const socket = ref(null); // Kết nối socket.io
 
 // Escape HTML để ngăn chặn XSS
@@ -32,32 +32,51 @@ onMounted(() => {
 
 // Gửi tin nhắn đến server
 const userName = localStorage.getItem('TenKhachHang');
-const sendMessage = () => {
-    if (message.value.trim()) {
-        const sanitizedMessage = escapeHtml(message.value);
-        const newMessage = {
-            content: sanitizedMessage,
-            sender: userName,
-            timestamp: new Date().toISOString(),
-        };
+const userId = localStorage.getItem('MaKhachHang');
+const adminId = localStorage.getItem('MaAdmin');
+// Gửi tin nhắn đến server  
+const sendMessage = async () => {  
+    if (message.value.trim()) {  
+        const sanitizedMessage = escapeHtml(message.value);  
+        const newMessage = {  
+            NoiDung: sanitizedMessage,  
+            NguoiGui: userName,
+            idNguoiGui: userId,
+            idNguoiNhan: adminId,  
+            ThoiGian: new Date().toISOString(),
+            role: 'user',    
+        };  
 
-        // Thêm tin nhắn của client vào danh sách
-        messages.value.push(newMessage);
-
-        // Gửi tin nhắn đến server qua socket
-        socket.value.emit('message', newMessage);
-
-        // Reset input message
-        message.value = '';
-    }
+        try {
+            const response = await axios.post('http://localhost:3000/api/tinnhan', newMessage);
+            console.log(message.value)
+            messages.value.push(response.data.newMessage);
+            message.value = '';
+        } catch (error) {
+            console.log('Error sending message:', error);
+        }  
+    }  
 };
 
-// Theo dõi khi component bị unmounted
-onUnmounted(() => {
-    if (socket.value) {
-        socket.value.disconnect(); // Ngắt kết nối socket
-    }
+onMounted(() => {
+    socket.value = io('http://localhost:3000', {
+        reconnectionAttempts: 5, // Số lần thử kết nối lại
+        reconnectionDelay: 1000, // Thời gian giữa các lần thử kết nối lại
+    });
+
+    socket.value.on('connect', () => {
+        console.log('Socket connected');
+    });
+
+    socket.value.on('disconnect', () => {
+        console.log('Socket disconnected');
+    });
+
+    socket.value.on('message', (data) => {
+        messages.value.push(data); // Thêm tin nhắn vào danh sách
+    });
 });
+
 </script>
 
 <template>
