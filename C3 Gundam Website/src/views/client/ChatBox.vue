@@ -1,16 +1,22 @@
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
+// State quản lý tin nhắn
 const message = ref('');
 const messages = ref([]);
-const socket = ref(null); // Kết nối socket.io
+const socket = ref(null);
 
-// Escape HTML để ngăn chặn XSS
+// Lấy thông tin người dùng từ localStorage
+const userName = localStorage.getItem('TenKhachHang');
+const userId = localStorage.getItem('MaKhachHang');
+const adminId = localStorage.getItem('MaAdmin');
+
+// Escape HTML để ngăn ngừa XSS
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -20,63 +26,105 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 
-// Kết nối với Socket.IO server
-onMounted(() => {
-    socket.value = io('http://localhost:3000');
-
-    // Lắng nghe tin nhắn từ server
-    socket.value.on('message', (data) => {
-        messages.value.push(data); // Thêm tin nhắn vào danh sách
-    });
-});
-
-// Gửi tin nhắn đến server
-const userName = localStorage.getItem('TenKhachHang');
-const userId = localStorage.getItem('MaKhachHang');
-const adminId = localStorage.getItem('MaAdmin');
-// Gửi tin nhắn đến server  
-const sendMessage = async () => {  
-    if (message.value.trim()) {  
-        const sanitizedMessage = escapeHtml(message.value);  
-        const newMessage = {  
-            NoiDung: sanitizedMessage,  
-            NguoiGui: userName,
-            idNguoiGui: userId,
-            idNguoiNhan: adminId,  
-            ThoiGian: new Date().toISOString(),
-            role: 'user',    
-        };  
-
-        try {
-            const response = await axios.post('http://localhost:3000/api/tinnhan', newMessage);
-            console.log(message.value)
-            messages.value.push(response.data.newMessage);
-            message.value = '';
-        } catch (error) {
-            console.log('Error sending message:', error);
-        }  
-    }  
-};
-
+// Kết nối với Socket.IO
 onMounted(() => {
     socket.value = io('http://localhost:3000', {
-        reconnectionAttempts: 5, // Số lần thử kết nối lại
-        reconnectionDelay: 1000, // Thời gian giữa các lần thử kết nối lại
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
     });
 
+    // Khi kết nối socket thành công
     socket.value.on('connect', () => {
         console.log('Socket connected');
+
+        // Tham gia phòng chat dựa trên `idNguoiGui` và `idNguoiNhan`
+        const roomId = [userId, adminId].sort().join('-'); // Tạo roomId duy nhất từ hai id
+        socket.value.emit('joinRoom', roomId);
     });
 
+    // Xử lý khi nhận tin nhắn từ server
+    socket.value.on('receiveMessage', (data) => {
+        messages.value.push(data);
+    });
+
+    // Khi socket ngắt kết nối
     socket.value.on('disconnect', () => {
         console.log('Socket disconnected');
     });
-
-    socket.value.on('message', (data) => {
-        messages.value.push(data); // Thêm tin nhắn vào danh sách
-    });
 });
 
+// Gửi tin nhắn
+const sendMessage = async () => {
+    if (message.value.trim()) {
+        const sanitizedMessage = escapeHtml(message.value);
+        const newMessage = {
+            NoiDung: sanitizedMessage,
+            NguoiGui: userName,
+            idNguoiGui: userId,
+            idNguoiNhan: adminId,
+            ThoiGian: new Date().toISOString(),
+            role: 'user',
+        };
+
+        try {
+            // Gửi tin nhắn qua API
+            const response = await axios.post('http://localhost:3000/api/tinnhan', newMessage);
+
+            // Gửi tin nhắn qua socket
+            const roomId = [userId, adminId].sort().join('-');
+            socket.value.emit('sendMessage', { ...newMessage, roomId });
+
+            // Cập nhật giao diện
+            messages.value.push(response.data.newMessage);
+            message.value = '';
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }
+};
+
+const formatDate = (date) => {
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    };
+
+    const formattedDate = date.toLocaleString('vi-VN', options);
+
+    return formattedDate;
+};
+
+
+const fetchMessages = async () => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/tinnhan?idNguoiGui=${userId}&idNguoiNhan=${adminId}`);
+        messages.value = response.data.messages;
+        messages.value = messages.value.map(msg => {
+            const formattedDate = new Date(msg.ThoiGian);
+            msg.ThoiGian = formatDate(formattedDate);
+            return {
+                ThoiGian: msg.ThoiGian,
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+    }
+};
+
+onMounted(() => {
+    fetchMessages();
+})
+
+// Xóa socket khi unmounted
+onUnmounted(() => {
+    if (socket.value) {
+        socket.value.disconnect();
+    }
+});
 </script>
 
 <template>
@@ -97,20 +145,24 @@ onMounted(() => {
                         </div>
                     </div>
                     <hr>
-                    <div class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-53vh)]">
-                        <!-- Hiển thị danh sách tin nhắn -->
-                        <div v-for="(msg, index) in messages" :key="index" class="flex gap-2"
-                            :class="{ 'self-end': msg.sender === 'client' }">
-                            <template v-if="msg.sender === 'admin'">
+                    <div class="flex flex-col gap-4 flex-grow overflow-y-auto min-h-[calc(100vh-60vh)]">
+                        <div v-for="(msg, index) in messages" :key="index" class="flex gap-2">
+                            <div class="flex flex-col gap-1" :class="{ 'self-end': msg.role === 'user' }"
+                                v-if="msg.role === 'user'">
+                                <div class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg self-end">
+                                    <p class="text-white text-[14px] inline-block">{{ msg.TinNhan }}</p>
+                                </div>
+                                <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
+                            </div>
+                            <template v-if="msg.role === 'admin'">
                                 <img src="../../assets/img/avatar.jpg" class="w-[35px] h-[35px] rounded-full" alt="">
                             </template>
-                            <div class="flex flex-col gap-1">
-                                <div :class="msg.sender === 'client' ? 'bg-[#4169E1] text-white' : 'bg-gray-200 text-[#333]'"
+                            <div v-if="msg.role === 'admin'" class="flex flex-col gap-1">
+                                <div :class="msg.role === 'admin' ? 'bg-[#4169E1] text-white' : 'bg-gray-200 text-[#333]'"
                                     class="p-2 rounded-md">
-                                    <p class="text-[14px]">{{ msg.content }}</p>
+                                    <p class="text-[14px]">{{ msg.TinNhan }}</p>
                                 </div>
-                                <small class="text-white text-[10px]">{{ new Date(msg.timestamp).toLocaleString()
-                                    }}</small>
+                                <small class="text-white text-[10px]">{{}}</small>
                             </div>
                         </div>
                     </div>

@@ -72,28 +72,57 @@ app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/tinnhan", messageRoutes);
 
-const Message = require("./src/models/messageModels");
+const MessageModel = require("./src/models/messageModels");
 // Socket.IO lắng nghe kết nối từ client
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
-  // Lắng nghe sự kiện gửi tin nhắn
-  socket.on("sendMessage", async (data) => {
-    console.log("Received message data:", data);
-    try {
-      const newMessage = new Message(data);
-      console.log(newMessage)
-      await newMessage.save(); // Lưu vào MongoDB
+  // Xử lý khi client gửi tin nhắn
+  socket.on('sendMessage', async (data) => {
+  try {
+    // Tìm bản ghi chat theo MaTinNhan
+    const chat = await MessageModel.findOne({ MaTinNhan: data.MaTinNhan });
 
-      // Phát tin nhắn tới tất cả các client trong phòng hoặc cho các client cụ thể
-      io.to(data.ChatId).emit("receiveMessage", newMessage);
-    } catch (error) {
-      console.error("Lỗi khi lưu tin nhắn:", error);
+    // Nếu đã có cuộc trò chuyện, thêm tin nhắn vào mảng
+    if (chat) {
+      chat.NoiDung.push({
+        NguoiGui: data.NguoiGui,
+        TinNhan: data.NoiDung,
+        role: data.role,
+        ThoiGian: new Date(),
+      });
+
+      await chat.save(); // Lưu thay đổi
+    } else {
+      // Nếu chưa có, tạo bản ghi mới
+      const newChat = new MessageModel({
+        MaTinNhan: data.MaTinNhan,
+        idNguoiGui: data.idNguoiGui,
+        idNguoiNhan: data.idNguoiNhan,
+        NoiDung: [
+          {
+            NguoiGui: data.NguoiGui,
+            TinNhan: data.NoiDung,
+            role: data.role,
+            ThoiGian: new Date(),
+          },
+        ],
+      });
+
+      await newChat.save(); // Lưu bản ghi mới
     }
-  });
 
-  // Xử lý khi client tham gia vào một phòng chat
-  socket.on("joinRoom", (roomId) => {
+    // Phát tin nhắn cho các client trong room
+    io.to(data.roomId).emit('receiveMessage', data);
+  } catch (error) {
+    console.error('Error saving message:', error);
+  }
+});
+
+
+  // Xử lý khi client tham gia phòng chat
+  socket.on("joinRoom", ({ idNguoiGui, idNguoiNhan }) => {
+    const roomId = [idNguoiGui, idNguoiNhan].sort().join("_");
     socket.join(roomId);
     console.log(`Client ${socket.id} joined room: ${roomId}`);
   });
@@ -103,6 +132,7 @@ io.on("connection", (socket) => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
+
 
 // Thêm middleware để sử dụng Socket.IO trong các route
 app.use((req, res, next) => {

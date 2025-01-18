@@ -1,61 +1,80 @@
-const Message = require('../models/messageModels');
-
-function generateChatId() {
-    return 'CID' + Math.floor(10000 + Math.random() * 90000);
-}
+const Message = require("../models/messageModels");
 
 function generateMaTinNhan() {
-    return 'MTN' + Math.floor(Math.random() * 1000000);
+    return "MTN" + Math.floor(Math.random() * 1000000);
 }
 
 exports.addMessage = async (req, res) => {
-    const { idNguoiGui, NoiDung, idNguoiNhan, NguoiGui, role } = req.body;
-    console.log(req.body);
-    try {
-        // Kiểm tra xem có tin nhắn nào giữa idNguoiGui và idNguoiNhan không
-        const existingMessages = await Message.find({ idNguoiGui, idNguoiNhan });
-        let chatId;
-        if (existingMessages.length > 0) {
-            // Nếu đã có tin nhắn giữa hai người này, sử dụng ChatId từ tin nhắn đầu tiên
-            chatId = existingMessages[0].ChatId;
-        } else {
-            // Nếu chưa có, tạo ChatId mới
-            chatId = generateChatId();
-        }
+    const { idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role } = req.body;
 
-        // Tạo tin nhắn mới
-        const newMessage = new Message({
-            ChatId: chatId,
+    try {
+        const existingChat = await Message.findOne({
             idNguoiGui,
             idNguoiNhan,
-            NoiDung,
-            NguoiGui,
-            MaTinNhan: generateMaTinNhan(),
-            role,
         });
 
-        // Lưu tin nhắn
-        console.log("Saving Message:", newMessage);
-        await newMessage.save();
-        res.status(201).json({ success: true, newMessage }); // Trả về tin nhắn vừa tạo
+        if (existingChat) {
+            // Thêm tin nhắn mới vào mảng nếu đã có bản ghi
+            existingChat.NoiDung.push({
+                NguoiGui,
+                TinNhan: NoiDung,
+                role,
+                ThoiGian: new Date(),
+            });
+
+            await existingChat.save();
+            return res.status(200).json({ success: true, message: "Tin nhắn đã được thêm vào cuộc trò chuyện.", chat: existingChat });
+        } else {
+            // Tạo bản ghi mới nếu chưa có
+            const newMessage = new Message({
+                MaTinNhan: generateMaTinNhan(),
+                idNguoiGui,
+                idNguoiNhan,
+                NoiDung: [
+                    {
+                        NguoiGui,
+                        TinNhan: NoiDung,
+                        role,
+                        ThoiGian: new Date(),
+                    },
+                ],
+            });
+            await newMessage.save();
+            return res.status(201).json({ success: true, message: "Cuộc trò chuyện mới đã được tạo.", chat: newMessage });
+        }
     } catch (error) {
         console.error("Error saving message:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
 
-exports.getMessagesByChatId = async (req, res) => {
-    const { chatId } = req.params;
 
-    if (!chatId) {
-        return res.status(400).json({ success: false, message: "ChatId là bắt buộc." });
+exports.getMessages = async (req, res) => {
+    const { idNguoiGui, idNguoiNhan } = req.query;
+
+    if (!idNguoiGui || !idNguoiNhan) {
+        return res.status(400).json({ success: false, message: "Thiếu thông tin idNguoiGui hoặc idNguoiNhan." });
     }
 
     try {
-        // Tìm tất cả tin nhắn theo ChatId
-        const messages = await Message.find({ ChatId: chatId }).sort({ ThoiGian: 1 });
-        res.status(200).json({ success: true, data: messages });
+        // Tìm bản ghi chat giữa hai người dùng
+        const chat = await Message.findOne({
+            $or: [
+                { idNguoiGui, idNguoiNhan },
+                { idNguoiGui: idNguoiNhan, idNguoiNhan: idNguoiGui },
+            ],
+        });
+
+        if (!chat) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy cuộc trò chuyện." });
+        }
+
+        // Sắp xếp mảng tin nhắn theo thời gian
+        const sortedMessages = chat.NoiDung.sort((a, b) => new Date(a.ThoiGian) - new Date(b.ThoiGian));
+
+        res.status(200).json({ success: true, messages: sortedMessages });
     } catch (error) {
+        console.error("Error fetching messages:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
