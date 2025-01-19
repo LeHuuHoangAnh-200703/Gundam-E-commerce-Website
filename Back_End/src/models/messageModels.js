@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  MaTinNhan: { type: String, required: true, unique: true },
+  MaTinNhan: String,
   idNguoiGui: { type: String, required: true },
   idNguoiNhan: { type: String, required: true },
   NoiDung: [

@@ -1,33 +1,25 @@
 const Message = require("../models/messageModels");
 
-function generateMaTinNhan() {
-    return "MTN" + Math.floor(Math.random() * 1000000);
-}
-
 exports.addMessage = async (req, res) => {
-    const { idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role } = req.body;
+    const { idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role, MaTinNhan } = req.body;
 
     try {
         const existingChat = await Message.findOne({
-            idNguoiGui,
-            idNguoiNhan,
+            MaTinNhan: MaTinNhan
         });
 
         if (existingChat) {
-            // Thêm tin nhắn mới vào mảng nếu đã có bản ghi
             existingChat.NoiDung.push({
                 NguoiGui,
                 TinNhan: NoiDung,
                 role,
                 ThoiGian: new Date(),
             });
-
             await existingChat.save();
-            return res.status(200).json({ success: true, message: "Tin nhắn đã được thêm vào cuộc trò chuyện.", chat: existingChat });
+            return res.status(200).json(existingChat);
         } else {
-            // Tạo bản ghi mới nếu chưa có
             const newMessage = new Message({
-                MaTinNhan: generateMaTinNhan(),
+                MaTinNhan,
                 idNguoiGui,
                 idNguoiNhan,
                 NoiDung: [
@@ -40,7 +32,7 @@ exports.addMessage = async (req, res) => {
                 ],
             });
             await newMessage.save();
-            return res.status(201).json({ success: true, message: "Cuộc trò chuyện mới đã được tạo.", chat: newMessage });
+            // return res.status(201).json(newMessage);
         }
     } catch (error) {
         console.error("Error saving message:", error);
@@ -48,6 +40,19 @@ exports.addMessage = async (req, res) => {
     }
 };
 
+// exports.getMessages = async (req, res) => {
+//     try {
+//         const message = await Message.findOne({
+//             MaTinNhan: req.params.maTinNhan,
+//         });
+//         if (!feeBack) {
+//             res.status(400).json({ message: "Mã tin nhắn không tồn tại!" });
+//         }
+//         res.status(200).json(message);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
 
 exports.getMessages = async (req, res) => {
     const { idNguoiGui, idNguoiNhan } = req.query;
@@ -72,9 +77,9 @@ exports.getMessages = async (req, res) => {
         // Sắp xếp mảng tin nhắn theo thời gian
         const sortedMessages = chat.NoiDung.sort((a, b) => new Date(a.ThoiGian) - new Date(b.ThoiGian));
 
-        res.status(200).json({ success: true, messages: sortedMessages });
+        return res.status(200).json({ success: true, messages: sortedMessages });
     } catch (error) {
         console.error("Error fetching messages:", error);
-        res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, error: error.message });
     }
 };
