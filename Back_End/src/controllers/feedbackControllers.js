@@ -89,4 +89,20 @@ exports.deleteFeedBack = async (req, res) => {
     }
 };
 
+exports.getFeedBackProducts = async (req, res) => {
+    try {
+        const statistics = await FeedBack.aggregate([
+            { 
+                $group: { 
+                    _id: "$ChatLuong", 
+                    count: { $sum: 1 } 
+                } 
+            }
+        ]);
+        return res.status(200).json(statistics);
+    } catch (err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 exports.upload = upload.array('HinhAnhSanPham', 10);

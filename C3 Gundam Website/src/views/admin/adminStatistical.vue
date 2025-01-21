@@ -4,6 +4,7 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import axios from "axios";
 import { Bar } from "vue-chartjs";
+import { Pie } from "vue-chartjs";
 import {
     Chart as ChartJS,
     Title,
@@ -11,13 +12,18 @@ import {
     Legend,
     BarElement,
     CategoryScale,
-    LinearScale
+    LinearScale,
+    ArcElement
 } from "chart.js";
 
 const customers = ref([]);
 const products = ref([]);
 const orders = ref([]);
 const feedbacks = ref([]);
+const notification = ref({
+    message: '',
+    type: ''
+});
 const fetchStatistical = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/thongke');
@@ -33,7 +39,7 @@ const fetchStatistical = async () => {
 }
 
 // Đăng ký các thành phần của Chart.js
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
 const chartData = ref(null);
 const chartOptions = ref({
@@ -57,12 +63,24 @@ const chartOptions = ref({
                 weight: 'bold',
                 textTransform: 'uppercase',
             },
-            color: '#444'
+            color: '#333'
         }
     }
 });
 
+const selectedYear = ref(new Date().getFullYear());
+
 const fetchRevenueData = async (year) => {
+    if (year > new Date().getFullYear()) {
+        notification.value = {
+            message: "Năm bạn muốn tìm không hợp lệ!",
+            type: "error",
+        };
+        setTimeout(() => {
+            notification.value.message = '';
+        }, 3000);
+        return;
+    }
     try {
         const response = await axios.get(`http://localhost:3000/api/donhang/thongke/revenue-by-month?year=${year}`);
         console.log(response.data)
@@ -76,9 +94,64 @@ const fetchRevenueData = async (year) => {
     }
 };
 
+const orderStatusChartData = ref(null);
+const fetchOrderStatusData = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/donhang/thongke/get-order-status");
+        const data = response.data;
+        orderStatusChartData.value = {
+            labels: data.map(item => item._id), // Lấy các trạng thái đơn
+            datasets: [
+                {
+                    label: "Số lượng đơn hàng",
+                    data: data.map(item => item.count),
+                    backgroundColor: [
+                        "#DA70D6",
+                        "#36A2EB",
+                        "#FFCE56",
+                        "#4BC0C0",
+                        "rgba(5, 155, 255, 0.5)"
+                    ]
+                }
+            ]
+        };
+    } catch (err) {
+        console.error("Lỗi khi lấy dữ liệu trạng thái đơn hàng:", err);
+    }
+};
+
+const feedbackStatusChartData = ref(null);
+const fetchFeedBackProducts = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/danhgia/thongke/get-feedback-products");
+        const data = response.data;
+        console.log(data)
+        feedbackStatusChartData.value = {
+            labels: data.map(item => `${item._id} sao`),
+            datasets: [
+                {
+                    label: "Tổng đánh giá",
+                    data: data.map(item => item.count),
+                    backgroundColor: [
+                        "#4169E1",
+                        "#9932CC",
+                        "#008B8B",
+                        "#AFEEEE",
+                        "#DB7093"
+                    ]
+                }
+            ]
+        };
+    } catch (err) {
+        console.error("Lỗi khi lấy dữ liệu trạng thái đơn hàng:", err);
+    }
+};
+
 onMounted(() => {
     fetchStatistical();
     fetchRevenueData(new Date().getFullYear());
+    fetchOrderStatusData();
+    fetchFeedBackProducts();
 })
 </script>
 
@@ -88,7 +161,7 @@ onMounted(() => {
             <SideBar />
             <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+                <div class="w-full relative flex flex-col gap-6 overflow-auto max-h-[calc(100vh-100px)] pb-7">
                     <div class="flex gap-4 w-full lg:flex-row flex-col">
                         <div class="text-white rounded-md shadow-lg bg-[#DB3F4C] w-full lg:w-[25%]">
                             <div class="flex justify-between px-4 pt-4 w-full items-center">
@@ -108,7 +181,7 @@ onMounted(() => {
                                 <i class="fa-solid fa-bag-shopping text-[30px]"></i>
                                 <div class="flex flex-col items-end">
                                     <p class="text-[24px] font-bold">{{ orders.length }}</p>
-                                    <p class="text-[14px] font-semibold">Đơn hàng đã và đang xử lý</p>
+                                    <p class="text-[14px] font-semibold">Đơn hàng đang xử lý</p>
                                 </div>
                             </div>
                             <div class="mt-6 w-full text-center bg-[#333]/30 rounded-b-md p-2">
@@ -144,12 +217,53 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-3">
-                        <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo năm</h3>
+                        <div class="flex gap-4 items-center">
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo năm</h3>
+                            <input type="number" v-model="selectedYear" min="2000" max="2100"
+                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[200px] focus:ring focus:ring-[#1A1D27]"
+                                @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
+                        </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                             <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
                         </div>
                     </div>
+                    <div class="flex lg:flex-row flex-col gap-4 w-full">
+                        <div class="flex flex-col gap-3 w-full lg:w-1/2">
+                            <div class="flex gap-4 items-center">
+                                <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê đơn hàng</h3>
+                            </div>
+                            <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
+                                <div class="lg:w-[350px] lg:h-[350px] w-[250px] h-[250px] m-auto">
+                                    <Pie v-if="orderStatusChartData" :data="orderStatusChartData" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-3 w-full lg:w-1/2">
+                            <div class="flex gap-4 items-center">
+                                <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê đánh giá sản phẩm</h3>
+                            </div>
+                            <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
+                                <div class="lg:w-[350px] lg:h-[350px] w-[200px] h-[200px] m-auto">
+                                    <Pie v-if="feedbackStatusChartData" :data="feedbackStatusChartData" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <transition name="slide-fade" mode="out-in">
+                    <div v-if="notification.message" :class="['fixed top-4 left-1/2 right-10 transform p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2 w-full max-w-sm', {
+                        'border-[#DB3F4C]': notification.type === 'error',
+                        'border-[#40E0D0]': notification.type === 'success',
+                    }]">
+                        <div class="flex gap-2 justify-center items-center">
+                            <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
+                                class="w-[50px]" alt="">
+                            <p class="text-[16px] font-semibold"
+                                :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
+                                    notification.message }}</p>
+                        </div>
+                    </div>
+                </transition>
             </div>
         </div>
     </div>
@@ -168,5 +282,16 @@ onMounted(() => {
 
 .fixed.translate-x-0 {
     transform: translateX(0);
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
 }
 </style>

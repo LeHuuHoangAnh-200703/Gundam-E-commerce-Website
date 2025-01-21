@@ -211,11 +211,24 @@ exports.getRevenueByMonth = async (req, res) => {
                 }
             ]
         };
-
-        console.log(response);
         return res.status(200).json(response);
     } catch (err) {
-        console.error("Lỗi khi lấy doanh thu theo tháng:", err);
         return res.status(500).json({ message: "Có lỗi xảy ra khi lấy thống kê doanh thu." });
     }
 };
+
+exports.getOrderStatus = async (req, res) => {
+    try {
+        const statistics = await Order.aggregate([
+            { 
+                $group: { 
+                    _id: "$TrangThaiDon", 
+                    count: { $sum: 1 } 
+                } 
+            }
+        ]);
+        return res.status(200).json(statistics);
+    } catch (err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
