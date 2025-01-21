@@ -11,7 +11,7 @@ const ChucVu = ref(localStorage.getItem("ChucVu"));
 const listNatifications = ref([]);
 
 const sidebarMenuMobile = [
-    { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
+    { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
     { name: "Danh sách sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
     { name: "Danh sách nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Danh sách đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
@@ -22,7 +22,6 @@ const sidebarMenuMobile = [
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
     { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
     { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
-    { name: "Hóa đơn", icon: "fa-solid fa-scroll", path: "listBills" },
     { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "logout" },
 ];
 // const logout = () => {

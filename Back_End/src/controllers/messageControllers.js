@@ -32,27 +32,13 @@ exports.addMessage = async (req, res) => {
                 ],
             });
             await newMessage.save();
-            // return res.status(201).json(newMessage);
+            return res.status(200).json(newMessage);
         }
     } catch (error) {
         console.error("Error saving message:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
-
-// exports.getMessages = async (req, res) => {
-//     try {
-//         const message = await Message.findOne({
-//             MaTinNhan: req.params.maTinNhan,
-//         });
-//         if (!feeBack) {
-//             res.status(400).json({ message: "Mã tin nhắn không tồn tại!" });
-//         }
-//         res.status(200).json(message);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
 
 exports.getMessages = async (req, res) => {
     const { idNguoiGui, idNguoiNhan } = req.query;

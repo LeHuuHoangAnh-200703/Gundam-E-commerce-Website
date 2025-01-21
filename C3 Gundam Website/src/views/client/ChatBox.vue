@@ -49,10 +49,10 @@ const sendMessage = async () => {
                 "http://localhost:3000/api/tinnhan",
                 newMessage
             );
-            const roomId = [userId, adminId].sort().join("-");
+            const roomId = [adminId, userId].sort().join("-");
+            console.log(roomId)
             socket.value.emit("sendMessage", { ...newMessage, roomId });
             message.value = "";
-            console.log(2)
             messages.value.push(newMessage);
         } catch (error) {
             console.error("Error sending message:", error);
@@ -84,6 +84,7 @@ const fetchMessages = async () => {
             const formattedDate = new Date(msg.ThoiGian);
             msg.ThoiGian = formatDate(formattedDate);
             return {
+                ...msg,
                 ThoiGian: msg.ThoiGian,
             };
         });
@@ -104,20 +105,24 @@ onMounted(() => {
         console.log("Socket connected");
 
         // Tham gia phòng chat dựa trên `idNguoiGui` và `idNguoiNhan`
-        const roomId = [userId, adminId].sort().join("-"); // Tạo roomId duy nhất từ hai id
+        const roomId = [adminId, userId].sort().join("-"); // Tạo roomId duy nhất từ hai id
         socket.value.emit("joinRoom", roomId);
     });
 
     // Xử lý khi nhận tin nhắn từ server
     socket.value.on("receiveMessage", (data) => {
+        console.log("Received message:", data);
         messages.value.push(data);
+        console.log("Updated messages:", messages.value);
     });
-
+    fetchMessages();
+    socket.value.on("error", (error) => {
+        console.error("Socket error:", error);
+    });
     // Khi socket ngắt kết nối
     socket.value.on("disconnect", () => {
         console.log("Socket disconnected");
     });
-    fetchMessages();
 });
 
 // Xóa socket khi unmounted
@@ -149,8 +154,8 @@ onUnmounted(() => {
                     </div>
                     <hr />
                     <div class="flex flex-col gap-4 flex-grow overflow-y-auto min-h-[calc(100vh-60vh)]">
-                        <div v-for="(msg, index) in messages" :key="index" class="flex gap-2">
-                            <div class="flex flex-col gap-1" :class="{ 'self-end': msg.role === 'user' }"
+                        <div v-for="(msg, index) in messages" :key="index">
+                            <div class="flex flex-col gap-1" :class="{ 'items-end': msg.role === 'user' }"
                                 v-if="msg.role === 'user'">
                                 <div class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg self-end">
                                     <p class="text-white text-[14px] inline-block">

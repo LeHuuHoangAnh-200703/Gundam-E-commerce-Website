@@ -23,9 +23,6 @@ import customers from "@/views/admin/customers.vue";
 import listSuppliers from "@/views/admin/listSuppliers.vue";
 import addSupplier from "@/views/admin/addSupplier.vue";
 import editSupplier from "@/views/admin/editSupplier.vue";
-import listBills from "@/views/admin/listBills.vue";
-import editBill from "@/views/admin/editBill.vue";
-import listBillInfo from "@/views/admin/listBillInfo.vue";
 import listEntryForms from "@/views/admin/listEntryForms.vue";
 import editEntryForm from "@/views/admin/editEntryForm.vue";
 import inventory from "@/views/admin/inventory.vue";
@@ -38,6 +35,7 @@ import OrderProducts from "@/views/client/OrderProducts.vue";
 import AddInfoOrder from "@/views/client/AddInfoOrder.vue";
 import chatWithCustomer from "@/views/admin/chatWithCustomer.vue";
 import ChatBox from "@/views/client/ChatBox.vue";
+import Statistical from "@/views/admin/adminStatistical.vue";
 
 const routes = [
     {
@@ -183,24 +181,6 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
-        path: "/admin/listBills",
-        name: "List Bills",
-        component: listBills,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/admin/editBill",
-        name: "Edit Bill",
-        component: editBill,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/admin/listBillInfo",
-        name: "List Bill Info",
-        component: listBillInfo,
-        meta: { requiresAuth: true },
-    },
-    {
         path: "/admin/inventoryLits",
         name: "Inventory Lits",
         component: inventory,
@@ -243,9 +223,15 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
-        path: "/admin/chatWithCustomer/",
+        path: "/admin/chatWithCustomer",
         name: "Chat With Customer",
         component: chatWithCustomer,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/statisticals",
+        name: "Admin statistical",
+        component: Statistical,
         meta: { requiresAuth: true },
     },
     {

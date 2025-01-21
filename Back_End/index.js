@@ -56,6 +56,7 @@ const inventoryRoutes = require("./src/routes/inventories");
 const cartRoutes = require("./src/routes/carts");
 const locationRoutes = require("./src/routes/locations");
 const messageRoutes = require("./src/routes/messages");
+const statisticalRoutes = require("./src/routes/statisticals");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
@@ -71,6 +72,7 @@ app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/tinnhan", messageRoutes);
+app.use("/api/thongke", statisticalRoutes);
 
 const MessageModel = require("./src/models/messageModels");
 // Socket.IO lắng nghe kết nối từ client
@@ -84,7 +86,6 @@ io.on("connection", (socket) => {
       const chat = await MessageModel.findOne({
         MaTinNhan: data.MaTinNhan
       });
-      console.log(chat)
       // Nếu đã có cuộc trò chuyện, thêm tin nhắn vào mảng
       if (chat) {
         chat.NoiDung.push({
@@ -113,7 +114,6 @@ io.on("connection", (socket) => {
 
         await newChat.save(); // Lưu bản ghi mới
       }
-
       // Phát tin nhắn cho các client trong room
       io.to(data.roomId).emit("receiveMessage", data);
     } catch (error) {
@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
 
   // Xử lý khi client tham gia phòng chat
   socket.on("joinRoom", ({ idNguoiGui, idNguoiNhan }) => {
-    const roomId = [idNguoiGui, idNguoiNhan].sort().join("_");
+    const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
     socket.join(roomId);
     console.log(`Client ${socket.id} joined room: ${roomId}`);
   });

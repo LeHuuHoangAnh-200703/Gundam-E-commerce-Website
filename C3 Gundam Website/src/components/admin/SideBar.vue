@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 const status = ref(0);
 const sidebarMenu = [
-    { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "adminStatistical" },
+    { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
     { name: "Quản lý sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
     { name: "Quản lý nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Quản lý đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
@@ -13,7 +13,6 @@ const sidebarMenu = [
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
     { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
     { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
-    { name: "Hóa đơn", icon: "fa-solid fa-scroll", path: "listBills" },
 ];
 
 const ChucVu = ref(localStorage.getItem("ChucVu"));
