@@ -16,11 +16,11 @@ exports.getOrder = async (req, res) => {
             MaDonHang: req.params.maDonHang,
         });
         if (!order) {
-            res.status(400).json({ message: "Đơn hàng không tồn tại!" });
+            return res.status(400).json({ message: "Đơn hàng không tồn tại!" });
         }
-        res.status(200).json(order);
+        return res.status(200).json(order);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 };
 
@@ -164,4 +164,58 @@ exports.updatedStatus = async (req, res) => {
         console.error("Error updating order status: ", error);  
         res.status(500).json({ message: 'Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.' });  
     }
-}
+};
+
+exports.getRevenueByMonth = async (req, res) => {
+    const year = req.query.year || new Date().getFullYear(); // Lấy năm từ query hoặc mặc định là năm hiện tại
+    console.log(year);
+    try {
+        const revenueData = await Order.aggregate([
+            {
+                $match: {
+                    TrangThaiDon: "Đã giao thành công", // Chỉ tính doanh thu cho đơn hàng hoàn thành
+                    NgayDatHang: {
+                        $gte: new Date(`${year}-01-01`), // Ngày đầu tiên của năm
+                        $lte: new Date(`${year}-12-31`) // Ngày cuối cùng của năm
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: "$NgayDatHang" }, // Lấy tháng từ trường NgayDatHang
+                    totalRevenue: { $sum: "$TongDon" } // Tính tổng doanh thu
+                }
+            },
+            {
+                $sort: { _id: 1 } // Sắp xếp theo tháng
+            }
+        ]);
+
+        // Tạo mảng doanh thu cho tất cả 12 tháng, nếu không có dữ liệu cho tháng nào thì gán doanh thu là 0
+        const revenueMap = new Array(12).fill(0); // Mảng doanh thu mặc định cho 12 tháng
+
+        // Cập nhật doanh thu cho các tháng có dữ liệu
+        revenueData.forEach(item => {
+            revenueMap[item._id - 1] = item.totalRevenue; // Lưu doanh thu vào vị trí đúng của tháng (0-indexed)
+        });
+
+        const response = {
+            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+            datasets: [
+                {
+                    label: `Doanh thu năm ${year}`,
+                    data: revenueMap,
+                    backgroundColor: "rgba(54, 162, 235, 0.6)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        console.log(response);
+        return res.status(200).json(response);
+    } catch (err) {
+        console.error("Lỗi khi lấy doanh thu theo tháng:", err);
+        return res.status(500).json({ message: "Có lỗi xảy ra khi lấy thống kê doanh thu." });
+    }
+};

@@ -9,5 +9,6 @@ router.put("/:maDonHang", orderController.updatedOrder);
 router.delete("/:maDonHang",orderController.deleteOrder);
 router.get("/khachhang/:maKhachHang", orderController.getOrderById);
 router.patch("/trangthai/:maDonHang", orderController.updatedStatus);
+router.get("/thongke/revenue-by-month", orderController.getRevenueByMonth);
 
 module.exports = router;
