@@ -36,6 +36,7 @@ import AddInfoOrder from "@/views/client/AddInfoOrder.vue";
 import chatWithCustomer from "@/views/admin/chatWithCustomer.vue";
 import ChatBox from "@/views/client/ChatBox.vue";
 import Statistical from "@/views/admin/adminStatistical.vue";
+import personalDirectory from "@/views/client/personalDirectory.vue";
 
 const routes = [
     {
@@ -87,6 +88,11 @@ const routes = [
         path: "/chatbox",
         name: "Chat Box",
         component: ChatBox,
+    },
+    {
+        path:"/personalDirectory/:maKhachHang",
+        name: "Personal Directory",
+        component: personalDirectory,
     },
     {
         path: "/addInfoOrder/:maKhachHang",

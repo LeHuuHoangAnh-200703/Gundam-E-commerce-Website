@@ -52,16 +52,18 @@ onMounted(() => {
                             class="w-[100px] h-[100px] bg-[#fff] rounded-full shadow-lg absolute left-1/2 translate-x-[-50%] -top-[50px] bg-center bg-cover object-cover"
                             alt="">
                         <div class="flex justify-between items-center flex-col lg:flex-row gap-4 px-2 lg:px-24">
-                            <p class="font-semibold text-[18px] text-white my-2">Mã tài khoản: <span
-                                    class="text-[#FFD700]">{{ maKhachHang }}</span></p>
                             <div class="flex gap-6">
-                                <router-link :to="`/editProfile/${maKhachHang}`"
-                                    class="px-3 py-2 sm:px-5 sm:py-2 bg-[#DB3F4C] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Chỉnh
-                                    sửa hồ sơ</router-link>
                                 <router-link :to="`/addInfoOrder/${maKhachHang}`"
                                     class="px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Thêm
                                     địa chỉ</router-link>
+                                <router-link :to="`/personalDirectory/${maKhachHang}`"
+                                    class="px-3 py-2 sm:px-5 sm:py-2 bg-[#008B8B] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">
+                                    Danh mục cá nhân
+                                </router-link>
                             </div>
+                            <router-link :to="`/editProfile/${maKhachHang}`"
+                                class="px-3 py-2 sm:px-5 sm:py-2 bg-[#DB3F4C] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Chỉnh
+                                sửa hồ sơ</router-link>
                         </div>
                         <div class="text-center mt-12 pb-4">
                             <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">{{ name
@@ -70,7 +72,7 @@ onMounted(() => {
                                     class="fa-regular fa-envelope text-[#FFD700]"></i> {{ email }}
                             </div>
                             <hr>
-                            <div class="my-5 lg:text-[18px] text-[15px] font-medium text-white">
+                            <div class="my-5 lg:text-[16px] text-[14px] font-medium text-white">
                                 <p>
                                     Chào mừng <span class="font-semibold text-[#FFD700]">{{ name }}</span> đã đến với
                                     C3 Gundam, chúng tôi mong rằng tại đây sẽ thõa mãn được những nhu cầu
@@ -86,7 +88,8 @@ onMounted(() => {
         <div class="h-[150px]"></div>
         <Footer />
         <BackToTop />
-        <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
+        <button @click.prevent="chatBox" to="/chatbox"
+            class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
     </div>
