@@ -11,5 +11,6 @@ router.get("/khachhang/:maKhachHang", orderController.getOrderById);
 router.patch("/trangthai/:maDonHang", orderController.updatedStatus);
 router.get("/thongke/revenue-by-month", orderController.getRevenueByMonth);
 router.get("/thongke/get-order-status", orderController.getOrderStatus);
+router.get("/thongke/revenue-by-day", orderController.getRevenueByDay);
 
 module.exports = router;

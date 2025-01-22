@@ -5,6 +5,7 @@ import SideBar from "@/components/admin/SideBar.vue";
 import axios from "axios";
 import { Bar } from "vue-chartjs";
 import { Pie } from "vue-chartjs";
+import { Line } from "vue-chartjs";
 import {
     Chart as ChartJS,
     Title,
@@ -13,7 +14,9 @@ import {
     BarElement,
     CategoryScale,
     LinearScale,
-    ArcElement
+    ArcElement,
+    PointElement,
+    LineElement
 } from "chart.js";
 
 const customers = ref([]);
@@ -39,9 +42,10 @@ const fetchStatistical = async () => {
 }
 
 // Đăng ký các thành phần của Chart.js
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
+ChartJS.register(Title, Tooltip, Legend, BarElement, PointElement, CategoryScale, LinearScale, ArcElement, LineElement);
 
 const chartData = ref(null);
+const selectedYear = ref(new Date().getFullYear());
 const chartOptions = ref({
     responsive: true,
     plugins: {
@@ -59,7 +63,7 @@ const chartOptions = ref({
             display: true,
             text: "Thống kê doanh thu từng tháng trong năm",
             font: {
-                size: 14,
+                size: 16,
                 weight: 'bold',
                 textTransform: 'uppercase',
             },
@@ -68,12 +72,10 @@ const chartOptions = ref({
     }
 });
 
-const selectedYear = ref(new Date().getFullYear());
-
 const fetchRevenueData = async (year) => {
     if (year > new Date().getFullYear()) {
         notification.value = {
-            message: "Năm bạn muốn tìm không hợp lệ!",
+            message: "Năm tìm kiếm không hợp lệ!",
             type: "error",
         };
         setTimeout(() => {
@@ -82,17 +84,91 @@ const fetchRevenueData = async (year) => {
         return;
     }
     try {
-        const response = await axios.get(`http://localhost:3000/api/donhang/thongke/revenue-by-month?year=${year}`);
-        console.log(response.data)
+        const response = await axios.get(
+            `http://localhost:3000/api/donhang/thongke/revenue-by-month?year=${year}`
+        );
 
         chartData.value = {
             labels: response.data.labels,
-            datasets: response.data.datasets
+            datasets: [
+                {
+                    label: `Doanh thu năm ${year}`,
+                    data: response.data.datasets[0].data,
+                    borderColor: "rgba(245, 121, 197, 1)",
+                    backgroundColor: "rgba(245, 121, 197, 0.2)",
+                    borderWidth: 2,
+                    tension: 0.3,
+                },
+            ],
         };
     } catch (err) {
         console.error("Lỗi khi lấy dữ liệu doanh thu:", err);
     }
 };
+
+const chartDataDay = ref(null);
+const selectedYearofDay = ref(new Date().getFullYear());
+const selectedMonthOfDay = ref(new Date().getMonth() + 1);
+
+const chartDayOptions = ref({
+    responsive: true,
+    plugins: {
+        legend: {
+            position: "top",
+            labels: {
+                font: {
+                    size: 14,
+                    weight: "bold",
+                    color: "#333",
+                },
+            },
+        },
+        title: {
+            display: true,
+            text: "Thống kê doanh thu từng ngày trong tháng",
+            font: {
+                size: 16,
+                weight: "bold",
+                textTransform: 'uppercase',
+            },
+            color: "#444",
+        },
+    },
+});
+
+const fetchRevenueDay = async (year, month) => {
+    if (year > new Date().getFullYear()) {
+        notification.value = {
+            message: "Năm tìm kiếm không hợp lệ!",
+            type: "error",
+        };
+        setTimeout(() => {
+            notification.value.message = '';
+        }, 3000);
+        return;
+    }
+    try {
+        const response = await axios.get(
+            `http://localhost:3000/api/donhang/thongke/revenue-by-day?year=${year}&month=${month}`
+        );
+
+        chartDataDay.value = {
+            labels: response.data.labels,
+            datasets: [
+                {
+                    label: `Doanh thu tháng ${month}/${year}`,
+                    data: response.data.datasets[0].data,
+                    backgroundColor: "rgba(75, 192, 192, 0.6)",
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    borderWidth: 1,
+                },
+            ],
+        };
+    } catch (err) {
+        console.error("Lỗi khi lấy dữ liệu doanh thu theo ngày:", err);
+    }
+};
+
 
 const orderStatusChartData = ref(null);
 const fetchOrderStatusData = async () => {
@@ -100,7 +176,7 @@ const fetchOrderStatusData = async () => {
         const response = await axios.get("http://localhost:3000/api/donhang/thongke/get-order-status");
         const data = response.data;
         orderStatusChartData.value = {
-            labels: data.map(item => item._id), // Lấy các trạng thái đơn
+            labels: data.map(item => item._id),
             datasets: [
                 {
                     label: "Số lượng đơn hàng",
@@ -133,11 +209,11 @@ const fetchFeedBackProducts = async () => {
                     label: "Tổng đánh giá",
                     data: data.map(item => item.count),
                     backgroundColor: [
-                        "#4169E1",
-                        "#9932CC",
-                        "#008B8B",
-                        "#AFEEEE",
-                        "#DB7093"
+                        "#6495ED",
+                        "#40E0D0",
+                        "#7B68EE",
+                        "#EE82EE",
+                        "#FFFF00"
                     ]
                 }
             ]
@@ -152,6 +228,7 @@ onMounted(() => {
     fetchRevenueData(new Date().getFullYear());
     fetchOrderStatusData();
     fetchFeedBackProducts();
+    fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
 })
 </script>
 
@@ -218,13 +295,25 @@ onMounted(() => {
                     </div>
                     <div class="flex flex-col gap-3">
                         <div class="flex gap-4 items-center">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo năm</h3>
-                            <input type="number" v-model="selectedYear" min="2000" max="2100"
-                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[200px] focus:ring focus:ring-[#1A1D27]"
-                                @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo tháng
+                            </h3>
+                            <div class="flex items-center gap-4">
+                                <input type="number" v-model="selectedYearofDay" min="2000" max="2100"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[200px] focus:ring focus:ring-[#1A1D27]"
+                                    @change="fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)"
+                                    placeholder="Nhập năm ..." />
+                                <select v-model="selectedMonthOfDay"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[150px] focus:ring focus:ring-[#1A1D27]"
+                                    @change="fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)">
+                                    <option disabled value="">Chọn tháng</option>
+                                    <option v-for="month in 12" :key="month" :value="month">
+                                        Tháng {{ month }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
-                            <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
+                            <Bar v-if="chartDataDay" :data="chartDataDay" :options="chartDayOptions" />
                         </div>
                     </div>
                     <div class="flex lg:flex-row flex-col gap-4 w-full">
@@ -240,13 +329,25 @@ onMounted(() => {
                         </div>
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
                             <div class="flex gap-4 items-center">
-                                <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê đánh giá sản phẩm</h3>
+                                <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê đánh giá sản phẩm
+                                </h3>
                             </div>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[200px] h-[200px] m-auto">
                                     <Pie v-if="feedbackStatusChartData" :data="feedbackStatusChartData" />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-4 items-center">
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo năm</h3>
+                            <input type="number" v-model="selectedYear" min="2000" max="2100"
+                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[200px] focus:ring focus:ring-[#1A1D27]"
+                                @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
+                        </div>
+                        <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
+                            <Line v-if="chartData" :data="chartData" :options="chartOptions" />
                         </div>
                     </div>
                 </div>

@@ -205,8 +205,8 @@ exports.getRevenueByMonth = async (req, res) => {
                 {
                     label: `Doanh thu năm ${year}`,
                     data: revenueMap,
-                    backgroundColor: "rgba(54, 162, 235, 0.6)",
-                    borderColor: "rgba(54, 162, 235, 1)",
+                    backgroundColor: "rgba(255, 107, 107, 0.6)",
+                    borderColor: "rgba(255, 107, 107, 1)",
                     borderWidth: 1
                 }
             ]
@@ -232,3 +232,55 @@ exports.getOrderStatus = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+exports.getRevenueByDay = async (req, res) => {
+    const year = req.query.year || new Date().getFullYear();
+    const month = req.query.month || new Date().getMonth() + 1;
+    try {
+        const revenueData = await Order.aggregate([
+            {
+                $match: {
+                    TrangThaiDon: "Đã giao thành công",
+                    NgayDatHang: {
+                        $gte: new Date(`${year}-${month}-01`),
+                        $lte: new Date(`${year}-${month}-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dayOfMonth: "$NgayDatHang" },
+                    totalRevenue: { $sum: "$TongDon" }
+                }
+            },
+            {
+                $sort: { _id: 1 } // Sắp xếp theo ngày
+            }
+        ]);
+
+        // Tạo mảng doanh thu cho tất cả các ngày trong tháng (nếu không có dữ liệu cho ngày nào thì gán doanh thu là 0)
+        const daysInMonth = new Date(year, month, 0).getDate(); // Số ngày trong tháng
+        const revenueMap = new Array(daysInMonth).fill(0); // Mảng doanh thu mặc định cho tất cả các ngày trong tháng
+
+        // Cập nhật doanh thu cho các ngày có dữ liệu
+        revenueData.forEach(item => {
+            revenueMap[item._id - 1] = item.totalRevenue; // Lưu doanh thu vào vị trí đúng của ngày (0-indexed)
+        });
+
+        const response = {
+            labels: Array.from({ length: daysInMonth }, (_, i) => `Ngày ${i + 1}`),
+            datasets: [
+                {
+                    label: `Doanh thu tháng ${month}/${year}`,
+                    data: revenueMap,
+                    backgroundColor: "rgba(75, 192, 192, 0.6)",
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    borderWidth: 1
+                }
+            ]
+        };
+        return res.status(200).json(response);
+    } catch (err) {
+        return res.status(500).json({ message: "Có lỗi xảy ra khi lấy thống kê doanh thu." });
+    }
+};
