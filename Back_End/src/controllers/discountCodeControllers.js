@@ -52,6 +52,7 @@ exports.updatedDiscountCode = async (req, res) => {
         discountCode.SoLanSuDung = req.body.SoLanSuDung || discountCode.SoLanSuDung;
         discountCode.NgayHetHan = req.body.NgayHetHan || discountCode.NgayHetHan;
         discountCode.MaGiamGia = req.body.MaGiamGia || discountCode.MaGiamGia;
+        discountCode.SoLanLuuMa = req.body.SoLanLuuMa || discountCode.SoLanLuuMa;
 
         if (req.body.NgayHetHan && new Date(req.body.NgayHetHan) < new Date()) {
             return res.status(400).json({ message: "Ngày hết hạn không hợp lệ!" });

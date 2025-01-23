@@ -22,9 +22,11 @@ const fetchDiscountCode = async () => {
             return {
                 ...discountCode,
                 NgayHetHan: new Date(discountCode.NgayHetHan),
+                NgayTao: new Date(discountCode.NgayTao),
             };
         });
-        console.log(listDiscountCodes);
+        listDiscountCodes.value.sort((a, b) => b.NgayTao - a.NgayTao);
+        console.log(listDiscountCodes.value)
     } catch (error) {
         console.error('Error fetching:', error);
     }
@@ -36,7 +38,7 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
 
     try {
         const response = await axios.delete(`http://localhost:3000/api/magiamgia/${idMaGG}`);
-        
+
         const notificationData = {
             ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
@@ -90,7 +92,13 @@ onMounted(() => {
                         <div v-if="listDiscountCodes.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <div v-for="(discountCode, index) in listDiscountCodes" :key="index"
                                 class="flex flex-col gap-1 border-t-4 border-[#DB3F4C] bg-white p-4 shadow-lg">
-                                <p class="font-bold text-[22px]">{{ discountCode.TenMaGiamGia }}</p>
+                                <div class="flex justify-between items-center">
+                                    <p class="font-bold text-[22px]">{{ discountCode.TenMaGiamGia }}</p>
+                                    <div
+                                        class="w-[30px] h-[30px] rounded-full border-2 border-[#1A1D27] flex justify-center items-center">
+                                        <p class="text-[#1A1D27] text-[14px] font-bold">{{ discountCode.SoLanLuuMa }}</p>
+                                    </div>
+                                </div>
                                 <p v-if="discountCode.GiamTien" class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
                                     formatCurrency(discountCode.GiamTien) }} VNĐ</p>
                                 <p v-else class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
@@ -98,7 +106,7 @@ onMounted(() => {
                                 <div class="flex lg:flex-row flex-col lg:justify-between">
                                     <p class="font-semibold text-[14px]">Hạn sử dụng: {{ new
                                         Date(discountCode.NgayHetHan) < new Date() ? 'Hết hạn' :
-                                            discountCode.NgayHetHan.toLocaleDateString('vi-VN') }}</p>
+                                        discountCode.NgayHetHan.toLocaleDateString('vi-VN') }}</p>
                                             <p class="font-semibold text-[14px]">Số lượt sử dụng: {{
                                                 discountCode.SoLanSuDung }}
                                             </p>
@@ -113,7 +121,8 @@ onMounted(() => {
                                     <router-link :to="`/admin/editDiscountCode/${discountCode.IdMaGiamGia}`"
                                         class="bg-[#00697F] text-white px-4 py-3 rounded-md transition-all duration-300 hover:bg-[#055565]"><i
                                             class="fa-solid fa-pen-to-square"></i></router-link>
-                                    <form @click="deleteDiscountCode(discountCode.IdMaGiamGia, discountCode.TenMaGiamGia)">
+                                    <form
+                                        @click="deleteDiscountCode(discountCode.IdMaGiamGia, discountCode.TenMaGiamGia)">
                                         <button type="submit"
                                             class="text-white bg-[#DC143C] px-4 py-3 rounded-md transition-all duration-300 hover:bg-[#B22222]"><i
                                                 class="fa-solid fa-trash"></i></button>
@@ -123,7 +132,8 @@ onMounted(() => {
                         </div>
                         <div v-else class="flex justify-center items-center m-auto w-full mt-32">
                             <div class="flex flex-col items-center justify-center gap-3">
-                                <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại không có mã giảm giá nào!</p>
+                                <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại không có mã
+                                    giảm giá nào!</p>
                                 <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
                             </div>
                         </div>

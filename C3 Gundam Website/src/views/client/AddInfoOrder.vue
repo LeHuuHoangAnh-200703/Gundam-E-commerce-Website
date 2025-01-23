@@ -134,7 +134,7 @@ const addInfoOrder = async () => {
         console.log('Selected Province:', selectedProvince.value);
         console.log('Selected District:', selectedDistrict.value);
         console.log('Selected Ward:', selectedWard.value);
-         const fullAddress = `${selectedWard.value.name}, ${selectedDistrict.value.name}, ${selectedProvince.value.name}`;
+        const fullAddress = `${selectedWard.value.name}, ${selectedDistrict.value.name}, ${selectedProvince.value.name}`;
         const response = await axios.post(`http://localhost:3000/api/khachhang/thongtin/${formData.value.idKhachHang}`, {
             TenNguoiNhan: formData.value.name,
             DienThoai: formData.value.phone,

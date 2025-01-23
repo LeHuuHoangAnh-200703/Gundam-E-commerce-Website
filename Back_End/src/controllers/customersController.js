@@ -1,4 +1,5 @@
 const Customer = require("../models/customersModels");
+const DiscountCode = require("../models/discountCodeModels");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const multer = require("multer");
@@ -186,6 +187,69 @@ exports.deleteLocation = async (req, res) => {
 
     await customer.save();
     res.status(200).json({ message: "Địa chỉ đã được xóa" });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      message: "Có lỗi xảy ra, vui lòng thử lại.",
+      error: error.message,
+    });
+  }
+};
+
+exports.saveDiscountCode = async (req, res) => {
+  const { IdMaGiamGia, maKhachHang } = req.params;
+  try {
+    const discountCode = await DiscountCode.findOne({ IdMaGiamGia: IdMaGiamGia });
+
+    const customerCheck = await Customer.findOne({ MaKhachHang: maKhachHang });
+    const discountExists = customerCheck.DanhSachMaGiamGia.some(item => item.IdMaGiamGia === IdMaGiamGia);
+
+    if (discountExists) {
+      return res.status(400).json({ message: 'Mã giảm giá đã được lưu.' });
+    }
+
+    if (discountCode.SoLanLuuMa <= 0) {
+      return res.status(400).json({ message: 'Mã giảm giá đã hết lượt lưu.' });
+    }
+
+    const customer = await Customer.findOneAndUpdate(
+      { MaKhachHang: maKhachHang },
+      {
+        $push: {
+          DanhSachMaGiamGia: {
+            IdMaGiamGia: discountCode.IdMaGiamGia,
+            TenMaGiamGia: discountCode.TenMaGiamGia,
+            GiaApDung: discountCode.GiaApDung,
+            GiamTien: discountCode.GiamTien,
+            GiamPhanTram: discountCode.GiamPhanTram,
+            SoLanSuDung: discountCode.SoLanSuDung,
+            NgayHetHan: discountCode.NgayHetHan,
+            MaGiamGia: discountCode.MaGiamGia,
+          }
+        },
+      },
+      { new: true }
+    );
+    discountCode.SoLanLuuMa--;
+    await discountCode.save();
+    await customer.save();
+    res.status(200).json(customer);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+exports.deleteDiscountCode = async (req, res) => {
+  const { IdMaGiamGia, maKhachHang } = req.params;
+  console.log(IdMaGiamGia, maKhachHang)
+  try {
+    const customer = await Customer.findOne({ MaKhachHang: maKhachHang });
+    customer.DanhSachMaGiamGia = customer.DanhSachMaGiamGia.filter(
+      (discountCode) => discountCode.IdMaGiamGia !== IdMaGiamGia
+    );
+
+    await customer.save();
+    res.status(200).json({ message: "Mã giảm giá đã được xóa" });
   } catch (error) {
     console.log(error)
     return res.status(500).json({

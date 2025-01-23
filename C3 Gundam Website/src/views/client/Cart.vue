@@ -244,7 +244,7 @@ onMounted(() => {
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm
                     nào!</p>
-                <img src="../../assets/img/banner.png" class="w-[200px]" alt="">
+                <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
             </div>
         </div>
         <Footer />

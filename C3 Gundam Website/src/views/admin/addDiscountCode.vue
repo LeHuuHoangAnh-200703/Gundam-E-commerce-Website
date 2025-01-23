@@ -34,6 +34,7 @@ const formData = ref({
     numberTimeUsed: '',
     expirationDate: '',
     discountCode: '',
+    saveCode: '',
 })
 
 const addDiscountCode = async () => {
@@ -47,6 +48,12 @@ const addDiscountCode = async () => {
 
     if (!formData.value.applyToOrders) {
         errors.value.applyToOrders = "Giá áp dụng không được trống.";
+    }
+
+    if (!formData.value.saveCode) {
+        errors.value.saveCode = "Số lần lưu mã không được để trống.";
+    } else if (formData.value.saveCode < 0) {
+        errors.value.saveCode = "Trường không thể nhập số âm."
     }
 
     if (formData.value.decreaseMoney && formData.value.percentReduction) {
@@ -94,6 +101,7 @@ const addDiscountCode = async () => {
             SoLanSuDung: formData.value.numberTimeUsed,
             NgayHetHan: formData.value.expirationDate,
             MaGiamGia: formData.value.discountCode,
+            SoLanLuuMa: formData.value.saveCode,
             NgayTao: new Date(),
         }
 
@@ -156,25 +164,38 @@ const addDiscountCode = async () => {
                                         <p v-if="errors.nameCode" class="text-red-500 text-sm mt-2">{{
                                             errors.nameCode }}</p>
                                     </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="optionDiscountCode" class="text-[15px] font-semibold">Áp dụng với
-                                            đơn</label>
-                                        <select v-model="formData.applyToOrders"
-                                            class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            name="" id="optionDiscountCode">
-                                            <option value="" class="text-[#003171] font-semibold">
-                                                Chọn giá áp dụng phù hợp</option>
-                                            <option value="6000000" class="text-[#003171] font-semibold">
-                                                6.000.000 VNĐ</option>
-                                            <option value="3000000" class="text-[#003171] font-semibold">3.000.000 VNĐ
-                                            </option>
-                                            <option value="1500000" class="text-[#003171] font-semibold">1.500.000 VNĐ
-                                            </option>
-                                            <option value="500000" class="text-[#003171] font-semibold">500.000 VNĐ
-                                            </option>
-                                        </select>
-                                        <p v-if="errors.applyToOrders" class="text-red-500 text-sm mt-2">{{
-                                            errors.applyToOrders }}</p>
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <label for="optionDiscountCode" class="text-[15px] font-semibold">Áp dụng
+                                                với
+                                                đơn</label>
+                                            <select v-model="formData.applyToOrders"
+                                                class="p-2 border-2 cursor-pointer text-[#003171] rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                                name="" id="optionDiscountCode">
+                                                <option value="" class="text-[#003171] font-semibold">
+                                                    Chọn giá áp dụng phù hợp</option>
+                                                <option value="6000000" class="text-[#003171] font-semibold">
+                                                    6.000.000 VNĐ</option>
+                                                <option value="3000000" class="text-[#003171] font-semibold">3.000.000
+                                                    VNĐ
+                                                </option>
+                                                <option value="1500000" class="text-[#003171] font-semibold">1.500.000
+                                                    VNĐ
+                                                </option>
+                                                <option value="500000" class="text-[#003171] font-semibold">500.000 VNĐ
+                                                </option>
+                                            </select>
+                                            <p v-if="errors.applyToOrders" class="text-red-500 text-sm mt-2">{{
+                                                errors.applyToOrders }}</p>
+                                        </div>
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <label for="saveCode" class="text-[15px] font-semibold">Số lần lưu mã</label>
+                                            <input type="number" v-model="formData.saveCode" id="saveCode"
+                                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                                placeholder="Nhập số lần lưu mã ...">
+                                            <p v-if="errors.saveCode" class="text-red-500 text-sm mt-2">{{
+                                                errors.saveCode }}</p>
+                                        </div>
                                     </div>
                                     <div class="flex gap-4">
                                         <div class="flex flex-col gap-2 w-full">
