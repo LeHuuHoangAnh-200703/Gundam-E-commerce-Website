@@ -10,5 +10,6 @@ router.delete("/:maKhachHang", customersController.deleteCustomer);
 router.post("/login", customersController.login);
 router.post("/thongtin/:maKhachHang", customersController.createInfoCustomer);
 router.post("/logout", customersController.logout);
+router.delete("/diachi/:maKhachHang/:id", customersController.deleteLocation);
 
 module.exports = router;

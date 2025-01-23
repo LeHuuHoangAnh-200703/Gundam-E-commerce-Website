@@ -37,6 +37,7 @@ import chatWithCustomer from "@/views/admin/chatWithCustomer.vue";
 import ChatBox from "@/views/client/ChatBox.vue";
 import Statistical from "@/views/admin/adminStatistical.vue";
 import personalDirectory from "@/views/client/personalDirectory.vue";
+import Voucher from "@/views/client/Voucher.vue";
 
 const routes = [
     {
@@ -108,6 +109,11 @@ const routes = [
         path: "/feedback/:maDanhGia",
         name: "Feedback",
         component: Feedback,
+    },
+    {
+        path: "/voucher",
+        name: "Voucher",
+        component: Voucher,
     },
     {
         path: "/admin/adminLogin",

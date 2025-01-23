@@ -14,15 +14,15 @@ const listChoices = [
         type: "All",
     },
     {
-        name: "MG - HIRM - RE/100 - 1/100",
+        name: "MG Mobile Suit Gundam",
         type: "MG",
     },
     {
-        name: "PG 1/60 - MEGA SIZE 1/48",
+        name: "PG Mobile Suit Gundam",
         type: "PG",
     },
     {
-        name: "RG - REAL GRADE 1/144",
+        name: "RG Mobile Suit Gundam",
         type: "RG",
     },
 ]

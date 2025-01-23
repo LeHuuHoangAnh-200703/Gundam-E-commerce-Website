@@ -111,11 +111,6 @@ exports.updateCustomer = async (req, res) => {
 exports.deleteCustomer = async (req, res) => {
   const { maKhachHang } = req.params;
   try {
-    // const existingOrder = await TheoDoiMuonSach.findOne({ MaDocGia: maDocGia });
-    // if (existingOrder) {
-    //   return res.status(400).json({ message: "Không thể xóa đọc giả vì họ đang có đơn mượn sách." });
-    // }
-
     const customer = await Customer.findOneAndDelete({
       MaKhachHang: maKhachHang,
     });
@@ -156,7 +151,6 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Có lỗi xảy ra, vui lòng thử lại." });
   }
 };
-
 exports.logout = async (req, res) => {
   const { maKhachHang } = req.body;
 
@@ -174,12 +168,30 @@ exports.logout = async (req, res) => {
       message: "Đăng xuất thành công!",
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Có lỗi xảy ra, vui lòng thử lại.",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Có lỗi xảy ra, vui lòng thử lại.",
+      error: error.message,
+    });
+  }
+};
+
+exports.deleteLocation = async (req, res) => {
+  const { id } = req.params;
+  const { maKhachHang } = req.params;
+  try {
+    const customer = await Customer.findOne({ MaKhachHang: maKhachHang });
+    customer.DanhSachDiaChi = customer.DanhSachDiaChi.filter(
+      (address) => address._id.toString() !== id
+    );
+
+    await customer.save();
+    res.status(200).json({ message: "Địa chỉ đã được xóa" });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      message: "Có lỗi xảy ra, vui lòng thử lại.",
+      error: error.message,
+    });
   }
 };
 

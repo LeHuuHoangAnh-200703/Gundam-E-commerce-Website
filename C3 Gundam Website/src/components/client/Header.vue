@@ -5,19 +5,19 @@ import axios from 'axios';
 
 const router = useRouter();
 const userInfo = ref({
-  MaKhachHang: localStorage.getItem('MaKhachHang') || '',
+    MaKhachHang: localStorage.getItem('MaKhachHang') || '',
 });
 const isLoggedIn = ref(!userInfo.value.MaKhachHang);
 const logout = () => {
-  localStorage.removeItem('TenKhachHang');
-  localStorage.removeItem('MaKhachHang');
-  localStorage.removeItem('Email');
-  userInfo.value.TenKhachHang = '';
-  userInfo.value.Email = '';
-  userInfo.value.MaKhachHang = '';
-  isLoggedIn.value = false;
+    localStorage.removeItem('TenKhachHang');
+    localStorage.removeItem('MaKhachHang');
+    localStorage.removeItem('Email');
+    userInfo.value.TenKhachHang = '';
+    userInfo.value.Email = '';
+    userInfo.value.MaKhachHang = '';
+    isLoggedIn.value = false;
 
-  router.push('/login');
+    router.push('/login');
 };
 
 const orders_history = () => {
@@ -35,7 +35,7 @@ const profile = () => {
         router.push('/login');
     } else {
         router.push('/profile');
-    } 
+    }
 }
 
 const carts = () => {
@@ -44,7 +44,16 @@ const carts = () => {
         router.push('/login');
     } else {
         router.push('/carts');
-    } 
+    }
+}
+
+const voucher = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/voucher');
+    }
 }
 
 const cartLists = ref([]);
@@ -101,6 +110,11 @@ onMounted(() => {
                         class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                     </div>
                 </li>
+                <li class="group"><button @click.prevent="voucher" to="/voucher">Giảm giá</button>
+                    <div
+                        class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
+                    </div>
+                </li>
                 <li v-if="isLoggedIn" class="group"><router-link to="/login">Đăng nhập</router-link>
                     <div
                         class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
@@ -116,7 +130,8 @@ onMounted(() => {
                 <button @click.prevent="carts" class="relative">
                     <i class="fa-solid fa-cart-shopping text-white text-[24px]"></i>
                     <span
-                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{ cartLists.length }}</span>
+                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{
+                            cartLists.length }}</span>
                 </button>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>
@@ -135,10 +150,14 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Theo dõi đơn hàng</button></li>
+                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Theo dõi đơn
+                        hàng</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
-                <li v-if="isLoggedIn" class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
+                <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
+                        class="fa-solid fa-user"></i> <button @click.prevent="voucher">Giảm giá</button></li>
+                <li v-if="isLoggedIn"
+                    class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>
                 <li v-else class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <button @click.prevent="logout">Đăng xuất</button></li>
