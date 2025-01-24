@@ -55,7 +55,7 @@ const deleteLocation = async (maKhachHang, id) => {
         };
         setTimeout(() => {
             router.push('/profile');
-        }, 3000);
+        }, 1000);
     } catch (err) {
         notification.value = {
             message: err.response?.data?.message || "Xóa địa chỉ thất bại!",
@@ -64,7 +64,7 @@ const deleteLocation = async (maKhachHang, id) => {
     }
     setTimeout(() => {
         notification.value.message = '';
-    }, 3000);
+    }, 1000);
 }
 
 const deleteDiscountCode = async (maKhachHang, idMaGiamGia) => {

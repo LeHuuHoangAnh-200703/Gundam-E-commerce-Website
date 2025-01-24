@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import Header from '@/components/client/Header.vue';
-import Footer from '@/components/client/Footer.vue';
-import BackToTop from '@/components/client/BackToTop.vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, watch } from "vue";
+import Header from "@/components/client/Header.vue";
+import Footer from "@/components/client/Footer.vue";
+import BackToTop from "@/components/client/BackToTop.vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 
@@ -18,31 +18,34 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 const formData = ref({
-    address: '',
-    description: '',
-    discountCode: '',
-    payment: '',
+    address: "",
+    description: "",
+    discountCode: "",
+    payment: "",
 });
 
 const notification = ref({
-    message: '',
-    type: ''
+    message: "",
+    type: "",
 });
 const maKhachHang = localStorage.getItem("MaKhachHang");
-const nameCustomer = ref('');
-const emailCustomer = ref('');
+const nameCustomer = ref("");
+const emailCustomer = ref("");
 const listAddress = ref([]);
+const listDiscountCodes = ref([]);
 const images = ref([]);
-const nameProducts = ref('');
-const maSanPham = ref('');
-const type = ref('');
+const nameProducts = ref("");
+const maSanPham = ref("");
+const type = ref("");
 const price = ref(0);
 const quantity = ref(1);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
 const fetchProduct = async (idProduct) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/sanpham/${idProduct}`);
+        const response = await axios.get(
+            `http://localhost:3000/api/sanpham/${idProduct}`
+        );
         images.value = response.data.Images;
         nameProducts.value = response.data.TenSanPham;
         maSanPham.value = response.data.MaSanPham;
@@ -51,18 +54,21 @@ const fetchProduct = async (idProduct) => {
     } catch (err) {
         console.log("error fetching:", err);
     }
-}
+};
 
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        const response = await axios.get(
+            `http://localhost:3000/api/khachhang/${idKhachHang}`
+        );
         nameCustomer.value = response.data.TenKhachHang;
         emailCustomer.value = response.data.Email;
         listAddress.value = response.data.DanhSachDiaChi;
+        listDiscountCodes.value = response.data.DanhSachMaGiamGia;
     } catch (err) {
         console.log("Error fetching: ", err);
     }
-}
+};
 
 watch([price, quantity], () => {
     totalPrice.value = price.value * quantity.value;
@@ -73,7 +79,7 @@ const addOrders = async () => {
 
     if (!formData.value.address) {
         errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
-    } 
+    }
 
     if (formData.value.description) {
         formData.value.description = escapeHtml(formData.value.description);
@@ -84,24 +90,26 @@ const addOrders = async () => {
     }
 
     if (!formData.value.payment) {
-        errors.value.payment = "Chọn phương thức thanh toán phù hợp."
+        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
     }
 
     if (Object.keys(errors.value).length > 0) {
         return;
     }
 
-    if (formData.value.payment !== 'Thanh toán qua Paypal') {
-        const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
+    if (formData.value.payment !== "Thanh toán qua Paypal") {
+        const confirmUpdate = confirm(
+            "Vui lòng kiểm tra lại thông tin trước khi đặt hàng?"
+        );
         if (!confirmUpdate) return;
     }
 
-    let trangThaiThanhToan = 'Khi nhận được hàng';
-    if (formData.value.payment === 'Thanh toán qua Paypal') {
-        trangThaiThanhToan = 'Đã thanh toán qua PayPal';
+    let trangThaiThanhToan = "Khi nhận được hàng";
+    if (formData.value.payment === "Thanh toán qua Paypal") {
+        trangThaiThanhToan = "Đã thanh toán qua PayPal";
     }
 
-    console.log(formData.value.address)
+    console.log(formData.value.address);
     try {
         const dataToSend = {
             MaKhachHang: maKhachHang,
@@ -113,25 +121,28 @@ const addOrders = async () => {
                 Gia: price.value,
                 SoLuong: quantity.value,
                 LoaiSanPham: type.value,
-                HinhAnh: images.value[0]
+                HinhAnh: images.value[0],
             },
             DiaChiNhanHang: formData.value.address,
             MaGiamGia: formData.value.discountCode,
             HinhThucThanhToan: formData.value.payment,
             TongDon: totalPrice.value,
             NgayDatHang: new Date(),
-            GhiChu: formData.value.description || 'Không có ghi chú',
+            GhiChu: formData.value.description || "Không có ghi chú",
             TrangThaiThanhToan: trangThaiThanhToan,
-        }
+        };
         console.log("Dữ liệu gửi đi:", dataToSend);
 
-        const response = await axios.post('http://localhost:3000/api/donhang', dataToSend);
+        const response = await axios.post(
+            "http://localhost:3000/api/donhang",
+            dataToSend
+        );
         notification.value = {
             message: "Đặt hàng thành công!",
             type: "success",
         };
         setTimeout(() => {
-            router.push('/orders_history');
+            router.push("/orders_history");
         }, 3000);
     } catch (error) {
         notification.value = {
@@ -140,62 +151,68 @@ const addOrders = async () => {
         };
     }
     setTimeout(() => {
-        notification.value.message = '';
+        notification.value.message = "";
     }, 3000);
-}
+};
 
 const initializePayPalButton = () => {
-    if (typeof paypal === 'undefined') {
-        console.error('PayPal SDK chưa được tải.');
+    if (typeof paypal === "undefined") {
+        console.error("PayPal SDK chưa được tải.");
         return;
     }
-    const paypalButtonsContainer = document.getElementById('paypal-button-container');
+    const paypalButtonsContainer = document.getElementById(
+        "paypal-button-container"
+    );
     if (paypalButtonsContainer) {
-        paypalButtonsContainer.innerHTML = '';  // Xóa nội dung cũ
+        paypalButtonsContainer.innerHTML = ""; // Xóa nội dung cũ
     }
     const vndToUsdRate = 24000; // Tỷ giá cố định (Ví dụ: 1 USD = 24,000 VND)
-    paypal.Buttons({
-        createOrder: (data, actions) => {
-            const usdPrice = (totalPrice.value / vndToUsdRate).toFixed(2); // Chuyển đổi VND sang USD
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: usdPrice, // Giá trị đã chuyển đổi
-                        currency_code: 'USD' // Đơn vị tiền tệ là USD
-                    },
-                }],
-            });
-        },
-        onApprove: async (data, actions) => {
-            try {
-                const order = await actions.order.capture();
-                await addOrders();
+    paypal
+        .Buttons({
+            createOrder: (data, actions) => {
+                const usdPrice = (totalPrice.value / vndToUsdRate).toFixed(2); // Chuyển đổi VND sang USD
+                return actions.order.create({
+                    purchase_units: [
+                        {
+                            amount: {
+                                value: usdPrice, // Giá trị đã chuyển đổi
+                                currency_code: "USD", // Đơn vị tiền tệ là USD
+                            },
+                        },
+                    ],
+                });
+            },
+            onApprove: async (data, actions) => {
+                try {
+                    const order = await actions.order.capture();
+                    await addOrders();
 
-                if (notification.value.type === 'success') {
+                    if (notification.value.type === "success") {
+                        notification.value = {
+                            message: "Thanh toán qua PayPal và đặt hàng thành công!",
+                            type: "success",
+                        };
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi xử lý đơn hàng sau thanh toán PayPal:", error);
                     notification.value = {
-                        message: 'Thanh toán qua PayPal và đặt hàng thành công!',
-                        type: 'success',
+                        message: "Thanh toán thành công nhưng không thể lưu đơn hàng!",
+                        type: "error",
                     };
                 }
-            } catch (error) {
-                console.error('Lỗi khi xử lý đơn hàng sau thanh toán PayPal:', error);
+                setTimeout(() => {
+                    notification.value.message = "";
+                }, 3000);
+            },
+            onError: (err) => {
+                console.error("Lỗi khi thanh toán PayPal:", err);
                 notification.value = {
-                    message: 'Thanh toán thành công nhưng không thể lưu đơn hàng!',
-                    type: 'error',
+                    message: "Đã xảy ra lỗi khi thanh toán qua PayPal!",
+                    type: "error",
                 };
-            }
-            setTimeout(() => {
-                notification.value.message = '';
-            }, 3000);
-        },
-        onError: (err) => {
-            console.error('Lỗi khi thanh toán PayPal:', err);
-            notification.value = {
-                message: 'Đã xảy ra lỗi khi thanh toán qua PayPal!',
-                type: 'error',
-            };
-        },
-    }).render('#paypal-button-container');
+            },
+        })
+        .render("#paypal-button-container");
 };
 
 function formatCurrency(value) {
@@ -208,16 +225,19 @@ onMounted(() => {
     quantity.value = Number(soluong) || 1;
     fetchProduct(idProduct);
     fetchCustomer(maKhachHang);
-})
-
-watch(() => formData.value.payment, (newPayment) => {
-    if (newPayment === 'Thanh toán qua Paypal') {
-        isPayPalReady.value = true;  // Hiển thị nút PayPal
-        initializePayPalButton();
-    } else {
-        isPayPalReady.value = false;  // Ẩn nút PayPal
-    }
 });
+
+watch(
+    () => formData.value.payment,
+    (newPayment) => {
+        if (newPayment === "Thanh toán qua Paypal") {
+            isPayPalReady.value = true; // Hiển thị nút PayPal
+            initializePayPalButton();
+        } else {
+            isPayPalReady.value = false; // Ẩn nút PayPal
+        }
+    }
+);
 </script>
 
 <template>
@@ -232,8 +252,10 @@ watch(() => formData.value.payment, (newPayment) => {
                             class="flex flex-col justify-end items-end gap-6">
                             <div class="flex flex-col lg:flex-row gap-8 w-full">
                                 <div class="flex flex-col gap-4 w-full lg:w-1/2 text-white lg:border-r-2 lg:pr-10">
-                                    <p class="text-white font-semibold text-[20px]">Thông tin mua hàng</p>
-                                    <hr>
+                                    <p class="text-white font-semibold text-[20px]">
+                                        Thông tin mua hàng
+                                    </p>
+                                    <hr />
                                     <div class="w-full">
                                         <label for=""
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Họ
@@ -250,16 +272,23 @@ watch(() => formData.value.payment, (newPayment) => {
                                     </div>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa chỉ nhận hàng:
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa chỉ
+                                            nhận hàng:
                                         </label>
                                         <select name="" id="" v-model="formData.address"
                                             class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
-                                            <option class="text-[#333] cursor-pointer" value="">Chọn địa chỉ nhận hàng</option>
-                                            <option v-for="(address, index) in listAddress" :key="index" :value="address" class="text-[#333] cursor-pointer">
-                                                {{ address.TenNguoiNhan }} / {{ address.DienThoai }} / {{ address.DiaChi }}</option>
+                                            <option class="text-[#333] cursor-pointer" value="">
+                                                Chọn địa chỉ nhận hàng
+                                            </option>
+                                            <option v-for="(address, index) in listAddress" :key="index"
+                                                :value="address" class="text-[#333] cursor-pointer">
+                                                {{ address.TenNguoiNhan }} / {{ address.DienThoai }} /
+                                                {{ address.DiaChi }}
+                                            </option>
                                         </select>
-                                        <p v-if="errors.address" class="text-red-500 text-sm mt-2">{{
-                                            errors.address }}</p>
+                                        <p v-if="errors.address" class="text-red-500 text-sm mt-2">
+                                            {{ errors.address }}
+                                        </p>
                                     </div>
                                     <div class="w-full">
                                         <label for=""
@@ -267,46 +296,69 @@ watch(() => formData.value.payment, (newPayment) => {
                                             chú</label>
                                         <textarea type="text" v-model="formData.description" placeholder="Ghi chú ..."
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                        <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
-                                            errors.description }}</p>
+                                        <p v-if="errors.description" class="text-red-500 text-sm mt-2">
+                                            {{ errors.description }}
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-4 w-full lg:w-1/2">
                                     <p class="text-white font-semibold text-[20px]">Đơn hàng</p>
-                                    <hr>
+                                    <hr />
                                     <div class="flex flex-col gap-4 overflow-hidden">
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
                                             <div class="flex gap-4 items-start">
                                                 <img :src="`/src/assets/img/${images[0]}`"
-                                                    class="w-[50px] lg:w-[80px] border-2" alt="">
+                                                    class="w-[50px] lg:w-[80px] border-2" alt="" />
                                                 <div class="overflow-hidden">
                                                     <div
                                                         class="w-52 lg:w-96 whitespace-nowrap text-ellipsis overflow-hidden">
                                                         <p
                                                             class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                                            {{ nameProducts }}</p>
+                                                            {{ nameProducts }}
+                                                        </p>
                                                     </div>
-                                                    <p class="text-white text-[14px]">Mã sản phẩm: <span
-                                                            class="text-[#FFD700]">{{ maSanPham }}</span></p>
+                                                    <p class="text-white text-[14px]">
+                                                        Mã sản phẩm:
+                                                        <span class="text-[#FFD700]">{{ maSanPham }}</span>
+                                                    </p>
 
-                                                    <p class="text-white text-[14px]">Giá: <span
-                                                            class="text-[#FFD700]">{{ formatCurrency(price) }}
-                                                            VNĐ</span></p>
-                                                    <p class="text-white text-[14px]">Số lượng: <span
-                                                            class="text-[#FFD700]">{{ quantity }}</span></p>
+                                                    <p class="text-white text-[14px]">
+                                                        Giá:
+                                                        <span class="text-[#FFD700]">{{ formatCurrency(price) }}
+                                                            VNĐ</span>
+                                                    </p>
+                                                    <p class="text-white text-[14px]">
+                                                        Số lượng:
+                                                        <span class="text-[#FFD700]">{{ quantity }}</span>
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
-                                        <hr>
+                                        <hr />
                                         <div class="w-full">
                                             <label for=""
                                                 class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Mã
-                                                giảm giá:</label>
-                                            <input type="text" v-model="formData.discountCode"
-                                                placeholder="Nhập mã giảm giá ..."
-                                                class="w-full text-white px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                            <p v-if="errors.discountCode" class="text-red-500 text-sm mt-2">{{
-                                                errors.discountCode }}</p>
+                                                giảm giá:
+                                            </label>
+                                            <select name="" id="" v-model="formData.discountCode"
+                                                class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
+                                                <option class="text-[#333] cursor-pointer" value="">
+                                                    Danh sách mã giảm giá của bạn
+                                                </option>
+                                                <option v-for="(discountCode, index) in listDiscountCodes" :key="index"
+                                                    :value="discountCode.IdMaGiamGia" class="text-[#333] cursor-pointer">
+                                                    Tên mã: {{ discountCode.TenMaGiamGia }} / Mã giảm:
+                                                    {{ discountCode.MaGiamGia }} / Giảm:
+                                                    {{
+                                                        discountCode.GiamTien
+                                                            ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
+                                                            : `${discountCode.GiamPhanTram}%`
+                                                    }}
+                                                </option>
+                                            </select>
+                                            <p v-if="errors.discountCode" class="text-red-500 text-sm mt-2">
+                                                {{ errors.discountCode }}
+                                            </p>
                                         </div>
                                         <div class="w-full">
                                             <label for=""
@@ -315,23 +367,36 @@ watch(() => formData.value.payment, (newPayment) => {
                                             </label>
                                             <select name="" id="" v-model="formData.payment"
                                                 class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
-                                                <option class="text-[#333] cursor-pointer" value="">Chọn phương thức
-                                                    thanh toán</option>
+                                                <option class="text-[#333] cursor-pointer" value="">
+                                                    Chọn phương thức thanh toán
+                                                </option>
                                                 <option class="text-[#333] cursor-pointer"
-                                                    value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
+                                                    value="Thanh toán khi nhận hàng">
+                                                    Thanh toán khi nhận hàng
+                                                </option>
                                                 <option class="text-[#333] cursor-pointer"
-                                                    value="Thanh toán qua Paypal">Thanh toán qua Paypal</option>
+                                                    value="Thanh toán qua Paypal">
+                                                    Thanh toán qua Paypal
+                                                </option>
                                             </select>
-                                            <p v-if="errors.payment" class="text-red-500 text-sm mt-2">{{
-                                                errors.payment }}</p>
+                                            <p v-if="errors.payment" class="text-red-500 text-sm mt-2">
+                                                {{ errors.payment }}
+                                            </p>
                                         </div>
-                                        <hr>
-                                        <p class="text-white text-[16px] text-end">Tổng cộng: <span
-                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice) }} VNĐ</span></p>
-                                        <button type="submit"
-                                            :class="(formData.payment === 'Thanh toán khi nhận hàng' || formData.payment === '') ? 'block' : 'hidden'"
-                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">Đặt
-                                            hàng</button>
+                                        <hr />
+                                        <p class="text-white text-[16px] text-end">
+                                            Tổng cộng:
+                                            <span class="text-[#FFD700]">
+                                                {{ formatCurrency(totalPrice) }} VNĐ</span>
+                                        </p>
+                                        <button type="submit" :class="formData.payment === 'Thanh toán khi nhận hàng' ||
+                                            formData.payment === ''
+                                            ? 'block'
+                                            : 'hidden'
+                                            "
+                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
+                                            Đặt hàng
+                                        </button>
                                         <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
                                         </div>
                                     </div>
@@ -346,16 +411,24 @@ watch(() => formData.value.payment, (newPayment) => {
         <Footer />
         <BackToTop />
         <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
+            <div v-if="notification.message" :class="[
+                'fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2',
+                {
+                    'border-[#DB3F4C]': notification.type === 'error',
+                    'border-[#40E0D0]': notification.type === 'success',
+                },
+            ]">
                 <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
+                    <img :src="notification.type === 'success'
+                        ? '/src/assets/img/rb_7710.png'
+                        : '/src/assets/img/rb_12437.png'
+                        " class="w-[50px]" alt="" />
+                    <p class="text-[16px] font-semibold" :class="notification.type === 'success'
+                        ? 'text-[#40E0D0]'
+                        : 'text-[#DB3F4C]'
+                        ">
+                        {{ notification.message }}
+                    </p>
                 </div>
             </div>
         </transition>
