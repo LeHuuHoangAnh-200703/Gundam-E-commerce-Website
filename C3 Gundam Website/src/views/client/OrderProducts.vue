@@ -225,8 +225,7 @@ watch(() => formData.value.payment, (newPayment) => {
                                     <hr>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Họ
-                                            tên</label>
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Người đặt hàng</label>
                                         <input type="text" v-model="nameCustomer" readonly
                                             placeholder="Nhập họ tên của bạn ..."
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />

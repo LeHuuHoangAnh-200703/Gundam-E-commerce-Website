@@ -22,6 +22,7 @@ const formData = ref({
     description: "",
     discountCode: "",
     payment: "",
+    shippingMethod: "",
 });
 
 const notification = ref({
@@ -70,8 +71,16 @@ const fetchCustomer = async (idKhachHang) => {
     }
 };
 
-watch([price, quantity], () => {
-    totalPrice.value = price.value * quantity.value;
+watch([price, quantity, () => formData.value.shippingMethod], () => {
+    let costShip = 0;
+    if (formData.value.shippingMethod === "standard") {
+        costShip = 20000;
+    } else if (formData.value.shippingMethod === "fast") {
+        costShip = 30000;
+    } else if (price.value * quantity.value >= 2000000) {
+        costShip = 0;
+    }
+    totalPrice.value = price.value * quantity.value + costShip;
 });
 
 const addOrders = async () => {
@@ -93,6 +102,10 @@ const addOrders = async () => {
         errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
     }
 
+    if (!formData.value.shippingMethod && totalPrice.value < 2000000) {
+        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
+    }
+
     if (Object.keys(errors.value).length > 0) {
         return;
     }
@@ -109,7 +122,6 @@ const addOrders = async () => {
         trangThaiThanhToan = "Đã thanh toán qua PayPal";
     }
 
-    console.log(formData.value.address);
     try {
         const dataToSend = {
             MaKhachHang: maKhachHang,
@@ -166,7 +178,7 @@ const initializePayPalButton = () => {
     if (paypalButtonsContainer) {
         paypalButtonsContainer.innerHTML = ""; // Xóa nội dung cũ
     }
-    const vndToUsdRate = 24000; // Tỷ giá cố định (Ví dụ: 1 USD = 24,000 VND)
+    const vndToUsdRate = 25000; // Tỷ giá cố định (Ví dụ: 1 USD = 25,000 VND)
     paypal
         .Buttons({
             createOrder: (data, actions) => {
@@ -258,8 +270,8 @@ watch(
                                     <hr />
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Họ
-                                            tên</label>
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Người
+                                            đặt hàng</label>
                                         <input type="text" v-model="nameCustomer" readonly
                                             placeholder="Nhập họ tên của bạn ..."
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
@@ -295,7 +307,7 @@ watch(
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Ghi
                                             chú</label>
                                         <textarea type="text" v-model="formData.description" placeholder="Ghi chú ..."
-                                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                            class="w-full h-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         <p v-if="errors.description" class="text-red-500 text-sm mt-2">
                                             {{ errors.description }}
                                         </p>
@@ -346,13 +358,14 @@ watch(
                                                     Danh sách mã giảm giá của bạn
                                                 </option>
                                                 <option v-for="(discountCode, index) in listDiscountCodes" :key="index"
-                                                    :value="discountCode.IdMaGiamGia" class="text-[#333] cursor-pointer">
+                                                    :value="discountCode.IdMaGiamGia"
+                                                    class="text-[#333] cursor-pointer">
                                                     Tên mã: {{ discountCode.TenMaGiamGia }} / Mã giảm:
                                                     {{ discountCode.MaGiamGia }} / Giảm:
                                                     {{
                                                         discountCode.GiamTien
                                                             ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
-                                                            : `${discountCode.GiamPhanTram}%`
+                                                    : `${discountCode.GiamPhanTram}%`
                                                     }}
                                                 </option>
                                             </select>
@@ -383,6 +396,46 @@ watch(
                                                 {{ errors.payment }}
                                             </p>
                                         </div>
+                                        <div class="w-full">
+                                            <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
+                                                Hình thức giao hàng:
+                                            </label>
+                                            <div class="space-y-2">
+                                                <label
+                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
+                                                    <input type="radio" name="shipping"
+                                                        v-model="formData.shippingMethod" value="standard"
+                                                        class="hidden" />
+                                                    <div :class="{
+                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
+                                                        'bg-blue-500 border-blue-500':
+                                                            formData.shippingMethod === 'standard',
+                                                    }">
+                                                        <div v-if="formData.shippingMethod === 'standard'"
+                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-white">Giao tiêu chuẩn (20.000đ)</span>
+                                                </label>
+                                                <label
+                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
+                                                    <input type="radio" name="shipping"
+                                                        v-model="formData.shippingMethod" value="fast" class="hidden" />
+                                                    <div :class="{
+                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
+                                                        'bg-blue-500 border-blue-500':
+                                                            formData.shippingMethod === 'fast',
+                                                    }">
+                                                        <div v-if="formData.shippingMethod === 'fast'"
+                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-white">Giao nhanh (30.000đ)</span>
+                                                </label>
+                                            </div>
+                                            <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng trên 2.000.000 VNĐ</p>
+                                            <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
+                                            {{ errors.shippingMethod }}
+                                        </p>
+                                        </div>
                                         <hr />
                                         <p class="text-white text-[16px] text-end">
                                             Tổng cộng:
@@ -390,15 +443,13 @@ watch(
                                                 {{ formatCurrency(totalPrice) }} VNĐ</span>
                                         </p>
                                         <button type="submit" :class="formData.payment === 'Thanh toán khi nhận hàng' ||
-                                            formData.payment === ''
-                                            ? 'block'
-                                            : 'hidden'
-                                            "
-                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
+                                                formData.payment === ''
+                                                ? 'block'
+                                                : 'hidden'
+                                            " class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
                                             Đặt hàng
                                         </button>
-                                        <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
-                                        </div>
+                                        <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container"></div>
                                     </div>
                                 </div>
                             </div>
@@ -420,12 +471,12 @@ watch(
             ]">
                 <div class="flex gap-2 justify-center items-center">
                     <img :src="notification.type === 'success'
-                        ? '/src/assets/img/rb_7710.png'
-                        : '/src/assets/img/rb_12437.png'
+                            ? '/src/assets/img/rb_7710.png'
+                            : '/src/assets/img/rb_12437.png'
                         " class="w-[50px]" alt="" />
                     <p class="text-[16px] font-semibold" :class="notification.type === 'success'
-                        ? 'text-[#40E0D0]'
-                        : 'text-[#DB3F4C]'
+                            ? 'text-[#40E0D0]'
+                            : 'text-[#DB3F4C]'
                         ">
                         {{ notification.message }}
                     </p>
