@@ -77,6 +77,8 @@ watch([price, quantity, () => formData.value.shippingMethod], () => {
         costShip = 20000;
     } else if (formData.value.shippingMethod === "fast") {
         costShip = 30000;
+    } else if (formData.value.shippingMethod === "tooFast") {
+        costShip = 50000;
     } else if (price.value * quantity.value >= 2000000) {
         costShip = 0;
     }
@@ -102,7 +104,7 @@ const addOrders = async () => {
         errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
     }
 
-    if (!formData.value.shippingMethod && totalPrice.value < 2000000) {
+    if (!formData.value.shippingMethod) {
         errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
     }
 
@@ -396,7 +398,7 @@ watch(
                                                 {{ errors.payment }}
                                             </p>
                                         </div>
-                                        <div class="w-full">
+                                        <div class="w-full" v-if="totalPrice < 2000000">
                                             <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
                                                 Hình thức giao hàng:
                                             </label>
@@ -429,6 +431,20 @@ watch(
                                                             class="w-2.5 h-2.5 bg-white rounded-full"></div>
                                                     </div>
                                                     <span class="text-white">Giao nhanh (30.000đ)</span>
+                                                </label>
+                                                <label
+                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
+                                                    <input type="radio" name="shipping"
+                                                        v-model="formData.shippingMethod" value="tooFast" class="hidden" />
+                                                    <div :class="{
+                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
+                                                        'bg-blue-500 border-blue-500':
+                                                            formData.shippingMethod === 'tooFast',
+                                                    }">
+                                                        <div v-if="formData.shippingMethod === 'tooFast'"
+                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-white">Ship hỏa tốc (50.000đ)</span>
                                                 </label>
                                             </div>
                                             <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng trên 2.000.000 VNĐ</p>
