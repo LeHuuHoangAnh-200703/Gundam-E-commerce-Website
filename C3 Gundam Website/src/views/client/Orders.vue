@@ -365,8 +365,8 @@ watch(
                                                     Tên mã: {{ discountCode.TenMaGiamGia }} / Mã giảm:
                                                     {{ discountCode.MaGiamGia }} / Giảm:
                                                     {{
-                                                        discountCode.GiamTien
-                                                            ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
+                                                    discountCode.GiamTien
+                                                    ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
                                                     : `${discountCode.GiamPhanTram}%`
                                                     }}
                                                 </option>
@@ -435,7 +435,8 @@ watch(
                                                 <label
                                                     class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
                                                     <input type="radio" name="shipping"
-                                                        v-model="formData.shippingMethod" value="tooFast" class="hidden" />
+                                                        v-model="formData.shippingMethod" value="tooFast"
+                                                        class="hidden" />
                                                     <div :class="{
                                                         'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
                                                         'bg-blue-500 border-blue-500':
@@ -447,10 +448,11 @@ watch(
                                                     <span class="text-white">Ship hỏa tốc (50.000đ)</span>
                                                 </label>
                                             </div>
-                                            <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng trên 2.000.000 VNĐ</p>
+                                            <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng
+                                                trên 2.000.000 VNĐ</p>
                                             <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
-                                            {{ errors.shippingMethod }}
-                                        </p>
+                                                {{ errors.shippingMethod }}
+                                            </p>
                                         </div>
                                         <hr />
                                         <p class="text-white text-[16px] text-end">
@@ -462,10 +464,12 @@ watch(
                                                 formData.payment === ''
                                                 ? 'block'
                                                 : 'hidden'
-                                            " class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
+                                            "
+                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
                                             Đặt hàng
                                         </button>
-                                        <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container"></div>
+                                        <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

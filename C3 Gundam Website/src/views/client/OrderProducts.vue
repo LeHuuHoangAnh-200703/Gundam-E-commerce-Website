@@ -22,6 +22,7 @@ const formData = ref({
     description: '',
     discountCode: '',
     payment: '',
+    shippingMethod: "",
 });
 
 const notification = ref({
@@ -53,7 +54,7 @@ const addOrders = async () => {
 
     if (!formData.value.address) {
         errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
-    } 
+    }
 
     if (formData.value.description) {
         formData.value.description = escapeHtml(formData.value.description);
@@ -194,10 +195,29 @@ onMounted(() => {
 });
 
 const calculateTotalPrice = () => {
-    totalPrice.value = selectedProducts.value.reduce((sum, product) => {
+    let costShip = 0;
+    let totalProductPrice = selectedProducts.value.reduce((sum, product) => {
         return sum + product.DonGia * product.SoLuong;
     }, 0);
+
+    if (formData.value.shippingMethod === "standard") {
+        costShip = 20000;
+    } else if (formData.value.shippingMethod === "fast") {
+        costShip = 30000;
+    } else if (formData.value.shippingMethod === "tooFast") {
+        costShip = 50000;
+    }
+
+    if (totalProductPrice >= 2000000) {
+        costShip = 0;
+    }
+
+    totalPrice.value = totalProductPrice + costShip;
 };
+
+watch(() => formData.value.shippingMethod, () => {
+    calculateTotalPrice();
+});
 
 watch(() => formData.value.payment, (newPayment) => {
     if (newPayment === 'Thanh toán qua Paypal') {
@@ -225,7 +245,8 @@ watch(() => formData.value.payment, (newPayment) => {
                                     <hr>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Người đặt hàng</label>
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Người
+                                            đặt hàng</label>
                                         <input type="text" v-model="nameCustomer" readonly
                                             placeholder="Nhập họ tên của bạn ..."
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
@@ -233,19 +254,22 @@ watch(() => formData.value.payment, (newPayment) => {
                                     <div class="w-full">
                                         <label for=""
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
-                                        <input type="text" v-model="emailCustomer" readonly
-                                            placeholder="test@gmail.com"
+                                        <input type="text" v-model="emailCustomer" readonly placeholder="test@gmail.com"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa chỉ nhận hàng:
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa chỉ
+                                            nhận hàng:
                                         </label>
                                         <select name="" id="" v-model="formData.address"
                                             class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
-                                            <option class="text-[#333] cursor-pointer" value="">Chọn địa chỉ nhận hàng</option>
-                                            <option v-for="(address, index) in listAddress" :key="index" :value="address" class="text-[#333] cursor-pointer">
-                                                {{ address.TenNguoiNhan }} / {{ address.DienThoai }} / {{ address.DiaChi }}</option>
+                                            <option class="text-[#333] cursor-pointer" value="">Chọn địa chỉ nhận hàng
+                                            </option>
+                                            <option v-for="(address, index) in listAddress" :key="index"
+                                                :value="address" class="text-[#333] cursor-pointer">
+                                                {{ address.TenNguoiNhan }} / {{ address.DienThoai }} / {{ address.DiaChi
+                                                }}</option>
                                         </select>
                                         <p v-if="errors.address" class="text-red-500 text-sm mt-2">{{
                                             errors.address }}</p>
@@ -265,7 +289,8 @@ watch(() => formData.value.payment, (newPayment) => {
                                     <hr>
                                     <div class="flex flex-col gap-4 overflow-hidden">
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
-                                            <div class="flex gap-4 items-start" v-for="(product, index) in selectedProducts" :key="index">
+                                            <div class="flex gap-4 items-start"
+                                                v-for="(product, index) in selectedProducts" :key="index">
                                                 <img :src="`/src/assets/img/${product.HinhAnh}`"
                                                     class="w-[50px] lg:w-[80px] border-2" alt="">
                                                 <div class="overflow-hidden">
@@ -313,6 +338,62 @@ watch(() => formData.value.payment, (newPayment) => {
                                             </select>
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">{{
                                                 errors.payment }}</p>
+                                        </div>
+                                        <div class="w-full" v-if="totalPrice < 2000000">
+                                            <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
+                                                Hình thức giao hàng:
+                                            </label>
+                                            <div class="space-y-2">
+                                                <label
+                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
+                                                    <input type="radio" name="shipping"
+                                                        v-model="formData.shippingMethod" value="standard"
+                                                        class="hidden" />
+                                                    <div :class="{
+                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
+                                                        'bg-blue-500 border-blue-500':
+                                                            formData.shippingMethod === 'standard',
+                                                    }">
+                                                        <div v-if="formData.shippingMethod === 'standard'"
+                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-white">Giao tiêu chuẩn (20.000đ)</span>
+                                                </label>
+                                                <label
+                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
+                                                    <input type="radio" name="shipping"
+                                                        v-model="formData.shippingMethod" value="fast" class="hidden" />
+                                                    <div :class="{
+                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
+                                                        'bg-blue-500 border-blue-500':
+                                                            formData.shippingMethod === 'fast',
+                                                    }">
+                                                        <div v-if="formData.shippingMethod === 'fast'"
+                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-white">Giao nhanh (30.000đ)</span>
+                                                </label>
+                                                <label
+                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
+                                                    <input type="radio" name="shipping"
+                                                        v-model="formData.shippingMethod" value="tooFast"
+                                                        class="hidden" />
+                                                    <div :class="{
+                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
+                                                        'bg-blue-500 border-blue-500':
+                                                            formData.shippingMethod === 'tooFast',
+                                                    }">
+                                                        <div v-if="formData.shippingMethod === 'tooFast'"
+                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-white">Ship hỏa tốc (50.000đ)</span>
+                                                </label>
+                                            </div>
+                                            <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng
+                                                trên 2.000.000 VNĐ</p>
+                                            <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
+                                                {{ errors.shippingMethod }}
+                                            </p>
                                         </div>
                                         <hr>
                                         <p class="text-white text-[16px] text-end">Tổng cộng: <span
