@@ -38,27 +38,34 @@ const sendMessage = async () => {
         try {
             const newMessage = {
                 MaTinNhan: generateMaTinNhan(userId, adminId),
-                NoiDung: sanitizedMessage,
+                TinNhan: sanitizedMessage,
                 NguoiGui: userName,
                 idNguoiGui: userId,
                 idNguoiNhan: adminId,
                 ThoiGian: new Date().toISOString(),
                 role: "user",
             };
-            const response = await axios.post(
-                "http://localhost:3000/api/tinnhan",
-                newMessage
-            );
-            const roomId = [adminId, userId].sort().join("-");
-            console.log(roomId)
-            socket.value.emit("sendMessage", { ...newMessage, roomId });
+
+            // Gửi tin nhắn đến API
+            await axios.post("http://localhost:3000/api/tinnhan", newMessage);
+
+            // Gửi tin nhắn đến server qua socket
+            socket.value.emit("sendMessage", newMessage);
+            console.log(newMessage)
+            // Cập nhật giao diện
+            messages.value.push({
+                ...newMessage,
+                ThoiGian: formatDate(new Date()),
+            });
+
             message.value = "";
-            messages.value.push(newMessage);
         } catch (error) {
-            console.error("Error sending message:", error);
+            console.error("Lỗi khi gửi tin nhắn:", error);
         }
     }
 };
+
+// Định dạng ngày giờ
 const formatDate = (date) => {
     const options = {
         day: "2-digit",
@@ -68,28 +75,25 @@ const formatDate = (date) => {
         minute: "2-digit",
         second: "2-digit",
     };
-
-    const formattedDate = date.toLocaleString("vi-VN", options);
-
-    return formattedDate;
+    return date.toLocaleString("vi-VN", options);
 };
 
+// Lấy tin nhắn từ API
 const fetchMessages = async () => {
     try {
         const response = await axios.get(
             `http://localhost:3000/api/tinnhan?idNguoiGui=${userId}&idNguoiNhan=${adminId}`
         );
-        messages.value = response.data.messages;
-        messages.value = messages.value.map((msg) => {
-            const formattedDate = new Date(msg.ThoiGian);
-            msg.ThoiGian = formatDate(formattedDate);
-            return {
+        if (response.data && response.data.messages && response.data.messages.length > 0) {
+            messages.value = response.data.messages.map((msg) => ({
                 ...msg,
-                ThoiGian: msg.ThoiGian,
-            };
-        });
+                ThoiGian: formatDate(new Date(msg.ThoiGian)),
+            }));
+        } else {
+            messages.value = [];
+        }
     } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error("Lỗi khi lấy tin nhắn:", error);
     }
 };
 
@@ -102,34 +106,28 @@ onMounted(() => {
 
     // Khi kết nối socket thành công
     socket.value.on("connect", () => {
-        console.log("Socket connected");
+        console.log("Kết nối socket thành công");
 
-        // Tham gia phòng chat dựa trên `idNguoiGui` và `idNguoiNhan`
-        const roomId = [adminId, userId].sort().join("-"); // Tạo roomId duy nhất từ hai id
-        socket.value.emit("joinRoom", roomId);
+        // Tham gia phòng chat với admin
+        socket.value.emit("joinRoom", { idNguoiGui: userId, idNguoiNhan: adminId });
     });
 
-    // Xử lý khi nhận tin nhắn từ server
+    // Nhận tin nhắn từ server
     socket.value.on("receiveMessage", (data) => {
-        console.log("Received message:", data);
-        messages.value.push(data);
-        console.log("Updated messages:", messages.value);
+        messages.value.push({
+            ...data,
+            ThoiGian: formatDate(new Date(data.ThoiGian)),
+        });
     });
+
+    // Lấy tin nhắn khi trang tải
     fetchMessages();
-    socket.value.on("error", (error) => {
-        console.error("Socket error:", error);
-    });
-    // Khi socket ngắt kết nối
-    socket.value.on("disconnect", () => {
-        console.log("Socket disconnected");
-    });
 });
 
-// Xóa socket khi unmounted
+// Ngắt kết nối khi rời trang
 onUnmounted(() => {
-    if (socket.value) {
-        socket.value.disconnect();
-    }
+    socket.value.emit("leaveRoom", { idNguoiGui: userId, idNguoiNhan: adminId });
+    socket.value.disconnect();
 });
 </script>
 

@@ -75,62 +75,92 @@ app.use("/api/tinnhan", messageRoutes);
 app.use("/api/thongke", statisticalRoutes);
 
 const MessageModel = require("./src/models/messageModels");
+// Quản lý danh sách phòng chat
+const rooms = new Map();
+
 // Socket.IO lắng nghe kết nối từ client
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
-
-  // Xử lý khi client gửi tin nhắn
-  socket.on("sendMessage", async (data) => {
-    try {
-      // Tìm bản ghi chat theo MaTinNhan
-      const chat = await MessageModel.findOne({
-        MaTinNhan: data.MaTinNhan
-      });
-      // Nếu đã có cuộc trò chuyện, thêm tin nhắn vào mảng
-      if (chat) {
-        chat.NoiDung.push({
-          NguoiGui: data.NguoiGui,
-          TinNhan: data.NoiDung,
-          role: data.role,
-          ThoiGian: new Date(),
-        });
-
-        await chat.save(); // Lưu thay đổi
-      } else {
-        // Nếu chưa có, tạo bản ghi mới
-        const newChat = new MessageModel({
-          MaTinNhan: data.MaTinNhan,
-          idNguoiGui: data.idNguoiGui,
-          idNguoiNhan: data.idNguoiNhan,
-          NoiDung: [
-            {
-              NguoiGui: data.NguoiGui,
-              TinNhan: data.NoiDung,
-              role: data.role,
-              ThoiGian: new Date(),
-            },
-          ],
-        });
-
-        await newChat.save(); // Lưu bản ghi mới
-      }
-      // Phát tin nhắn cho các client trong room
-      io.to(data.roomId).emit("receiveMessage", data);
-    } catch (error) {
-      console.error("Error saving message:", error);
-    }
-  });
 
   // Xử lý khi client tham gia phòng chat
   socket.on("joinRoom", ({ idNguoiGui, idNguoiNhan }) => {
     const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
     socket.join(roomId);
     console.log(`Client ${socket.id} joined room: ${roomId}`);
+
+    // Cập nhật danh sách phòng
+    if (!rooms.has(roomId)) {
+      rooms.set(roomId, new Set());
+    }
+    rooms.get(roomId).add(socket.id);
+  });
+
+  // Xử lý khi client gửi tin nhắn
+  socket.on("sendMessage", async (data) => {
+    try {
+      const { MaTinNhan, idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role } = data;
+      const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
+
+      // Kiểm tra xem người dùng đã tham gia phòng chưa
+      if (!rooms.has(roomId) || !rooms.get(roomId).has(socket.id)) {
+        console.error(`Client ${socket.id} chưa tham gia phòng ${roomId}`);
+        return;
+      }
+
+      // Tìm hoặc tạo cuộc trò chuyện
+      let chat = await MessageModel.findOne({ MaTinNhan });
+      if (chat) {
+        chat.NoiDung.push({ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() });
+        await chat.save();
+      } else {
+        chat = new MessageModel({
+          MaTinNhan,
+          idNguoiGui,
+          idNguoiNhan,
+          NoiDung: [{ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() }],
+        });
+        await chat.save();
+      }
+
+      // Phát tin nhắn đến phòng chat
+      io.to(roomId).emit("receiveMessage", {
+        NguoiGui,
+        TinNhan: NoiDung,
+        role,
+        ThoiGian: new Date(),
+      });
+
+    } catch (error) {
+      console.error("Lỗi khi lưu tin nhắn:", error);
+    }
+  });
+
+  // Xử lý khi client rời phòng chat
+  socket.on("leaveRoom", ({ idNguoiGui, idNguoiNhan }) => {
+    const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
+    socket.leave(roomId);
+    console.log(`Client ${socket.id} rời phòng: ${roomId}`);
+
+    // Xóa socket khỏi danh sách phòng
+    if (rooms.has(roomId)) {
+      rooms.get(roomId).delete(socket.id);
+      if (rooms.get(roomId).size === 0) {
+        rooms.delete(roomId);
+      }
+    }
   });
 
   // Xử lý ngắt kết nối
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
+    
+    // Xóa client khỏi tất cả các phòng
+    for (const [roomId, clients] of rooms) {
+      clients.delete(socket.id);
+      if (clients.size === 0) {
+        rooms.delete(roomId);
+      }
+    }
   });
 });
 
