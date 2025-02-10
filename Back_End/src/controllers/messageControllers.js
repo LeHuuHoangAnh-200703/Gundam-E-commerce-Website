@@ -1,8 +1,7 @@
 const Message = require("../models/messageModels");
 
 exports.addMessage = async (req, res) => {
-    const { idNguoiGui, idNguoiNhan, NoiDung, role, MaTinNhan } = req.body;
-
+    const { idNguoiGui, idNguoiNhan, TinNhan, role, MaTinNhan } = req.body;
     try {
         let chat = await Message.findOne({ MaTinNhan });
 
@@ -10,7 +9,7 @@ exports.addMessage = async (req, res) => {
             // Thêm tin nhắn mới vào danh sách
             chat.NoiDung.push({
                 NguoiGui: idNguoiGui,
-                TinNhan: NoiDung,
+                TinNhan,
                 role,
                 ThoiGian: new Date(),
             });
@@ -23,7 +22,7 @@ exports.addMessage = async (req, res) => {
                 NoiDung: [
                     {
                         NguoiGui: idNguoiGui,
-                        TinNhan: NoiDung,
+                        TinNhan,
                         role,
                         ThoiGian: new Date(),
                     },
