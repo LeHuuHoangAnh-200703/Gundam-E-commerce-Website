@@ -138,7 +138,7 @@ const addOrders = async () => {
                 HinhAnh: images.value[0],
             },
             DiaChiNhanHang: formData.value.address,
-            MaGiamGia: formData.value.discountCode,
+            IdMaGiamGia: formData.value.discountCode,
             HinhThucThanhToan: formData.value.payment,
             TongDon: totalPrice.value,
             NgayDatHang: new Date(),
@@ -335,7 +335,6 @@ watch(
                                                         Mã sản phẩm:
                                                         <span class="text-[#FFD700]">{{ maSanPham }}</span>
                                                     </p>
-
                                                     <p class="text-white text-[14px]">
                                                         Giá:
                                                         <span class="text-[#FFD700]">{{ formatCurrency(price) }}
@@ -361,9 +360,8 @@ watch(
                                                 </option>
                                                 <option v-for="(discountCode, index) in listDiscountCodes" :key="index"
                                                     :value="discountCode.IdMaGiamGia"
-                                                    class="text-[#333] cursor-pointer">
-                                                    Tên mã: {{ discountCode.TenMaGiamGia }} / Mã giảm:
-                                                    {{ discountCode.MaGiamGia }} / Giảm:
+                                                    class="text-[#333] cursor-pointer">Id Mã: {{ discountCode.IdMaGiamGia }}
+                                                    / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
                                                     {{
                                                     discountCode.GiamTien
                                                     ? `${formatCurrency(discountCode.GiamTien)} VNĐ`

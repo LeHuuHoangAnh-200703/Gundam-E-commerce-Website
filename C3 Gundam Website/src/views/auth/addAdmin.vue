@@ -18,7 +18,6 @@ const router = useRouter();
 const formData = ref({
     nameAdmin: '',
     emailAdmin: '',
-    chucVu: '',
     password: '',
     confirmPassword: '',
 });
@@ -52,10 +51,6 @@ const registerAdmin = async () => {
         errors.value.password = "Mật khẩu phải tối thiểu 6 ký tự!";
     }
 
-    if (!formData.value.chucVu) {
-        errors.value.chucVu = "Chức vụ không để trống khi thêm tài khoản!";
-    }
-
     if (!formData.value.confirmPassword) {
         errors.value.confirmPassword = "Vui lòng không để trống khi thêm tài khoản!";
     } else if (formData.value.confirmPassword.length < 6) {
@@ -73,7 +68,6 @@ const registerAdmin = async () => {
             TenAdmin: formData.value.nameAdmin,
             MatKhau: formData.value.password,
             Email: formData.value.emailAdmin,
-            ChucVu: formData.value.chucVu,
             NgayTao: new Date()
         };
 
@@ -121,16 +115,6 @@ const registerAdmin = async () => {
                                 <input type="text" v-model="formData.emailAdmin" placeholder="test@gmail.com"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                 <p v-if="errors.emailAdmin" class="text-red-500 text-sm my-2">{{ errors.emailAdmin }}</p>
-                            </div>
-                            <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Chức vụ</label>
-                                <select name="" id="" v-model="formData.chucVu"
-                                    class="w-full cursor-pointer px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
-                                    <option value="" class="text-[#333]">Chọn chức vụ phù hợp</option>
-                                    <option class="text-[#333]" value="Quản trị viên">Quản trị viên</option>
-                                    <option class="text-[#333]" value="Nhân viên quản lý">Nhân viên quản lý</option>
-                                </select>
-                                <p v-if="errors.chucVu" class="text-red-500 text-sm my-2">{{ errors.chucVu }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>

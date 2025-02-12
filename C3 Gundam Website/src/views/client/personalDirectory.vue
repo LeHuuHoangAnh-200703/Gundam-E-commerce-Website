@@ -161,9 +161,6 @@ onMounted(() => {
                                         <p class="font-semibold text-[14px]">Áp dụng với đơn: <span
                                                 class="text-[#DB3F4C]">{{
                                                     formatCurrency(discountCode.GiaApDung) }} VNĐ</span></p>
-                                        <p class="font-semibold text-[14px]">Mã giảm giá: <span
-                                                class="text-[#DB3F4C] uppercase">{{
-                                                    discountCode.MaGiamGia }}</span></p>
                                     </div>
                                     <div
                                         class="w-[35px] h-[35px] border-2 border-[#1A1D27] flex items-center justify-center self-end rounded-lg">

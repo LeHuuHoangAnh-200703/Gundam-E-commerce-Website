@@ -114,9 +114,6 @@ onMounted(() => {
                                 <p class="font-semibold text-[14px]">Áp dụng với đơn: <span class="text-[#DB3F4C]">{{
                                     formatCurrency(discountCode.GiaApDung) }}
                                         VNĐ</span></p>
-                                <p class="font-semibold text-[14px]">Mã giảm giá: <span
-                                        class="text-[#DB3F4C] uppercase">{{
-                                            discountCode.MaGiamGia }}</span></p>
                                 <div class="flex justify-end gap-4 mt-3">
                                     <router-link :to="`/admin/editDiscountCode/${discountCode.IdMaGiamGia}`"
                                         class="bg-[#00697F] text-white px-4 py-3 rounded-md transition-all duration-300 hover:bg-[#055565]"><i

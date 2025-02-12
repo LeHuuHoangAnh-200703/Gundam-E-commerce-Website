@@ -38,7 +38,7 @@ exports.getOrderById = async (req, res) => {
 }
 
 exports.createOrder = async (req, res) => {
-    let { MaGiamGia, TongDon, SanPhamDaMua } = req.body;
+    let { IdMaGiamGia, TongDon, SanPhamDaMua } = req.body;
     let finalPrice = TongDon;
     try {
         // Xử lý nếu SanPhamDaMua là object
@@ -46,8 +46,8 @@ exports.createOrder = async (req, res) => {
             SanPhamDaMua = [SanPhamDaMua];
         }
 
-        if (MaGiamGia) {
-            const discount = await DiscountCode.findOne({ IdMaGiamGia: MaGiamGia });
+        if (IdMaGiamGia) {
+            const discount = await DiscountCode.findOne({ IdMaGiamGia: IdMaGiamGia });
             if (!discount) {
                 return res.status(400).json({ message: "Mã giảm giá không tồn tại." });
             }
@@ -78,7 +78,6 @@ exports.createOrder = async (req, res) => {
 
                 discount.SoLanSuDung -= 1;
                 await discount.save();
-                MaGiamGia = discount.MaGiamGia;
             } else {
                 return res.status(400).json({ message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });
             }
@@ -98,7 +97,7 @@ exports.createOrder = async (req, res) => {
             await inventory.save();
         }
 
-        const order = new Order({ ...req.body, MaGiamGia, TongDon: finalPrice });
+        const order = new Order({ ...req.body, TongDon: finalPrice });
         await order.save();
         res.status(200).json(order);
     } catch (err) {

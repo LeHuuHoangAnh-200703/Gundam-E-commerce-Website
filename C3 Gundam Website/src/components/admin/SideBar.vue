@@ -4,26 +4,16 @@ const status = ref(0);
 const sidebarMenu = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
     { name: "Quản lý sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
-    { name: "Quản lý nhân viên", icon: "fa-solid fa-users", path: "staffList" },
+    // { name: "Quản lý nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Quản lý đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
     { name: "Quản lý khách hàng", icon: "fa-solid fa-users", path: "customers" },
     { name: "Quản lý đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
     { name: "Quản lý nhà cung cấp", icon: "fa-solid fa-user-large", path: "listSuppliers" },
     { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
-    { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
+    { name: "Thêm tài khoản", icon: "fa-solid fa-user-plus", path: "addAdmin" },
     { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
 ];
-
-const ChucVu = ref(localStorage.getItem("ChucVu"));
-
-const filteredSidebarMenu = computed(() => {
-    if (ChucVu.value === 'Quản trị viên') {
-        return sidebarMenu;
-    } else {
-        return sidebarMenu.filter((item, index) => index !== 2 && index !== 9);
-    }
-});
 
 const saveStatus = (index) => {
     status.value = index;
@@ -45,7 +35,7 @@ onMounted(() => {
             Gundam Store</p>
         <hr class="mb-8 mx-8">
         <ul class="flex flex-col space-y-1 text-[12px] font-semibold px-8 text-white mb-8">
-            <router-link :to="sidebar.path" v-for="(sidebar, index) in filteredSidebarMenu" :key="index" @click="saveStatus(index)"
+            <router-link :to="sidebar.path" v-for="(sidebar, index) in sidebarMenu" :key="index" @click="saveStatus(index)"
                 :class="{ 'active-link': status === index }"
                 class="flex gap-3 items-center font-semibold cursor-pointer px-2 py-3 hover:bg-[#DB3F4C] rounded-md transition-all duration-200">
                 <i :class="sidebar.icon"></i>

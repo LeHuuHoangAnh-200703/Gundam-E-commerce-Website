@@ -173,7 +173,7 @@ onMounted(() => {
                                         <p class="font-medium text-[14px] xl:text-[12px]">Hình thức thanh toán: <span
                                                 class="font-semibold">{{ order.HinhThucThanhToan }}</span></p>
                                         <p class="font-medium text-[14px] xl:text-[12px]">Mã giảm giá: <span class="font-semibold">{{
-                                            order.MaGiamGia === "" ? "Không sử dụng" : order.MaGiamGia }}</span></p>
+                                            order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia }}</span></p>
                                         <p class="font-medium text-[14px] xl:text-[12px]">Ghi chú: <span class="font-semibold">{{
                                                 order.GhiChu }}</span></p>
                                         <p class="font-medium text-[14px] xl:text-[12px]">Tổng đơn: <span

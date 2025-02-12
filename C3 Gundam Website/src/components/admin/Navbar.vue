@@ -6,21 +6,20 @@ const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
 const hasUnreadNotifications = ref(false);
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = ref(localStorage.getItem("ChucVu"));
+const Email = ref(localStorage.getItem("Email"));
 
 const listNatifications = ref([]);
 
 const sidebarMenuMobile = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
-    { name: "Danh sách sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
-    { name: "Danh sách nhân viên", icon: "fa-solid fa-users", path: "staffList" },
-    { name: "Danh sách đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
-    { name: "Danh sách khách hàng", icon: "fa-solid fa-users", path: "customers" },
-    { name: "Danh sách đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
+    { name: "Quản lý sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
+    { name: "Quản lý đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
+    { name: "Quản lý khách hàng", icon: "fa-solid fa-users", path: "customers" },
+    { name: "Quản lý đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
     { name: "Quản lý nhà cung cấp", icon: "fa-solid fa-user-large", path: "listSuppliers" },
     { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
-    { name: "Thêm nhân viên", icon: "fa-solid fa-user-plus", path: "addAdmin" },
+    { name: "Thêm tài khoản", icon: "fa-solid fa-user-plus", path: "addAdmin" },
     { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
     { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "logout" },
 ];
@@ -40,7 +39,7 @@ const logout = async () => {
 
     console.log(response.data.message);
     localStorage.removeItem("TenAdmin");
-    localStorage.removeItem("ChucVu");
+    localStorage.removeItem("Email");
     localStorage.removeItem("TrangThaiHoatDong");
 
     router.push("/admin/adminLogin");
@@ -87,14 +86,6 @@ const formatDate = (date) => {
     return `${time}`;
 };
 
-const filteredSidebarMenu = computed(() => {
-    if (ChucVu.value === 'Quản trị viên') {
-        return sidebarMenuMobile;
-    } else {
-        return sidebarMenuMobile.filter((item, index) => index !== 2 && index !== 9);
-    }
-});
-
 onMounted(async () => {
     await fetchNatifications();
 });
@@ -108,7 +99,7 @@ onMounted(async () => {
                 <img src="../../assets/img/avatar.jpg" class="w-[50px] rounded-full" alt="">
                 <div class="font-semibold flex flex-col justify-center">
                     <p class="text-[14px]">{{ TenAdmin }}</p>
-                    <p class="text-[12px]">Chức vụ: <span class="text-[#DB3F4C]">{{ ChucVu }}</span></p>
+                    <p class="text-[12px]">Email: <span class="text-[#DB3F4C]">{{ Email }}</span></p>
                 </div>
             </div>
             <div class="flex gap-3 justify-center items-center">
@@ -145,7 +136,7 @@ onMounted(async () => {
                     </div>
                     <hr>
                     <ul class="flex flex-col text-white">
-                        <router-link to="" v-for="(sidebar, index) in filteredSidebarMenu" :key="index"
+                        <router-link :to="sidebar.path" v-for="(sidebar, index) in sidebarMenuMobile" :key="index"
                             class="flex gap-3 items-center font-semibold cursor-pointer py-3 hover:text-[#DB3F4C] rounded-md transition-all duration-200">
                             <i :class="sidebar.icon"></i>
                             {{ sidebar.name }}

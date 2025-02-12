@@ -18,7 +18,7 @@ const orderSchema = new mongoose.Schema({
         LoaiSanPham: String,  
         HinhAnh: String  
     }],
-    MaGiamGia: String,
+    IdMaGiamGia: String,
     HinhThucThanhToan: String,
     TongDon: Number,
     GhiChu: String,

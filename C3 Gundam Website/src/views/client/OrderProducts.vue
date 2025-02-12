@@ -36,6 +36,7 @@ const maKhachHang = localStorage.getItem("MaKhachHang");
 const nameCustomer = ref('');
 const emailCustomer = ref('');
 const listAddress = ref([]);
+const listDiscountCodes = ref([]);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
 
@@ -45,6 +46,7 @@ const fetchCustomer = async (idKhachHang) => {
         nameCustomer.value = response.data.TenKhachHang;
         emailCustomer.value = response.data.Email;
         listAddress.value = response.data.DanhSachDiaChi;
+        listDiscountCodes.value = response.data.DanhSachMaGiamGia;
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -98,7 +100,7 @@ const addOrders = async () => {
             Email: emailCustomer.value,
             DiaChiNhanHang: formData.value.address,
             SanPhamDaMua: sanPhamDaMua,
-            MaGiamGia: formData.value.discountCode,
+            IdMaGiamGia: formData.value.discountCode,
             HinhThucThanhToan: formData.value.payment,
             TongDon: totalPrice.value,
             NgayDatHang: new Date(),
@@ -279,7 +281,7 @@ watch(() => formData.value.payment, (newPayment) => {
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Ghi
                                             chú</label>
                                         <textarea type="text" v-model="formData.description" placeholder="Ghi chú ..."
-                                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                            class="w-full h-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
                                             errors.description }}</p>
                                     </div>
@@ -315,12 +317,27 @@ watch(() => formData.value.payment, (newPayment) => {
                                         <div class="w-full">
                                             <label for=""
                                                 class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Mã
-                                                giảm giá:</label>
-                                            <input type="text" v-model="formData.discountCode"
-                                                placeholder="Nhập mã giảm giá ..."
-                                                class="w-full text-white px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                            <p v-if="errors.discountCode" class="text-red-500 text-sm mt-2">{{
-                                                errors.discountCode }}</p>
+                                                giảm giá:
+                                            </label>
+                                            <select name="" id="" v-model="formData.discountCode"
+                                                class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
+                                                <option class="text-[#333] cursor-pointer" value="">
+                                                    Danh sách mã giảm giá của bạn
+                                                </option>
+                                                <option v-for="(discountCode, index) in listDiscountCodes" :key="index"
+                                                    :value="discountCode.IdMaGiamGia"
+                                                    class="text-[#333] cursor-pointer">Id Mã: {{ discountCode.IdMaGiamGia }}
+                                                    / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
+                                                    {{
+                                                    discountCode.GiamTien
+                                                    ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
+                                                    : `${discountCode.GiamPhanTram}%`
+                                                    }}
+                                                </option>
+                                            </select>
+                                            <p v-if="errors.discountCode" class="text-red-500 text-sm mt-2">
+                                                {{ errors.discountCode }}
+                                            </p>
                                         </div>
                                         <div class="w-full">
                                             <label for=""

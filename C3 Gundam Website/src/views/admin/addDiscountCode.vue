@@ -33,7 +33,6 @@ const formData = ref({
     percentReduction: '',
     numberTimeUsed: '',
     expirationDate: '',
-    discountCode: '',
     saveCode: '',
 })
 
@@ -82,14 +81,6 @@ const addDiscountCode = async () => {
         errors.value.expirationDate = "Ngày hết hạn không được để trống.";
     }
 
-    if (!formData.value.discountCode) {
-        errors.value.discountCode = "Mã giảm giá không được để trống.";
-    } else if (formData.value.discountCode >= 3) {
-        errors.value.discountCode = "Mã giảm giá phải tối thiểu 3 ký tự."
-    } else {
-        formData.value.discountCode = escapeHtml(formData.value.discountCode);
-    }
-
     if (Object.keys(errors.value).length > 0) {
         return;
     }
@@ -100,7 +91,6 @@ const addDiscountCode = async () => {
             GiaApDung: formData.value.applyToOrders,
             SoLanSuDung: formData.value.numberTimeUsed,
             NgayHetHan: formData.value.expirationDate,
-            MaGiamGia: formData.value.discountCode,
             SoLanLuuMa: formData.value.saveCode,
             NgayTao: new Date(),
         }
@@ -235,14 +225,6 @@ const addDiscountCode = async () => {
                                             <p v-if="errors.expirationDate" class="text-red-500 text-sm mt-2">{{
                                                 errors.expirationDate }}</p>
                                         </div>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="discountCode" class="text-[15px] font-semibold">Mã giảm giá</label>
-                                        <input type="text" v-model="formData.discountCode" id="discountCode"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập mã giảm giá ...">
-                                        <p v-if="errors.discountCode" class="text-red-500 text-sm mt-2">{{
-                                            errors.discountCode }}</p>
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
                                         <button type="submit"

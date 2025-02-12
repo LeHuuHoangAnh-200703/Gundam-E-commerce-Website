@@ -188,7 +188,7 @@ onMounted(() => {
                             </div>
                             <div>
                                 <p class="text-white text-[14px]">Trạng thái thanh toán: {{ order.TrangThaiThanhToan }}</p>
-                                <p class="text-white text-[14px]">Mã giảm giá: {{ order.MaGiamGia === "" ? "Không sử dụng" : order.MaGiamGia }}</p>
+                                <p class="text-white text-[14px]">Mã giảm giá: {{ order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia }}</p>
                                 <p class="text-white text-[14px]">Hình thức thanh toán: {{ order.HinhThucThanhToan }}
                                 </p>
                                 <p class="text-white text-[14px]">Ghi chú: {{ order.GhiChu }}</p>

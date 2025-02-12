@@ -50,7 +50,6 @@ exports.updateAdmin = async (req, res) => {
 
     admin.TenAdmin = req.body.TenAdmin || admin.TenAdmin;
     admin.Email = req.body.Email || admin.Email;
-    admin.ChucVu = req.body.ChucVu || admin.ChucVu;
     if (req.body.MatKhau) {
       admin.MatKhau = req.body.MatKhau;
     }
@@ -100,7 +99,6 @@ exports.login = async (req, res) => {
       admin: {
         MaAdmin: admin.MaAdmin,
         TenAdmin: admin.TenAdmin,
-        ChucVu: admin.ChucVu,
         Email: admin.Email,
         MatKhau: admin.MatKhau,
         TrangThaiHoatDong: admin.TrangThaiHoatDong
