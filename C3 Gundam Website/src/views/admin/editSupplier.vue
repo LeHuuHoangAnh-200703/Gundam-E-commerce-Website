@@ -16,7 +16,7 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const MaAdmin = localStorage.getItem("MaAdmin");
 const ThoiGian = new Date();
 const errors = ref({});
@@ -84,7 +84,7 @@ const editSupplier = async () => {
         const notificationData = {
             ThongBao: `Nhà cung cấp ${formData.value.nameSupplier} vừa được cập nhật thông tin.`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

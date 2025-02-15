@@ -17,7 +17,7 @@ const escapeHtml = (unsafe) => {
 };
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const ThoiGian = new Date();
 
 const listSuppliers = ref([]);
@@ -105,6 +105,7 @@ const addProduct = async () => {
         formData.value.images.forEach(image => {
             dataToSend.append('Images', image);
         });
+        console.log(dataToSend)
         const response = await axios.post('http://localhost:3000/api/sanpham', dataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -114,7 +115,7 @@ const addProduct = async () => {
         const notificationData = {
             ThongBao: `Vừa thêm sản phẩm ${formData.value.nameProduct}`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

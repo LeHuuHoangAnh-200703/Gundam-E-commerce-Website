@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const MaAdmin = localStorage.getItem("MaAdmin");
 const ThoiGian = new Date();
 
@@ -41,7 +41,6 @@ const fetchSuppliers = async () => {
 const fetchEntryForm = async (idPhieuNhap) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/phieunhap/${idPhieuNhap}`);
-        console.log(response.data)
         formData.value.idSupplier = response.data.MaNhaCungCap;
         formData.value.idEntryForm = response.data.MaPhieuNhap;
         const date = new Date(response.data.NgayNhap);
@@ -80,7 +79,7 @@ const editEntryForm = async () => {
         const notificationData = {
             ThongBao: `${TenAdmin} vừa cập nhật phiếu nhập.`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

@@ -115,7 +115,7 @@ onMounted(() => {
                                     </td>
                                     <td>
                                         <img class="w-[100px] py-2 max-w-full ml-7"
-                                            :src="`/src/assets/img/${product.Images[0]}`" alt="Hình ảnh sản phẩm" />
+                                            :src="`${product.Images[0]}`" alt="Hình ảnh sản phẩm" />
                                     </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">

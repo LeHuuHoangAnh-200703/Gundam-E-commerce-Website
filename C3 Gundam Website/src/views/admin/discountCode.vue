@@ -12,7 +12,7 @@ const notification = ref({
 });
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const ThoiGian = new Date();
 
 const fetchDiscountCode = async () => {
@@ -42,7 +42,7 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
         const notificationData = {
             ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

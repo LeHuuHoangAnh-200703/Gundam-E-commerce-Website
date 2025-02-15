@@ -147,7 +147,7 @@ onMounted(() => {
                                     <p class="my-4 text-justify xl:text-[14px]">{{ comment.MoTa }}</p>
                                     <div class="flex gap-4">
                                         <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                            :src="`/src/assets/img_feedback/${img}`"
+                                            :src="`${img}`"
                                             class="w-[80px] lg:w-[100px] xl:w-[80px] border-2" alt="">
                                     </div>
                                 </div>

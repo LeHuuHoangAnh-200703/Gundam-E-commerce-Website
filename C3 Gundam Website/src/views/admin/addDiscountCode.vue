@@ -18,7 +18,7 @@ const escapeHtml = (unsafe) => {
 const errors = ref({});
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const ThoiGian = new Date();
 
 const notification = ref({
@@ -106,7 +106,7 @@ const addDiscountCode = async () => {
         const notificationData = {
             ThongBao: `Vừa thêm mã giảm giá ${formData.value.nameCode.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

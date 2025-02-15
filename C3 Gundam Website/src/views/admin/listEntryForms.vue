@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const MaAdmin = localStorage.getItem("MaAdmin");
 const ThoiGian = new Date();
 
@@ -66,7 +66,7 @@ const addEntryForm = async () => {
         const notificationData = {
             ThongBao: `${TenAdmin} vừa tạo phiếu nhập kho sản phẩm.`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

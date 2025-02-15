@@ -137,7 +137,7 @@ onMounted(() => {
                             <div class="overflow-y-auto max-h-[300px] flex flex-col gap-4">
                                 <div class="flex gap-4 border-b-2 pb-4 mb-3 overflow-hidden items-start"
                                     v-for="(product, index) in order.SanPhamDaMua" :key="index">
-                                    <img :src="`/src/assets/img/${product.HinhAnh}`" class="w-[100px]" alt="">
+                                    <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
                                     <div class="flex flex-col gap-1 overflow-hidden">
                                         <div class="whitespace-nowrap text-ellipsis overflow-hidden">
                                             <p

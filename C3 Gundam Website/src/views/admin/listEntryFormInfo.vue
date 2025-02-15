@@ -9,7 +9,7 @@ import { data } from "autoprefixer";
 const router = useRouter();
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const ChucVu = localStorage.getItem("ChucVu");
+const Email = localStorage.getItem("Email");
 const ThoiGian = new Date();
 
 const listProducts = ref([]);
@@ -95,7 +95,7 @@ const addEntryFormInfo = async () => {
         const notificationData = {
             ThongBao: `Chi tiết phiếu nhập ${idEntryForm.value} vừa được thêm.`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
+            Email: Email,
             ThoiGian: ThoiGian,
         };
 

@@ -155,7 +155,7 @@ onMounted(() => {
         <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
             <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link :to="`/details/${product.MaSanPham}`">
-                    <img :src="`/src/assets/img/${product.Images[0]}`"
+                    <img :src="`${product.Images[0]}`"
                         class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                 </router-link>
                 <router-link :to="`/details/${product.MaSanPham}`"

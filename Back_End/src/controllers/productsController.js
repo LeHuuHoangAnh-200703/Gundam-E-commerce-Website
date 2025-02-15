@@ -2,28 +2,19 @@ const Product = require("../models/productModels");
 const Inventory = require("../models/inventoryModels");
 const path = require("path");
 const multer = require("multer");
+const cloudinary = require('cloudinary').v2;
 
-const storagePath = path.join(
-  __dirname,
-  "../../../C3 Gundam Website/src/assets/img"
-);
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, storagePath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+cloudinary.config({
+  cloud_name: 'dwcajbc6f',
+  api_key: '365476741985665',
+  api_secret: '6gAWhCMdI8DfBAs-1ZDwwx1xM0Y'
 });
 
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 exports.getAllProducts = async (req, res) => {
   try {
-    // Lấy tất cả sản phẩm từ bảng Product
     const products = await Product.find();
-
-    // Lấy tất cả dữ liệu tồn kho từ bảng Inventory
     const inventories = await Inventory.find();
 
     // Tạo một Map để ánh xạ Mã Sản Phẩm -> Số lượng tồn kho
@@ -41,24 +32,20 @@ exports.getAllProducts = async (req, res) => {
       };
     });
 
-    // Trả về kết quả
     res.status(200).json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-  
 
 exports.getProduct = async (req, res) => {
   try {
-    // Lấy thông tin sản phẩm từ bảng Product
     const product = await Product.findOne({ MaSanPham: req.params.maSanPham });
 
     if (!product) {
       return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
     }
 
-    // Lấy thông tin tồn kho từ bảng Inventory
     const inventory = await Inventory.findOne({ MaSanPham: req.params.maSanPham });
 
     // Kết hợp dữ liệu tồn kho với thông tin sản phẩm
@@ -67,7 +54,6 @@ exports.getProduct = async (req, res) => {
       SoLuong: inventory ? inventory.SoLuongTon : 0, // Lấy số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
     };
 
-    // Trả về kết quả
     res.status(200).json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -75,14 +61,34 @@ exports.getProduct = async (req, res) => {
 };
 
 exports.createProduct = async (req, res) => {
-  const product = new Product({
-    ...req.body,
-    Images: req.files ? req.files.map(file => file.filename) : []
+  console.log(req.body);
+  
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files were uploaded.' });
+  }
+
+  const imageUploadPromises = req.files.map(file => {
+    return new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream((error, result) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(result);
+      });
+      stream.end(file.buffer); // Kết thúc stream với buffer
+    });
   });
+
   try {
+    const imageUploadResults = await Promise.all(imageUploadPromises); // Chờ tất cả hình ảnh được upload
+    const product = new Product({
+      ...req.body,
+      Images: imageUploadResults.map(result => result.secure_url) // Lưu URL hình ảnh
+    });
     await product.save();
     res.status(200).json(product);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -104,11 +110,19 @@ exports.updatedProduct = async (req, res) => {
 
     // Kiểm tra xem có hình ảnh mới không
     if (req.files && req.files.length > 0) {
-      // Nếu có hình ảnh mới, xóa hết hình ảnh cũ
-      product.Images = req.files.map(file => file.filename);
-    } else {
-      // Nếu không có hình ảnh mới, giữ lại hình ảnh cũ
-      product.Images = product.Images;
+      const imageUploadPromises = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream((error, result) => {
+            if (error) {
+              return reject(error);
+            }
+            resolve(result);
+          });
+          stream.end(file.buffer); // Kết thúc stream với buffer
+        });
+      });
+      const imageUploadResults = await Promise.all(imageUploadPromises); // Chờ tất cả hình ảnh được upload
+      product.Images = imageUploadResults.map(result => result.secure_url); // Cập nhật hình ảnh
     }
 
     const updatedProduct = await product.save();
