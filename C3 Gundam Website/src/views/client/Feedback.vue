@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from "axios";
 import { useRouter } from 'vue-router';
 
@@ -22,6 +23,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 const setRating = (star) => {
     rating.value = star;
 };
@@ -101,18 +108,12 @@ const createFeedBack = async () => {
         });
 
         const response = await axios.post('http://localhost:3000/api/danhgia', dataToSend);
-        notification.value = {
-            message: "Cảm ơn bạn đã góp ý về sản phẩm!",
-            type: "success",
-        };
+        showNotification("Cảm ơn bạn đã góp ý về sản phẩm!", "success");
         setTimeout(() => {
             router.push('/orders_history');
         }, 3000);
     } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Đánh giá thất bại!",
-            type: "error",
-        };
+        showNotification(error.response?.data?.message || "Đánh giá thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -141,7 +142,7 @@ onMounted(() => {
                     <h1 class="text-white text-[20px] font-semibold">Thực hiện đánh giá</h1>
                     <hr class="my-2">
                     <div class="flex gap-4 border-b-2 pb-4 mb-3" v-for="(order, index) in listOrders" :key="index">
-                        <img :src="`/src/assets/img/${order.HinhAnh}`" class="w-[60px]" alt="">
+                        <img :src="`${order.HinhAnh}`" class="w-[60px]" alt="">
                         <div class="flex flex-col gap-1 justify-center">
                             <div class="lg:w-full w-56 whitespace-nowrap text-ellipsis overflow-hidden">
                                 <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{
@@ -202,28 +203,9 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <!-- <div class="flex justify-center items-center m-auto w-full">
-            <div class="flex flex-col items-center justify-center gap-3">
-                <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có đơn hàng nào!</p>
-                <img src="../../assets/img/banner.png" class="w-[200px]" alt="">
-            </div>
-        </div> -->
         <Footer />
         <BackToTop />
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
 
@@ -235,16 +217,5 @@ onMounted(() => {
 
 .fa-star:hover {
     color: #ffd700;
-}
-
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
 }
 </style>

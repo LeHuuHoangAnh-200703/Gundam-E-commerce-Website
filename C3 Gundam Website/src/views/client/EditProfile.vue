@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -31,6 +32,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 
 const fetchCustomer = async (idKhachHang) => {
     try {
@@ -93,18 +100,12 @@ const editProfile = async () => {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        notification.value = {
-            message: "Cập nhật thông tin thành công!",
-            type: "success",
-        };
+        showNotification("Cập nhật thông tin thành công!", "success");
         setTimeout(() => {
             router.push('/profile');
         }, 3000);
     } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Cập nhật thông tin thất bại!",
-            type: "error",
-        };
+        showNotification(error.response?.data?.message || "Cập nhật thông tin thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -201,35 +202,9 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <transition name="slide-fade" mode="out-in">
-                <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                    'border-[#DB3F4C]': notification.type === 'error',
-                    'border-[#40E0D0]': notification.type === 'success',
-                }]">
-                    <div class="flex gap-2 justify-center items-center">
-                        <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                            class="w-[50px]" alt="">
-                        <p class="text-[16px] font-semibold"
-                            :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                                notification.message }}</p>
-                    </div>
-                </div>
-            </transition>
+            <NotificationClient :message="notification.message" :type="notification.type" />
         </div>
         <Footer />
         <BackToTop />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

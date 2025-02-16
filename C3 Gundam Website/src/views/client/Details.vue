@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -11,10 +12,6 @@ const router = useRouter();
 const comments = ref([]);
 
 const relatedProducts = ref([]);
-const notification = ref({
-    message: '',
-    type: ''
-});
 const idCustomer = localStorage.getItem('MaKhachHang');
 const nameProduct = ref('');
 const price = ref('');
@@ -27,6 +24,17 @@ const quantity = ref('');
 const status = ref('');
 const selectedImage = ref();
 const orderQuantity = ref(1);
+
+const notification = ref({
+    message: '',
+    type: ''
+});
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 const fetchProduct = async (idSanPham) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${idSanPham}`);
@@ -84,16 +92,10 @@ const deleteFeedback = async (idDanhGia) => {
     if (!confirmUpdate) return;
     try {
         const response = await axios.delete(`http://localhost:3000/api/danhgia/${idDanhGia}`);
-        notification.value = {
-            message: "Xóa đánh giá thành công!",
-            type: "success",
-        };
+        showNotification("Xóa đánh giá thành công!", "success");
         await fetchFeedBacks();
     } catch (err) {
-        notification.value = {
-            message: err.response?.data?.message || "Xóa đánh giá thất bại!",
-            type: "error",
-        };
+        showNotification(err.response?.data?.message || "Xóa đánh giá thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -203,10 +205,7 @@ function increaseQuantity() {
 };
 
 function handleDisabledClick() {
-    notification.value = {
-        message: "Sản phẩm hiện tại đã ngừng kinh doanh!",
-        type: "error",
-    };
+    showNotification("Sản phẩm hiện tại đã ngừng kinh doanh!", "error");
 
     setTimeout(() => {
         notification.value.message = '';
@@ -268,12 +267,12 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[45%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
-                        <img :src="`/src/assets/img/${selectedImage}`"
+                        <img :src="`${selectedImage}`"
                             :class="{ 'opacity-0': !showImage, 'transition-opacity duration-300': true }"
                             class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] w-full" alt="" />
                     </div>
                     <div class="flex gap-3 items-center justify-center">
-                        <img v-for="(img, index) in images" :key="index" :src="`/src/assets/img/${img}`"
+                        <img v-for="(img, index) in images" :key="index" :src="`${img}`"
                             @click="changeImage(img)"
                             class="w-[75px] border-2 transition-all hover:border-[#DB3F4C] cursor-pointer"
                             :class="{ 'border-[#DB3F4C]': img === selectedImage }" alt="" />
@@ -358,7 +357,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             <div v-for="(product, index) in paginatedProducts" :key="index"
                                 class="flex flex-col gap-2 items-center w-[220px] sm:w-[180px] md:w-[200px] lg:w-[220px]">
                                 <router-link :to="`/details/${product.MaSanPham}`">
-                                    <img :src="`/src/assets/img/${product.Images[0]}`"
+                                    <img :src="`${product.Images[0]}`"
                                         class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                                 </router-link>
                                 <div
@@ -422,7 +421,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             class="flex py-4 border-b flex-col gap-2 w-full">
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-4 w-full">
-                                    <img :src="`/src/assets/img/${comment.HinhAnhKhachHang}`"
+                                    <img :src="`${comment.HinhAnhKhachHang}`"
                                         class="w-[60px] h-[60px] rounded-full object-cover" alt="">
                                     <div class="">
                                         <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
@@ -444,7 +443,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                 <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
                                 <div class="flex gap-4 flex-wrap">
                                     <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                        :src="`/src/assets/img_feedback/${img}`" class="w-[80px] rounded" alt="">
+                                        :src="`${img}`" class="w-[80px] rounded" alt="">
                                 </div>
                             </div>
                         </div>
@@ -453,7 +452,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <div class="flex flex-col items-center justify-center gap-3">
                             <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại
                                 không có đánh giá nào!</p>
-                            <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
+                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png" class="w-[200px]" alt="">
                         </div>
                     </div>
                     <div class="flex justify-center items-center gap-4 mt-4">
@@ -470,32 +469,6 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
         <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

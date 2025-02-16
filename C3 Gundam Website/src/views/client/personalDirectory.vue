@@ -5,6 +5,7 @@ import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import NotificationClient from '@/components/Notification/NotificationClient.vue';
 
 const router = useRouter()
 const listAddress = ref([]);
@@ -14,6 +15,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 
 const fetchDiscountCode = async () => {
     try {
@@ -49,18 +56,12 @@ const fetchCustomer = async (idKhachHang) => {
 const deleteLocation = async (maKhachHang, id) => {
     try {
         const response = await axios.delete(`http://localhost:3000/api/khachhang/diachi/${maKhachHang}/${id}`);
-        notification.value = {
-            message: "Xóa địa chỉ thành công!",
-            type: "success",
-        };
+        showNotification("Xóa địa chỉ thành công!", "success");
         setTimeout(() => {
             router.push('/profile');
         }, 1000);
     } catch (err) {
-        notification.value = {
-            message: err.response?.data?.message || "Xóa địa chỉ thất bại!",
-            type: "error",
-        };
+        showNotification(err.response?.data?.message || "Xóa địa chỉ thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -71,18 +72,12 @@ const deleteDiscountCode = async (maKhachHang, idMaGiamGia) => {
     console.log(maKhachHang, idMaGiamGia)
     try {
         const response = await axios.delete(`http://localhost:3000/api/khachhang/magiamgia/${maKhachHang}/${idMaGiamGia}`);
-        notification.value = {
-            message: "Xóa mã giảm giá thành công!",
-            type: "success",
-        };
+        showNotification("Xóa mã giảm giá thành công!", "success");
         setTimeout(() => {
             router.push('/profile');
         }, 3000);
     } catch (err) {
-        notification.value = {
-            message: err.response?.data?.message || "Xóa mã giảm giá thất bại!",
-            type: "error",
-        };
+        showNotification(err.response?.data?.message || "Xóa mã giảm giá thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -130,7 +125,7 @@ onMounted(() => {
                             <div class="flex flex-col items-center justify-center gap-3">
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có địa chỉ, hãy cập nhật!</p>
-                                <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
+                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png" class="w-[200px]" alt="">
                             </div>
                         </div>
                     </div>
@@ -174,7 +169,7 @@ onMounted(() => {
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có mã giảm giá
                                     nào!</p>
-                                <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
+                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png" class="w-[200px]" alt="">
                             </div>
                         </div>
                     </div>
@@ -183,32 +178,6 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

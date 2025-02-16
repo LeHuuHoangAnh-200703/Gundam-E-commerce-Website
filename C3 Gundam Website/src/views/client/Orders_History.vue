@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
 
 const options = [
@@ -29,6 +30,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 const listOrders = ref([]);
 const fetchOrders = async (maKhachHang) => {
     try {
@@ -50,16 +57,10 @@ const deleteOrder = async (maDonHang) => {
     if (!confirmDelete) return;
     try {
         const response = await axios.delete(`http://localhost:3000/api/donhang/${maDonHang}`);
-        notification.value = {
-            message: "Hủy đơn hàng thành công!",
-            type: "success",
-        };
+        showNotification("Hủy đơn hàng thành công!", "success");
         listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
     } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Hủy đơn hàng thất bại!",
-            type: "error",
-        };
+        showNotification(error.response?.data?.message || "Hủy đơn hàng thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -71,10 +72,7 @@ const updatedStatus = async (maDonHang, currentStatus) => {
     const currentIndex = statusOrder.indexOf(currentStatus);
 
     if (currentIndex === -1 || currentIndex >= statusOrder.length - 1) {
-        notification.value = {
-            message: "Trạng thái đơn hàng không hợp lệ hoặc đã ở trạng thái cuối cùng.",
-            type: "error",
-        };
+        showNotification("Trạng thái đơn hàng không hợp lệ hoặc đã ở trạng thái cuối cùng.", "error");
         setTimeout(() => {
             notification.value.message = '';
         }, 3000);
@@ -159,7 +157,7 @@ onMounted(() => {
                     <div class="overflow-y-auto max-h-[250px] flex flex-col gap-4">
                         <div class="flex gap-4 border-b-[1px] pb-4 mb-3" v-for="(product, index) in order.SanPhamDaMua"
                             :key="index">
-                            <img :src="`/src/assets/img/${product.HinhAnh}`" class="w-[100px]" alt="">
+                            <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
                             <div class="flex flex-col gap-1">
                                 <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
                                     <p
@@ -225,7 +223,7 @@ onMounted(() => {
                 <div class="flex flex-col items-center justify-center gap-3">
                     <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có đơn
                         hàng nào!</p>
-                    <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
+                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png" class="w-[200px]" alt="">
                 </div>
             </div>
         </div>
@@ -234,32 +232,6 @@ onMounted(() => {
         <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

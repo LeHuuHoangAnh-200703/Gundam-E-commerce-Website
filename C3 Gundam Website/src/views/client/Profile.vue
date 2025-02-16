@@ -38,7 +38,6 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
@@ -97,6 +96,6 @@ onMounted(() => {
 
 <style scoped>
 .image_profile {
-    background-image: url('../../assets/img/banner02.jpg');
+    background-image: url('https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/Banner02_m5sy99.jpg');
 }
 </style>

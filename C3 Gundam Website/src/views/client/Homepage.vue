@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from "vue"
 import Header_Home from "@/components/client/Header_Home.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -28,12 +29,19 @@ const listChoices = [
 ]
 
 const listProducts = ref([]);
+const searchQuery = ref("");
+const selectedType = ref("All");
+
 const notification = ref({
     message: '',
     type: ''
 });
-const searchQuery = ref("");
-const selectedType = ref("All");
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 const selectTypeProducts = (type) => {
     selectedType.value = type;
 };
@@ -59,10 +67,7 @@ const fectchProducts = async () => {
 const addToCart = async (idProDuct) => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
     if (!maKhachHang) {
-        notification.value = {
-            message: "Bạn cần đăng nhập trước khi thêm sản phẩm vào giỏ hàng!",
-            type: "error",
-        };
+        showNotification("Bạn cần đăng nhập trước khi thêm sản phẩm vào giỏ hàng!", "error");
         router.push('/login');
         return;
     }
@@ -70,18 +75,12 @@ const addToCart = async (idProDuct) => {
         const response = await axios.post(`http://localhost:3000/api/giohang/${idProDuct}`, {
             MaKhachHang: maKhachHang,
         });
-        notification.value = {
-            message: "Thêm giỏ hàng thành công!",
-            type: "success",
-        };
+        showNotification("Thêm giỏ hàng thành công!", "success");
         setTimeout(() => {
             router.push('/carts');
         }, 1000);
     } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Thêm giỏ hàng thất bại!",
-            type: "error",
-        };
+        showNotification(error.response?.data?.message || "Thêm giỏ hàng thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -133,7 +132,7 @@ onMounted(() => {
                     </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="../../assets/img/banner.png" class="w-[350px]" alt="">
+                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/banner_ycqsds.png" class="w-[350px]" alt="">
                 </div>
             </div>
         </div>
@@ -176,32 +175,6 @@ onMounted(() => {
         <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

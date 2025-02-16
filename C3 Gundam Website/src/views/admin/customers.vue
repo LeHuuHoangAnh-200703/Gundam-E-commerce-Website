@@ -91,13 +91,4 @@ onMounted(() => {
     background: #DB3F4C;
     color: white;
 }
-
-.fixed {
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-}
-
-.fixed.translate-x-0 {
-    transform: translateX(0);
-}
 </style>

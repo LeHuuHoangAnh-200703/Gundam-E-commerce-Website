@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -12,6 +13,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 
 const fetchCarts = async (maKhachHang) => {
     try {
@@ -31,18 +38,12 @@ const fetchCarts = async (maKhachHang) => {
 const deleteCart = async (idGioHang) => {
     try {
         const response = await axios.delete(`http://localhost:3000/api/giohang/${idGioHang}`);
-        notification.value = {
-            message: "Xóa sản phẩm khỏi giỏ hàng thành công!",
-            type: "success",
-        };
+        showNotification("Xóa sản phẩm khỏi giỏ hàng thành công!", "success");
         setTimeout(() => {
             router.replace('/carts');
         }, 1000);
     } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Xóa sản phẩm khỏi giỏ hàng thất bại!",
-            type: "error",
-        };
+        showNotification(error.response?.data?.message || "Xóa sản phẩm khỏi giỏ hàng thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -78,10 +79,7 @@ const deleteSelectedCarts = async () => {
     // Lọc các sản phẩm đã được chọn (isSelected = true) và lấy danh sách ID của chúng
     const selectedCartIds = carts.value.filter(cart => cart.isSelected).map(cart => cart.MaGioHang);
     if (selectedCartIds.length === 0) {
-        notification.value = {
-            message: "Vui lòng chọn ít nhất một sản phẩm để xóa!",
-            type: "error",
-        };
+        showNotification("Vui lòng chọn ít nhất một sản phẩm để xóa!", "error");
         setTimeout(() => notification.value.message = '', 3000);
         return;
     }
@@ -101,10 +99,7 @@ const goToOrderPage = async () => {
     const selectedProducts = carts.value.filter(cart => cart.isSelected);
 
     if (selectedProducts.length === 0) {
-        notification.value = {
-            message: "Vui lòng chọn ít nhất một sản phẩm!",
-            type: "error",
-        };
+        showNotification("Vui lòng chọn ít nhất một sản phẩm!", "error");
         setTimeout(() => (notification.value.message = ""), 3000);
         return;
     }
@@ -123,10 +118,7 @@ const goToOrderPage = async () => {
             console.log(stockData)
             const product = stockData.find(p => p.MaSanPham === cart.MaSanPham);
             if (!product || cart.SoLuong > product.SoLuongTon) {
-                notification.value = {
-                    message: `Sản phẩm ${cart.TenSanPham} chỉ còn ${product?.SoLuongTon || 0} trong kho!`,
-                    type: "error",
-                };
+                showNotification(`Sản phẩm ${cart.TenSanPham} chỉ còn ${product?.SoLuongTon || 0} trong kho!`, "error");
                 setTimeout(() => (notification.value.message = ""), 3000);
                 return;
             }
@@ -136,11 +128,7 @@ const goToOrderPage = async () => {
         await deleteSelectedCarts();
         router.push("/orders");
     } catch (err) {
-        console.log(err)
-        notification.value = {
-            message: err.response?.data?.message || "Có lỗi xảy ra khi kiểm tra tồn kho!",
-            type: "error",
-        };
+        showNotification(err.response?.data?.message || "Có lỗi xảy ra khi kiểm tra tồn kho!", "error");
         setTimeout(() => (notification.value.message = ""), 3000);
     }
 };
@@ -199,7 +187,7 @@ onMounted(() => {
                                     </span>
                                 </label>
                             </div>
-                            <img :src="`/src/assets/img/${cart.HinhAnh}`" class="w-[80px] h-auto" alt="">
+                            <img :src="`${cart.HinhAnh}`" class="w-[80px] h-auto" alt="">
                             <div class="flex flex-col gap-1 justify-center">
                                 <div class="w-48 lg:w-60 whitespace-nowrap text-ellipsis overflow-hidden">
                                     <p class="text-white text-[14px] overflow-hidden text-ellipsis whitespace-nowrap">{{
@@ -244,7 +232,7 @@ onMounted(() => {
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm
                     nào!</p>
-                <img src="../../assets/img/rb_4168.png" class="w-[200px]" alt="">
+                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png" class="w-[200px]" alt="">
             </div>
         </div>
         <Footer />
@@ -252,32 +240,6 @@ onMounted(() => {
         <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
-                            notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from 'axios';
 
 const options = [
@@ -33,6 +34,16 @@ const options = [
 
 const listOrders = ref([]);
 const selectedType = ref("Tất cả đơn hàng");
+const notification = ref({
+    message: '',
+    type: ''
+});
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 const selectTypeOrders = (type) => {
     selectedType.value = type;
 };
@@ -58,10 +69,7 @@ const updatedStatus = async (maDonHang, currentStatus) => {
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= options.length) {
-        notification.value = {
-            message: "Trạng thái đơn hàng đã ở trạng thái cuối cùng.",
-            type: "error",
-        };
+        showNotification("Trạng thái đơn hàng đã ở trạng thái cuối cùng!", "error");
         setTimeout(() => {
             notification.value.message = '';
         }, 3000);
@@ -200,6 +208,7 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
+                <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
     </div>
@@ -209,14 +218,5 @@ onMounted(() => {
 .active-link {
     background: #DB3F4C;
     color: white;
-}
-
-.fixed {
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-}
-
-.fixed.translate-x-0 {
-    transform: translateX(0);
 }
 </style>
