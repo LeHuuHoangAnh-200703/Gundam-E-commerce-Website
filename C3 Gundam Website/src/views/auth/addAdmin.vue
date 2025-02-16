@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import axios from 'axios';
+import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import { useRouter } from 'vue-router';
 
 // Hàm mã hóa đầu vào
@@ -26,6 +27,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 
 const registerAdmin = async () => {
     errors.value = {};
@@ -72,18 +79,12 @@ const registerAdmin = async () => {
         };
 
         const response = await axios.post('http://localhost:3000/api/admin', dataToSend);
-        notification.value = {
-            message: "Thêm tài khoản thành công!",
-            type: "success",
-        };
+        showNotification("Thêm tài khoản thành công!", "success");
         setTimeout(() => {
             router.push('/admin/adminLogin');
         }, 3000);
     } catch (error) {
-        notification.value = {
-            message: error.response?.data?.message || "Thêm tài khoản thất bại!",
-            type: "error",
-        };
+        showNotification(error.response?.data?.message || "Thêm tài khoản thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
@@ -145,7 +146,7 @@ const registerAdmin = async () => {
                     <div class="hidden lg:block bg-[#DB3F4C] rounded-md p-4 lg:w-1/2">
                         <p class="text-white font-bold text-[24px]">C3 GUNDAM</p>
                         <div class="flex flex-col gap-2 items-center justify-center mt-16">
-                            <img src="../../assets/img/banner.png" class="w-[400px]" alt="banner">
+                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/banner_ycqsds.png" class="w-[400px]" alt="banner">
                             <p class="text-[18px] lg:text-[24px] text-white font-semibold uppercase text-center">
                                 C3 GUNDAM xin chào!
                             </p>
@@ -157,31 +158,6 @@ const registerAdmin = async () => {
                 </div>
             </div>
         </div>
-        <transition name="slide-fade" mode="out-in">
-            <div v-if="notification.message" :class="['fixed top-4 right-4 p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2', {
-                'border-[#DB3F4C]': notification.type === 'error',
-                'border-[#40E0D0]': notification.type === 'success',
-            }]">
-                <div class="flex gap-2 justify-center items-center">
-                    <img :src="notification.type === 'success' ? '/src/assets/img/rb_7710.png' : '/src/assets/img/rb_12437.png'"
-                        class="w-[50px]" alt="">
-                    <p class="text-[16px] font-semibold"
-                        :class="notification.type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{ notification.message }}</p>
-                </div>
-            </div>
-        </transition>
+        <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-</style>

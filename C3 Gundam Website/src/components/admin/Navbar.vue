@@ -6,7 +6,7 @@ const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
 const hasUnreadNotifications = ref(false);
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = ref(localStorage.getItem("Email"));
+const Email = localStorage.getItem("Email");
 
 const listNatifications = ref([]);
 
@@ -37,9 +37,10 @@ const logout = async () => {
       maAdmin
     });
 
-    console.log(response.data.message);
     localStorage.removeItem("TenAdmin");
     localStorage.removeItem("Email");
+    localStorage.removeItem("MaAdmin");
+    localStorage.removeItem("ChucVu");
     localStorage.removeItem("TrangThaiHoatDong");
 
     router.push("/admin/adminLogin");
@@ -69,7 +70,6 @@ const fetchNatifications = async () => {
             };
         });
         listNatifications.value.sort((a, b) => b.ThoiGian - a.ThoiGian);
-        // Hiển thị dấu chấm đỏ nếu có thông báo mới
         if (listNatifications.value.length > 0) {
             hasUnreadNotifications.value = true;
         }
@@ -164,7 +164,7 @@ onMounted(async () => {
                             </div>
                             <p class="font-semibold text-[12px]">Người chỉnh sửa: <span class="text-[#DB3F4C]">{{
                                 natification.NguoiChinhSua }} <span class="text-[#333]">/</span> {{
-                                        natification.ChucVu
+                                        natification.Email
                                     }}</span></p>
                             <p class="text-[12px] font-medium text-gray-600">{{ formatDate(natification.ThoiGian) }}</p>
                         </div>
