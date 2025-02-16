@@ -229,7 +229,6 @@ onMounted(() => {
                                         <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Giá nhập</th>
                                         <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tổng tiền</th>
                                         <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày Nhập</th>
-                                        <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                                     </tr>
                                 </thead>
                                 <tbody class="w-full">
@@ -257,13 +256,6 @@ onMounted(() => {
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                             {{ formatDate(entryFormInfo.NgayNhap) }}</td>
-                                        <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                            <form>
-                                                <button type="submit"
-                                                    class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 mb-4 rounded-md transition-all duration-300 hover:bg-[#B22222] whitespace-nowrap"><i
-                                                        class="fa-solid fa-trash"></i></button>
-                                            </form>
-                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

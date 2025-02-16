@@ -3,21 +3,15 @@ const DiscountCode = require("../models/discountCodeModels");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const multer = require("multer");
+const cloudinary = require('cloudinary').v2;
 
-const storagePath = path.join(
-  __dirname,
-  "../../../C3 Gundam Website/src/assets/img"
-);
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, storagePath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+cloudinary.config({
+  cloud_name: 'dwcajbc6f',
+  api_key: '365476741985665',
+  api_secret: '6gAWhCMdI8DfBAs-1ZDwwx1xM0Y'
 });
 
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 exports.getAllCustomers = async (req, res) => {
   try {
@@ -85,26 +79,38 @@ exports.updateCustomer = async (req, res) => {
     const customer = await Customer.findOne({
       MaKhachHang: req.params.maKhachHang,
     });
+
     if (!customer) {
       return res.status(404).json({ message: "Khách hàng không tồn tại" });
     }
 
+    // Cập nhật thông tin khách hàng
     customer.TenKhachHang = req.body.TenKhachHang || customer.TenKhachHang;
     customer.Email = req.body.Email || customer.Email;
 
     if (req.body.password) {
-      customer.MatKhau = req.body.password;
+      customer.MatKhau = await bcrypt.hash(req.body.password, 10); // Mã hóa mật khẩu mới
     }
 
+    // Upload hình ảnh nếu có
     if (req.file) {
-      customer.Image = req.file.filename;
-    } else {
-      customer.Image = customer.Image;
+      const imageUploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream((error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+        stream.end(req.file.buffer); // Kết thúc stream với buffer
+      });
+
+      customer.Image = imageUploadResult.secure_url; // Lưu URL hình ảnh
     }
 
     const updatedCustomer = await customer.save();
     res.status(200).json(updatedCustomer);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ message: err.message });
   }
 };

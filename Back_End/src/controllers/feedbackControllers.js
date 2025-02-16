@@ -1,21 +1,15 @@
 const FeedBack = require("../models/feedbackModels");
 const path = require("path");
 const multer = require("multer");
+const cloudinary = require('cloudinary').v2;
 
-const storagePath = path.join(
-    __dirname,
-    "../../../C3 Gundam Website/src/assets/img_feedback"
-);
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, storagePath);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
+cloudinary.config({
+    cloud_name: 'dwcajbc6f',
+    api_key: '365476741985665',
+    api_secret: '6gAWhCMdI8DfBAs-1ZDwwx1xM0Y'
 });
 
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 exports.getAllFeedBacks = async (req, res) => {
     try {
@@ -61,10 +55,23 @@ exports.createFeedBack = async (req, res) => {
         return res.status(400).json({ message: "Mô tả chứa nội dung không phù hợp!" });
     }
 
+    const imageUploadPromises = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream((error, result) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(result);
+            });
+            stream.end(file.buffer); // Kết thúc stream với buffer
+        });
+    });
+    const imageUploadResults = await Promise.all(imageUploadPromises);
+
     const feedBack = new FeedBack({
         ...req.body,
         SanPhamDaDanhGia: JSON.parse(req.body.SanPhamDaDanhGia),
-        HinhAnhSanPham: req.files ? req.files.map(file => file.filename) : []
+        HinhAnhSanPham: imageUploadResults.map(result => result.secure_url)
     });
     try {
         await feedBack.save();
@@ -92,11 +99,11 @@ exports.deleteFeedBack = async (req, res) => {
 exports.getFeedBackProducts = async (req, res) => {
     try {
         const statistics = await FeedBack.aggregate([
-            { 
-                $group: { 
-                    _id: "$ChatLuong", 
-                    count: { $sum: 1 } 
-                } 
+            {
+                $group: {
+                    _id: "$ChatLuong",
+                    count: { $sum: 1 }
+                }
             }
         ]);
         return res.status(200).json(statistics);

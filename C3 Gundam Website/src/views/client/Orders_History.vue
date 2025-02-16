@@ -5,7 +5,9 @@ import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const options = [
     {
         name: "Đang chờ xác nhận",
@@ -93,6 +95,23 @@ const updatedStatus = async (maDonHang, currentStatus) => {
         console.error("Error updating status:", err);
     }
 };
+
+const checkOrderReviewed = async (idDonHang) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/donhang/kiemtradanhgia/${idDonHang}`)
+        if (response.data.results) {
+            showNotification("Bạn đã đánh giá đơn hàng này rồi.", "error");
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 3000);
+            return;
+        } else {
+            router.push(`/feedback/${idDonHang}`)
+        }
+    } catch (err) {
+        console.log("Error fetching orderReviewed:", err);
+    }
+}
 
 const selectedType = ref("");
 const selectTypeOrders = (type) => {
@@ -185,7 +204,8 @@ onMounted(() => {
                                 <p class="text-white text-[14px]">Email: {{ order.Email }}</p>
                             </div>
                             <div>
-                                <p class="text-white text-[14px]">Trạng thái thanh toán: {{ order.TrangThaiThanhToan }}</p>
+                                <p class="text-white text-[14px]">Trạng thái thanh toán: {{ order.TrangThaiThanhToan }}
+                                </p>
                                 <p class="text-white text-[14px]">Mã giảm giá: {{ order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia }}</p>
                                 <p class="text-white text-[14px]">Hình thức thanh toán: {{ order.HinhThucThanhToan }}
                                 </p>
@@ -202,9 +222,9 @@ onMounted(() => {
                             formatCurrency(order.TongDon) }} VNĐ</span></p>
                     </div>
                     <div class="flex gap-3 justify-end">
-                        <router-link :to="`/feedback/${order.MaDonHang}`"
+                        <button @click="checkOrderReviewed(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
-                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</router-link>
+                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</button>
                         <button @click.prevent="deleteOrder(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đang chờ xác nhận' || order.TrangThaiDon === 'Đang chờ lấy hàng') ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
@@ -223,13 +243,15 @@ onMounted(() => {
                 <div class="flex flex-col items-center justify-center gap-3">
                     <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có đơn
                         hàng nào!</p>
-                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png" class="w-[200px]" alt="">
+                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_4168_ypai8w.png"
+                        class="w-[200px]" alt="">
                 </div>
             </div>
         </div>
         <Footer />
         <BackToTop />
-        <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
+        <button @click.prevent="chatBox" to="/chatbox"
+            class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
         <NotificationClient :message="notification.message" :type="notification.type" />

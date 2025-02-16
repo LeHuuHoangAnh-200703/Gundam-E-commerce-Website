@@ -1,4 +1,5 @@
 const EntryForm = require("../models/entryFormModels");
+const EntryFormInfo = require("../models/entryFormInfoModels");
 
 exports.getAllEntryForms = async (req, res) => {
   try {
@@ -68,3 +69,17 @@ exports.deleteEntryForm = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.checkQuantity = async (req, res) => {
+  const { maPN } = req.params;
+  try {
+    const entryForminfos = await EntryFormInfo.find({ MaPhieuNhap: maPN });
+    if (entryForminfos.length > 0) {
+      return res.status(200).json({ results: true });
+    } else {
+      return res.status(200).json({ results: false });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}

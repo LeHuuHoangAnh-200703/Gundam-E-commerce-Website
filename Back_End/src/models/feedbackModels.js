@@ -5,6 +5,7 @@ const feedbackSchema = new mongoose.Schema({
     ChatLuong: Number,
     TenKhachHang: String,
     MaKhachHang: String,
+    MaDonHang: String,
     MoTa: String,
     HinhAnhKhachHang: String,
     HinhAnhSanPham: [String],

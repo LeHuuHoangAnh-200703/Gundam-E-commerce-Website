@@ -1,4 +1,5 @@
 const Order = require("../models/orderModels");
+const Feedback = require("../models/feedbackModels");
 const DiscountCode = require("../models/discountCodeModels");
 const Inventory = require("../models/inventoryModels");
 exports.getAllOrders = async (req, res) => {
@@ -284,3 +285,17 @@ exports.getRevenueByDay = async (req, res) => {
         return res.status(500).json({ message: "Có lỗi xảy ra khi lấy thống kê doanh thu." });
     }
 };
+
+exports.checkOrderReviewed = async (req, res) => {
+    const { maDonHang } = req.params;
+    try {
+        const idDonHang = await Feedback.findOne({ MaDonHang: maDonHang });
+        if (idDonHang) {
+            return res.status(200).json({ results: true });
+        } else {
+            return res.status(200).json({ results: false });
+        }
+    } catch (err) {
+        return res.status(500).json({ message: "Có lỗi xảy ra." });
+    }
+}

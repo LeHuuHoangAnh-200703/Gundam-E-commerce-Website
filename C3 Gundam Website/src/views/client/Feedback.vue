@@ -10,6 +10,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const listOrders = ref([]);
 const avatar = ref('');
+const idDonHang = ref('');
 const errors = ref({});
 const formData = ref({
     nameCustomer: '',
@@ -42,7 +43,7 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 
-const fetchOrder= async (maDonHang) => {
+const fetchOrder = async (maDonHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/donhang/${maDonHang}`);
         listOrders.value = response.data.SanPhamDaMua;
@@ -102,6 +103,7 @@ const createFeedBack = async () => {
         dataToSend.append('HinhAnhKhachHang', avatar.value);
         dataToSend.append('MoTa', formData.value.description);
         dataToSend.append('NgayDang', new Date());
+        dataToSend.append('MaDonHang', idDonHang.value);
         dataToSend.append('SanPhamDaDanhGia', JSON.stringify(danhSachSanPham));
         formData.value.images.forEach(image => {
             dataToSend.append('HinhAnhSanPham', image);
@@ -126,9 +128,13 @@ const imageUrls = computed(() => {
 
 onMounted(() => {
     const idDanhGia = router.currentRoute.value.params.maDanhGia;
+    idDonHang.value = idDanhGia;
+    console.log(idDonHang.value)
+    console.log(idDanhGia);
     fetchOrder(idDanhGia);
     const maKhachHang = localStorage.getItem('MaKhachHang');
     fetchCustomer(maKhachHang);
+    window.scrollTo(0, 0);
 })
 </script>
 

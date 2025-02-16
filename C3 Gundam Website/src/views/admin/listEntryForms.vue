@@ -104,6 +104,23 @@ const fetchEntryForm = async () => {
     }
 }
 
+const checkQuantityEntryForms = async (idPhieuNhap) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/phieunhap/kiemtra/${idPhieuNhap}`);
+        if (response.data.results) {
+            showNotification("Đã có thông tin nhập kho, không thể sửa!", "error");
+            return;
+        } else {
+            router.push(`/admin/editEntryForm/${idPhieuNhap}`)
+        }
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+}
+
 const formatDate = (date) => {
     const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
     const formattedDate = date.toLocaleString('vi-VN', options);
@@ -196,9 +213,9 @@ onMounted(() => {
                                             class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                             {{ formatDate(entryForm.NgayNhap) }}</td>
                                         <td class="flex justify-center items-center gap-2 px-7 py-7 flex-col">
-                                            <router-link :to="`/admin/editEntryForm/${entryForm.MaPhieuNhap}`"
+                                            <button @click="checkQuantityEntryForms(entryForm.MaPhieuNhap)"
                                                 class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
-                                                    class="fa-solid fa-pen-to-square"></i></router-link>
+                                                    class="fa-solid fa-pen-to-square"></i></button>
                                             <router-link :to="`/admin/listEntryFormInfo/${entryForm.MaPhieuNhap}`"
                                                 class="inline-block bg-[#003171] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#0c2d58] whitespace-nowrap"><i
                                                     class="fa-solid fa-hashtag"></i></router-link>
