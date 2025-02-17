@@ -38,11 +38,14 @@ const fetchProducts = async () => {
     }
 }
 
-const updateStatus = async (maSanPham, tenSanPham) => {
+const updateStatus = async (maSanPham, newStatus) => {
     const confirmUpdate = confirm("Bạn có chắc chắn về việc cập nhật trạng thái này không?");
     if (!confirmUpdate) return;
+    const nextStatus = newStatus === 'Đang bán' ? 'Ngừng kinh doanh' : 'Đang bán';
     try {
-        const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`);
+        const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`, {
+            TrangThai: nextStatus,
+        });
 
         const notificationData = {
             ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
@@ -145,7 +148,7 @@ onMounted(() => {
                                         <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <form @submit="updateStatus(product.MaSanPham, product.TenSanPham)">
+                                        <form @submit="updateStatus(product.MaSanPham, product.TrangThai)">
                                             <button type="submit"
                                                 class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
                                                     class="fa-solid fa-repeat"></i></button>

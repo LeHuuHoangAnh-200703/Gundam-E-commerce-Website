@@ -95,12 +95,15 @@ exports.updateCustomer = async (req, res) => {
     // Upload hình ảnh nếu có
     if (req.file) {
       const imageUploadResult = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream((error, result) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve(result);
-        });
+        const stream = cloudinary.uploader.upload_stream({
+          folder: 'avatars',
+        },
+          (error, result) => {
+            if (error) {
+              return reject(error);
+            }
+            resolve(result);
+          });
         stream.end(req.file.buffer); // Kết thúc stream với buffer
       });
 
@@ -132,8 +135,6 @@ exports.deleteCustomer = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  console.log("Email:", email);
-  console.log("Password:", password);
   try {
     const customer = await Customer.findOne({ Email: email });
     if (!customer) {

@@ -62,19 +62,23 @@ exports.getProduct = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   console.log(req.body);
-  
+
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ message: 'No files were uploaded.' });
   }
 
   const imageUploadPromises = req.files.map(file => {
     return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream((error, result) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(result);
-      });
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'products',
+        },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
       stream.end(file.buffer); // Kết thúc stream với buffer
     });
   });
@@ -112,12 +116,16 @@ exports.updatedProduct = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const imageUploadPromises = req.files.map(file => {
         return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream((error, result) => {
-            if (error) {
-              return reject(error);
-            }
-            resolve(result);
-          });
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'products',
+            },
+            (error, result) => {
+              if (error) {
+                return reject(error);
+              }
+              resolve(result);
+            });
           stream.end(file.buffer); // Kết thúc stream với buffer
         });
       });
@@ -133,22 +141,19 @@ exports.updatedProduct = async (req, res) => {
 };
 
 exports.updateProductStatus = async (req, res) => {
-    const { maSanPham } = req.params;
-    try {
-        const updatedProduct = await Product.findOneAndUpdate(
-            { MaSanPham: maSanPham },
-            { TrangThai: 'Ngừng kinh doanh' },
-            { new: true }
-        );
+  const { TrangThai } = req.body;
+  try {
+    const updatedProduct = await Product.findOne({ MaSanPham: req.params.maSanPham });
 
-        if (!updatedProduct) {
-            return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
-        }
-
-        res.json(updatedProduct);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
     }
+    updatedProduct.TrangThai = TrangThai;
+    await updatedProduct.save();
+    res.status(200).json({message: "Cập nhật trạng thái thành công."});
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
 exports.upload = upload.array('Images', 10);

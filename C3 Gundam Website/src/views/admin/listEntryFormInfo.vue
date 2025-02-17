@@ -50,7 +50,8 @@ const fetchEntryForm = async (idPhieuNhap) => {
 const fetchProducts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/sanpham');
-        listProducts.value = response.data.filter(product => product.NhaCungCap === nameSupplier.value);
+        listProducts.value = response.data.filter(product => product.NhaCungCap === nameSupplier.value && 
+        product.TrangThai !== 'Ngừng kinh doanh');
     } catch (err) {
         console.log("Erro fetching: ", err);
     }

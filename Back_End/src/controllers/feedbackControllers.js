@@ -57,12 +57,15 @@ exports.createFeedBack = async (req, res) => {
 
     const imageUploadPromises = req.files.map(file => {
         return new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream((error, result) => {
-                if (error) {
-                    return reject(error);
-                }
-                resolve(result);
-            });
+            const stream = cloudinary.uploader.upload_stream({
+                folder: 'feedbacks',
+            },
+                (error, result) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    resolve(result);
+                });
             stream.end(file.buffer); // Kết thúc stream với buffer
         });
     });
