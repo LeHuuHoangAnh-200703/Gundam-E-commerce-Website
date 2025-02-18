@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("Email");
+const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 const listSuppliers = ref([]);
 

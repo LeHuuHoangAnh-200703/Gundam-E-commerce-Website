@@ -17,7 +17,7 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("Email");
+const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 const errors = ref({});
 const formData = ref({

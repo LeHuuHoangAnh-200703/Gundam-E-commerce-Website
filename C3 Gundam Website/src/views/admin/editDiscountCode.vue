@@ -17,7 +17,7 @@ const escapeHtml = (unsafe) => {
 
 const errors = ref({});
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("Email");
+const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 
 const notification = ref({

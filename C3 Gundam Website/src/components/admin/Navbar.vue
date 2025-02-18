@@ -6,7 +6,7 @@ const isSidebarVisible = ref(false);
 const isNotificationVisible = ref(false);
 const hasUnreadNotifications = ref(false);
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("Email");
+const Email = localStorage.getItem("EmailAdmin");
 
 const listNatifications = ref([]);
 
@@ -38,7 +38,7 @@ const logout = async () => {
     });
 
     localStorage.removeItem("TenAdmin");
-    localStorage.removeItem("Email");
+    localStorage.removeItem("EmailAdmin");
     localStorage.removeItem("MaAdmin");
     localStorage.removeItem("ChucVu");
     localStorage.removeItem("TrangThaiHoatDong");
