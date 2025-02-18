@@ -5,7 +5,6 @@ import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from "axios";
 import { useRouter } from 'vue-router';
-import { data } from "autoprefixer";
 
 const router = useRouter();
 
