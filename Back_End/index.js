@@ -13,15 +13,15 @@ const app = express();
 const PORT = 3000;
 
 // Tạo HTTP server từ Express
-const server = http.createServer(app);
+// const server = http.createServer(app);
 
-// Khởi tạo Socket.IO với HTTP server
-const io = new Server(server, {
-  cors: {
-    origin: "*", // Cho phép tất cả nguồn (có thể điều chỉnh)
-    methods: ["GET", "POST"],
-  },
-});
+// // Khởi tạo Socket.IO với HTTP server
+// const io = new Server(server, {
+//   cors: {
+//     origin: "*", // Cho phép tất cả nguồn (có thể điều chỉnh)
+//     methods: ["GET", "POST"],
+//   },
+// });
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -79,98 +79,98 @@ const MessageModel = require("./src/models/messageModels");
 const rooms = new Map();
 
 // Socket.IO lắng nghe kết nối từ client
-io.on("connection", (socket) => {
-  console.log(`Client connected: ${socket.id}`);
+// io.on("connection", (socket) => {
+//   console.log(`Client connected: ${socket.id}`);
 
-  // Xử lý khi client tham gia phòng chat
-  socket.on("joinRoom", ({ idNguoiGui, idNguoiNhan }) => {
-    const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
-    socket.join(roomId);
-    console.log(`Client ${socket.id} joined room: ${roomId}`);
+//   // Xử lý khi client tham gia phòng chat
+//   socket.on("joinRoom", ({ idNguoiGui, idNguoiNhan }) => {
+//     const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
+//     socket.join(roomId);
+//     console.log(`Client ${socket.id} joined room: ${roomId}`);
 
-    // Cập nhật danh sách phòng
-    if (!rooms.has(roomId)) {
-      rooms.set(roomId, new Set());
-    }
-    rooms.get(roomId).add(socket.id);
-  });
+//     // Cập nhật danh sách phòng
+//     if (!rooms.has(roomId)) {
+//       rooms.set(roomId, new Set());
+//     }
+//     rooms.get(roomId).add(socket.id);
+//   });
 
-  // Xử lý khi client gửi tin nhắn
-  socket.on("sendMessage", async (data) => {
-    try {
-      const { MaTinNhan, idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role } = data;
-      const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
+//   // Xử lý khi client gửi tin nhắn
+//   socket.on("sendMessage", async (data) => {
+//     try {
+//       const { MaTinNhan, idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role } = data;
+//       const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
 
-      // Kiểm tra xem người dùng đã tham gia phòng chưa
-      if (!rooms.has(roomId) || !rooms.get(roomId).has(socket.id)) {
-        console.error(`Client ${socket.id} chưa tham gia phòng ${roomId}`);
-        return;
-      }
+//       // Kiểm tra xem người dùng đã tham gia phòng chưa
+//       if (!rooms.has(roomId) || !rooms.get(roomId).has(socket.id)) {
+//         console.error(`Client ${socket.id} chưa tham gia phòng ${roomId}`);
+//         return;
+//       }
 
-      // Tìm hoặc tạo cuộc trò chuyện
-      let chat = await MessageModel.findOne({ MaTinNhan });
-      if (chat) {
-        chat.NoiDung.push({ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() });
-        await chat.save();
-      } else {
-        chat = new MessageModel({
-          MaTinNhan,
-          idNguoiGui,
-          idNguoiNhan,
-          NoiDung: [{ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() }],
-        });
-        await chat.save();
-      }
+//       // Tìm hoặc tạo cuộc trò chuyện
+//       let chat = await MessageModel.findOne({ MaTinNhan });
+//       if (chat) {
+//         chat.NoiDung.push({ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() });
+//         await chat.save();
+//       } else {
+//         chat = new MessageModel({
+//           MaTinNhan,
+//           idNguoiGui,
+//           idNguoiNhan,
+//           NoiDung: [{ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() }],
+//         });
+//         await chat.save();
+//       }
 
-      // Phát tin nhắn đến phòng chat
-      io.to(roomId).emit("receiveMessage", {
-        NguoiGui,
-        TinNhan: NoiDung,
-        role,
-        ThoiGian: new Date(),
-      });
+//       // Phát tin nhắn đến phòng chat
+//       io.to(roomId).emit("receiveMessage", {
+//         NguoiGui,
+//         TinNhan: NoiDung,
+//         role,
+//         ThoiGian: new Date(),
+//       });
 
-    } catch (error) {
-      console.error("Lỗi khi lưu tin nhắn:", error);
-    }
-  });
+//     } catch (error) {
+//       console.error("Lỗi khi lưu tin nhắn:", error);
+//     }
+//   });
 
-  // Xử lý khi client rời phòng chat
-  socket.on("leaveRoom", ({ idNguoiGui, idNguoiNhan }) => {
-    const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
-    socket.leave(roomId);
-    console.log(`Client ${socket.id} rời phòng: ${roomId}`);
+//   // Xử lý khi client rời phòng chat
+//   socket.on("leaveRoom", ({ idNguoiGui, idNguoiNhan }) => {
+//     const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
+//     socket.leave(roomId);
+//     console.log(`Client ${socket.id} rời phòng: ${roomId}`);
 
-    // Xóa socket khỏi danh sách phòng
-    if (rooms.has(roomId)) {
-      rooms.get(roomId).delete(socket.id);
-      if (rooms.get(roomId).size === 0) {
-        rooms.delete(roomId);
-      }
-    }
-  });
+//     // Xóa socket khỏi danh sách phòng
+//     if (rooms.has(roomId)) {
+//       rooms.get(roomId).delete(socket.id);
+//       if (rooms.get(roomId).size === 0) {
+//         rooms.delete(roomId);
+//       }
+//     }
+//   });
 
-  // Xử lý ngắt kết nối
-  socket.on("disconnect", () => {
-    console.log(`Client disconnected: ${socket.id}`);
+//   // Xử lý ngắt kết nối
+//   socket.on("disconnect", () => {
+//     console.log(`Client disconnected: ${socket.id}`);
     
-    // Xóa client khỏi tất cả các phòng
-    for (const [roomId, clients] of rooms) {
-      clients.delete(socket.id);
-      if (clients.size === 0) {
-        rooms.delete(roomId);
-      }
-    }
-  });
-});
+//     // Xóa client khỏi tất cả các phòng
+//     for (const [roomId, clients] of rooms) {
+//       clients.delete(socket.id);
+//       if (clients.size === 0) {
+//         rooms.delete(roomId);
+//       }
+//     }
+//   });
+// });
 
-// Thêm middleware để sử dụng Socket.IO trong các route
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
+// // Thêm middleware để sử dụng Socket.IO trong các route
+// app.use((req, res, next) => {
+//   req.io = io;
+//   next();
+// });
 
 // Chạy server
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
