@@ -1,4 +1,6 @@
 const Supplier = require("../models/suppliersModels");
+const EntryForm = require("../models/entryFormModels");
+const Products = require("../models/productModels");
 
 exports.getAllSuppliers = async (req, res) => {
   try {
@@ -42,7 +44,6 @@ exports.createSupplier = async (req, res) => {
   }
 };
 
-
 exports.updatedSupplier = async (req, res) => {
   try {
     const supplier = await Supplier.findOne({
@@ -75,15 +76,14 @@ exports.updatedSupplier = async (req, res) => {
   }
 };
 
-
 exports.deleteSupplier = async (req, res) => {
   const { maNCC } = req.params;
   try {
-    // const existingOrder = await TheoDoiMuonSach.findOne({ MaDocGia: maDocGia });
-    // if (existingOrder) {
-    //   return res.status(400).json({ message: "Không thể xóa đọc giả vì họ đang có đơn mượn sách." });
-    // }
-
+    const entryForm = await EntryForm.findOne({ MaNhaCungCap: maNCC });
+    // const product = await Products.find({ MaNhaCungCap: maNCC });
+    if (entryForm) {
+      return res.status(400).json({ message: "Nhà cung cấp này đã thêm ở sản phẩm hoặc phiếu nhập." })
+    }
     const supplier = await Supplier.findOneAndDelete({
       MaNhaCungCap: maNCC,
     });

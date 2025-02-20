@@ -66,7 +66,7 @@ const fetchProduct = async (maSanPham) => {
         formData.value.nameProduct = response.data.TenSanPham;
         formData.value.price = response.data.GiaBan;
         formData.value.typeProduct = response.data.LoaiSanPham;
-        formData.value.supplier = response.data.NhaCungCap;
+        formData.value.supplier = response.data.MaNhaCungCap;
         formData.value.description = response.data.MoTa;
         formData.value.idSanPham = response.data.MaSanPham;
     } catch (err) {
@@ -97,10 +97,6 @@ const editProduct = async () => {
         errors.value.supplier = "Nhà cung cấp không được để trống.";
     }
 
-    if (!formData.value.typeProduct) {
-        errors.value.price = "Nhà cung cấp không được để trống.";
-    }
-
     if (!formData.value.description) {
         errors.value.description = "Mô tả không được để trống.";
     } else {
@@ -116,7 +112,7 @@ const editProduct = async () => {
         dataToSend.append('TenSanPham', formData.value.nameProduct);
         dataToSend.append('GiaBan', formData.value.price);
         dataToSend.append('LoaiSanPham', formData.value.typeProduct);
-        dataToSend.append('NhaCungCap', formData.value.supplier);
+        dataToSend.append('MaNhaCungCap', formData.value.supplier);
         dataToSend.append('MoTa', formData.value.description);
 
         if (formData.value.images.length > 0) {
@@ -218,7 +214,7 @@ onMounted(() => {
                                                 <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp
                                                     phù hợp</option>
                                                 <option v-for="(supplier, index) in listSuppliers" :key="index"
-                                                    :value="supplier.TenNhaCungCap"
+                                                    :value="supplier.MaNhaCungCap"
                                                     class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} -
                                                     {{ supplier.TenNhaCungCap }}</option>
                                             </select>

@@ -83,10 +83,6 @@ const addProduct = async () => {
         errors.value.supplier = "Nhà cung cấp không được để trống.";
     }
 
-    if (!formData.value.typeProduct) {
-        errors.value.price = "Nhà cung cấp không được để trống.";
-    }
-
     if (!formData.value.description) {
         errors.value.description = "Mô tả không được để trống.";
     } else {
@@ -106,7 +102,7 @@ const addProduct = async () => {
         dataToSend.append('TenSanPham', formData.value.nameProduct);
         dataToSend.append('GiaBan', formData.value.price);
         dataToSend.append('LoaiSanPham', formData.value.typeProduct);
-        dataToSend.append('NhaCungCap', formData.value.supplier);
+        dataToSend.append('MaNhaCungCap', formData.value.supplier);
         dataToSend.append('MoTa', formData.value.description);
 
         formData.value.images.forEach(image => {
@@ -205,7 +201,7 @@ onMounted(() => {
                                                 <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp
                                                     phù hợp</option>
                                                 <option v-for="(supplier, index) in listSuppliers" :key="index"
-                                                    :value="supplier.TenNhaCungCap"
+                                                    :value="supplier.MaNhaCungCap"
                                                     class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} -
                                                     {{ supplier.TenNhaCungCap }}</option>
                                             </select>

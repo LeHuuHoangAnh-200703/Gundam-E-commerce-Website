@@ -131,7 +131,7 @@ onMounted(() => {
                                         product.LoaiSanPham }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
-                                        product.NhaCungCap }}
+                                        product.TenNhaCungCap }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ (product.SoLuong > 0) ? product.SoLuong : 'Hết hàng' }}

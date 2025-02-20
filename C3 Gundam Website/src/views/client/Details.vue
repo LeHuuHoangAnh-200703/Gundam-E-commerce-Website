@@ -43,7 +43,7 @@ const fetchProduct = async (idSanPham) => {
         description.value = response.data.MoTa;
         images.value = response.data.Images;
         price.value = response.data.GiaBan;
-        supplier.value = response.data.NhaCungCap;
+        supplier.value = response.data.TenNhaCungCap;
         typeProduct.value = response.data.LoaiSanPham;
         quantity.value = response.data.SoLuong;
         status.value = response.data.TrangThai;
@@ -340,7 +340,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                 </div>
                 <p class="my-8 text-gray-300 text-justify">{{ description }}</p>
             </div>
-            <div class="my-20">
+            <div class="my-20 w-full">
                 <div class="flex justify-center items-end">
                     <p
                         class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">

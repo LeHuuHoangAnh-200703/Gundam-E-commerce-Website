@@ -53,6 +53,7 @@ const deleteSupplier = async (maNCC, tenNCC) => {
         await axios.post('http://localhost:3000/api/thongbao', notificationData);
 
         showNotification("Xóa nhà cung cấp thành công!", "success");
+        await fetchSuppliers();
         setTimeout(() => {
             router.push('/admin/listSuppliers');
         }, 3000);
@@ -106,7 +107,7 @@ onMounted(() => {
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ supplier.DiaChi }}</td>
                                     <td class="flex justify-center gap-2 px-7 py-7">
-                                        <router-link :href="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
+                                        <router-link :to="`/admin/editSupplier/${supplier.MaNhaCungCap}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565]"><i
                                                 class="fa-solid fa-pen-to-square"></i></router-link>
                                         <form

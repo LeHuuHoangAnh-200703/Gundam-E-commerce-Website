@@ -1,5 +1,6 @@
 const Product = require("../models/productModels");
 const Inventory = require("../models/inventoryModels");
+const Supplier = require("../models/suppliersModels");
 const path = require("path");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -23,12 +24,23 @@ exports.getAllProducts = async (req, res) => {
       inventoryMap[inventory.MaSanPham.toString()] = inventory.SoLuongTon;
     });
 
+    // Tạo một mảng chứa các mã nhà cung cấp để tìm kiếm
+    const supplierIds = [...new Set(products.map(product => product.MaNhaCungCap))];
+
+    // Tìm tất cả nhà cung cấp dựa trên mã nhà cung cấp
+    const suppliers = await Supplier.find({ MaNhaCungCap: { $in: supplierIds } });
+    const supplierMap = {};
+    suppliers.forEach(supplier => {
+      supplierMap[supplier.MaNhaCungCap] = supplier.TenNhaCungCap;
+    });
+
     // Kết hợp dữ liệu tồn kho với danh sách sản phẩm
     const result = products.map(product => {
       const productId = product.MaSanPham?.toString(); // Lấy mã sản phẩm để ánh xạ
       return {
         ...product._doc, // Giữ nguyên dữ liệu sản phẩm
         SoLuong: inventoryMap[productId] || 0, // Thêm số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
+        TenNhaCungCap: supplierMap[product.MaNhaCungCap], // Lấy tên nhà cung cấp hoặc gán "Không xác định" nếu không có
       };
     });
 
@@ -47,22 +59,22 @@ exports.getProduct = async (req, res) => {
     }
 
     const inventory = await Inventory.findOne({ MaSanPham: req.params.maSanPham });
-
-    // Kết hợp dữ liệu tồn kho với thông tin sản phẩm
+    const supplier = await Supplier.findOne({ MaNhaCungCap: product.MaNhaCungCap });
+    
     const result = {
       ...product._doc, // Giữ nguyên thông tin sản phẩm
       SoLuong: inventory ? inventory.SoLuongTon : 0, // Lấy số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
+      TenNhaCungCap: supplier.TenNhaCungCap
     };
 
     res.status(200).json(result);
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: err.message });
   }
 };
 
 exports.createProduct = async (req, res) => {
-  console.log(req.body);
-
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ message: 'No files were uploaded.' });
   }
@@ -109,7 +121,7 @@ exports.updatedProduct = async (req, res) => {
     product.TenSanPham = req.body.TenSanPham || product.TenSanPham;
     product.GiaBan = req.body.GiaBan || product.GiaBan;
     product.LoaiSanPham = req.body.LoaiSanPham || product.LoaiSanPham;
-    product.NhaCungCap = req.body.NhaCungCap || product.NhaCungCap;
+    product.MaNhaCungCap = req.body.MaNhaCungCap || product.MaNhaCungCap;
     product.MoTa = req.body.MoTa || product.MoTa;
 
     // Kiểm tra xem có hình ảnh mới không
@@ -150,7 +162,7 @@ exports.updateProductStatus = async (req, res) => {
     }
     updatedProduct.TrangThai = TrangThai;
     await updatedProduct.save();
-    res.status(200).json({message: "Cập nhật trạng thái thành công."});
+    res.status(200).json({ message: "Cập nhật trạng thái thành công." });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
