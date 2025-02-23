@@ -25,7 +25,7 @@ const findNameCustomers = computed(() => {
         return listCustomers.value;
     }
     return listCustomers.value.filter(customer => {
-        return customer.TenKhachHang.includes(searchValue.value);
+        return customer.TenKhachHang.toLowerCase().includes(searchValue.value);
     })
 })
 
