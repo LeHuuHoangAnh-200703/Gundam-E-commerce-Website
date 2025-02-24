@@ -7,5 +7,6 @@ router.get("/:maSanPham", productController.getProduct);
 router.post("/", productController.upload ,productController.createProduct);
 router.put("/:maSanPham", productController.upload, productController.updatedProduct);
 router.patch("/:maSanPham", productController.updateProductStatus);
+router.post("/search", productController.findProductsWithName)
 
 module.exports = router;

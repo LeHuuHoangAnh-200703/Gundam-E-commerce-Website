@@ -38,6 +38,7 @@ import ChatBox from "@/views/client/ChatBox.vue";
 import Statistical from "@/views/admin/adminStatistical.vue";
 import personalDirectory from "@/views/client/personalDirectory.vue";
 import Voucher from "@/views/client/Voucher.vue";
+import SearchResults from "@/views/client/SearchResults.vue";
 
 const routes = [
     {
@@ -114,6 +115,11 @@ const routes = [
         path: "/voucher",
         name: "Voucher",
         component: Voucher,
+    },
+    {
+        path: "/seachResults",
+        name: "Seach Results",
+        component: SearchResults,
     },
     {
         path: "/admin/adminLogin",

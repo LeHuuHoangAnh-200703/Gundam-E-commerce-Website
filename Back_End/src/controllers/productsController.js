@@ -60,7 +60,7 @@ exports.getProduct = async (req, res) => {
 
     const inventory = await Inventory.findOne({ MaSanPham: req.params.maSanPham });
     const supplier = await Supplier.findOne({ MaNhaCungCap: product.MaNhaCungCap });
-    
+
     const result = {
       ...product._doc, // Giữ nguyên thông tin sản phẩm
       SoLuong: inventory ? inventory.SoLuongTon : 0, // Lấy số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
@@ -167,5 +167,21 @@ exports.updateProductStatus = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+exports.findProductsWithName = async (req, res) => {
+  const { name } = req.params;
+  if (!name) {
+    res.status(404).json({ message: 'Tên sản phẩm không được để trống.' })
+  }
+  try {
+    const products = await Product.find({ TenSanPham: { $regex: name, $options: 'i' } });
+    if (products.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm nào." });
+    }
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
 
 exports.upload = upload.array('Images', 10);
