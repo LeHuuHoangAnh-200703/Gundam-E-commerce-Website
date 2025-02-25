@@ -169,18 +169,18 @@ exports.updateProductStatus = async (req, res) => {
 };
 
 exports.findProductsWithName = async (req, res) => {
-  const { name } = req.params;
-  if (!name) {
-    res.status(404).json({ message: 'Tên sản phẩm không được để trống.' })
+  const tenSanPham  = req.query.tenSanPham;
+  if (!tenSanPham) {
+    return res.status(400).json({ message: 'Tên sản phẩm không được để trống.' })
   }
   try {
-    const products = await Product.find({ TenSanPham: { $regex: name, $options: 'i' } });
+    const products = await Product.find({ TenSanPham: { $regex: tenSanPham, $options: 'i' } });
     if (products.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy sản phẩm nào." });
+      return res.status(400).json({ message: "Không tìm thấy sản phẩm nào." });
     }
-    res.status(200).json(products);
+    return res.status(200).json(products);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    return res.status(400).json({ message: err.message });
   }
 }
 

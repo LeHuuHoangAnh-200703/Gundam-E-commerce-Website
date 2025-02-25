@@ -5,32 +5,13 @@ import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
-
-const listChoices = [
-    {
-        name: "TẤT CẢ SẢN PHẨM",
-        type: "All",
-    },
-    {
-        name: "MG Mobile Suit Gundam",
-        type: "MG",
-    },
-    {
-        name: "PG Mobile Suit Gundam",
-        type: "PG",
-    },
-    {
-        name: "RG Mobile Suit Gundam",
-        type: "RG",
-    },
-]
+const route = useRoute(); // Sử dụng useRoute để theo dõi thay đổi của query
 
 const listProducts = ref([]);
-const searchQuery = ref("");
-
+const searchQuery = ref(route.query.query || '');
 const notification = ref({
     message: '',
     type: ''
@@ -42,13 +23,10 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
-const handleSearch = (query) => {
-    searchQuery.value = query;
-};
-
 const fectchProducts = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/sanpham');
+        const response = await axios.get(`http://localhost:3000/api/sanpham/timkiem/ketquatimkiem?tenSanPham=${searchQuery.value}`);
+        console.log(response.data)
         listProducts.value = response.data.map(product => {
             return {
                 ...product,
@@ -100,19 +78,24 @@ const chatBox = () => {
 }
 
 onMounted(() => {
-    fectchProducts();
+    if (!searchQuery.value) {
+        router.push({ name: 'NotFound' });
+    } else {
+        fectchProducts();
+    }
 })
 </script>
 
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
-        <Header_Home @search="handleSearch" />
-        <h1 class="mb-10 mt-5 m-5 lg:mx-[210px] text-white font-bold text-[20px]">Kết quả tìm kiếm của ""</h1>
+        <Header_Home />
+        <h1 class="mb-10 mt-5 m-5 lg:mx-[210px] text-white font-bold text-[20px]">Kết quả tìm kiếm của "{{ searchQuery
+            }}"</h1>
         <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
             <div v-for="(product, index) in listProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link :to="`/details/${product.MaSanPham}`">
-                    <img :src="`${product.Images[0]}`"
-                        class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
+                    <img :src="`${product.Images[0]}`" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]"
+                        alt="">
                 </router-link>
                 <router-link :to="`/details/${product.MaSanPham}`"
                     class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
@@ -129,7 +112,8 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
-        <button @click.prevent="chatBox" to="/chatbox" class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
+        <button @click.prevent="chatBox" to="/chatbox"
+            class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
             <i class="fa-solid fa-comments text-white"></i>
         </button>
         <NotificationClient :message="notification.message" :type="notification.type" />

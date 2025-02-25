@@ -16,12 +16,13 @@ const logout = async () => {
     });
 
     console.log(response.data.message);
-    localStorage.removeItem("MaKhachHang");
-    localStorage.removeItem("TenKhachHang");
-    localStorage.removeItem("TrangThai");
-    userInfo.value.TenKhachHang = '';
-    userInfo.value.Email = '';
-    userInfo.value.MaKhachHang = '';
+    // localStorage.removeItem("MaKhachHang");
+    // localStorage.removeItem("TenKhachHang");
+    // localStorage.removeItem("TrangThai");
+    // userInfo.value.TenKhachHang = '';
+    // userInfo.value.Email = '';
+    // userInfo.value.MaKhachHang = '';
+    localStorage.clear();
     isLoggedIn.value = false;
     router.push("/login");
   } catch (error) {
@@ -67,7 +68,12 @@ const voucher = () => {
 const emit = defineEmits();
 const searchQuery = ref("");
 const handleSearch = () => {
-    emit('search', searchQuery.value);
+    if (searchQuery.value.trim()) {
+        router.push({
+            path: '/seachResults',
+            query: { query: searchQuery.value }
+        })
+    }
 };
 
 const cartLists = ref([]);
@@ -96,12 +102,6 @@ onMounted(() => {
     closeMenu.click(() => {
         sideBar.animate({ left: "-100%" }, 400);
     })
-
-    $(".search-input").on("keydown", (event) => {
-        if (event.key === "Enter") {
-            emit('search', searchQuery.value);
-        }
-    });
 
     const maKhachHang = localStorage.getItem("MaKhachHang");
     fetchCarts(maKhachHang);
@@ -150,7 +150,7 @@ onMounted(() => {
             </div>
             <div class="flex lg:gap-10 gap-7 items-end">
                 <div class="relative lg:block hidden">
-                    <input type="text" v-model="searchQuery"
+                    <input type="text" v-model="searchQuery" @keydown.enter="handleSearch"
                         class="search-input relative py-3 w-[300px] pr-10 outline-none text-white border-b-2 bg-transparent placeholder:font-semibold placeholder:text-white"
                         placeholder="Tìm kiếm ...">
                     <i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-[20px] text-white"></i>
@@ -174,7 +174,7 @@ onMounted(() => {
                 </button>
             </div>
             <div class="relative my-4">
-                <input type="text" v-model="searchQuery"
+                <input type="text" v-model="searchQuery" @keydown.enter="handleSearch"
                     class="search-input relative py-3 w-full text-[24px] pr-10 outline-none text-white border-b-2 bg-transparent placeholder:font-semibold placeholder:text-white"
                     placeholder="Tìm kiếm ...">
                 <i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-[20px] text-white"></i>
