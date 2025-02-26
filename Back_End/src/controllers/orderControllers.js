@@ -85,7 +85,7 @@ exports.createOrder = async (req, res) => {
         }
 
         for (const sp of SanPhamDaMua) {
-            const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham});
+            const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
             if (!inventory) {
                 return res.status(400).json({ message: `Sản phẩm không tồn tại trong kho.` });
             }
@@ -147,23 +147,23 @@ exports.deleteOrder = async (req, res) => {
 };
 
 exports.updatedStatus = async (req, res) => {
-    const { maDonHang} = req.params;
+    const { maDonHang } = req.params;
     const { newStatus } = req.body;
-    try {  
-        const updatedOrder = await Order.findOneAndUpdate(  
-            { MaDonHang: maDonHang },  
-            { TrangThaiDon: newStatus },  
-            { new: true } 
-        );  
+    try {
+        const updatedOrder = await Order.findOneAndUpdate(
+            { MaDonHang: maDonHang },
+            { TrangThaiDon: newStatus },
+            { new: true }
+        );
 
-        if (!updatedOrder) {  
-            return res.status(404).json({ message: 'Đơn hàng không tìm thấy.' });  
-        }  
+        if (!updatedOrder) {
+            return res.status(404).json({ message: 'Đơn hàng không tìm thấy.' });
+        }
 
-        res.status(200).json(updatedOrder);  
-    } catch (error) {  
-        console.error("Error updating order status: ", error);  
-        res.status(500).json({ message: 'Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.' });  
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        console.error("Error updating order status: ", error);
+        res.status(500).json({ message: 'Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.' });
     }
 };
 
@@ -174,7 +174,15 @@ exports.getRevenueByMonth = async (req, res) => {
         const revenueData = await Order.aggregate([
             {
                 $match: {
-                    TrangThaiDon: "Đã giao thành công", // Chỉ tính doanh thu cho đơn hàng hoàn thành
+                    $or: [
+                        {
+                            TrangThaiDon: "Đã giao thành công"
+                        },
+                        {
+                            TrangThaiThanhToan: "Đã thanh toán qua PayPal",
+                            TrangThaiDon: { $ne: "Đã hủy" },
+                        }
+                    ],
                     NgayDatHang: {
                         $gte: new Date(`${year}-01-01`), // Ngày đầu tiên của năm
                         $lte: new Date(`${year}-12-31`) // Ngày cuối cùng của năm
@@ -221,11 +229,11 @@ exports.getRevenueByMonth = async (req, res) => {
 exports.getOrderStatus = async (req, res) => {
     try {
         const statistics = await Order.aggregate([
-            { 
-                $group: { 
-                    _id: "$TrangThaiDon", 
-                    count: { $sum: 1 } 
-                } 
+            {
+                $group: {
+                    _id: "$TrangThaiDon",
+                    count: { $sum: 1 }
+                }
             }
         ]);
         return res.status(200).json(statistics);
@@ -241,7 +249,15 @@ exports.getRevenueByDay = async (req, res) => {
         const revenueData = await Order.aggregate([
             {
                 $match: {
-                    TrangThaiDon: "Đã giao thành công",
+                    $or: [
+                        {
+                            TrangThaiDon: "Đã giao thành công"
+                        },
+                        {
+                            TrangThaiThanhToan: "Đã thanh toán qua PayPal",
+                            TrangThaiDon: { $ne: "Đã hủy" },
+                        }
+                    ],
                     NgayDatHang: {
                         $gte: new Date(`${year}-${month}-01`),
                         $lte: new Date(`${year}-${month}-31`)

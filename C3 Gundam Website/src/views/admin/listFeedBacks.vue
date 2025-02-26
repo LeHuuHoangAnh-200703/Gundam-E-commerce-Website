@@ -5,6 +5,7 @@ import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
 
 const comments = ref([]);
+const searchValue = ref("");
 const fetchFeedBacks = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/danhgia');
@@ -43,19 +44,22 @@ const selected = (item) => {
 const chooseFeedBackWithStar = computed(() => {
     return comments.value.filter(comment => {
         const chooseStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
-        return chooseStar;
+        const matchesSearch = !searchValue.value || comment.SanPhamDaDanhGia.some(item => 
+            item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
+        )
+        return chooseStar && matchesSearch;
     });
 })
 
-const starCounts = computed(() => {  
+const starCounts = computed(() => {
     const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    comments.value.forEach(comment => {  
-        if (comment.ChatLuong >= 1 && comment.ChatLuong <= 5) {  
-            counts[comment.ChatLuong]++;  
-        }  
-    });  
-    return counts;  
-});  
+    comments.value.forEach(comment => {
+        if (comment.ChatLuong >= 1 && comment.ChatLuong <= 5) {
+            counts[comment.ChatLuong]++;
+        }
+    });
+    return counts;
+});
 
 onMounted(() => {
     fetchFeedBacks();
@@ -74,7 +78,8 @@ onMounted(() => {
                 <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
                     <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
                         <div class="flex flex-col gap-2">
-                            <p class="text-[24px] xl:text-[20px] font-semibold"><span class="text-[30px] xl:text-[26px]">{{ totalQuality }}</span> trên 5 <i
+                            <p class="text-[24px] xl:text-[20px] font-semibold"><span
+                                    class="text-[30px] xl:text-[26px]">{{ totalQuality }}</span> trên 5 <i
                                     class="fa-solid fa-star text-[#FFD700]"></i></p>
                         </div>
                         <div class="flex flex-col gap-2">
@@ -124,47 +129,68 @@ onMounted(() => {
                             </button>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-4 w-full overflow-y-auto max-h-[calc(100vh-200px)]">
-                        <div v-if="chooseFeedBackWithStar.length > 0"
-                            class="bg-white p-4 w-full border-2 rounded-lg shadow-lg">
-                            <div v-for="(comment, index) in chooseFeedBackWithStar" :key="index"
-                                class="flex py-4 border-b flex-col gap-2 w-full">
-                                <div class="flex gap-4 w-full">
-                                    <img :src="`${comment.HinhAnhKhachHang !=='undefined' ? comment.HinhAnhKhachHang : 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/avatar_sejn1n.jpg'}`"
-                                        class="w-[60px] h-[60px] xl:w-[50px] xl:h-[50px] rounded-full object-cover" alt="">
-                                    <div class="">
-                                        <p class="text-[14px] xl:text-[12px] font-semibold">{{ comment.TenKhachHang }}</p>
-                                        <div class="flex gap-1 my-1">
-                                            <i v-for="star in 5" :key="star" :class="{
-                                                'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
-                                                'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
-                                            }"></i>
+                    <div class="flex flex-col gap-6 w-full">
+                        <div class="relative flex justify-center gap-2 w-full lg:max-w-[calc(100vw-200px)]">
+                            <input type="text" v-model="searchValue"
+                                class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                                placeholder="Tìm kiếm đánh giá sản phẩm..." />
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                        </div>
+                        <div class="flex flex-col gap-4 w-full overflow-y-auto max-h-[calc(100vh-200px)]">
+                            <div v-if="chooseFeedBackWithStar.length > 0"
+                                class="bg-white p-4 w-full border-2 rounded-lg shadow-lg">
+                                <div v-for="(comment, index) in chooseFeedBackWithStar" :key="index"
+                                    class="flex py-4 border-b flex-col gap-2 w-full">
+                                    <div class="flex gap-4 w-full">
+                                        <img :src="`${comment.HinhAnhKhachHang !== 'undefined' ? comment.HinhAnhKhachHang : 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/avatar_sejn1n.jpg'}`"
+                                            class="w-[60px] h-[60px] xl:w-[50px] xl:h-[50px] rounded-full object-cover"
+                                            alt="">
+                                        <div class="">
+                                            <p class="text-[14px] xl:text-[12px] font-semibold">{{ comment.TenKhachHang
+                                                }}
+                                            </p>
+                                            <div class="flex gap-1 my-1">
+                                                <i v-for="star in 5" :key="star" :class="{
+                                                    'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
+                                                    'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
+                                                }"></i>
+                                            </div>
+                                            <p class="text-[12px] xl:text-[10px] font-semibold mb-1">{{
+                                                formatDate(comment.NgayDang) }}</p>
                                         </div>
-                                        <p class="text-[12px] xl:text-[10px] font-semibold mb-1">{{ formatDate(comment.NgayDang) }}</p>
                                     </div>
-                                </div>
-                                <div class="flex flex-col">
-                                    <p class="my-4 text-justify xl:text-[14px]">{{ comment.MoTa }}</p>
-                                    <div class="flex gap-4">
-                                        <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                            :src="`${img}`"
-                                            class="w-[80px] lg:w-[100px] xl:w-[80px] border-2" alt="">
+                                    <div class="flex flex-col">
+                                        <p class="my-4 text-justify xl:text-[14px]">{{ comment.MoTa }}</p>
+                                        <div class="flex gap-4">
+                                            <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
+                                                :src="`${img}`" class="w-[80px] lg:w-[100px] xl:w-[80px] border-2"
+                                                alt="">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="flex flex-wrap" v-for="(product, index) in comment.SanPhamDaDanhGia"
-                                    :key="index">
-                                    <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">{{ product.TenSanPham }}</p>
-                                    <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{ product.MaSanPham }}</p>
-                                    <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{ product.LoaiSanPham }}</p>
+                                    <div class="flex flex-wrap" v-for="(product, index) in comment.SanPhamDaDanhGia"
+                                        :key="index">
+                                        <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">{{ product.TenSanPham
+                                            }}
+                                        </p>
+                                        <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{ product.MaSanPham
+                                            }}
+                                        </p>
+                                        <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{
+                                            product.LoaiSanPham }}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div v-else class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
-                            <div class="flex justify-center items-center m-auto w-full h-full">
-                                <div class="flex flex-col items-center justify-center gap-3">
-                                    <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
-                                        không có đánh giá nào!</p>
-                                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-shiba-inu-dog-robot-cyborg-cartoon-vector-icon-illustration-animal-technology-isolated-flat_egpulq.png" class="w-[350px]" alt="">
+                            <div v-else
+                                class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
+                                <div class="flex justify-center items-center m-auto w-full h-full">
+                                    <div class="flex flex-col items-center justify-center gap-3">
+                                        <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
+                                            không có đánh giá nào!</p>
+                                        <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/astronaut-riding-king-kong-robot-with-gun-cartoon-vector-icon-illustration-science-technology-flat_o4ny7c.png"
+                                            class="w-[350px]" alt="">
+                                    </div>
                                 </div>
                             </div>
                         </div>

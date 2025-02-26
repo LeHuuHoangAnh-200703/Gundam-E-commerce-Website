@@ -118,6 +118,16 @@ exports.updatedProduct = async (req, res) => {
       return res.status(404).json({ message: "Sản phẩm không tồn tại" });
     }
 
+    // Lưu trữ public_id của hình ảnh cũ để xóa sau này
+    const oldImagePublicIds = product.Images.map(imageUrl => {
+      // Tách public_id từ URL
+      const urlParts = imageUrl.split('/');
+      const publicIdWithExtension = urlParts[urlParts.length - 1]; // Lấy phần cuối cùng của URL
+      const publicId = publicIdWithExtension.split('.')[0]; // Tách public_id từ tên file
+      return publicId; // Trả về public_id
+    });
+
+    // Cập nhật thông tin sản phẩm
     product.TenSanPham = req.body.TenSanPham || product.TenSanPham;
     product.GiaBan = req.body.GiaBan || product.GiaBan;
     product.LoaiSanPham = req.body.LoaiSanPham || product.LoaiSanPham;
@@ -126,6 +136,13 @@ exports.updatedProduct = async (req, res) => {
 
     // Kiểm tra xem có hình ảnh mới không
     if (req.files && req.files.length > 0) {
+      // Xóa hình ảnh cũ khỏi Cloudinary
+      const deletePromises = oldImagePublicIds.map(publicId => {
+        return cloudinary.uploader.destroy(`products/${publicId}`);
+      });
+      await Promise.all(deletePromises); // Chờ tất cả hình ảnh cũ được xóa
+
+      // Tải hình ảnh mới lên Cloudinary
       const imageUploadPromises = req.files.map(file => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(

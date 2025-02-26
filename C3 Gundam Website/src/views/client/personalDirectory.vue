@@ -125,7 +125,7 @@ onMounted(() => {
                             <div class="flex flex-col items-center justify-center gap-3">
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có địa chỉ, hãy cập nhật!</p>
-                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-shiba-inu-dog-robot-cyborg-cartoon-vector-icon-illustration-animal-technology-isolated-flat_egpulq.png" class="w-[200px]" alt="">
+                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/astronaut-riding-king-kong-robot-with-gun-cartoon-vector-icon-illustration-science-technology-flat_o4ny7c.png" class="w-[200px]" alt="">
                             </div>
                         </div>
                     </div>
@@ -169,7 +169,7 @@ onMounted(() => {
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có mã giảm giá
                                     nào!</p>
-                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-shiba-inu-dog-robot-cyborg-cartoon-vector-icon-illustration-animal-technology-isolated-flat_egpulq.png" class="w-[200px]" alt="">
+                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/astronaut-riding-king-kong-robot-with-gun-cartoon-vector-icon-illustration-science-technology-flat_o4ny7c.png" class="w-[200px]" alt="">
                             </div>
                         </div>
                     </div>
