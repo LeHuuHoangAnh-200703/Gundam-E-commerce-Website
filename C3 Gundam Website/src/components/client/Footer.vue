@@ -12,7 +12,7 @@
         </p>
       </div>
       <div class="text-center lg:text-right">
-        <p class="text-[16px]">Sản phẩm được cung cấp bởi <span class="text-[#DB3F4C] font-semibold">BANDAI NAMCO</span></p>
+        <p class="text-[16px]">Sản phẩm được cung cấp chính bởi <span class="text-[#DB3F4C] font-semibold">BANDAI NAMCO</span></p>
       </div>
     </div>
   </footer>

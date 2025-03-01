@@ -84,16 +84,26 @@ exports.updateCustomer = async (req, res) => {
       return res.status(404).json({ message: "Khách hàng không tồn tại" });
     }
 
-    // Cập nhật thông tin khách hàng
     customer.TenKhachHang = req.body.TenKhachHang || customer.TenKhachHang;
     customer.Email = req.body.Email || customer.Email;
 
     if (req.body.password) {
-      customer.MatKhau = await bcrypt.hash(req.body.password, 10); // Mã hóa mật khẩu mới
+      customer.MatKhau = await bcrypt.hash(req.body.password, 10);
     }
 
-    // Upload hình ảnh nếu có
     if (req.file) {
+      if (customer.Image) {
+        // Lấy public_id của ảnh cũ từ URL
+        const urlParts = customer.Image.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = publicIdWithExtension.split('.')[0]; // Bỏ phần mở rộng file
+
+        // Xóa ảnh cũ trên Cloudinary (nếu có)
+        const deleteResult = await cloudinary.uploader.destroy(`avatars/${publicId}`);
+        if (deleteResult.result !== "ok") {
+          console.warn("⚠️ Không thể xóa ảnh cũ trên Cloudinary:", deleteResult);
+        }
+      }
       const imageUploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream({
           folder: 'avatars',

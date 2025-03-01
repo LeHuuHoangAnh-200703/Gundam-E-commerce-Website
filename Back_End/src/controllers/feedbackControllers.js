@@ -1,4 +1,5 @@
 const FeedBack = require("../models/feedbackModels");
+const Customer = require("../models/customersModels");
 const path = require("path");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -14,7 +15,25 @@ const upload = multer({ storage: storage });
 exports.getAllFeedBacks = async (req, res) => {
     try {
         const feedBacks = await FeedBack.find();
-        res.status(200).json(feedBacks);
+        const customerIds = [...new Set(feedBacks.map(feedBack => feedBack.MaKhachHang))];
+
+        const customers = await Customer.find({ MaKhachHang: { $in: customerIds } });
+        const customerMap = {};
+        customers.forEach(customer => {
+            customerMap[customer.MaKhachHang] = {
+                TenKhachHang: customer.TenKhachHang,
+                HinhAnhKhachHang: customer.Image
+            };
+        });
+
+        const feedbacksWithCustomer = feedBacks.map(feedBack => ({
+            ...feedBack.toObject(),
+            TenKhachHang: customerMap[feedBack.MaKhachHang]?.TenKhachHang || "Không xác định",
+            HinhAnhKhachHang: customerMap[feedBack.MaKhachHang]?.HinhAnhKhachHang || null
+        }));
+
+
+        res.status(200).json(feedbacksWithCustomer);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -93,6 +112,23 @@ exports.deleteFeedBack = async (req, res) => {
         if (!feedBack) {
             return res.status(404).json({ message: "Mã đánh giá không tồn tại." });
         }
+
+        if (feedBack.HinhAnhSanPham && feedBack.HinhAnhSanPham.length > 0) {
+            const deletePromises = feedBack.HinhAnhSanPham.map(async (imageUrl) => {
+                try {
+                    // Lấy public_id từ URL của ảnh trên Cloudinary
+                    const publicId = imageUrl.split('/').pop().split('.')[0];
+                    await cloudinary.uploader.destroy(`feedbacks/${publicId}`);
+                } catch (error) {
+                    console.error("Lỗi khi xóa ảnh trên Cloudinary:", error);
+                }
+            });
+
+            await Promise.all(deletePromises);
+        }
+
+        await FeedBack.findOneAndDelete({ MaDanhGia: maDanhGia });
+
         res.status(200).json({ message: "Mã đánh giá đã được xóa." });
     } catch (err) {
         res.status(500).json({ message: err.message });

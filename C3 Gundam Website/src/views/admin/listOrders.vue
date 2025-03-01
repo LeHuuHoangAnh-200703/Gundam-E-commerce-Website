@@ -30,6 +30,10 @@ const options = [
         name: "Đã giao thành công",
         icon: "fa-solid fa-circle-check"
     },
+    {
+        name: "Đơn hàng đã hủy",
+        icon: "fa-solid fa-trash"
+    },
 ]
 
 const listOrders = ref([]);
