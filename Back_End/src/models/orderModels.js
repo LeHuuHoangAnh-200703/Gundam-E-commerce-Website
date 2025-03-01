@@ -21,8 +21,9 @@ const orderSchema = new mongoose.Schema({
   TongDon: Number,
   GhiChu: String,
   NgayDatHang: Date,
+  HinhThucVanChuyen: String,
   TrangThaiThanhToan: String,
-  TrangThaiDon: { type: String, enum: ['Đã hủy' ,'Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Đã nhận được hàng', 'Đã giao thành công'], default: 'Đang chờ xác nhận' },
+  TrangThaiDon: { type: String, enum: ['Đơn hàng đã hủy' ,'Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Đã nhận được hàng', 'Đã giao thành công'], default: 'Đang chờ xác nhận' },
 });
 
 function generateMaDonHang() {

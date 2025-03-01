@@ -125,9 +125,11 @@ exports.updatedOrder = async (req, res) => {
 exports.deleteOrder = async (req, res) => {
     const { maDonHang } = req.params;
     try {
-        const order = await Order.findOneAndDelete({
-            MaDonHang: maDonHang,
-        });
+        const order = await Order.findOneAndUpdate(
+            { MaDonHang: maDonHang },
+            { TrangThaiDon: 'Đơn hàng đã hủy' },
+            { new: true }
+        );
 
         for (const sp of order.SanPhamDaMua) {
             const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
@@ -169,7 +171,6 @@ exports.updatedStatus = async (req, res) => {
 
 exports.getRevenueByMonth = async (req, res) => {
     const year = req.query.year || new Date().getFullYear(); // Lấy năm từ query hoặc mặc định là năm hiện tại
-    console.log(year);
     try {
         const revenueData = await Order.aggregate([
             {
@@ -180,7 +181,7 @@ exports.getRevenueByMonth = async (req, res) => {
                         },
                         {
                             TrangThaiThanhToan: "Đã thanh toán qua PayPal",
-                            TrangThaiDon: { $ne: "Đã hủy" },
+                            TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
                         }
                     ],
                     NgayDatHang: {
@@ -255,7 +256,7 @@ exports.getRevenueByDay = async (req, res) => {
                         },
                         {
                             TrangThaiThanhToan: "Đã thanh toán qua PayPal",
-                            TrangThaiDon: { $ne: "Đã hủy" },
+                            TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
                         }
                     ],
                     NgayDatHang: {

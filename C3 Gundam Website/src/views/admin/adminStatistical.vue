@@ -42,7 +42,7 @@ const fetchStatistical = async () => {
         feedbacks.value = response.data.feedback;
         // Chuyển object `order` thành array
         const ordersArray = Object.values(response.data.order);
-        orders.value = ordersArray.filter(order => order.TrangThaiDon !== "Đã giao thành công");
+        orders.value = ordersArray.filter(order => order.TrangThaiDon !== "Đã giao thành công" && order.TrangThaiDon !== 'Đơn hàng đã hủy');
     } catch (err) {
         console.log("Error fetching: ", err);
     }

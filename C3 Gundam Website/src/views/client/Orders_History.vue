@@ -25,6 +25,10 @@ const options = [
         name: "Đã giao thành công",
         icon: "fa-solid fa-circle-check"
     },
+    {
+        name: "Đơn hàng đã hủy",
+        icon: "fa-solid fa-trash"
+    },
 ]
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
@@ -151,17 +155,17 @@ onMounted(() => {
 <template>
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
+        <div class="relative mb-5 m-2 lg:mx-[150px] flex items-center flex-col flex-grow">
             <div class="flex flex-col gap-4 justify-center items-center mb-4">
                 <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Thông tin đơn hàng</h1>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                     <button v-for="option in options" :key="option" @click="selectTypeOrders(option.name)"
-                        class="border-2 px-10 lg:px-5 py-3 bg-white flex justify-start items-center gap-4 rounded-md hover:bg-[#008B8B] hover:text-white transition-all duration-300">
+                        class="border-2 px-10 lg:px-5 py-3 bg-white flex justify-center items-center gap-4 rounded-md hover:bg-[#008B8B] hover:text-white transition-all duration-300">
                         <i :class="option.icon"></i> {{ option.name }}
                     </button>
                 </div>
             </div>
-            <div class="w-full m-4" v-if="filterOrders.length > 0">
+            <div class="w-full m-4 p-3" v-if="filterOrders.length > 0">
                 <div v-for="(order, index) in filterOrders" :key="index"
                     class="bg-[#242424] flex flex-col mb-5 overflow-hidden px-4 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div
@@ -209,6 +213,8 @@ onMounted(() => {
                                 <p class="text-white text-[14px]">Mã giảm giá: {{ order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia }}</p>
                                 <p class="text-white text-[14px]">Hình thức thanh toán: {{ order.HinhThucThanhToan }}
                                 </p>
+                                <p class="text-white text-[14px]">Hình thức vận chuyển: {{ order.HinhThucVanChuyen }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -229,7 +235,7 @@ onMounted(() => {
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
                             hàng</button>
                         <button @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
-                            :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
+                            :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'block' : 'hidden'"
                             class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto">Đã nhận được
                             hàng</button>
                     </div>

@@ -61,7 +61,10 @@ const fetchOrders = async () => {
                 NgayDatHang: new Date(order.NgayDatHang)
             }
         })
-        listOrders.value.sort((a, b) => b.NgayDatHang - a.NgayDatHang);
+
+        const ordersNormal = listOrders.value.filter(order => order.TrangThaiDon !== 'Đơn hàng đã hủy');
+        const ordersLost = listOrders.value.filter(order => order.TrangThaiDon === 'Đơn hàng đã hủy');
+        listOrders.value = [...ordersNormal.sort((a, b) => b.NgayDatHang - a.NgayDatHang), ...ordersLost.sort((a, b) => b.NgayDatHang - a.NgayDatHang)];
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -73,11 +76,18 @@ const updatedStatus = async (maDonHang, currentStatus) => {
     const currentIndex = options.findIndex(option => option.name === currentStatus);
     const nextIndex = currentIndex + 1;
 
+    if (currentStatus === "Đã giao thành công") {
+        showNotification("Trạng thái đơn hàng đã ở trạng thái cuối cùng!", "error");
+        return;
+    }
+
+    if (options[nextIndex]?.name === "Đơn hàng đã hủy") {
+        showNotification("Không thể cập nhật trạng thái đơn hàng đã hủy!", "error");
+        return;
+    }
+
     if (nextIndex >= options.length) {
         showNotification("Trạng thái đơn hàng đã ở trạng thái cuối cùng!", "error");
-        setTimeout(() => {
-            notification.value.message = '';
-        }, 3000);
         return;
     }
 
@@ -194,6 +204,8 @@ onMounted(() => {
                                                         address.DienThoai }}</span></p>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Địa chỉ nhận hàng: <span
                                                     class="font-semibold">{{ address.DiaChi }}</span></p>
+                                            <p class="font-medium text-[14px] xl:text-[12px]">Hình thức vận chuyển: <span
+                                                    class="font-semibold text-[#003171]">{{ order.HinhThucVanChuyen }}</span></p>
                                         </div>
                                         <div>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Trạng thái: <span

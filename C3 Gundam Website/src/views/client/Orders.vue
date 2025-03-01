@@ -44,6 +44,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+
+const shippingFee = [
+    { fee: 'Giao tiêu chuẩn (20.000đ)' },
+    { fee: 'Giao nhanh (30.000đ)' },
+    { fee: 'Ship hỏa tốc (50.000đ)' },
+]
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
@@ -84,13 +90,13 @@ watch([price, quantity, () => formData.value.shippingMethod], () => {
     let costShip = 0;
     if (price.value * quantity.value >= 2000000) {
         costShip = 0;
-        formData.value.shippingMethod = "freeShip";
+        formData.value.shippingMethod = "Miễn phí giao hàng";
     } else {
-        if (formData.value.shippingMethod === "standard") {
+        if (formData.value.shippingMethod === "Giao tiêu chuẩn (20.000đ)") {
             costShip = 20000;
-        } else if (formData.value.shippingMethod === "fast") {
+        } else if (formData.value.shippingMethod === "Giao nhanh (30.000đ)") {
             costShip = 30000;
-        } else if (formData.value.shippingMethod === "tooFast") {
+        } else if (formData.value.shippingMethod === "Ship hỏa tốc (50.000đ)") {
             costShip = 50000;
         }
     }
@@ -136,6 +142,10 @@ const addOrders = async () => {
         trangThaiThanhToan = "Đã thanh toán qua PayPal";
     }
 
+    if (totalPrice.value >= 2000000) {
+        formData.value.shippingMethod = "Miễn phí giao hàng";
+    }
+
     try {
         const dataToSend = {
             MaKhachHang: maKhachHang,
@@ -154,6 +164,7 @@ const addOrders = async () => {
             NgayDatHang: new Date(),
             GhiChu: formData.value.description || "Không có ghi chú",
             TrangThaiThanhToan: trangThaiThanhToan,
+            HinhThucVanChuyen: formData.value.shippingMethod
         };
 
         const response = await axios.post(
@@ -400,49 +411,20 @@ watch(
                                                 <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000 VNĐ</span>
                                             </div>
                                             <div v-else class="space-y-2">
-                                                <label
+                                                <label v-for="ship in shippingFee" :key="ship"
                                                     class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
                                                     <input type="radio" name="shipping"
-                                                        v-model="formData.shippingMethod" value="standard"
+                                                        v-model="formData.shippingMethod" :value="ship.fee"
                                                         class="hidden" />
                                                     <div :class="{
                                                         'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
                                                         'bg-blue-500 border-blue-500':
-                                                            formData.shippingMethod === 'standard',
+                                                            formData.shippingMethod === ship.fee,
                                                     }">
-                                                        <div v-if="formData.shippingMethod === 'standard'"
+                                                        <div v-if="formData.shippingMethod === ship.fee"
                                                             class="w-2.5 h-2.5 bg-white rounded-full"></div>
                                                     </div>
-                                                    <span class="text-white">Giao tiêu chuẩn (20.000đ)</span>
-                                                </label>
-                                                <label
-                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
-                                                    <input type="radio" name="shipping"
-                                                        v-model="formData.shippingMethod" value="fast" class="hidden" />
-                                                    <div :class="{
-                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
-                                                        'bg-blue-500 border-blue-500':
-                                                            formData.shippingMethod === 'fast',
-                                                    }">
-                                                        <div v-if="formData.shippingMethod === 'fast'"
-                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
-                                                    </div>
-                                                    <span class="text-white">Giao nhanh (30.000đ)</span>
-                                                </label>
-                                                <label
-                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
-                                                    <input type="radio" name="shipping"
-                                                        v-model="formData.shippingMethod" value="tooFast"
-                                                        class="hidden" />
-                                                    <div :class="{
-                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
-                                                        'bg-blue-500 border-blue-500':
-                                                            formData.shippingMethod === 'tooFast',
-                                                    }">
-                                                        <div v-if="formData.shippingMethod === 'tooFast'"
-                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
-                                                    </div>
-                                                    <span class="text-white">Ship hỏa tốc (50.000đ)</span>
+                                                    <span class="text-white">{{ ship.fee }}</span>
                                                 </label>
                                             </div>
                                             <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
