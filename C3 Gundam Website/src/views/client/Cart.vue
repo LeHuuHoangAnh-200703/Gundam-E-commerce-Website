@@ -23,7 +23,6 @@ const showNotification = (msg, type) => {
 const fetchCarts = async (maKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
-        console.log(response.data)
         carts.value = response.data.map(cart => {
             return {
                 ...cart,

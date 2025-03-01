@@ -98,8 +98,8 @@ const fetchRevenueData = async (year) => {
                 {
                     label: `Doanh thu năm ${year}`,
                     data: response.data.datasets[0].data,
-                    borderColor: "rgba(245, 121, 197, 1)",
-                    backgroundColor: "rgba(245, 121, 197, 0.2)",
+                    borderColor: "#1E90FF",
+                    backgroundColor: "#00BFFF",
                     borderWidth: 2,
                     tension: 0.3,
                 },

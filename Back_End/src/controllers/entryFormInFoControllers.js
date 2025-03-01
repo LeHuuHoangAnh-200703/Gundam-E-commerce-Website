@@ -43,7 +43,6 @@ exports.createEntryFormInfo = async (req, res) => {
     } else {
       const newInventory = new Inventory({
         MaSanPham,
-        TenSanPham,
         SoLuongTon: SoLuong,
         GiaNhapGanNhat: GiaNhap,
       });

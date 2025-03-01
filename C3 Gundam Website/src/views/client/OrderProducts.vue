@@ -77,6 +77,14 @@ const addOrders = async () => {
         errors.value.payment = "Chọn phương thức thanh toán phù hợp."
     }
 
+    let totalProductPrice = selectedProducts.value.reduce((sum, product) => {
+        return sum + product.DonGia * product.SoLuong;
+    }, 0);
+
+    if (totalProductPrice < 2000000 && !formData.value.shippingMethod) {
+        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
+    }
+
     if (Object.keys(errors.value).length > 0) {
         return;
     }
@@ -103,8 +111,6 @@ const addOrders = async () => {
 
         const dataToSend = {
             MaKhachHang: maKhachHang,
-            TenKhachHang: nameCustomer.value,
-            Email: emailCustomer.value,
             DiaChiNhanHang: formData.value.address,
             SanPhamDaMua: sanPhamDaMua,
             IdMaGiamGia: formData.value.discountCode,
@@ -194,16 +200,17 @@ const calculateTotalPrice = () => {
         return sum + product.DonGia * product.SoLuong;
     }, 0);
 
-    if (formData.value.shippingMethod === "standard") {
-        costShip = 20000;
-    } else if (formData.value.shippingMethod === "fast") {
-        costShip = 30000;
-    } else if (formData.value.shippingMethod === "tooFast") {
-        costShip = 50000;
-    }
-
     if (totalProductPrice >= 2000000) {
         costShip = 0;
+        formData.value.shippingMethod = "freeShip";
+    } else {
+        if (formData.value.shippingMethod === "standard") {
+            costShip = 20000;
+        } else if (formData.value.shippingMethod === "fast") {
+            costShip = 30000;
+        } else if (formData.value.shippingMethod === "tooFast") {
+            costShip = 50000;
+        }
     }
 
     totalPrice.value = totalProductPrice + costShip;
@@ -273,7 +280,7 @@ watch(() => formData.value.payment, (newPayment) => {
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Ghi
                                             chú</label>
                                         <textarea type="text" v-model="formData.description" placeholder="Ghi chú ..."
-                                            class="w-full h-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         <p v-if="errors.description" class="text-red-500 text-sm mt-2">{{
                                             errors.description }}</p>
                                     </div>
@@ -285,8 +292,8 @@ watch(() => formData.value.payment, (newPayment) => {
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
                                             <div class="flex gap-4 items-start"
                                                 v-for="(product, index) in selectedProducts" :key="index">
-                                                <img :src="`${product.HinhAnh}`"
-                                                    class="w-[50px] lg:w-[80px] border-2" alt="">
+                                                <img :src="`${product.HinhAnh}`" class="w-[50px] lg:w-[80px] border-2"
+                                                    alt="">
                                                 <div class="overflow-hidden">
                                                     <div
                                                         class="w-52 lg:w-96 whitespace-nowrap text-ellipsis overflow-hidden">
@@ -318,12 +325,13 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 </option>
                                                 <option v-for="(discountCode, index) in listDiscountCodes" :key="index"
                                                     :value="discountCode.IdMaGiamGia"
-                                                    class="text-[#333] cursor-pointer">Id Mã: {{ discountCode.IdMaGiamGia }}
+                                                    class="text-[#333] cursor-pointer">Id Mã: {{
+                                                        discountCode.IdMaGiamGia }}
                                                     / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
                                                     {{
-                                                    discountCode.GiamTien
-                                                    ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
-                                                    : `${discountCode.GiamPhanTram}%`
+                                                        discountCode.GiamTien
+                                                            ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
+                                                            : `${discountCode.GiamPhanTram}%`
                                                     }}
                                                 </option>
                                             </select>
@@ -348,11 +356,15 @@ watch(() => formData.value.payment, (newPayment) => {
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">{{
                                                 errors.payment }}</p>
                                         </div>
-                                        <div class="w-full" v-if="totalPrice < 2000000">
+                                        <div class="w-full">
                                             <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
                                                 Hình thức giao hàng:
                                             </label>
-                                            <div class="space-y-2">
+                                            <div v-if="selectedProducts.reduce((sum, product) => sum + product.DonGia * product.SoLuong, 0) >= 2000000" 
+                                                class="p-3 rounded-lg border border-gray-500 bg-gray-800">
+                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000 VNĐ</span>
+                                            </div>
+                                            <div v-else class="space-y-2">
                                                 <label
                                                     class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
                                                     <input type="radio" name="shipping"
@@ -398,8 +410,6 @@ watch(() => formData.value.payment, (newPayment) => {
                                                     <span class="text-white">Ship hỏa tốc (50.000đ)</span>
                                                 </label>
                                             </div>
-                                            <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng
-                                                trên 2.000.000 VNĐ</p>
                                             <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
                                                 {{ errors.shippingMethod }}
                                             </p>

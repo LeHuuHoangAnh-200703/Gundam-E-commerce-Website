@@ -201,7 +201,7 @@ onMounted(() => {
                                 <p class="text-white text-[14px]">Họ tên: {{ address.TenNguoiNhan }}</p>
                                 <p class="text-white text-[14px]">Điện thoại: {{ address.DienThoai }}</p>
                                 <p class="text-white text-[14px]">Điạ chỉ: {{ address.DiaChi }}</p>
-                                <p class="text-white text-[14px]">Email: {{ order.Email }}</p>
+                                <p class="text-white text-[14px]">Ghi chú: {{ order.GhiChu }}</p>
                             </div>
                             <div>
                                 <p class="text-white text-[14px]">Trạng thái thanh toán: {{ order.TrangThaiThanhToan }}
@@ -209,7 +209,6 @@ onMounted(() => {
                                 <p class="text-white text-[14px]">Mã giảm giá: {{ order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia }}</p>
                                 <p class="text-white text-[14px]">Hình thức thanh toán: {{ order.HinhThucThanhToan }}
                                 </p>
-                                <p class="text-white text-[14px]">Ghi chú: {{ order.GhiChu }}</p>
                             </div>
                         </div>
                     </div>

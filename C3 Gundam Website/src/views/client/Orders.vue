@@ -82,14 +82,17 @@ const fetchCustomer = async (idKhachHang) => {
 
 watch([price, quantity, () => formData.value.shippingMethod], () => {
     let costShip = 0;
-    if (formData.value.shippingMethod === "standard") {
-        costShip = 20000;
-    } else if (formData.value.shippingMethod === "fast") {
-        costShip = 30000;
-    } else if (formData.value.shippingMethod === "tooFast") {
-        costShip = 50000;
-    } else if (price.value * quantity.value >= 2000000) {
+    if (price.value * quantity.value >= 2000000) {
         costShip = 0;
+        formData.value.shippingMethod = "freeShip";
+    } else {
+        if (formData.value.shippingMethod === "standard") {
+            costShip = 20000;
+        } else if (formData.value.shippingMethod === "fast") {
+            costShip = 30000;
+        } else if (formData.value.shippingMethod === "tooFast") {
+            costShip = 50000;
+        }
     }
     totalPrice.value = price.value * quantity.value + costShip;
 });
@@ -136,8 +139,6 @@ const addOrders = async () => {
     try {
         const dataToSend = {
             MaKhachHang: maKhachHang,
-            TenKhachHang: nameCustomer.value,
-            Email: emailCustomer.value,
             SanPhamDaMua: {
                 TenSanPham: nameProducts.value,
                 MaSanPham: maSanPham.value,
@@ -164,6 +165,7 @@ const addOrders = async () => {
             router.push("/orders_history");
         }, 3000);
     } catch (error) {
+        console.log(error)
         showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
     }
     setTimeout(() => {
@@ -303,7 +305,7 @@ watch(
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Ghi
                                             chú</label>
                                         <textarea type="text" v-model="formData.description" placeholder="Ghi chú ..."
-                                            class="w-full h-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         <p v-if="errors.description" class="text-red-500 text-sm mt-2">
                                             {{ errors.description }}
                                         </p>
@@ -390,11 +392,14 @@ watch(
                                                 {{ errors.payment }}
                                             </p>
                                         </div>
-                                        <div class="w-full" v-if="totalPrice < 2000000">
+                                        <div class="w-full">
                                             <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
                                                 Hình thức giao hàng:
                                             </label>
-                                            <div class="space-y-2">
+                                            <div v-if="price * quantity >= 2000000" class="p-3 rounded-lg border border-gray-500 bg-gray-800">
+                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000 VNĐ</span>
+                                            </div>
+                                            <div v-else class="space-y-2">
                                                 <label
                                                     class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
                                                     <input type="radio" name="shipping"
@@ -440,8 +445,6 @@ watch(
                                                     <span class="text-white">Ship hỏa tốc (50.000đ)</span>
                                                 </label>
                                             </div>
-                                            <p class="mt-2 text-white/65 text-[14px]">Free ship khi mua với đơn hàng
-                                                trên 2.000.000 VNĐ</p>
                                             <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
                                                 {{ errors.shippingMethod }}
                                             </p>

@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema({
   MaDonHang: String,
   MaKhachHang: String,
-  TenKhachHang: String,
-  Email: String,
   DiaChiNhanHang: [{
     TenNguoiNhan: String,
     DiaChi: String,

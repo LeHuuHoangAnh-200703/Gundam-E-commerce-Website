@@ -28,13 +28,31 @@ exports.getCart = async (req, res) => {
 exports.getCartByID = async (req, res) => {
     const { maKhachHang } = req.params;
     try {
-        const cart = await Cart.find({
+        const carts = await Cart.find({
             MaKhachHang: maKhachHang,
         });
-        // if (cart.length === 0) {
-        //     return res.status(400).json({ message: "Giỏ hàng không tồn tại!" });
-        // }
-        return res.status(200).json(cart);
+        const productIds = [...new Set(carts.map(cart => cart.MaSanPham))];
+
+        const products = await Product.find({ MaSanPham: { $in: productIds } });
+        const productMap = {};
+        products.forEach(product => {
+            productMap[product.MaSanPham] = {
+                TenSanPham: product.TenSanPham,
+                HinhAnh: product.Images[0],
+                LoaiSanPham: product.LoaiSanPham,
+                DonGia: product.GiaBan
+            };
+        });
+
+        const productsWithCarts = carts.map(product => ({
+            ...product.toObject(),
+            TenSanPham: productMap[product.MaSanPham]?.TenSanPham,
+            HinhAnh: productMap[product.MaSanPham]?.HinhAnh,
+            LoaiSanPham: productMap[product.MaSanPham]?.LoaiSanPham,
+            DonGia: productMap[product.MaSanPham]?.DonGia,
+        }));
+
+        return res.status(200).json(productsWithCarts);
     } catch (err) {
         return res.status(500).json({ message: err.message });
     }

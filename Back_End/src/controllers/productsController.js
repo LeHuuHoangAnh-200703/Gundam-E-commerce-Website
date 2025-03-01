@@ -186,7 +186,7 @@ exports.updateProductStatus = async (req, res) => {
 };
 
 exports.findProductsWithName = async (req, res) => {
-  const tenSanPham  = req.query.tenSanPham;
+  const tenSanPham = req.query.tenSanPham;
   if (!tenSanPham) {
     return res.status(400).json({ message: 'Tên sản phẩm không được để trống.' })
   }

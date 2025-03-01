@@ -4,11 +4,7 @@ const cartSchema = new mongoose.Schema({
     MaGioHang: String,
     MaKhachHang: String,
     MaSanPham: String,
-    TenSanPham: String,
-    LoaiSanPham: String,
     SoLuong: Number,
-    DonGia: String,
-    HinhAnh: String,
 });
 
 function generateMaGioHang() {  

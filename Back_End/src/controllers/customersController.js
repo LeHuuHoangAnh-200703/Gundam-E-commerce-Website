@@ -93,15 +93,13 @@ exports.updateCustomer = async (req, res) => {
 
     if (req.file) {
       if (customer.Image) {
-        // Lấy public_id của ảnh cũ từ URL
         const urlParts = customer.Image.split('/');
         const publicIdWithExtension = urlParts[urlParts.length - 1];
         const publicId = publicIdWithExtension.split('.')[0]; // Bỏ phần mở rộng file
 
-        // Xóa ảnh cũ trên Cloudinary (nếu có)
         const deleteResult = await cloudinary.uploader.destroy(`avatars/${publicId}`);
         if (deleteResult.result !== "ok") {
-          console.warn("⚠️ Không thể xóa ảnh cũ trên Cloudinary:", deleteResult);
+          console.log("⚠️ Không thể xóa ảnh cũ trên Cloudinary:", deleteResult);
         }
       }
       const imageUploadResult = await new Promise((resolve, reject) => {
