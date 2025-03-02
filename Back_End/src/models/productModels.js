@@ -6,6 +6,7 @@ const productSchema = new mongoose.Schema({
     GiaBan: String,
     LoaiSanPham: String,
     MaNhaCungCap: String,
+    LuotBan: Number,
     MoTa: String,
     Images: [String],
     TrangThai: { type: String, enum: ['Đang bán', 'Ngừng kinh doanh'], default: 'Đang bán' },

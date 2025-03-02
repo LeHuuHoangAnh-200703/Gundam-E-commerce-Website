@@ -2,6 +2,7 @@ const Order = require("../models/orderModels");
 const Feedback = require("../models/feedbackModels");
 const DiscountCode = require("../models/discountCodeModels");
 const Inventory = require("../models/inventoryModels");
+const Product = require("../models/productModels");
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find();
@@ -86,6 +87,8 @@ exports.createOrder = async (req, res) => {
 
         for (const sp of SanPhamDaMua) {
             const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
+            const product = await Product.findOne({ MaSanPham: sp.MaSanPham });
+
             if (!inventory) {
                 return res.status(400).json({ message: `Sản phẩm không tồn tại trong kho.` });
             }
@@ -96,6 +99,12 @@ exports.createOrder = async (req, res) => {
 
             inventory.SoLuongTon -= sp.SoLuong;
             await inventory.save();
+
+            if (product) {
+                product.LuotBan = (product.LuotBan || 0) + sp.SoLuong;
+                await product.save();
+            }
+
         }
 
         const order = new Order({ ...req.body, TongDon: finalPrice });
@@ -133,9 +142,15 @@ exports.deleteOrder = async (req, res) => {
 
         for (const sp of order.SanPhamDaMua) {
             const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
+            const product = await Product.findOne({ MaSanPham: sp.MaSanPham });
             if (inventory) {
                 inventory.SoLuongTon += sp.SoLuong;
                 await inventory.save();
+            }
+
+            if (product) {
+                product.LuotBan = Math.max(0, product.LuotBan - sp.SoLuong); // Không để LuotBan < 0
+                await product.save();
             }
         }
 
