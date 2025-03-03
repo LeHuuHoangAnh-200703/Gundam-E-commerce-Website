@@ -28,6 +28,7 @@ const notification = ref({
     message: '',
     type: ''
 });
+const listSelling = ref([]);
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
@@ -202,7 +203,6 @@ const fetchFeedBackProducts = async () => {
     try {
         const response = await axios.get("http://localhost:3000/api/danhgia/thongke/get-feedback-products");
         const data = response.data;
-        console.log(data)
         feedbackStatusChartData.value = {
             labels: data.map(item => `${item._id} sao`),
             datasets: [
@@ -224,12 +224,27 @@ const fetchFeedBackProducts = async () => {
     }
 };
 
+const getTopSellingProducts = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/sanpham/luotban/topsanpham');
+        listSelling.value = response.data.map(product => {
+            return {
+                ...product
+            }
+        })
+        console.log(listSelling.value)
+    } catch (err) {
+        console.log('Error fetching sellings products:', err);
+    }
+}
+
 onMounted(() => {
     fetchStatistical();
     fetchRevenueData(new Date().getFullYear());
     fetchOrderStatusData();
     fetchFeedBackProducts();
     fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
+    getTopSellingProducts();
 })
 </script>
 
@@ -294,17 +309,46 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
+                    <div class="flex flex-col gap-4">
+                        <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Top sản
+                            phẩm bán chạy nhất</h3>
+                        <div class="flex flex-col gap-4 p-4 bg-white shadow-lg rounded-md border-2">
+                            <div v-for="(product, index) in listSelling" :key="index"
+                                class="flex gap-4 items-center border-b-2 pb-4">
+                                <div
+                                    class="border-4 border-[#1A1D27] rounded-full w-[40px] h-[40px] flex justify-center items-center">
+                                    <p class="font-bold text-[18px] text-gray-600">{{ index + 1 }}</p>
+                                </div>
+                                <div class="flex gap-4 items-center">
+                                    <img :src="product.Images[0]" class="rounded-md w-[70px] border-2 border-[#1A1D27]"
+                                        alt="">
+                                    <div>
+                                        <div
+                                            class="whitespace-nowrap text-ellipsis overflow-hidden w-[150px] lg:w-full">
+                                            <p
+                                                class="font-semibold text-[16px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                                {{ product.TenSanPham }}</p>
+                                        </div>
+                                        <p class="text-[14px] font-semibold">Đã bán: <span class="font-medium">{{
+                                                product.LuotBan }} sản phẩm</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex flex-col gap-3">
-                        <div class="flex gap-4 items-center">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo tháng
+                        <div class="flex gap-4 items-center lg:flex-row flex-col">
+                            <h3
+                                class="font-bold text-[16px] lg:text-[20px] uppercase w-full lg:w-[50%] lg:text-start text-center">
+                                Thống kê doanh thu theo tháng
                             </h3>
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
                                 <input type="number" v-model="selectedYearofDay" min="2000" max="2100"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[200px] focus:ring focus:ring-[#1A1D27]"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-[200px] w-full focus:ring focus:ring-[#1A1D27]"
                                     @change="fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)"
                                     placeholder="Nhập năm ..." />
                                 <select v-model="selectedMonthOfDay"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[150px] focus:ring focus:ring-[#1A1D27]"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-[150px] w-full focus:ring focus:ring-[#1A1D27]"
                                     @change="fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)">
                                     <option disabled value="">Chọn tháng</option>
                                     <option v-for="month in 12" :key="month" :value="month">
@@ -317,11 +361,10 @@ onMounted(() => {
                             <Bar v-if="chartDataDay" :data="chartDataDay" :options="chartDayOptions" />
                         </div>
                     </div>
-                    <div class="flex lg:flex-row flex-col gap-4 w-full">
+                    <div class="flex lg:flex-row flex-col gap-4 w-full items-center">
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
-                            <div class="flex gap-4 items-center">
-                                <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê đơn hàng</h3>
-                            </div>
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống kê đơn hàng
+                            </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[250px] h-[250px] m-auto">
                                     <Pie v-if="orderStatusChartData" :data="orderStatusChartData" />
@@ -329,10 +372,9 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
-                            <div class="flex gap-4 items-center">
-                                <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê đánh giá sản phẩm
-                                </h3>
-                            </div>
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống kê đánh giá sản
+                                phẩm
+                            </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[200px] h-[200px] m-auto">
                                     <Pie v-if="feedbackStatusChartData" :data="feedbackStatusChartData" />
@@ -341,10 +383,11 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-3">
-                        <div class="flex gap-4 items-center">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase">Thống kê doanh thu theo năm</h3>
+                        <div class="flex gap-4 items-center lg:flex-row flex-col">
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống
+                                kê doanh thu theo năm</h3>
                             <input type="number" v-model="selectedYear" min="2000" max="2100"
-                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-[200px] focus:ring focus:ring-[#1A1D27]"
+                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full lg:w-[200px] focus:ring focus:ring-[#1A1D27]"
                                 @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">

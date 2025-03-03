@@ -201,4 +201,16 @@ exports.findProductsWithName = async (req, res) => {
   }
 }
 
+exports.getTopSellingProducts = async (req, res) => {
+  try {
+    const topProducts = await Product.find()
+      .sort({ LuotBan: -1 }) // Sắp xếp giảm dần theo lượt bán
+      .limit(3);
+
+    return res.status(200).json(topProducts);
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi khi lấy sản phẩm bán chạy", error });
+  }
+}
+
 exports.upload = upload.array('Images', 10);

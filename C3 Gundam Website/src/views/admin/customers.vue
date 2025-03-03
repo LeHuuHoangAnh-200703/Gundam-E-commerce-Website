@@ -9,6 +9,7 @@ const searchValue = ref('');
 const fetchCustomers = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/khachhang');
+        console.log(response.data)
         listCustomers.value = response.data.map(customer => {
             return {
                 ...customer,
@@ -16,7 +17,7 @@ const fetchCustomers = async () => {
             }
         })
     } catch (err) {
-        console.log("Error fetching: ", err);
+        console.log("Error fetching: ", err.message);
     }
 }
 
@@ -58,7 +59,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div
-                        class="shadow-lg border-2 border-gray-300">
+                        class="shadow-lg border-2 border-gray-300 overflow-auto">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">
                                 <tr>
@@ -67,6 +68,7 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên khách hàng</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Email</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày tham gia</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tổng đơn hàng</th>
                                 </tr>
                             </thead>
                             <tbody class="w-full">
@@ -76,6 +78,7 @@ onMounted(() => {
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ customer.TenKhachHang }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ customer.Email }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ formatDate(customer.NgayTao) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{ customer.TongDonHang }} đơn hàng</td>
                                 </tr>
                             </tbody>
                         </table>

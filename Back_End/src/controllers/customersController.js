@@ -1,5 +1,6 @@
 const Customer = require("../models/customersModels");
 const DiscountCode = require("../models/discountCodeModels");
+const Order = require("../models/orderModels");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const multer = require("multer");
@@ -16,11 +17,35 @@ const upload = multer({ storage: storage });
 exports.getAllCustomers = async (req, res) => {
   try {
     const customers = await Customer.find();
-    res.status(200).json(customers);
+
+    const orders = await Order.aggregate([
+      {
+        $group: {
+          _id: "$MaKhachHang",
+          TongDonHang: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Ánh xạ lại orders thành object để truy vấn nhanh hơn
+    const orderMap = {};
+    orders.forEach(order => {
+      orderMap[order._id] = order.TongDonHang;
+    });
+
+    const customersWithOrders = customers.map(customer => {
+      return {
+        ...customer.toObject(),
+        TongDonHang: orderMap[customer.MaKhachHang] || 0,
+      };
+    });
+
+    res.status(200).json(customersWithOrders);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 exports.getCustomer = async (req, res) => {
   try {

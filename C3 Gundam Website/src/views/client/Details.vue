@@ -24,6 +24,7 @@ const quantity = ref('');
 const status = ref('');
 const selectedImage = ref();
 const orderQuantity = ref(1);
+const sales = ref('');
 
 const notification = ref({
     message: '',
@@ -47,6 +48,7 @@ const fetchProduct = async (idSanPham) => {
         typeProduct.value = response.data.LoaiSanPham;
         quantity.value = response.data.SoLuong;
         status.value = response.data.TrangThai;
+        sales.value = response.data.LuotBan;
         if (images.value.length > 0) {
             selectedImage.value = images.value[0];
         }
@@ -81,7 +83,7 @@ const fetchFeedBacks = async () => {
         const myComments = allComments.filter(comment => comment.MaKhachHang === idCustomer);
         const otherComments = allComments.filter(comment => comment.MaKhachHang !== idCustomer);
 
-        comments.value = [...myComments, ...otherComments.sort((a, b) => b.NgayDang - a.NgayDang)];
+        comments.value = [...myComments.sort((a, b) => b.NgayDang - a.NgayDang), ...otherComments.sort((a, b) => b.NgayDang - a.NgayDang)];
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -284,7 +286,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <p class="text-white font-medium">Mã sản phẩm: {{ idProduct }}</p>
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
-                        <p class="text-white font-medium">Còn lại: {{ quantity }} sản phẩm</p>
+                        <p class="text-white font-medium">Tình trạng: {{ (quantity > 0) ? 'Còn hàng' : 'Hết hàng' }}</p>
+                        <p class="text-white font-medium">Đã bán: {{ sales }} sản phẩm</p>
                     </div>
                     <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">{{ formatCurrency(price) }}
                             VNĐ</span></p>
