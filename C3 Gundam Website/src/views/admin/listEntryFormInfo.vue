@@ -15,7 +15,7 @@ const ThoiGian = new Date();
 const listProducts = ref([]);
 const errors = ref({});
 const idEntryForm = ref('');
-const nameSupplier = ref('');
+const idSupplier = ref('');
 const listEntryFormInfos = ref([]);
 const formData = ref({
     idProduct: '',
@@ -40,7 +40,7 @@ const fetchEntryForm = async (idPhieuNhap) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/phieunhap/${idPhieuNhap}`);
         idEntryForm.value = response.data.MaPhieuNhap;
-        nameSupplier.value = response.data.TenNhaCungCap;
+        idSupplier.value = response.data.MaNhaCungCap;
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -49,8 +49,9 @@ const fetchEntryForm = async (idPhieuNhap) => {
 const fetchProducts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/sanpham');
-        listProducts.value = response.data.filter(product => product.NhaCungCap === nameSupplier.value && 
-        product.TrangThai !== 'Ngừng kinh doanh');
+        listProducts.value = response.data.filter(product => product.MaNhaCungCap === idSupplier.value 
+            && product.TrangThai !== 'Ngừng kinh doanh'
+        );
     } catch (err) {
         console.log("Erro fetching: ", err);
     }
@@ -110,6 +111,7 @@ const addEntryFormInfo = async () => {
 
         showNotification("Thêm chi tiết phiếu nhập thành công!", "success");
         fetchEntryFormInfos();
+        fetchProducts();
     } catch (error) {
         showNotification(error.response?.data?.message || "Thêm chi tiết phiếu nhập thất bại!", "error");
     }
@@ -185,7 +187,7 @@ onMounted(() => {
                                             <option v-for="(product, index) in listProducts" :key="index"
                                                 :value="product.MaSanPham" class="text-[#003171] font-semibold">{{
                                                     product.MaSanPham }} -
-                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ
+                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ - Còn lại: {{ product.SoLuong }}
                                             </option>
                                         </select>
                                         <p v-if="errors.idProduct" class="text-red-500 text-sm mt-2">{{

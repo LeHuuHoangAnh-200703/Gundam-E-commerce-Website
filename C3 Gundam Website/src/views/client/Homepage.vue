@@ -36,6 +36,7 @@ const notification = ref({
     message: '',
     type: ''
 });
+
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
@@ -58,7 +59,7 @@ const fectchProducts = async () => {
                 ...product,
             }
         })
-        //Lọc những sản phẩm ngừng kinh doanh đưa xuống hiển thị cuối cùng
+        
         const productsNormal = listProducts.value.filter(product => product.TrangThai !== 'Ngừng kinh doanh');
         const productsSpecial = listProducts.value.filter(product => product.TrangThai === 'Ngừng kinh doanh');
         listProducts.value = [...productsNormal, ...productsSpecial];
@@ -98,6 +99,23 @@ const filteredProducts = computed(() => {
     });
 });
 
+const currentPage = ref(1);
+const itemsPerPage = ref(16); // 4 dòng × 4 cột = 16 sản phẩm
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage.value));
+
+// Lấy sản phẩm theo trang hiện tại
+const paginatedProducts = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    return filteredProducts.value.slice(start, start + itemsPerPage.value);
+});
+
+// Chuyển trang
+const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+};
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -155,7 +173,7 @@ onMounted(() => {
             </button>
         </div>
         <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
-            <div v-for="(product, index) in filteredProducts" :key="index" class="flex flex-col gap-3 items-center">
+            <div v-for="(product, index) in paginatedProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link :to="`/details/${product.MaSanPham}`">
                     <img :src="`${product.Images[0]}`"
                         class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
@@ -172,6 +190,14 @@ onMounted(() => {
                 <button v-else-if="product.SoLuong < 0"
                     class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
             </div>
+        </div>
+        <div class="flex justify-center my-10 space-x-2">
+            <button v-for="page in totalPages" :key="page" 
+                @click="goToPage(page)" 
+                class="px-4 py-2 rounded-md border text-white"
+                :class="page === currentPage ? 'bg-[#DB3F4C] border-[#DB3F4C]' : 'border-gray-500'">
+                {{ page }}
+            </button>
         </div>
         <Footer />
         <BackToTop />
