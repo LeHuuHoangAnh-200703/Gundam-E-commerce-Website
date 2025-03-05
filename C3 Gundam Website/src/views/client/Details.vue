@@ -287,7 +287,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
                         <p class="text-white font-medium">Tình trạng: {{ (quantity > 0) ? 'Còn hàng' : 'Hết hàng' }}</p>
-                        <p class="text-white font-medium">Đã bán: {{ sales }} sản phẩm</p>
+                        <p class="text-white font-medium">Đã bán: {{ sales || 0 }} sản phẩm</p>
                     </div>
                     <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">{{ formatCurrency(price) }}
                             VNĐ</span></p>
@@ -455,7 +455,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <div class="flex flex-col items-center justify-center gap-3">
                             <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại
                                 không có đánh giá nào!</p>
-                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/astronaut-riding-king-kong-robot-with-gun-cartoon-vector-icon-illustration-science-technology-flat_o4ny7c.png" class="w-[200px]" alt="">
+                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-with-blanket-space-cartoon-vector-icon-illustration-science-technology-icon_q2xrkr.png" class="w-[200px]" alt="">
                         </div>
                     </div>
                     <div class="flex justify-center items-center gap-4 mt-4">

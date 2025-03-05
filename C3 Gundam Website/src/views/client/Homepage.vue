@@ -45,7 +45,12 @@ const showNotification = (msg, type) => {
 };
 const selectTypeProducts = (type) => {
     selectedType.value = type;
+    // Kiểm tra nếu trang hiện tại vượt quá tổng số trang sau khi lọc, đưa về trang gần nhất
+    if (currentPage.value > totalPages.value) {
+        currentPage.value = totalPages.value;
+    }
 };
+
 
 const handleSearch = (query) => {
     searchQuery.value = query;
@@ -116,6 +121,7 @@ const goToPage = (page) => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 };
+
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }

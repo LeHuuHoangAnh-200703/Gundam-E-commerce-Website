@@ -99,6 +99,7 @@ onMounted(() => {
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">
                                 <tr>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">STT</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ảnh sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên sản phẩm</th>
@@ -114,6 +115,8 @@ onMounted(() => {
                             <tbody class="w-full">
                                 <tr class="border-t border-slate-500" v-for="(product, index) in findProducts"
                                     :key="index">
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ index + 1 }}
+                                    </td>
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ product.MaSanPham }}
                                     </td>
                                     <td>
