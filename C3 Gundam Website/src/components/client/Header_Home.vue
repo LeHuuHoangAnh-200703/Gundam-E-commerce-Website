@@ -1,7 +1,8 @@
 <script setup>
 import axios from "axios";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from 'vue-router';
+import debounce from "lodash/debounce";
 
 const router = useRouter();
 const userInfo = ref({
@@ -10,24 +11,16 @@ const userInfo = ref({
 const isLoggedIn = ref(!userInfo.value.MaKhachHang);
 const logout = async () => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
-  try {
-    const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
-      maKhachHang
-    });
-
-    console.log(response.data.message);
-    // localStorage.removeItem("MaKhachHang");
-    // localStorage.removeItem("TenKhachHang");
-    // localStorage.removeItem("TrangThai");
-    // userInfo.value.TenKhachHang = '';
-    // userInfo.value.Email = '';
-    // userInfo.value.MaKhachHang = '';
-    localStorage.clear();
-    isLoggedIn.value = false;
-    router.push("/login");
-  } catch (error) {
-    console.error("Đăng xuất thất bại:", error.response.data.message);
-  }
+    try {
+        const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
+            maKhachHang
+        });
+        localStorage.clear();
+        isLoggedIn.value = false;
+        router.push("/login");
+    } catch (error) {
+        console.error("Đăng xuất thất bại:", error.response.data.message);
+    }
 };
 
 const orders_history = () => {
@@ -89,6 +82,38 @@ const fetchCarts = async (maKhachHang) => {
         console.log("Error fetching: ", err);
     }
 }
+
+const listProducts = ref([]);
+const searchProducts = async () => {
+    if (!searchQuery.value.trim()) {
+        listProducts.value = [];
+        return;
+    }
+
+    try {
+        const response = await axios.get(`http://localhost:3000/api/sanpham/goiy/ketquatimkiem?tenSanPham=${searchQuery.value}`);
+        listProducts.value = response.data.map(product => {
+            return {
+                ...product
+            }
+        })
+        console.log(listProducts.value);
+    } catch (err) {
+        console.log('Error search: ', err.message);
+    }
+}
+
+function formatCurrency(value) {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Sử dụng debounce để giảm tần suất gọi API
+const debouncedSearch = debounce(searchProducts, 300);
+
+// Gọi debounce mỗi khi searchQuery thay đổi
+watch(searchQuery, () => {
+    debouncedSearch();
+});
 
 onMounted(() => {
     const openMenu = $(".open-menu");
@@ -158,11 +183,25 @@ onMounted(() => {
                 <button @click.prevent="carts" class="relative">
                     <i class="fa-solid fa-cart-shopping text-white text-[24px]"></i>
                     <span
-                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{ cartLists.length }}</span>
+                        class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{
+                            cartLists.length }}</span>
                 </button>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>
                 </button>
+            </div>
+            <div v-if="listProducts.length" class="absolute top-20 right-5 rounded-md bg-white p-6 shadow-md hidden lg:block">
+                <div class="flex flex-col gap-4">
+                    <div v-for="(product, index) in listProducts" :key="index" class="flex gap-2 items-center border-b-2 pb-3">
+                        <img :src="`${product.Images[0]}`" class="w-[50px] border-2 rounded-md border-[#1A1D27]" alt="">
+                        <div class="flex flex-col">
+                            <div class="whitespace-nowrap text-ellipsis overflow-hidden w-[300px]">
+                                <p class="font-semibold text-[12px] overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham }}</p>
+                            </div>
+                            <p class="text-[12px] font-semibold">Giá: <span class="text-[#DB3F4C]">{{ formatCurrency(product.GiaBan) }} VNĐ</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="sidebar fixed top-0 -left-[100%] w-full h-full bg-[#1A1D27] p-4 z-20">
@@ -183,7 +222,8 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Theo dõi đơn hàng</button></li>
+                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Theo dõi đơn
+                        hàng</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i

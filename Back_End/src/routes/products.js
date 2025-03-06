@@ -9,5 +9,6 @@ router.put("/:maSanPham", productController.upload, productController.updatedPro
 router.patch("/:maSanPham", productController.updateProductStatus);
 router.get("/timkiem/ketquatimkiem", productController.findProductsWithName);
 router.get("/luotban/topsanpham", productController.getTopSellingProducts);
+router.get("/goiy/ketquatimkiem", productController.productSuggestionsWithSearch);
 
 module.exports = router;
