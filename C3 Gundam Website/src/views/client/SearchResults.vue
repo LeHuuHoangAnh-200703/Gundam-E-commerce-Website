@@ -6,6 +6,7 @@ import BackToTop from "@/components/client/BackToTop.vue";
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import axios from 'axios';
 import { useRouter, useRoute } from "vue-router";
+import { watch } from 'vue';
 
 const router = useRouter();
 const route = useRoute(); // Sử dụng useRoute để theo dõi thay đổi của query
@@ -77,6 +78,27 @@ const chatBox = () => {
     }
 }
 
+const currentPage = ref(1);
+const itemsPerPage = ref(16); // 4 dòng × 4 cột = 16 sản phẩm
+const totalPages = computed(() => Math.ceil(listProducts.value.length / itemsPerPage.value));
+
+const paginatedProducts = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    return listProducts.value.slice(start, start + itemsPerPage.value);
+});
+
+const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+};
+
+watch(() => route.query.query, (newQuery) => {
+    searchQuery.value = newQuery; 
+    fectchProducts();
+});
+
 onMounted(() => {
     if (!searchQuery.value) {
         router.push({ name: 'NotFound' });
@@ -87,12 +109,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header_Home />
-        <h1 class="mb-10 mt-5 m-5 lg:mx-[210px] text-white font-bold text-[20px]">Kết quả tìm kiếm của "{{ searchQuery
+        <h1 v-if="listProducts.length > 0" class="mb-10 mt-5 m-5 lg:mx-[210px] text-white font-bold text-[20px]">Kết quả tìm kiếm của "{{ searchQuery
             }}"</h1>
-        <div class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
-            <div v-for="(product, index) in listProducts" :key="index" class="flex flex-col gap-3 items-center">
+        <div v-if="listProducts.length > 0" class="mt-10 mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 m-5 lg:mx-[210px]">
+            <div v-for="(product, index) in paginatedProducts" :key="index" class="flex flex-col gap-3 items-center">
                 <router-link :to="`/details/${product.MaSanPham}`">
                     <img :src="`${product.Images[0]}`" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]"
                         alt="">
@@ -109,6 +131,20 @@ onMounted(() => {
                 <button v-else-if="product.SoLuong < 0"
                     class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
             </div>
+        </div>
+        <div v-else class="flex flex-1 justify-center items-center m-auto w-full">
+            <div class="flex flex-col items-center justify-center gap-3">
+                <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Không có sản phẩm phù hợp với "{{ searchQuery }}"</p>
+                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[200px]" alt="">
+            </div>
+        </div>
+        <div class="flex justify-center my-10 space-x-2">
+            <button v-for="page in totalPages" :key="page" 
+                @click="goToPage(page)" 
+                class="px-4 py-2 rounded-md border text-white cursor-pointer"
+                :class="page === currentPage ? 'bg-[#DB3F4C] border-[#DB3F4C]' : 'border-gray-500'">
+                {{ page }}
+            </button>
         </div>
         <Footer />
         <BackToTop />

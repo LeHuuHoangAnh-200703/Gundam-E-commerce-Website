@@ -200,7 +200,7 @@ onMounted(() => {
         <div class="flex justify-center my-10 space-x-2">
             <button v-for="page in totalPages" :key="page" 
                 @click="goToPage(page)" 
-                class="px-4 py-2 rounded-md border text-white"
+                class="px-4 py-2 rounded-md border text-white cursor-pointer"
                 :class="page === currentPage ? 'bg-[#DB3F4C] border-[#DB3F4C]' : 'border-gray-500'">
                 {{ page }}
             </button>
