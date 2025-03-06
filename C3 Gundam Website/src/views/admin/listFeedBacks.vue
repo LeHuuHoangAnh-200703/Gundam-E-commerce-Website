@@ -188,7 +188,7 @@ onMounted(() => {
                                     <div class="flex flex-col items-center justify-center gap-3">
                                         <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
                                             không có đánh giá nào!</p>
-                                        <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-with-blanket-space-cartoon-vector-icon-illustration-science-technology-icon_q2xrkr.png"
+                                        <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
                                             class="w-[350px]" alt="">
                                     </div>
                                 </div>

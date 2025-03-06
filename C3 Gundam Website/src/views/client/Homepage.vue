@@ -193,7 +193,7 @@ onMounted(() => {
                     class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
                 <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'"
                     class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
-                <button v-else-if="product.SoLuong < 0"
+                <button v-else-if="product.SoLuong <= 0"
                     class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
             </div>
         </div>
