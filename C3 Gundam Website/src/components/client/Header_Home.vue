@@ -192,15 +192,15 @@ onMounted(() => {
             </div>
             <div v-if="listProducts.length" class="absolute top-20 right-5 rounded-md bg-white p-6 shadow-md hidden lg:block">
                 <div class="flex flex-col gap-4">
-                    <div v-for="(product, index) in listProducts" :key="index" class="flex gap-2 items-center border-b-2 pb-3">
+                    <router-link :to="`/details/${product.MaSanPham}`" v-for="(product, index) in listProducts" :key="index" class="flex gap-2 items-center border-b-2 pb-3 group">
                         <img :src="`${product.Images[0]}`" class="w-[50px] border-2 rounded-md border-[#1A1D27]" alt="">
                         <div class="flex flex-col">
                             <div class="whitespace-nowrap text-ellipsis overflow-hidden w-[300px]">
-                                <p class="font-semibold text-[12px] overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham }}</p>
+                                <p class="font-semibold text-[12px] overflow-hidden text-ellipsis whitespace-nowrap group-hover:text-[#DB3F4C] transition-all duration-300">{{ product.TenSanPham }}</p>
                             </div>
                             <p class="text-[12px] font-semibold">Giá: <span class="text-[#DB3F4C]">{{ formatCurrency(product.GiaBan) }} VNĐ</span></p>
                         </div>
-                    </div>
+                    </router-link>
                 </div>
             </div>
         </div>
