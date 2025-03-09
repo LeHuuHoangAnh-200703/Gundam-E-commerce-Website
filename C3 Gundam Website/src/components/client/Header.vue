@@ -146,7 +146,7 @@ onMounted(() => {
                     <i class="fa-solid fa-arrow-left text-white text-[24px]"></i>
                 </button>
             </div>
-            <ul class="flex flex-col gap-6 text-[20px] text-white font-semibold">
+            <ul class="flex flex-col gap-6 text-[20px] text-white font-semibold mt-10">
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
@@ -155,7 +155,7 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-user"></i> <button @click.prevent="voucher">Giảm giá</button></li>
+                        class="fa-solid fa-tags"></i> <button @click.prevent="voucher">Giảm giá</button></li>
                 <li v-if="isLoggedIn"
                     class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>

@@ -192,9 +192,6 @@ exports.findProductsWithName = async (req, res) => {
   }
   try {
     const products = await Product.find({ TenSanPham: { $regex: tenSanPham, $options: 'i' } });
-    if (products.length === 0) {
-      return res.status(400).json({ message: "Không tìm thấy sản phẩm nào." });
-    }
     return res.status(200).json(products);
   } catch (err) {
     return res.status(400).json({ message: err.message });
@@ -206,9 +203,6 @@ exports.productSuggestionsWithSearch = async (req, res) => {
 
   try {
     const products = await Product.find({ TenSanPham: {$regex: tenSanPham, $options: 'i'}}).limit(4);
-    if (products.length <= 0) {
-      return res.status(400).json({ message: "Không tìm thấy sản phẩm nào."});
-    }
     return res.status(200).json(products);
   } catch (err) {
     return res.status(400).json({ message: err.message });
