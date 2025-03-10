@@ -4,10 +4,9 @@ const status = ref(0);
 const sidebarMenu = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
     { name: "Quản lý sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
-    // { name: "Quản lý nhân viên", icon: "fa-solid fa-users", path: "staffList" },
     { name: "Quản lý đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
-    { name: "Quản lý khách hàng", icon: "fa-solid fa-users", path: "customers" },
     { name: "Quản lý đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
+    { name: "Quản lý khách hàng", icon: "fa-solid fa-users", path: "customers" },
     { name: "Quản lý nhà cung cấp", icon: "fa-solid fa-user-large", path: "listSuppliers" },
     { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
