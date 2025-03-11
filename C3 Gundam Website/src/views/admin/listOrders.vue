@@ -4,6 +4,7 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from 'axios';
+import { iteratee } from "lodash";
 
 const options = [
     {
@@ -110,10 +111,12 @@ const filteredOrders = computed(() => {
         const matchesSearch = !searchValue.value || order.DiaChiNhanHang.some(item => 
             item.TenNguoiNhan.toLowerCase().includes(searchValue.value.toLowerCase())
         );
-        return matchesType && matchesSearch;
+        const nameProducts = !searchValue.value || order.SanPhamDaMua.some(item => 
+            item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
+        );
+        return matchesType && (matchesSearch || nameProducts);
     });
 });
-
 
 const formatDate = (date) => {
     const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
@@ -155,7 +158,7 @@ onMounted(() => {
                         <div class="relative flex justify-center gap-2 w-full lg:max-w-[calc(100vw-200px)]">
                             <input type="text" v-model="searchValue"
                                 class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
-                                placeholder="Tìm kiếm đơn hàng theo tên khách hàng..." />
+                                placeholder="Tìm kiếm đơn hàng ..." />
                             <i class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
                         </div>
                         <div v-if="filteredOrders.length > 0"

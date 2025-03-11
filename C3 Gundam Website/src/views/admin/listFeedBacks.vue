@@ -47,7 +47,10 @@ const chooseFeedBackWithStar = computed(() => {
         const matchesSearch = !searchValue.value || comment.SanPhamDaDanhGia.some(item => 
             item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
         )
-        return chooseStar && matchesSearch;
+        const findProductId = !searchValue.value || comment.SanPhamDaDanhGia.some(item => 
+            item.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
+        )
+        return chooseStar && ( matchesSearch || findProductId );
     });
 })
 

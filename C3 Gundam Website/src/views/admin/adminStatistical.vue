@@ -99,8 +99,8 @@ const fetchRevenueData = async (year) => {
                 {
                     label: `Doanh thu năm ${year}`,
                     data: response.data.datasets[0].data,
-                    borderColor: "#1E90FF",
-                    backgroundColor: "#00BFFF",
+                    borderColor: "rgba(245, 121, 197, 1)",
+                    backgroundColor: "rgba(245, 121, 197, 0.2)",
                     borderWidth: 2,
                     tension: 0.3,
                 },
@@ -330,7 +330,7 @@ onMounted(() => {
                                                 {{ product.TenSanPham }}</p>
                                         </div>
                                         <p class="text-[14px] font-semibold">Đã bán: <span class="font-medium">{{
-                                                product.LuotBan }} sản phẩm</span></p>
+                                            product.LuotBan }} sản phẩm</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -363,7 +363,8 @@ onMounted(() => {
                     </div>
                     <div class="flex lg:flex-row flex-col gap-4 w-full items-center">
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống kê đơn hàng
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống
+                                kê đơn hàng
                             </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[250px] h-[250px] m-auto">
@@ -372,7 +373,8 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống kê đánh giá sản
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống
+                                kê đánh giá sản
                                 phẩm
                             </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
