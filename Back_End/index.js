@@ -11,17 +11,16 @@ dotenv.config();
 
 const app = express();
 const PORT = 3000;
+const server = http.createServer(app);
 
-// Tạo HTTP server từ Express
-// const server = http.createServer(app);
+// Khởi tạo Socket.IO
+const socketIO = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  },
+});
 
-// // Khởi tạo Socket.IO với HTTP server
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*", // Cho phép tất cả nguồn (có thể điều chỉnh)
-//     methods: ["GET", "POST"],
-//   },
-// });
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -55,7 +54,6 @@ const feeabackRoutes = require("./src/routes/feedbacks");
 const inventoryRoutes = require("./src/routes/inventories");
 const cartRoutes = require("./src/routes/carts");
 const locationRoutes = require("./src/routes/locations");
-const messageRoutes = require("./src/routes/messages");
 const statisticalRoutes = require("./src/routes/statisticals");
 
 app.use("/api/khachhang", khachHangRoutes);
@@ -71,106 +69,77 @@ app.use("/api/danhgia", feeabackRoutes);
 app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
-app.use("/api/tinnhan", messageRoutes);
 app.use("/api/thongke", statisticalRoutes);
 
-const MessageModel = require("./src/models/messageModels");
-// Quản lý danh sách phòng chat
-const rooms = new Map();
+// Middleware xác thực Socket.IO (tùy chọn)
+socketIO.use((socket, next) => {
+  const { userId, userName } = socket.handshake.auth;
+  if (!userId || !userName) {
+    return next(new Error("Authentication error"));
+  }
+  socket.userId = userId;
+  socket.userName = userName;
+  next();
+});
 
-// Socket.IO lắng nghe kết nối từ client
-// io.on("connection", (socket) => {
-//   console.log(`Client connected: ${socket.id}`);
+// Xử lý sự kiện Socket.IO
+socketIO.on("connection", (socket) => {
+  console.log(`⚡: ${socket.userName} (ID: ${socket.userId}) vừa kết nối!`);
 
-//   // Xử lý khi client tham gia phòng chat
-//   socket.on("joinRoom", ({ idNguoiGui, idNguoiNhan }) => {
-//     const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
-//     socket.join(roomId);
-//     console.log(`Client ${socket.id} joined room: ${roomId}`);
+  // Tham gia phòng chat
+  socket.on("joinRoom", (roomCode) => {
+    socket.join(roomCode);
+    console.log(`${socket.userName} đã tham gia phòng: ${roomCode}`);
+  });
+  // Gửi tin nhắn
+  socket.on("sendMessage", async (data) => {
+    const { roomCode, senderId, senderName, text } = data;
+    const message = {
+      text,
+      senderId,
+      senderN: senderName,
+      time: new Date(),
+    };
 
-//     // Cập nhật danh sách phòng
-//     if (!rooms.has(roomId)) {
-//       rooms.set(roomId, new Set());
-//     }
-//     rooms.get(roomId).add(socket.id);
-//   });
+    try {
+      const ChatRoom = require("./src/models/messageModels");
 
-//   // Xử lý khi client gửi tin nhắn
-//   socket.on("sendMessage", async (data) => {
-//     try {
-//       const { MaTinNhan, idNguoiGui, idNguoiNhan, NoiDung, NguoiGui, role } = data;
-//       const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
+      let chatRoom = await ChatRoom.findOne({ roomCode });
 
-//       // Kiểm tra xem người dùng đã tham gia phòng chưa
-//       if (!rooms.has(roomId) || !rooms.get(roomId).has(socket.id)) {
-//         console.error(`Client ${socket.id} chưa tham gia phòng ${roomId}`);
-//         return;
-//       }
+      if (chatRoom) {
+        chatRoom.messages.push(message);
+        if (chatRoom.senderId === senderId) {
+          chatRoom.receiverMessagesNotRead.push(message);
+        } else {
+          chatRoom.senderMessagesNotRead.push(message);
+        }
+        await chatRoom.save();
+      }
 
-//       // Tìm hoặc tạo cuộc trò chuyện
-//       let chat = await MessageModel.findOne({ MaTinNhan });
-//       if (chat) {
-//         chat.NoiDung.push({ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() });
-//         await chat.save();
-//       } else {
-//         chat = new MessageModel({
-//           MaTinNhan,
-//           idNguoiGui,
-//           idNguoiNhan,
-//           NoiDung: [{ NguoiGui, TinNhan: NoiDung, role, ThoiGian: new Date() }],
-//         });
-//         await chat.save();
-//       }
+      // Phát tin nhắn real-time đến phòng
+      socketIO.to(roomCode).emit("receiveMessage", message);
+    } catch (error) {
+      console.error("Lỗi khi gửi tin nhắn:", error);
+    }
+  });
+  // Ngắt kết nối
+  socket.on("disconnect", () => {
+    console.log(`🔥: ${socket.userName} (ID: ${socket.userId}) đã ngắt kết nối`);
+  });
+});
 
-//       // Phát tin nhắn đến phòng chat
-//       io.to(roomId).emit("receiveMessage", {
-//         NguoiGui,
-//         TinNhan: NoiDung,
-//         role,
-//         ThoiGian: new Date(),
-//       });
-
-//     } catch (error) {
-//       console.error("Lỗi khi lưu tin nhắn:", error);
-//     }
-//   });
-
-//   // Xử lý khi client rời phòng chat
-//   socket.on("leaveRoom", ({ idNguoiGui, idNguoiNhan }) => {
-//     const roomId = [idNguoiGui, idNguoiNhan].sort().join("-");
-//     socket.leave(roomId);
-//     console.log(`Client ${socket.id} rời phòng: ${roomId}`);
-
-//     // Xóa socket khỏi danh sách phòng
-//     if (rooms.has(roomId)) {
-//       rooms.get(roomId).delete(socket.id);
-//       if (rooms.get(roomId).size === 0) {
-//         rooms.delete(roomId);
-//       }
-//     }
-//   });
-
-//   // Xử lý ngắt kết nối
-//   socket.on("disconnect", () => {
-//     console.log(`Client disconnected: ${socket.id}`);
-    
-//     // Xóa client khỏi tất cả các phòng
-//     for (const [roomId, clients] of rooms) {
-//       clients.delete(socket.id);
-//       if (clients.size === 0) {
-//         rooms.delete(roomId);
-//       }
-//     }
-//   });
-// });
-
-// // Thêm middleware để sử dụng Socket.IO trong các route
-// app.use((req, res, next) => {
-//   req.io = io;
-//   next();
-// });
+// API lấy danh sách phòng chat (tùy chọn)
+app.get("/api/chat", async (req, res) => {
+  try {
+    const ChatRoom = require("./src/models/messageModels");
+    const chatRooms = await ChatRoom.find();
+    res.json(chatRooms);
+  } catch (error) {
+    res.status(500).json({ error: "Lỗi khi lấy danh sách phòng chat" });
+  }
+});
 
 // Chạy server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });

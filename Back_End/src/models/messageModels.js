@@ -1,17 +1,23 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  MaTinNhan: String,
-  idNguoiGui: { type: String, required: true },
-  idNguoiNhan: { type: String, required: true },
-  NoiDung: [
-    {
-      NguoiGui: String,
-      TinNhan: String,
-      role: String,
-      ThoiGian: { type: Date, default: Date.now },
-    },
-  ],
+  text: { type: String, required: true },
+  senderId: { type: String, required: true },
+  senderN: { type: String, required: true },
+  time: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Message', messageSchema);
+const chatRoomSchema = new mongoose.Schema({
+    roomCode: { type: String, required: true },
+    senderId: { type: String, required: true },
+    receiverId: { type: String, required: true },
+    senderName: { type: String, required: true },
+    receiverName: { type: String, required: true },
+    senderAvatar: { type: String, required: false },
+    receiverAvatar: { type: String, required: false },
+    messages: [messageSchema],
+    senderMessagesNotRead: [messageSchema], 
+    receiverMessagesNotRead: [messageSchema],
+});
+
+module.exports = mongoose.model('Message', chatRoomSchema);
