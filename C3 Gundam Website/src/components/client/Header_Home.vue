@@ -15,7 +15,10 @@ const logout = async () => {
         const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
             maKhachHang
         });
-        localStorage.clear();
+        localStorage.removeItem("Email");
+        localStorage.removeItem("TenKhachHang");
+        localStorage.removeItem("MaKhachHang");
+        localStorage.removeItem("HinhAnh");
         isLoggedIn.value = false;
         router.push("/login");
     } catch (error) {

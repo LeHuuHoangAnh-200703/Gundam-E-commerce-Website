@@ -6,128 +6,98 @@ import BackToTop from "@/components/client/BackToTop.vue";
 import { io } from "socket.io-client";
 import axios from "axios";
 
-// State quản lý tin nhắn
-const message = ref("");
+// Khai báo các biến reactive
 const messages = ref([]);
-const socket = ref(null);
-
-// Lấy thông tin người dùng từ localStorage
-const userName = localStorage.getItem("TenKhachHang");
-const userId = localStorage.getItem("MaKhachHang");
-const adminId = localStorage.getItem("MaAdmin");
-
-// Escape HTML để ngăn ngừa XSS
-const escapeHtml = (unsafe) => {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-};
-
-const generateMaTinNhan = (idNguoiGui, idNguoiNhan) => {
-    return `MTN_${idNguoiGui}_${idNguoiNhan}`;
-};
+const message = ref("");
+const userId = ref(localStorage.getItem('MaKhachHang'));
+const userName = ref(localStorage.getItem('TenKhachHang'));
+const image = ref(localStorage.getItem('HinhAnh'));
+console.log(image.value)
+const roomCode = ref(`${userId.value}_admin`);
+const socket = io("http://localhost:3000", {
+    auth: {
+        userId: userId.value,
+        userName: userName.value,
+    },
+});
 
 // Gửi tin nhắn
 const sendMessage = async () => {
     if (message.value.trim()) {
-        const sanitizedMessage = escapeHtml(message.value);
+        const messageData = {
+            roomCode: roomCode.value,
+            senderId: userId.value,
+            senderName: userName.value,
+            text: message.value,
+        };
 
-        try {
-            const newMessage = {
-                MaTinNhan: generateMaTinNhan(userId, adminId),
-                TinNhan: sanitizedMessage,
-                NguoiGui: userName,
-                idNguoiGui: userId,
-                idNguoiNhan: adminId,
-                ThoiGian: new Date().toISOString(),
-                role: "user",
-            };
-
-            // Gửi tin nhắn đến API
-            await axios.post("http://localhost:3000/api/tinnhan", newMessage);
-
-            // Gửi tin nhắn đến server qua socket
-            socket.value.emit("sendMessage", newMessage);
-            console.log(newMessage)
-            // Cập nhật giao diện
-            messages.value.push({
-                ...newMessage,
-                ThoiGian: formatDate(new Date()),
-            });
-
-            message.value = "";
-        } catch (error) {
-            console.error("Lỗi khi gửi tin nhắn:", error);
-        }
+        socket.emit("sendMessage", messageData);
+        message.value = ""; // Xóa input sau khi gửi
     }
 };
 
-// Định dạng ngày giờ
-const formatDate = (date) => {
-    const options = {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
+// Format thời gian
+const formatTime = (time) => {
+    return new Date(time).toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
-    };
-    return date.toLocaleString("vi-VN", options);
+    });
 };
 
-// Lấy tin nhắn từ API
-const fetchMessages = async () => {
+// Tải lịch sử tin nhắn khi vào phòng
+const loadChatHistory = async () => {
     try {
-        const response = await axios.get(
-            `http://localhost:3000/api/tinnhan?idNguoiGui=${userId}&idNguoiNhan=${adminId}`
-        );
-        if (response.data && response.data.messages && response.data.messages.length > 0) {
-            messages.value = response.data.messages.map((msg) => ({
-                ...msg,
-                ThoiGian: formatDate(new Date(msg.ThoiGian)),
+        const response = await axios.get(`http://localhost:3000/api/chat`);
+        const chatRooms = response.data;
+        const chatRoom = chatRooms.find((room) => room.roomCode === roomCode.value);
+
+        if (chatRoom) {
+            messages.value = chatRoom.messages.map((msg) => ({
+                TinNhan: msg.text,
+                ThoiGian: formatTime(msg.time),
+                role: msg.senderId === userId.value ? "user" : "admin",
             }));
-        } else {
-            messages.value = [];
         }
     } catch (error) {
-        console.error("Lỗi khi lấy tin nhắn:", error);
+        console.error("Lỗi khi tải lịch sử chat:", error);
     }
 };
 
-// Kết nối với Socket.IO
+// Lifecycle hooks
 onMounted(() => {
-    socket.value = io("http://localhost:3000", {
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
+    // Tham gia phòng chat
+    socket.emit("joinRoom", {
+        roomCode: roomCode.value,
+        senderId: userId.value,
+        receiverId: "AM55511",
+        senderName: userName.value,
+        receiverName: "C3 GUNDAM STORE",
+        senderAvatar: image.value
     });
 
-    // Khi kết nối socket thành công
-    socket.value.on("connect", () => {
-        console.log("Kết nối socket thành công");
-
-        // Tham gia phòng chat với admin
-        socket.value.emit("joinRoom", { idNguoiGui: userId, idNguoiNhan: adminId });
+    // Nhận thông tin phòng khi tham gia
+    socket.on("roomJoined", (chatRoom) => {
+        messages.value = chatRoom.messages.map((msg) => ({
+            TinNhan: msg.text,
+            ThoiGian: formatTime(msg.time),
+            role: msg.senderId === userId.value ? "user" : "admin",
+        }));
     });
 
-    // Nhận tin nhắn từ server
-    socket.value.on("receiveMessage", (data) => {
+    // Nhận tin nhắn real-time
+    socket.on("receiveMessage", (msg) => {
         messages.value.push({
-            ...data,
-            ThoiGian: formatDate(new Date(data.ThoiGian)),
+            TinNhan: msg.text,
+            ThoiGian: formatTime(msg.time),
+            role: msg.senderId === userId.value ? "user" : "admin",
         });
     });
-
-    // Lấy tin nhắn khi trang tải
-    fetchMessages();
+    // Tải lịch sử tin nhắn khi vào
+    loadChatHistory();
 });
 
-// Ngắt kết nối khi rời trang
 onUnmounted(() => {
-    socket.value.emit("leaveRoom", { idNguoiGui: userId, idNguoiNhan: adminId });
-    socket.value.disconnect();
+    socket.disconnect();
 });
 </script>
 
@@ -147,7 +117,7 @@ onUnmounted(() => {
                             alt="" />
                         <div class="flex flex-col">
                             <p class="font-semibold text-[18px]">C3 GUNDAM STORE</p>
-                            <p class="text-[12px]">Đang hoạt động</p>
+                            <p class="text-[12px]">Hoạt động từ (7:30-22:30)</p>
                         </div>
                     </div>
                     <hr />

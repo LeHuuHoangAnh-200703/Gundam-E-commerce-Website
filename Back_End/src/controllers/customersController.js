@@ -186,6 +186,7 @@ exports.login = async (req, res) => {
         TenKhachHang: customer.TenKhachHang,
         Email: customer.Email,
         TrangThai: customer.TrangThai,
+        HinhAnh: customer.Image
       },
     });
   } catch (error) {

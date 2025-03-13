@@ -58,11 +58,11 @@ const login = async () => {
             email: formData.value.email,
             password: formData.value.password
         });
-        console.log(response.data);
         localStorage.setItem('Email', response.data.customer.Email);
         localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
         localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);
         localStorage.setItem('TrangThai', response.data.customer.TrangThai);
+        localStorage.setItem('HinhAnh', response.data.customer.HinhAnh);
         showNotification("Đăng nhập thành công!", "success");
         setTimeout(() => {
             router.push('/');

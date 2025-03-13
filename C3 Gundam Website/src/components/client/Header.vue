@@ -8,16 +8,21 @@ const userInfo = ref({
     MaKhachHang: localStorage.getItem('MaKhachHang') || '',
 });
 const isLoggedIn = ref(!userInfo.value.MaKhachHang);
-const logout = () => {
-    localStorage.removeItem('TenKhachHang');
-    localStorage.removeItem('MaKhachHang');
-    localStorage.removeItem('Email');
-    userInfo.value.TenKhachHang = '';
-    userInfo.value.Email = '';
-    userInfo.value.MaKhachHang = '';
-    isLoggedIn.value = false;
-
-    router.push('/login');
+const logout = async () => {
+    const maKhachHang = localStorage.getItem("MaKhachHang");
+    try {
+        const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
+            maKhachHang
+        });
+        localStorage.removeItem("Email");
+        localStorage.removeItem("TenKhachHang");
+        localStorage.removeItem("MaKhachHang");
+        localStorage.removeItem("HinhAnh");
+        isLoggedIn.value = false;
+        router.push("/login");
+    } catch (error) {
+        console.error("Đăng xuất thất bại:", error.response.data.message);
+    }
 };
 
 const orders_history = () => {
