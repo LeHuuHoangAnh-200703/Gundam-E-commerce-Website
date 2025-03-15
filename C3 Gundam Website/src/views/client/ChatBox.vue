@@ -110,7 +110,7 @@ onUnmounted(() => {
                     Đoạn chat <i class="fa-solid fa-comments"></i>
                 </h1>
                 <div
-                    class="bg-[#242424] flex flex-col gap-3 overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
+                    class="bg-[#242424] flex flex-col h-full w-full gap-3 overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div class="flex gap-3 items-center text-white">
                         <img src="../../assets/img/avatar.jpg"
                             class="w-[50px] h-[50px] rounded-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]"
@@ -121,7 +121,7 @@ onUnmounted(() => {
                         </div>
                     </div>
                     <hr />
-                    <div class="flex flex-col gap-4 flex-grow overflow-y-auto min-h-[calc(100vh-60vh)]">
+                    <div class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-40vh)]">
                         <div v-for="(msg, index) in messages" :key="index">
                             <div class="flex flex-col gap-1" :class="{ 'items-end': msg.role === 'user' }"
                                 v-if="msg.role === 'user'">
@@ -132,17 +132,14 @@ onUnmounted(() => {
                                 </div>
                                 <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
                             </div>
-                            <template v-if="msg.role === 'admin'">
+                            <div v-if="msg.role === 'admin'" class="flex gap-2">
                                 <img src="../../assets/img/avatar.jpg" class="w-[35px] h-[35px] rounded-full" alt="" />
-                            </template>
-                            <div v-if="msg.role === 'admin'" class="flex flex-col gap-1">
-                                <div :class="msg.role === 'admin'
-                                    ? 'bg-[#4169E1] text-white'
-                                    : 'bg-gray-200 text-[#333]'
-                                    " class="p-2 rounded-md">
-                                    <p class="text-[14px]">{{ msg.TinNhan }}</p>
+                                <div class="flex flex-col gap-1">
+                                    <div class="p-2 rounded-md bg-gray-200 text-[#333]">
+                                        <p class="text-[14px]">{{ msg.TinNhan }}</p>
+                                    </div>
+                                    <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
                                 </div>
-                                <small class="text-white text-[10px]">{{}}</small>
                             </div>
                         </div>
                     </div>

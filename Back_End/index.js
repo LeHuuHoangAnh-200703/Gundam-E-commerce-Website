@@ -71,7 +71,7 @@ app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/thongke", statisticalRoutes);
 
-// Middleware xác thực Socket.IO (tùy chọn)
+// Middleware xác thực Socket.IO
 socketIO.use((socket, next) => {
   const { userId, userName } = socket.handshake.auth;
   if (!userId || !userName) {
@@ -86,7 +86,6 @@ socketIO.use((socket, next) => {
 socketIO.on("connection", (socket) => {
   console.log(`⚡: ${socket.userName} (ID: ${socket.userId}) vừa kết nối!`);
 
-  // Tham gia hoặc tạo phòng chat
   socket.on("joinRoom", async ({ roomCode, senderId, receiverId, senderName, receiverName, senderAvatar }) => {
     socket.join(roomCode);
     console.log(`${socket.userName} đã tham gia phòng: ${roomCode}`);
@@ -96,14 +95,13 @@ socketIO.on("connection", (socket) => {
       let chatRoom = await ChatRoom.findOne({ roomCode });
 
       if (!chatRoom) {
-        // Tạo phòng chat mới nếu chưa tồn tại
         chatRoom = new ChatRoom({
           roomCode,
           senderId,
           receiverId,
           senderName,
           receiverName,
-          senderAvatar: senderAvatar || "", // Có thể thêm từ dữ liệu người dùng
+          senderAvatar: senderAvatar || "",
           receiverAvatar: "",
           messages: [],
           senderMessagesNotRead: [],
@@ -112,13 +110,12 @@ socketIO.on("connection", (socket) => {
         await chatRoom.save();
       }
 
-      // Gửi thông tin phòng chat về client
       socket.emit("roomJoined", chatRoom);
     } catch (error) {
       console.error("Lỗi khi tham gia/tạo phòng:", error);
     }
   });
-  // Gửi tin nhắn
+
   socket.on("sendMessage", async (data) => {
     const { roomCode, senderId, senderName, text } = data;
     const message = {
@@ -143,6 +140,10 @@ socketIO.on("connection", (socket) => {
 
         // Phát tin nhắn real-time đến phòng
         socketIO.to(roomCode).emit("receiveMessage", message);
+
+        // Phát cập nhật danh sách chatRooms cho tất cả client
+        const updatedChatRooms = await ChatRoom.find();
+        socketIO.emit("chatRoomsUpdated", updatedChatRooms);
       } else {
         console.log("Phòng chat không tồn tại");
       }
@@ -150,7 +151,7 @@ socketIO.on("connection", (socket) => {
       console.error("Lỗi khi gửi tin nhắn:", error);
     }
   });
-  // Đánh dấu tin nhắn đã đọc
+
   socket.on("markAsRead", async ({ roomCode, userId }) => {
     try {
       const ChatRoom = require("./src/models/messageModels");
@@ -164,15 +165,15 @@ socketIO.on("connection", (socket) => {
         }
         await chatRoom.save();
 
-        // Cập nhật trạng thái phòng cho tất cả client
         socketIO.to(roomCode).emit("roomUpdated", chatRoom);
+        const updatedChatRooms = await ChatRoom.find();
+        socketIO.emit("chatRoomsUpdated", updatedChatRooms);
       }
     } catch (error) {
       console.error("Lỗi khi đánh dấu đã đọc:", error);
     }
   });
 
-  // Ngắt kết nối
   socket.on("disconnect", () => {
     console.log(`🔥: ${socket.userName} (ID: ${socket.userId}) đã ngắt kết nối`);
   });
