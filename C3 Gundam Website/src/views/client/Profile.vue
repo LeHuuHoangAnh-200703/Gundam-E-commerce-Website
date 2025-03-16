@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import Chat from '../../components/client/Chat.vue';
 import axios from 'axios';
 
 const name = ref('');
@@ -20,15 +21,6 @@ const fetchCustomer = async (idKhachHang) => {
         console.log(image.value)
     } catch (err) {
         console.log("Error fetching:", err);
-    }
-}
-
-const chatBox = () => {
-    const MaKhachHang = localStorage.getItem('MaKhachHang');
-    if (!MaKhachHang) {
-        router.push('/login');
-    } else {
-        router.push('/chatbox');
     }
 }
 
@@ -87,10 +79,7 @@ onMounted(() => {
         <div class="h-[150px]"></div>
         <Footer />
         <BackToTop />
-        <button @click.prevent="chatBox" to="/chatbox"
-            class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
-            <i class="fa-solid fa-comments text-white"></i>
-        </button>
+        <Chat />
     </div>
 </template>
 

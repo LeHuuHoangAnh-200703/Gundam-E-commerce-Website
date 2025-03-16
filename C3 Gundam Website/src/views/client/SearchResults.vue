@@ -7,6 +7,7 @@ import NotificationClient from "@/components/Notification/NotificationClient.vue
 import axios from 'axios';
 import { useRouter, useRoute } from "vue-router";
 import { watch } from 'vue';
+import Chat from '../../components/client/Chat.vue';
 
 const router = useRouter();
 const route = useRoute(); // Sử dụng useRoute để theo dõi thay đổi của query
@@ -67,15 +68,6 @@ const addToCart = async (idProDuct) => {
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
-const chatBox = () => {
-    const MaKhachHang = localStorage.getItem('MaKhachHang');
-    if (!MaKhachHang) {
-        router.push('/login');
-    } else {
-        router.push('/chatbox');
-    }
 }
 
 const currentPage = ref(1);
@@ -148,10 +140,7 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
-        <button @click.prevent="chatBox" to="/chatbox"
-            class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
-            <i class="fa-solid fa-comments text-white"></i>
-        </button>
+        <Chat />
         <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>

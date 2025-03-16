@@ -6,6 +6,7 @@ import BackToTop from "@/components/client/BackToTop.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import Chat from '../../components/client/Chat.vue';
 
 const router = useRouter();
 const listDiscountCodes = ref([]);
@@ -19,14 +20,6 @@ const showNotification = (msg, type) => {
         notification.value.message = '';
     }, 3000);
 };
-const chatBox = () => {
-    const MaKhachHang = localStorage.getItem('MaKhachHang');
-    if (!MaKhachHang) {
-        router.push('/login');
-    } else {
-        router.push('/chatbox');
-    }
-}
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -153,10 +146,7 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
-        <button @click.prevent="chatBox" to="/chatbox"
-            class="fixed bottom-32 right-10 flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
-            <i class="fa-solid fa-comments text-white"></i>
-        </button>
+        <Chat />
         <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>

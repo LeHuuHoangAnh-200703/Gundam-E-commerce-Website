@@ -5,6 +5,8 @@ import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
 
 const listProducts = ref([]);
+const selectedType = ref('All');
+const searchValue = ref('');
 const types = ref([
     {
         name: "Tất cả",
@@ -61,7 +63,6 @@ const updateStatus = async (maSanPham, newStatus) => {
     }
 };
 
-const selectedType = ref('All');
 const selected = async (type) => {
     return selectedType.value = type;
 }
@@ -69,7 +70,8 @@ const selected = async (type) => {
 const findProducts = computed(() => {
     return listProducts.value.filter(product => {
         const chooseType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
-        return chooseType;
+        const nameProducts = !searchValue.value || product.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
+        return chooseType && nameProducts;
     })
 })
 
@@ -91,9 +93,18 @@ onMounted(() => {
                 <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-7">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý sản phẩm</h1>
-                        <div class="flex justify-center lg:justify-end items-center flex-wrap flex-1 gap-4">
-                            <button @click.prevent="selected(item.type)" class="bg-white px-8 py-3 shadow font-semibold border-2 border-s-transparent hover:border-[#003171] hover:text-[#003171] transition-all duration-300" v-for="(item, index) in types" :key="index">{{ item.name }}</button>
+                        <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
+                            <input type="text" v-model="searchValue"
+                                class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                                placeholder="Tìm kiếm sản phẩm ..." />
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
                         </div>
+                    </div>
+                    <div class="flex justify-center lg:justify-end items-center flex-wrap flex-1 gap-4">
+                        <button @click.prevent="selected(item.type)"
+                            class="bg-white px-8 py-3 shadow font-semibold border-2 border-s-transparent hover:border-[#003171] hover:text-[#003171] transition-all duration-300"
+                            v-for="(item, index) in types" :key="index">{{ item.name }}</button>
                     </div>
                     <div class="shadow-lg border-2 border-gray-300 overflow-auto">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
@@ -121,13 +132,13 @@ onMounted(() => {
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ product.MaSanPham }}
                                     </td>
                                     <td>
-                                        <img class="w-[100px] py-2 max-w-full ml-7"
-                                            :src="`${product.Images[0]}`" alt="Hình ảnh sản phẩm" />
+                                        <img class="w-[100px] py-2 max-w-full ml-7" :src="`${product.Images[0]}`"
+                                            alt="Hình ảnh sản phẩm" />
                                     </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham
-                                            }}</p>
+                                        }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatCurrency(product.GiaBan) }} VNĐ</td>

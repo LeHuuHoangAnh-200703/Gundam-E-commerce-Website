@@ -30,7 +30,6 @@ const loadChatRooms = async () => {
 
 const selectRoom = (room) => {
     selectedRoom.value = room;
-    console.log("Đã chọn phòng:", selectedRoom.value.roomCode);
     loadChatHistory(room.roomCode);
     socket.emit("joinRoom", {
         roomCode: room.roomCode,
@@ -53,7 +52,6 @@ const loadChatHistory = async (roomCode) => {
                 ThoiGian: formatTime(msg.time),
                 role: msg.senderId === adminId.value ? "admin" : "user",
             }));
-            console.log("Lịch sử tin nhắn đã tải:", messages.value);
         }
     } catch (error) {
         console.error("Lỗi khi tải lịch sử tin nhắn:", error);
@@ -76,7 +74,6 @@ const sendMessage = () => {
         });
 
         socket.emit("sendMessage", messageData);
-        console.log("Tin nhắn đã gửi:", messageData);
         message.value = "";
     }
 };
@@ -122,6 +119,19 @@ onMounted(() => {
     // Lắng nghe cập nhật danh sách chatRooms
     socket.on("chatRoomsUpdated", (updatedChatRooms) => {
         chatRooms.value = updatedChatRooms.filter((room) => room.receiverId === adminId.value);
+        // Tải lại lịch sử chat nếu đang ở trong phòng chat bị cập nhật
+        if (selectedRoom.value) {
+            const updatedRoom = updatedChatRooms.find(
+                (room) => room.roomCode === selectedRoom.value.roomCode
+            );
+            if (updatedRoom) {
+                messages.value = updatedRoom.messages.map((msg) => ({
+                    TinNhan: msg.text,
+                    ThoiGian: formatTime(msg.time),
+                    role: msg.senderId === adminId.value ? "admin" : "user",
+                }));
+            }
+        }
     });
 
     socket.on("roomUpdated", (chatRoom) => {
@@ -131,7 +141,6 @@ onMounted(() => {
                 ThoiGian: formatTime(msg.time),
                 role: msg.senderId === adminId.value ? "admin" : "user",
             }));
-            console.log("Phòng đã cập nhật, tin nhắn:", messages.value); // Debug
         }
     });
 });
@@ -164,9 +173,9 @@ onUnmounted(() => {
                             </div>
                             <div class="flex flex-col gap-2 mt-3 overflow-y-auto max-h-[calc(100vh-300px)]">
                                 <div v-for="room in chatRooms" :key="room.roomCode"
-                                    class="flex gap-2 items-center hover:bg-gray-200 rounded-lg p-2 cursor-pointer"
+                                    class="flex gap-2 items-center hover:bg-gray-200 p-2 cursor-pointer border-b-2 pb-4"
                                     @click="selectRoom(room)">
-                                    <div class="flex gap-2">
+                                    <div class="flex gap-2 items-center">
                                         <img :src="room.senderAvatar || '../../assets/img/avatar.jpg'"
                                             class="w-[50px] h-[50px] rounded-full" alt="" />
                                         <div class="flex flex-col justify-center">
@@ -191,12 +200,10 @@ onUnmounted(() => {
                     <div class="flex flex-col gap-8 w-full h-full overflow-hidden">
                         <div v-if="selectedRoom"
                             class="bg-white p-4 w-full h-full border-2 rounded-lg shadow-lg flex flex-col gap-4 overflow-hidden">
-                            <div class="flex gap-2">
+                            <div class="flex gap-2 items-center">
                                 <img :src="selectedRoom.senderAvatar || '../../assets/img/avatar.jpg'"
                                     class="w-[50px] h-[50px] rounded-full" alt="" />
-                                <div class="flex flex-col justify-center">
-                                    <p class="text-[14px] font-bold">{{ selectedRoom.senderName }}</p>
-                                </div>
+                                <p class="text-[14px] font-bold">{{ selectedRoom.senderName }}</p>
                             </div>
                             <hr />
                             <div class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-53vh)]">

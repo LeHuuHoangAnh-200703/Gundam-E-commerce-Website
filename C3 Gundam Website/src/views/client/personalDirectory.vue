@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import Chat from '../../components/client/Chat.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import NotificationClient from '@/components/Notification/NotificationClient.vue';
@@ -178,6 +179,7 @@ onMounted(() => {
         </div>
         <Footer />
         <BackToTop />
+        <Chat />
         <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>

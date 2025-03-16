@@ -12,7 +12,6 @@ const message = ref("");
 const userId = ref(localStorage.getItem('MaKhachHang'));
 const userName = ref(localStorage.getItem('TenKhachHang'));
 const image = ref(localStorage.getItem('HinhAnh'));
-console.log(image.value)
 const roomCode = ref(`${userId.value}_admin`);
 const socket = io("http://localhost:3000", {
     auth: {
