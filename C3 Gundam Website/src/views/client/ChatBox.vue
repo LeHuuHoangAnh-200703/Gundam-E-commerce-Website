@@ -109,7 +109,7 @@ onUnmounted(() => {
                     Đoạn chat <i class="fa-solid fa-comments"></i>
                 </h1>
                 <div
-                    class="bg-[#242424] flex flex-col h-full w-full gap-3 overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
+                    class="bg-[#242424] flex flex-col min-h-[calc(100vh-30vh)] w-full gap-3 overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div class="flex gap-3 items-center text-white">
                         <img src="../../assets/img/avatar.jpg"
                             class="w-[50px] h-[50px] rounded-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]"

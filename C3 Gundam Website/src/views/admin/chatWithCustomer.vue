@@ -214,13 +214,15 @@ onUnmounted(() => {
                                         </div>
                                         <small class="text-[#333] text-[10px] self-end">{{ msg.ThoiGian }}</small>
                                     </div>
-                                    <div v-if="msg.role === 'user'" class="flex gap-2 items-end">
+                                    <div v-if="msg.role === 'user'" class="flex gap-2">
                                         <img :src="selectedRoom.senderAvatar || '../../assets/img/avatar.jpg'"
                                             class="w-[35px] h-[35px] rounded-full" alt="" />
-                                        <div class="bg-gray-200 p-2 rounded-md self-end">
-                                            <p class="text-[#333] text-[14px] inline-block">{{ msg.TinNhan }}</p>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="bg-gray-200 p-2 rounded-md self-end">
+                                                <p class="text-[#333] text-[14px] inline-block">{{ msg.TinNhan }}</p>
+                                            </div>
+                                            <small class="text-[#333] text-[10px]">{{ msg.ThoiGian }}</small>
                                         </div>
-                                        <small class="text-[#333] text-[10px]">{{ msg.ThoiGian }}</small>
                                     </div>
                                 </div>
                             </div>
