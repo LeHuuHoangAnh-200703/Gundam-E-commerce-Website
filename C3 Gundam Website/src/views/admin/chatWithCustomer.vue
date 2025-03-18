@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import { io } from "socket.io-client";
-import axios from "axios";
+import axios from "axios"; // Thêm axios để gọi API
 
 const messages = ref([]);
 const message = ref("");
@@ -13,140 +13,122 @@ const adminId = ref("AM55511");
 const adminName = ref("C3 GUNDAM STORE");
 
 const socket = io("http://localhost:3000", {
-    auth: {
-        userId: adminId.value,
-        userName: adminName.value,
-    },
+  auth: {
+    userId: adminId.value,
+    userName: adminName.value,
+  },
 });
 
+// Tải danh sách phòng chat từ API
 const loadChatRooms = async () => {
-    try {
-        const response = await axios.get("http://localhost:3000/api/chat");
-        chatRooms.value = response.data.filter((room) => room.receiverId === adminId.value);
-    } catch (error) {
-        console.error("Lỗi khi tải danh sách phòng chat:", error);
-    }
+  try {
+    const response = await axios.get("http://localhost:3000/api/chat");
+    chatRooms.value = response.data.filter((room) => room.receiverId === adminId.value);
+  } catch (error) {
+    console.error("Lỗi khi tải danh sách phòng chat:", error);
+  }
 };
 
 const selectRoom = (room) => {
-    selectedRoom.value = room;
-    loadChatHistory(room.roomCode);
-    socket.emit("joinRoom", {
-        roomCode: room.roomCode,
-        senderId: adminId.value,
-        receiverId: room.senderId,
-        senderName: adminName.value,
-        receiverName: room.senderName,
-    });
-    // Đánh dấu tin nhắn đã đọc khi nhấp vào khách hàng
-    socket.emit("markAsRead", { roomCode: room.roomCode, userId: adminId.value });
-};
-
-const loadChatHistory = async (roomCode) => {
-    try {
-        const response = await axios.get("http://localhost:3000/api/chat");
-        const chatRoom = response.data.find((room) => room.roomCode === roomCode);
-        if (chatRoom) {
-            messages.value = chatRoom.messages.map((msg) => ({
-                TinNhan: msg.text,
-                ThoiGian: formatTime(msg.time),
-                role: msg.senderId === adminId.value ? "admin" : "user",
-            }));
-        }
-    } catch (error) {
-        console.error("Lỗi khi tải lịch sử tin nhắn:", error);
-    }
+  selectedRoom.value = room;
+  socket.emit("joinRoom", {
+    roomCode: room.roomCode,
+    senderId: adminId.value,
+    receiverId: room.senderId,
+    senderName: adminName.value,
+  });
+  socket.emit("markAsRead", { roomCode: room.roomCode, userId: adminId.value });
 };
 
 const sendMessage = () => {
-    if (message.value.trim() && selectedRoom.value) {
-        const messageData = {
-            roomCode: selectedRoom.value.roomCode,
-            senderId: adminId.value,
-            senderName: adminName.value,
-            text: message.value,
-        };
-
-        messages.value.push({
-            TinNhan: messageData.text,
-            ThoiGian: formatTime(new Date()),
-            role: "admin",
-        });
-
-        socket.emit("sendMessage", messageData);
-        message.value = "";
-    }
+  if (message.value.trim() && selectedRoom.value) {
+    const messageData = {
+      roomCode: selectedRoom.value.roomCode,
+      senderId: adminId.value,
+      senderName: adminName.value,
+      text: message.value,
+    };
+    messages.value.push({
+      TinNhan: messageData.text,
+      ThoiGian: formatTime(new Date()),
+      role: "admin",
+    });
+    socket.emit("sendMessage", messageData);
+    message.value = "";
+  }
 };
 
 const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+  return new Date(time).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 };
 
-// Đếm số tin nhắn chưa đọc cho mỗi phòng
 const unreadMessagesCount = computed(() => {
-    const counts = {};
-    chatRooms.value.forEach((room) => {
-        counts[room.roomCode] = room.receiverMessagesNotRead.length;
-    });
-    return counts;
+  const counts = {};
+  chatRooms.value.forEach((room) => {
+    counts[room.roomCode] = room.receiverMessagesNotRead.length;
+  });
+  return counts;
 });
 
 onMounted(() => {
-    loadChatRooms();
+  // Tải danh sách phòng chat ban đầu từ API
+  loadChatRooms();
 
-    socket.on("roomJoined", (chatRoom) => {
-        if (chatRoom.roomCode === selectedRoom.value?.roomCode) {
-            messages.value = chatRoom.messages.map((msg) => ({
-                TinNhan: msg.text,
-                ThoiGian: formatTime(msg.time),
-                role: msg.senderId === adminId.value ? "admin" : "user",
-            }));
-        }
-    });
+  // Lắng nghe các sự kiện Socket.IO để cập nhật real-time
+  socket.on("chatRoomsUpdated", (updatedChatRooms) => {
+    console.log("Received chatRoomsUpdated:", updatedChatRooms); // Debug
+    chatRooms.value = updatedChatRooms.filter((room) => room.receiverId === adminId.value);
+    if (selectedRoom.value) {
+      const updatedRoom = updatedChatRooms.find(
+        (room) => room.roomCode === selectedRoom.value.roomCode
+      );
+      if (updatedRoom) {
+        selectedRoom.value = updatedRoom;
+        messages.value = updatedRoom.messages.map((msg) => ({
+          TinNhan: msg.text,
+          ThoiGian: formatTime(msg.time),
+          role: msg.senderId === adminId.value ? "admin" : "user",
+        }));
+      }
+    }
+  });
 
-    socket.on("receiveMessage", (msg) => {
-        if (selectedRoom.value && msg.roomCode === selectedRoom.value.roomCode) {
-            if (msg.senderId !== adminId.value) {
-                messages.value.push({
-                    TinNhan: msg.text,
-                    ThoiGian: formatTime(msg.time),
-                    role: "user",
-                });
-            }
-        }
-    });
+  socket.on("roomJoined", (chatRoom) => {
+    if (chatRoom.roomCode === selectedRoom.value?.roomCode) {
+      messages.value = chatRoom.messages.map((msg) => ({
+        TinNhan: msg.text,
+        ThoiGian: formatTime(msg.time),
+        role: msg.senderId === adminId.value ? "admin" : "user",
+      }));
+    }
+  });
 
-    // Lắng nghe cập nhật danh sách chatRooms
-    socket.on("chatRoomsUpdated", (updatedChatRooms) => {
-        chatRooms.value = updatedChatRooms.filter((room) => room.receiverId === adminId.value);
-        // Tải lại lịch sử chat nếu đang ở trong phòng chat bị cập nhật
-        if (selectedRoom.value) {
-            const updatedRoom = updatedChatRooms.find(
-                (room) => room.roomCode === selectedRoom.value.roomCode
-            );
-            if (updatedRoom) {
-                messages.value = updatedRoom.messages.map((msg) => ({
-                    TinNhan: msg.text,
-                    ThoiGian: formatTime(msg.time),
-                    role: msg.senderId === adminId.value ? "admin" : "user",
-                }));
-            }
-        }
-    });
+  socket.on("receiveMessage", (msg) => {
+    if (selectedRoom.value && msg.roomCode === selectedRoom.value.roomCode) {
+      if (msg.senderId !== adminId.value) {
+        messages.value.push({
+          TinNhan: msg.text,
+          ThoiGian: formatTime(msg.time),
+          role: "user",
+        });
+      }
+    }
+  });
 
-    socket.on("roomUpdated", (chatRoom) => {
-        if (chatRoom.roomCode === selectedRoom.value?.roomCode) {
-            messages.value = chatRoom.messages.map((msg) => ({
-                TinNhan: msg.text,
-                ThoiGian: formatTime(msg.time),
-                role: msg.senderId === adminId.value ? "admin" : "user",
-            }));
-        }
-    });
+  socket.on("roomUpdated", (chatRoom) => {
+    if (chatRoom.roomCode === selectedRoom.value?.roomCode) {
+      selectedRoom.value = chatRoom;
+      messages.value = chatRoom.messages.map((msg) => ({
+        TinNhan: msg.text,
+        ThoiGian: formatTime(msg.time),
+        role: msg.senderId === adminId.value ? "admin" : "user",
+      }));
+    }
+  });
 });
 
 onUnmounted(() => {
-    socket.disconnect();
+  socket.disconnect();
 });
 </script>
 

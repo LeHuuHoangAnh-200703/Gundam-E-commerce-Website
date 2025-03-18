@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import Header from "@/components/client/Header.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
@@ -9,94 +9,114 @@ import axios from "axios";
 // Khai báo các biến reactive
 const messages = ref([]);
 const message = ref("");
-const userId = ref(localStorage.getItem('MaKhachHang'));
-const userName = ref(localStorage.getItem('TenKhachHang'));
-const image = ref(localStorage.getItem('HinhAnh'));
+const userId = ref(localStorage.getItem("MaKhachHang"));
+const userName = ref(localStorage.getItem("TenKhachHang"));
+const image = ref(localStorage.getItem("HinhAnh"));
 const roomCode = ref(`${userId.value}_admin`);
 const socket = io("http://localhost:3000", {
-    auth: {
-        userId: userId.value,
-        userName: userName.value,
-    },
+  auth: {
+    userId: userId.value,
+    userName: userName.value,
+  },
 });
+
+// Theo dõi thay đổi trong localStorage
+watch(
+  () => [localStorage.getItem("TenKhachHang"), localStorage.getItem("HinhAnh")],
+  ([newName, newImage]) => {
+    userName.value = newName;
+    image.value = newImage;
+    // Cập nhật lại thông tin gửi tới server nếu cần
+    socket.emit("updateUserInfo", {
+      userId: userId.value,
+      userName: newName,
+      senderAvatar: newImage,
+    });
+  }
+);
 
 // Gửi tin nhắn
 const sendMessage = async () => {
-    if (message.value.trim()) {
-        const messageData = {
-            roomCode: roomCode.value,
-            senderId: userId.value,
-            senderName: userName.value,
-            text: message.value,
-        };
-
-        socket.emit("sendMessage", messageData);
-        message.value = ""; // Xóa input sau khi gửi
-    }
+  if (message.value.trim()) {
+    const messageData = {
+      roomCode: roomCode.value,
+      senderId: userId.value,
+      senderName: userName.value,
+      text: message.value,
+    };
+    socket.emit("sendMessage", messageData);
+    message.value = "";
+  }
 };
 
 // Format thời gian
 const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
-};
-
-// Tải lịch sử tin nhắn khi vào phòng
-const loadChatHistory = async () => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/chat`);
-        const chatRooms = response.data;
-        const chatRoom = chatRooms.find((room) => room.roomCode === roomCode.value);
-
-        if (chatRoom) {
-            messages.value = chatRoom.messages.map((msg) => ({
-                TinNhan: msg.text,
-                ThoiGian: formatTime(msg.time),
-                role: msg.senderId === userId.value ? "user" : "admin",
-            }));
-        }
-    } catch (error) {
-        console.error("Lỗi khi tải lịch sử chat:", error);
-    }
+  return new Date(time).toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 // Lifecycle hooks
 onMounted(() => {
-    // Tham gia phòng chat
-    socket.emit("joinRoom", {
-        roomCode: roomCode.value,
-        senderId: userId.value,
-        receiverId: "AM55511",
-        senderName: userName.value,
-        receiverName: "C3 GUNDAM STORE",
-        senderAvatar: image.value
-    });
+  // Tham gia phòng chat
+  socket.emit("joinRoom", {
+    roomCode: roomCode.value,
+    senderId: userId.value,
+    receiverId: "AM55511",
+    senderName: userName.value,
+    receiverName: "C3 GUNDAM STORE",
+    senderAvatar: image.value,
+  });
 
-    // Nhận thông tin phòng khi tham gia
-    socket.on("roomJoined", (chatRoom) => {
-        messages.value = chatRoom.messages.map((msg) => ({
-            TinNhan: msg.text,
-            ThoiGian: formatTime(msg.time),
-            role: msg.senderId === userId.value ? "user" : "admin",
-        }));
-    });
+  // Đánh dấu tin nhắn đã đọc khi mở chatbox
+  socket.emit("markAsRead", {
+    roomCode: roomCode.value,
+    userId: userId.value,
+  });
 
-    // Nhận tin nhắn real-time
-    socket.on("receiveMessage", (msg) => {
-        messages.value.push({
-            TinNhan: msg.text,
-            ThoiGian: formatTime(msg.time),
-            role: msg.senderId === userId.value ? "user" : "admin",
-        });
+  // Nhận thông tin phòng khi tham gia (bao gồm lịch sử tin nhắn)
+  socket.on("roomJoined", (chatRoom) => {
+    messages.value = chatRoom.messages.map((msg) => ({
+      TinNhan: msg.text,
+      ThoiGian: formatTime(msg.time),
+      role: msg.senderId === userId.value ? "user" : "admin",
+    }));
+    // Cập nhật thông tin khách hàng từ server (nếu backend gửi)
+    if (chatRoom.senderName && chatRoom.senderAvatar) {
+      userName.value = chatRoom.senderName;
+      image.value = chatRoom.senderAvatar;
+    }
+  });
+
+  // Nhận tin nhắn real-time
+  socket.on("receiveMessage", (msg) => {
+    messages.value.push({
+      TinNhan: msg.text,
+      ThoiGian: formatTime(msg.time),
+      role: msg.senderId === userId.value ? "user" : "admin",
     });
-    // Tải lịch sử tin nhắn khi vào
-    loadChatHistory();
+  });
+
+  // Cập nhật phòng chat khi có thay đổi (bao gồm thông tin khách hàng)
+  socket.on("roomUpdated", (chatRoom) => {
+    if (chatRoom.roomCode === roomCode.value) {
+      messages.value = chatRoom.messages.map((msg) => ({
+        TinNhan: msg.text,
+        ThoiGian: formatTime(msg.time),
+        role: msg.senderId === userId.value ? "user" : "admin",
+      }));
+      // Cập nhật thông tin khách hàng từ server
+      if (chatRoom.senderName && chatRoom.senderAvatar) {
+        userName.value = chatRoom.senderName;
+        image.value = chatRoom.senderAvatar;
+      }
+    }
+  });
 });
 
 onUnmounted(() => {
-    socket.disconnect();
+  socket.disconnect();
 });
 </script>
 

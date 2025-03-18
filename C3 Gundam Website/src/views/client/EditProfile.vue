@@ -173,22 +173,27 @@ onMounted(() => {
                                     <p v-if="errors.confirmPassword" class="text-red-500 text-sm my-2">{{
                                         errors.confirmPassword }}</p>
                                 </div>
-
                                 <div class="md:col-span-5 my-2">
-                                    <label for="city" class="font-semibold text-[16px]">Ảnh của bạn : </label>
-                                    <input type="file" name="image" id="imageInput" @change="event => {
-                                        formData.image = Array.from(event.target.files);
-                                    }" />
-                                </div>
-                                <div
-                                    class="border-2 md:col-span-5 p-5 h-[200px] rounded-md flex justify-center items-center">
-                                    <div v-if="imageUrls.length > 0">
-                                        <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
-                                            class="w-40 h-40 object-cover" />
-                                    </div>
-                                    <div v-else class="text-[60px] text-slate-300" id="image_icon">
-                                        <i class="fa-regular fa-image"></i>
-                                    </div>
+                                    <label for="image_upload" class="text-[15px] font-semibold text-white">Hình ảnh sản
+                                        phẩm <i class="fa-solid fa-circle-info text-gray-300"></i></label>
+                                    <label for="image_upload"
+                                        class="border-2 border-gray-400 mt-2 cursor-pointer border-dashed rounded-md p-8 text-center flex flex-col items-center justify-center">
+                                        <div class="text-[18px] text-slate-300" id="image_icon">
+                                            <i class="fa-regular fa-image"></i>
+                                        </div>
+                                        <label for="image_upload" class="text-[12px] text-gray-500 cursor-pointer">
+                                            Thả hình ảnh vào đây, hoặc chọn <span
+                                                class="text-[#003171] cursor-pointer">nhấp để
+                                                duyệt</span>
+                                        </label>
+                                        <input type="file" class="hidden" name="image" id="image_upload" @change="event => {
+                                            formData.image = Array.from(event.target.files);
+                                        }" />
+                                        <div class="flex flex-wrap justify-center gap-2 mt-2">
+                                            <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
+                                                class="w-24 h-24 object-cover border rounded-md" />
+                                        </div>
+                                    </label>
                                 </div>
                                 <div class="md:col-span-5 text-right mt-2">
                                     <div class="inline-flex items-end">

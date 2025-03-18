@@ -42,7 +42,6 @@ const logout = async () => {
     localStorage.removeItem("TenAdmin");
     localStorage.removeItem("EmailAdmin");
     localStorage.removeItem("MaAdmin");
-    localStorage.removeItem("ChucVu");
     localStorage.removeItem("TrangThaiHoatDong");
     router.push("/admin/adminLogin");
   } catch (error) {
@@ -145,7 +144,7 @@ onUnmounted(() => {
           </i>
         </router-link>
         <router-link to="/admin/chatWithCustomer" class="px-2 py-2 rounded-full group">
-          <i class="fa-solid fa-comment relative transition-all duration-200 text-[20px]">
+          <i class="fa-solid fa-comments relative transition-all duration-200 text-[20px]">
             <span
               v-if="hasUnreadMessages"
               class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"

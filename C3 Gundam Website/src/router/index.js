@@ -276,7 +276,7 @@ router.beforeEach((to, from, next) => {
     // Kiểm tra xem route có yêu cầu xác thực không
     if (to.matched.some(record => record.meta.requiresAuth)) {
         // Kiểm tra trạng thái đăng nhập
-        if (!localStorage.getItem("ChucVu")) {
+        if (!localStorage.getItem("MaAdmin")) {
             next({ path: "/admin/adminLogin" }); // Chuyển hướng đến trang đăng nhập
             isLoading.value = false; // Ẩn loading nếu chuyển hướng
         } else {

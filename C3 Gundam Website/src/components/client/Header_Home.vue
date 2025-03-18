@@ -19,6 +19,7 @@ const logout = async () => {
         localStorage.removeItem("TenKhachHang");
         localStorage.removeItem("MaKhachHang");
         localStorage.removeItem("HinhAnh");
+        localStorage.removeItem('TrangThai');
         isLoggedIn.value = false;
         router.push("/login");
     } catch (error) {
