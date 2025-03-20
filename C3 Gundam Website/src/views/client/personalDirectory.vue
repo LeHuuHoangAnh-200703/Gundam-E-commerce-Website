@@ -48,7 +48,7 @@ const fetchCustomer = async (idKhachHang) => {
                 ...discountCode,
                 SoLanSuDung: foundDiscountCode ? foundDiscountCode.SoLanSuDung : 0,
             };
-        });
+        }).sort((a, b) => new Date(a.NgayHetHan) - new Date(b.NgayHetHan));;
     } catch (err) {
         console.log("Error fetching: ", err);
     }

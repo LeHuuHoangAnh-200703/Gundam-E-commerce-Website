@@ -10,6 +10,7 @@ const discountCodeSchema = new mongoose.Schema({
     NgayHetHan: Date,
     MaGiamGia: String,
     SoLanLuuMa: Number,
+    IdKhachHangSuDung: [String],
     NgayTao: Date,
 });
 

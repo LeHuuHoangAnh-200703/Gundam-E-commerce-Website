@@ -365,7 +365,7 @@ watch(
                                                 <option class="text-[#333] cursor-pointer" value="">
                                                     Danh sách mã giảm giá của bạn
                                                 </option>
-                                                <option v-for="(discountCode, index) in listDiscountCodes" :key="index"
+                                                <option v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())" :key="index"
                                                     :value="discountCode.IdMaGiamGia"
                                                     class="text-[#333] cursor-pointer">Id Mã: {{ discountCode.IdMaGiamGia }}
                                                     / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:

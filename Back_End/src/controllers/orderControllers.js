@@ -40,7 +40,7 @@ exports.getOrderById = async (req, res) => {
 }
 
 exports.createOrder = async (req, res) => {
-    let { IdMaGiamGia, TongDon, SanPhamDaMua } = req.body;
+    let { IdMaGiamGia, TongDon, SanPhamDaMua, MaKhachHang } = req.body;
     let finalPrice = TongDon;
     try {
         // Xử lý nếu SanPhamDaMua là object
@@ -63,6 +63,11 @@ exports.createOrder = async (req, res) => {
                 return res.status(400).json({ message: "Mã giảm giá đã hết lượt sử dụng." });
             }
 
+            // Kiểm tra khách hàng đã sử dụng mã này chưa
+            if (discount.IdKhachHangSuDung?.includes(MaKhachHang)) {
+                return res.status(400).json({ message: "Bạn đã sử dụng mã giảm giá này rồi." });
+            }
+
             const giaApDung = Number(discount.GiaApDung);
             const giamTien = Number(discount.GiamTien || 0);
             const giamPhanTram = discount.GiamPhanTram || 0;
@@ -79,6 +84,7 @@ exports.createOrder = async (req, res) => {
                 }
 
                 discount.SoLanSuDung -= 1;
+                discount.IdKhachHangSuDung = [...(discount.IdKhachHangSuDung || []), MaKhachHang];
                 await discount.save();
             } else {
                 return res.status(400).json({ message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });
