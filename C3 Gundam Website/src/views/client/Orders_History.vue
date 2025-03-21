@@ -212,7 +212,7 @@ onMounted(() => {
                     </div>
                     <hr class="my-3">
                     <div
-                        class="flex flex-col gap-2 lg:flex-row justify-center items-center lg:justify-between text-white font-semibold mb-4">
+                        class="flex flex-col gap-2 lg:flex-row justify-center items-center lg:justify-between text-white font-semibold">
                         <p class="text-[14px] text-center lg:text-start">Lưu ý: <span class="text-[#FFD700]">Đơn hàng
                                 chỉ được hủy khi chưa được chuyển đi</span></p>
                         <p class="text-[14px] text-center lg:text-start">Tổng đơn: <span class="text-[#FFD700]">{{
@@ -221,14 +221,14 @@ onMounted(() => {
                     <div class="flex gap-3 justify-end">
                         <button @click="checkOrderReviewed(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
-                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto">Đánh giá</button>
+                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đánh giá</button>
                         <button @click.prevent="deleteOrder(order.MaDonHang)"
                             :class="(order.TrangThaiDon === 'Đang chờ xác nhận' || order.TrangThaiDon === 'Đang chờ lấy hàng') ? 'block' : 'hidden'"
-                            class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Hủy đơn
+                            class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Hủy đơn
                             hàng</button>
                         <button @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
                             :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'block' : 'hidden'"
-                            class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto">Đã nhận được
+                            class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đã nhận được
                             hàng</button>
                     </div>
                     <p :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
