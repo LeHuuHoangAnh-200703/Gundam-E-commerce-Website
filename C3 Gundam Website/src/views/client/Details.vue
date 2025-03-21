@@ -273,7 +273,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                     </div>
                 </div>
                 <div class="flex flex-col gap-4 w-full lg:w-[55%]">
-                    <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
+                    <p class="text-white text-[20px] font-medium text-justify">{{ nameProduct }}</p>
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Mã sản phẩm: {{ idProduct }}</p>
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
