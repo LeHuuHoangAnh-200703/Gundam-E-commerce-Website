@@ -62,7 +62,6 @@ const loginAdmin = async () => {
         console.log(response.data);
         localStorage.setItem('TenAdmin', response.data.admin.TenAdmin);
         localStorage.setItem('MaAdmin', response.data.admin.MaAdmin);
-        localStorage.setItem('ChucVu', response.data.admin.Email);
         localStorage.setItem('EmailAdmin', response.data.admin.Email);
         showNotification("Đăng nhập thành công!", "success");
         setTimeout(() => {

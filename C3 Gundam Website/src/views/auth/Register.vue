@@ -18,10 +18,21 @@ const errors = ref({});
 const router = useRouter();
 const formData = ref({
     nameCustomer: '',
-    emailCustomer: '',
+    phoneCustomer: '',
     password: '',
     confirmPassword: '',
 });
+
+// Biến kiểm soát ẩn/hiện mật khẩu
+const showPassword = ref({
+  password: false,
+  confirmPassword: false
+});
+
+// Hàm toggle ẩn/hiện mật khẩu
+const togglePassword = (field) => {
+  showPassword.value[field] = !showPassword.value[field];
+};
 
 const notification = ref({
     message: '',
@@ -36,7 +47,7 @@ const showNotification = (msg, type) => {
 
 const register = async () => {
     errors.value = {};
-    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+    const phoneRegex = /^(0|\+84)[3-9][0-9]{8}$/;
 
     if (!formData.value.nameCustomer) {
         errors.value.nameCustomer = "Tên không để trống khi đăng ký!";
@@ -44,12 +55,12 @@ const register = async () => {
         formData.value.nameCustomer = escapeHtml(formData.value.nameCustomer);
     }
 
-    if (!formData.value.emailCustomer) {
-        errors.value.emailCustomer = "Email không để trống khi đăng ký!";
-    } else if (!emailRegex.test(formData.value.emailCustomer)) {
-        errors.value.emailCustomer = "Email không đúng định dạng!";
+    if (!formData.value.phoneCustomer) {
+        errors.value.phoneCustomer = "Số điện thoại không để trống khi đăng ký!";
+    } else if (!phoneRegex.test(formData.value.phoneCustomer)) {
+        errors.value.phoneCustomer = "Số điện thoại không hợp lệ!";
     } else {
-        formData.value.emailCustomer = escapeHtml(formData.value.emailCustomer);
+        formData.value.phoneCustomer = escapeHtml(formData.value.phoneCustomer);
     }
 
     if (!formData.value.password) {
@@ -74,7 +85,7 @@ const register = async () => {
         const dataToSend = {
             TenKhachHang: formData.value.nameCustomer,
             MatKhau: formData.value.password,
-            Email: formData.value.emailCustomer,
+            SoDienThoai: formData.value.phoneCustomer,
             NgayTao: new Date()
         };
 
@@ -110,21 +121,27 @@ const register = async () => {
                                 <p v-if="errors.nameCustomer" class="text-red-500 text-sm my-2">{{ errors.nameCustomer }}</p>
                             </div>
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email của bạn</label>
-                                <input type="text" v-model="formData.emailCustomer" placeholder="test@gmail.com"
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Số điện thoại của bạn</label>
+                                <input type="text" v-model="formData.phoneCustomer" placeholder="079xxxxxxx"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.emailCustomer" class="text-red-500 text-sm my-2">{{ errors.emailCustomer }}</p>
+                                <p v-if="errors.phoneCustomer" class="text-red-500 text-sm my-2">{{ errors.phoneCustomer }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
-                                <input type="password" v-model="formData.password" placeholder="••••••••"
+                                <div class="flex gap-2">
+                                    <input :type="showPassword.password ? 'text' : 'password'" v-model="formData.password" placeholder="••••••••"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                    <button @click.prevent="togglePassword('password')" class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i :class="showPassword.password ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                                </div>
                                 <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <div class="w-full">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Nhập lại mật khẩu</label>
-                                <input type="password" v-model="formData.confirmPassword" placeholder="••••••••"
+                                <div class="flex gap-2">
+                                    <input :type="showPassword.confirmPassword ? 'text' : 'password'" v-model="formData.confirmPassword" placeholder="••••••••"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                    <button @click.prevent="togglePassword('confirmPassword')" class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i :class="showPassword.confirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                                </div>
                                 <p v-if="errors.confirmPassword" class="text-red-500 text-sm my-2">{{ errors.confirmPassword }}</p>
                             </div>
                             <button type="submit"

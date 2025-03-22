@@ -30,7 +30,7 @@ const selectedProducts = ref([]);
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
 const nameCustomer = ref('');
-const emailCustomer = ref('');
+const phoneCustomer = ref('');
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
 const totalPrice = ref(0);
@@ -58,7 +58,7 @@ const fetchCustomer = async (idKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         nameCustomer.value = response.data.TenKhachHang;
-        emailCustomer.value = response.data.Email;
+        phoneCustomer.value = response.data.SoDienThoai;
         listAddress.value = response.data.DanhSachDiaChi;
         listDiscountCodes.value = response.data.DanhSachMaGiamGia;
     } catch (err) {
@@ -265,8 +265,9 @@ watch(() => formData.value.payment, (newPayment) => {
                                     </div>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
-                                        <input type="text" v-model="emailCustomer" readonly placeholder="test@gmail.com"
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Số điện
+                                            thoại</label>
+                                        <input type="text" v-model="phoneCustomer" readonly placeholder="079xxxxxxx"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full">
@@ -334,8 +335,9 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 <option class="text-[#333] cursor-pointer" value="">
                                                     Danh sách mã giảm giá của bạn
                                                 </option>
-                                                <option v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())" :key="index"
-                                                    :value="discountCode.IdMaGiamGia"
+                                                <option
+                                                    v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())"
+                                                    :key="index" :value="discountCode.IdMaGiamGia"
                                                     class="text-[#333] cursor-pointer">Id Mã: {{
                                                         discountCode.IdMaGiamGia }}
                                                     / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
@@ -371,9 +373,10 @@ watch(() => formData.value.payment, (newPayment) => {
                                             <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
                                                 Hình thức giao hàng:
                                             </label>
-                                            <div v-if="selectedProducts.reduce((sum, product) => sum + product.DonGia * product.SoLuong, 0) >= 2000000" 
+                                            <div v-if="selectedProducts.reduce((sum, product) => sum + product.DonGia * product.SoLuong, 0) >= 2000000"
                                                 class="p-3 rounded-lg border border-gray-500 bg-gray-800">
-                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000 VNĐ</span>
+                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000
+                                                    VNĐ</span>
                                             </div>
                                             <div v-else class="space-y-2">
                                                 <label v-for="ship in shippingFee" :key="ship"

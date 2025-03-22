@@ -32,7 +32,7 @@ const sidebarMenuMobile = [
   { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
   { name: "Thêm tài khoản", icon: "fa-solid fa-user-plus", path: "addAdmin" },
   { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
-  { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "logout" },
+  { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "adminLogin" },
 ];
 
 const logout = async () => {
@@ -42,7 +42,6 @@ const logout = async () => {
     localStorage.removeItem("TenAdmin");
     localStorage.removeItem("EmailAdmin");
     localStorage.removeItem("MaAdmin");
-    localStorage.removeItem("TrangThaiHoatDong");
     router.push("/admin/adminLogin");
   } catch (error) {
     console.error("Đăng xuất thất bại:", error.response.data.message);

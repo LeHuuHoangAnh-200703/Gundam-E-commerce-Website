@@ -62,12 +62,12 @@ exports.getCustomer = async (req, res) => {
 };
 
 exports.createCustomer = async (req, res) => {
-  const { Email } = req.body;
+  const { SoDienThoai } = req.body;
   const customer = new Customer(req.body);
   try {
-    const checkEmail = await Customer.findOne({ Email });
-    if (checkEmail) {
-      return res.status(400).json({ message: "Email này đã được đăng ký!" });
+    const checkPhone = await Customer.findOne({ SoDienThoai });
+    if (checkPhone) {
+      return res.status(400).json({ message: "Số điện thoại này đã được đăng ký!" });
     }
     await customer.save();
     res.status(200).json(customer);
@@ -110,7 +110,6 @@ exports.updateCustomer = async (req, res) => {
     }
 
     customer.TenKhachHang = req.body.TenKhachHang || customer.TenKhachHang;
-    customer.Email = req.body.Email || customer.Email;
 
     if (req.body.password) {
       customer.MatKhau = await bcrypt.hash(req.body.password, 10);
@@ -167,11 +166,11 @@ exports.deleteCustomer = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { phone, password } = req.body;
   try {
-    const customer = await Customer.findOne({ Email: email });
+    const customer = await Customer.findOne({ SoDienThoai: phone });
     if (!customer) {
-      return res.status(400).json({ message: "Email không tồn tại." });
+      return res.status(400).json({ message: "Số điện thoại không tồn tại." });
     }
     const isMatch = await bcrypt.compare(password, customer.MatKhau);
     if (!isMatch) {
@@ -184,7 +183,7 @@ exports.login = async (req, res) => {
       customer: {
         MaKhachHang: customer.MaKhachHang,
         TenKhachHang: customer.TenKhachHang,
-        Email: customer.Email,
+        SoDienThoai: customer.SoDienThoai,
         TrangThai: customer.TrangThai,
         HinhAnh: customer.Image
       },
@@ -265,7 +264,6 @@ exports.saveDiscountCode = async (req, res) => {
             GiamPhanTram: discountCode.GiamPhanTram,
             SoLanSuDung: discountCode.SoLanSuDung,
             NgayHetHan: discountCode.NgayHetHan,
-            MaGiamGia: discountCode.MaGiamGia,
           }
         },
       },
@@ -282,7 +280,6 @@ exports.saveDiscountCode = async (req, res) => {
 
 exports.deleteDiscountCode = async (req, res) => {
   const { IdMaGiamGia, maKhachHang } = req.params;
-  console.log(IdMaGiamGia, maKhachHang)
   try {
     const customer = await Customer.findOne({ MaKhachHang: maKhachHang });
     customer.DanhSachMaGiamGia = customer.DanhSachMaGiamGia.filter(

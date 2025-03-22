@@ -28,7 +28,7 @@ const formData = ref({
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
 const nameCustomer = ref("");
-const emailCustomer = ref("");
+const phoneCustomer = ref("");
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
 const images = ref([]);
@@ -78,7 +78,7 @@ const fetchCustomer = async (idKhachHang) => {
             `http://localhost:3000/api/khachhang/${idKhachHang}`
         );
         nameCustomer.value = response.data.TenKhachHang;
-        emailCustomer.value = response.data.Email;
+        phoneCustomer.value = response.data.SoDienThoai;
         listAddress.value = response.data.DanhSachDiaChi;
         listDiscountCodes.value = response.data.DanhSachMaGiamGia;
     } catch (err) {
@@ -176,7 +176,6 @@ const addOrders = async () => {
             router.push("/orders_history");
         }, 3000);
     } catch (error) {
-        console.log(error)
         showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
     }
     setTimeout(() => {
@@ -286,8 +285,9 @@ watch(
                                     </div>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
-                                        <input type="text" v-model="emailCustomer" readonly placeholder="test@gmail.com"
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Số điện thoại</label>
+                                        <input type="text" v-model="phoneCustomer" readonly
+                                            placeholder="079xxxxxxx"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full">
@@ -316,7 +316,7 @@ watch(
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Ghi
                                             chú</label>
                                         <textarea type="text" v-model="formData.description" placeholder="Ghi chú ..."
-                                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                            class="w-full h-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                         <p v-if="errors.description" class="text-red-500 text-sm mt-2">
                                             {{ errors.description }}
                                         </p>

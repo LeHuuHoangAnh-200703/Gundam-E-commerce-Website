@@ -16,9 +16,10 @@ const escapeHtml = (unsafe) => {
 const errors = ref({});
 const router = useRouter();
 const formData = ref({
-    email: '',
+    phone: '',
     password: '',
 });
+const showPassword = ref(false);
 
 const notification = ref({
     message: '',
@@ -31,22 +32,28 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
+const togglePassword = () => {
+    showPassword.value = !showPassword.value;
+}
+
 const login = async () => {
     errors.value = {};
-    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+    const phoneRegex = /^(0|\+84)[3-9][0-9]{8}$/;
 
-    if (!formData.value.email) {
-        errors.value.email = "Email không được để trống!";
-    } else if (!emailRegex.test(formData.value.email)) {
-        errors.value.email = "Email không đúng định dạng!";
+    if (!formData.value.phone) {
+        errors.value.phone = "Số điện thoại không để trống!";
+    } else if (!phoneRegex.test(formData.value.phone)) {
+        errors.value.phone = "Số điện thoại không hợp lệ!";
     } else {
-        formData.value.email = escapeHtml(formData.value.email);
+        formData.value.phone = escapeHtml(formData.value.phone);
     }
 
     if (!formData.value.password) {
         errors.value.password = "Mật khẩu không được để trống!";
     } else if (formData.value.password.length < 6) {
         errors.value.password = "Mật khẩu phải tối thiểu 6 ký tự!";
+    } else {
+        formData.value.password = escapeHtml(formData.value.password);
     }
 
     if (Object.keys(errors.value).length > 0) {
@@ -55,10 +62,10 @@ const login = async () => {
 
     try {
         const response = await axios.post('http://localhost:3000/api/khachhang/login', {
-            email: formData.value.email,
+            phone: formData.value.phone,
             password: formData.value.password
         });
-        localStorage.setItem('Email', response.data.customer.Email);
+        localStorage.setItem('SoDienThoai', response.data.customer.SoDienThoai);
         localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
         localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);
         localStorage.setItem('TrangThai', response.data.customer.TrangThai);
@@ -84,7 +91,8 @@ const login = async () => {
                     <div class="hidden lg:block bg-[#DB3F4C] rounded-md p-4 lg:w-1/2">
                         <p class="text-white font-bold text-[24px]">C3 GUNDAM</p>
                         <div class="flex flex-col gap-2 items-center justify-center">
-                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/banner_ycqsds.png" class="w-[200px] lg:w-[300px]" alt="banner">
+                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/banner_ycqsds.png"
+                                class="w-[200px] lg:w-[300px]" alt="banner">
                             <p class="text-[18px] lg:text-[24px] text-white font-semibold uppercase text-center">
                                 C3 GUNDAM xin chào!
                             </p>
@@ -93,22 +101,27 @@ const login = async () => {
                             </p>
                         </div>
                     </div>
-                    <div class="flex text-white flex-col gap-4 p-5 w-full lg:w-1/2 justify-center items-center lg:items-start">
+                    <div
+                        class="flex text-white flex-col gap-4 p-5 w-full lg:w-1/2 justify-center items-center lg:items-start">
                         <p class="font-semibold text-[20px] md:text-[24px] text-center lg:text-start">ĐĂNG NHẬP</p>
                         <p class="font-medium text-[14px] md:text-[16px] mb-6 text-center lg:text-start">
                             Vui lòng điền đầy đủ thông tin!
                         </p>
                         <form @submit.prevent="login" method="POST" class="flex flex-col gap-4 w-full">
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email</label>
-                                <input type="email" v-model="formData.email" placeholder="test@gmail.com"
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Số điện
+                                    thoại</label>
+                                <input type="text" v-model="formData.phone" placeholder="079xxxxxxx"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.email" class="text-red-500 text-sm my-2">{{ errors.email }}</p>
+                                <p v-if="errors.phone" class="text-red-500 text-sm my-2">{{ errors.phone }}</p>
                             </div>
-                            <div class="w-full">
+                            <div class="w-full relative">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
-                                <input type="password" v-model="formData.password" placeholder="••••••••"
-                                    class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <div class="flex gap-2">
+                                    <input :type="showPassword ? 'text' : 'password'" v-model="formData.password" placeholder="••••••••"
+                                        class="relative w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                    <button @click.prevent="togglePassword" class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                                </div>
                                 <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <button type="submit"
