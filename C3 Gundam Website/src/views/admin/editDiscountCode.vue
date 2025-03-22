@@ -17,7 +17,6 @@ const escapeHtml = (unsafe) => {
 
 const errors = ref({});
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 
 const notification = ref({
@@ -39,7 +38,6 @@ const formData = ref({
 const fetchDiscountCode = async (idMaGG) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/magiamgia/${idMaGG}`);
-        console.log(response.data)
         formData.value.idCode = response.data.IdMaGiamGia;
         formData.value.nameCode = response.data.TenMaGiamGia;
         formData.value.applyToOrders = response.data.GiaApDung;
@@ -124,7 +122,6 @@ const editDiscountCode = async () => {
         const notificationData = {
             ThongBao: `Vừa cập nhật mã giảm giá ${formData.value.nameCode.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
-            Email: Email,
             ThoiGian: ThoiGian,
         };
 

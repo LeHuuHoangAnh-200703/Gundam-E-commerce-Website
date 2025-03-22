@@ -17,7 +17,7 @@ const escapeHtml = (unsafe) => {
 const errors = ref({});
 const router = useRouter();
 const formData = ref({
-    email: '',
+    phone: '',
     password: '',
 });
 
@@ -25,6 +25,10 @@ const notification = ref({
     message: '',
     type: ''
 });
+const showPassword = ref(false);
+const togglePassword = () => {
+    showPassword.value = !showPassword.value;
+}
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
@@ -34,20 +38,22 @@ const showNotification = (msg, type) => {
 
 const loginAdmin = async () => {
     errors.value = {};
-    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+    const phoneRegex = /^(0|\+84)[3-9][0-9]{8}$/;
 
-    if (!formData.value.email) {
-        errors.value.email = "Email không được để trống!";
-    } else if (!emailRegex.test(formData.value.email)) {
-        errors.value.email = "Email không đúng định dạng!";
+    if (!formData.value.phone) {
+        errors.value.phone = "Số điện thoại không để trống!";
+    } else if (!phoneRegex.test(formData.value.phone)) {
+        errors.value.phone = "Số điện thoại không hợp lệ!";
     } else {
-        formData.value.email = escapeHtml(formData.value.email);
+        formData.value.phone = escapeHtml(formData.value.phone);
     }
 
     if (!formData.value.password) {
         errors.value.password = "Mật khẩu không được để trống!";
     } else if (formData.value.password.length < 6) {
         errors.value.password = "Mật khẩu phải tối thiểu 6 ký tự!";
+    } else {
+        formData.value.password = escapeHtml(formData.value.password);
     }
 
     if (Object.keys(errors.value).length > 0) {
@@ -56,13 +62,11 @@ const loginAdmin = async () => {
 
     try {
         const response = await axios.post('http://localhost:3000/api/admin/login', {
-            email: formData.value.email,
+            phone: formData.value.phone,
             password: formData.value.password
         });
-        console.log(response.data);
         localStorage.setItem('TenAdmin', response.data.admin.TenAdmin);
         localStorage.setItem('MaAdmin', response.data.admin.MaAdmin);
-        localStorage.setItem('EmailAdmin', response.data.admin.Email);
         showNotification("Đăng nhập thành công!", "success");
         setTimeout(() => {
             router.push('/admin/adminProducts');
@@ -100,15 +104,18 @@ const loginAdmin = async () => {
                         </p>
                         <form @submit.prevent="loginAdmin" method="POST" class="flex flex-col gap-4 w-full">
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email</label>
-                                <input type="text" v-model="formData.email" placeholder="test@gmail.com"
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Số điện thoại</label>
+                                <input type="text" v-model="formData.phone" placeholder="079xxxxxxx"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.email" class="text-red-500 text-sm my-2">{{ errors.email }}</p>
+                                <p v-if="errors.phone" class="text-red-500 text-sm my-2">{{ errors.phone }}</p>
                             </div>
-                            <div class="w-full">
+                            <div class="w-full relative">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
-                                <input type="password" v-model="formData.password" placeholder="••••••••"
-                                    class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                <div class="flex gap-2">
+                                    <input :type="showPassword ? 'text' : 'password'" v-model="formData.password" placeholder="••••••••"
+                                        class="relative w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
+                                    <button @click.prevent="togglePassword" class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                                </div>
                                 <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <button type="submit"

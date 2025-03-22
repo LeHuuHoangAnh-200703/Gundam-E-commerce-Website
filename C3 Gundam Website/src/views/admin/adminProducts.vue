@@ -7,6 +7,8 @@ import axios from 'axios';
 const listProducts = ref([]);
 const selectedType = ref('All');
 const searchValue = ref('');
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ThoiGian = new Date();
 const types = ref([
     {
         name: "Tất cả",
@@ -34,7 +36,6 @@ const fetchProducts = async () => {
                 ...product,
             }
         });
-        console.log(listProducts.value)
     } catch (error) {
         console.error('Error fetching:', error);
     }
@@ -52,7 +53,6 @@ const updateStatus = async (maSanPham, newStatus) => {
         const notificationData = {
             ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
             NguoiChinhSua: TenAdmin,
-            ChucVu: ChucVu,
             ThoiGian: ThoiGian,
         };
 

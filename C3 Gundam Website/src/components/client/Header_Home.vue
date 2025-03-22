@@ -15,7 +15,7 @@ const logout = async () => {
         const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
             maKhachHang
         });
-        localStorage.removeItem("Email");
+        localStorage.removeItem("SoDienThoai");
         localStorage.removeItem("TenKhachHang");
         localStorage.removeItem("MaKhachHang");
         localStorage.removeItem("HinhAnh");

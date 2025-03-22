@@ -4,7 +4,6 @@ const notificationSchema = new mongoose.Schema({
     MaThongBao: String,
     ThongBao: String,
     NguoiChinhSua: String,
-    Email: String,
     ThoiGian: {
         type: Date,
         default: Date.now,

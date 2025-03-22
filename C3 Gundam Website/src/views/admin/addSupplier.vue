@@ -18,7 +18,6 @@ const escapeHtml = (unsafe) => {
 };
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 
 const errors = ref({});
@@ -79,7 +78,6 @@ const addSupplier = async () => {
         const notificationData = {
             ThongBao: `Vừa thêm nhà cung cấp ${formData.value.nameSupplier}`,
             NguoiChinhSua: TenAdmin,
-            Email: Email,
             ThoiGian: ThoiGian,
         };
 

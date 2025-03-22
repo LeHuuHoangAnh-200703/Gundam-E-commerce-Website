@@ -9,7 +9,6 @@ const isNotificationVisible = ref(false);
 const hasUnreadNotifications = ref(false);
 const hasUnreadMessages = ref(false); // Biến để theo dõi tin nhắn chưa đọc
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("EmailAdmin");
 
 const listNatifications = ref([]);
 
@@ -30,7 +29,7 @@ const sidebarMenuMobile = [
   { name: "Quản lý nhà cung cấp", icon: "fa-solid fa-user-large", path: "listSuppliers" },
   { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
   { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
-  { name: "Thêm tài khoản", icon: "fa-solid fa-user-plus", path: "addAdmin" },
+  // { name: "Thêm tài khoản", icon: "fa-solid fa-user-plus", path: "addAdmin" },
   { name: "Quản lý kho", icon: "fa-solid fa-rectangle-list", path: "inventoryLits" },
   { name: "Đăng xuất", icon: "fa-solid fa-right-from-bracket", path: "adminLogin" },
 ];
@@ -129,7 +128,7 @@ onUnmounted(() => {
         <div class="font-semibold flex flex-col justify-center">
           <p class="text-[14px]">{{ TenAdmin }}</p>
           <p class="text-[12px]">
-            Email: <span class="text-[#DB3F4C]">{{ Email }}</span>
+            Chào mừng quản trị viên <span class="text-[#DB3F4C]">{{ TenAdmin }}</span> quay trở lại!
           </p>
         </div>
       </div>
@@ -213,7 +212,7 @@ onUnmounted(() => {
                 <a class="font-semibold text-[16px]">{{ natification.ThongBao }}</a>
               </div>
               <p class="font-semibold text-[12px]">
-                Người chỉnh sửa: <span class="text-[#DB3F4C]">{{ natification.NguoiChinhSua }} <span class="text-[#333]">/</span> {{ natification.Email }}</span>
+                Người chỉnh sửa: <span class="text-[#DB3F4C]">{{ natification.NguoiChinhSua }}</span>
               </p>
               <p class="text-[12px] font-medium text-gray-600">{{ formatDate(natification.ThoiGian) }}</p>
             </div>

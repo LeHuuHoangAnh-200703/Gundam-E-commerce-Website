@@ -9,7 +9,6 @@ const searchValue = ref('');
 const fetchCustomers = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/khachhang');
-        console.log(response.data)
         listCustomers.value = response.data.map(customer => {
             return {
                 ...customer,

@@ -18,7 +18,6 @@ const escapeHtml = (unsafe) => {
 };
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 
 const listSuppliers = ref([]);
@@ -118,7 +117,6 @@ const addProduct = async () => {
         const notificationData = {
             ThongBao: `Vừa thêm sản phẩm ${formData.value.nameProduct}`,
             NguoiChinhSua: TenAdmin,
-            Email: Email,
             ThoiGian: ThoiGian,
         };
 

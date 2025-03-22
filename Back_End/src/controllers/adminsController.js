@@ -77,11 +77,11 @@ exports.deleteAdmin = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { phone, password } = req.body;
   try {
-    const admin = await Admin.findOne({ Email: email });
+    const admin = await Admin.findOne({ SoDienThoai: phone });
     if (!admin) {
-      return res.status(400).json({ message: "Email không tồn tại." });
+      return res.status(400).json({ message: "Số điện thoại không tồn tại." });
     }
 
     if (admin.TrangThai === "Đã vô hiệu hóa") {
@@ -99,7 +99,6 @@ exports.login = async (req, res) => {
       admin: {
         MaAdmin: admin.MaAdmin,
         TenAdmin: admin.TenAdmin,
-        Email: admin.Email,
         MatKhau: admin.MatKhau,
         TrangThaiHoatDong: admin.TrangThaiHoatDong
       },

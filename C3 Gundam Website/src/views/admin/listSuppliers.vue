@@ -8,7 +8,6 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 const listSuppliers = ref([]);
 
@@ -46,7 +45,6 @@ const deleteSupplier = async (maNCC, tenNCC) => {
         const notificationData = {
             ThongBao: `Vừa xóa nhà cung cấp ${tenNCC}`,
             NguoiChinhSua: TenAdmin,
-            Email: Email,
             ThoiGian: ThoiGian,
         };
 

@@ -67,6 +67,8 @@ const register = async () => {
         errors.value.password = "Mật khẩu không để trống khi đăng ký!";
     } else if (formData.value.password.length < 6) {
         errors.value.password = "Mật khẩu phải tối thiểu 6 ký tự!";
+    } else {
+        formData.value.password = escapeHtml(formData.value.password);
     }
 
     if (!formData.value.confirmPassword) {
@@ -75,6 +77,8 @@ const register = async () => {
         errors.value.confirmPassword = "Mật khẩu phải tối thiểu 6 ký tự!";
     } else if (formData.value.confirmPassword !== formData.value.password) {
         errors.value.confirmPassword = "Mật khẩu nhập lại không chính xác!";
+    } else {
+        formData.value.confirmPassword = escapeHtml(formData.value.confirmPassword);
     }
 
     if (Object.keys(errors.value).length > 0) {

@@ -8,7 +8,6 @@ import axios from "axios";
 const listDiscountCodes = ref([]);
 
 const TenAdmin = localStorage.getItem("TenAdmin");
-const Email = localStorage.getItem("EmailAdmin");
 const ThoiGian = new Date();
 
 const notification = ref({
@@ -49,7 +48,6 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
         const notificationData = {
             ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
             NguoiChinhSua: TenAdmin,
-            Email: Email,
             ThoiGian: ThoiGian,
         };
 
