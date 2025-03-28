@@ -6,6 +6,9 @@ const paypal = require("@paypal/checkout-server-sdk");
 const dotenv = require("dotenv");
 const http = require("http");
 const { Server } = require("socket.io");
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+const path = require("path");
 
 dotenv.config();
 
@@ -21,8 +24,55 @@ const socketIO = new Server(server, {
   },
 });
 
+cloudinary.config({
+    cloud_name: 'dwcajbc6f',
+    api_key: '365476741985665',
+    api_secret: '6gAWhCMdI8DfBAs-1ZDwwx1xM0Y'
+});
+
 app.use(cors());
 app.use(bodyParser.json());
+
+// Cấu hình multer để lưu file tạm thời
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Giới hạn 5MB
+});
+
+// Tạo thư mục uploads nếu chưa tồn tại
+const fs = require("fs");
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+// Endpoint upload hình ảnh lên Cloudinary
+app.post("/api/upload", upload.array("images"), async (req, res) => {
+  try {
+    const uploadPromises = req.files.map((file) =>
+      cloudinary.uploader.upload(file.path, {
+        folder: "chatBox",
+      })
+    );
+    const results = await Promise.all(uploadPromises);
+    const imageUrls = results.map((result) => result.secure_url);
+
+    // Xóa file tạm sau khi upload
+    req.files.forEach((file) => fs.unlinkSync(file.path));
+
+    res.json({ imageUrls });
+  } catch (error) {
+    console.error("Lỗi khi upload lên Cloudinary:", error);
+    res.status(500).json({ error: "Lỗi khi upload hình ảnh" });
+  }
+});
 
 mongoose
   .connect(process.env.DATABASE_URI, {
@@ -143,12 +193,13 @@ socketIO.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", async (data) => {
-    const { roomCode, senderId, senderName, text } = data;
+    const { roomCode, senderId, senderName, text, images } = data;
     const message = {
-      text,
+      text: text || "",
       senderId,
       senderN: senderName,
       time: new Date(),
+      images: images || [],
     };
 
     try {

@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  text: { type: String, required: true },
+  text: { type: String },
   senderId: { type: String, required: true },
   senderN: { type: String, required: true },
+  images: [{ type: String }],
   time: { type: Date, default: Date.now }
 });
 

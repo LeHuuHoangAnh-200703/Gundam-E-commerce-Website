@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import Header from "@/components/client/Header.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
@@ -8,6 +8,7 @@ import { io } from "socket.io-client";
 // Khai báo các biến reactive
 const messages = ref([]);
 const message = ref("");
+const selectedFiles = ref([]);
 const userId = ref(localStorage.getItem("MaKhachHang"));
 const userName = ref(localStorage.getItem("TenKhachHang"));
 const image = ref(localStorage.getItem("HinhAnh"));
@@ -20,16 +21,20 @@ const socket = io("http://localhost:3000", {
 });
 
 const escapeHtml = (unsafe) => {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 };
 
 const handleFileUpload = (event) => {
-    formData.value.images = Array.from(event.target.files);
+  selectedFiles.value = Array.from(event.target.files);
+};
+
+const removeImage = (index) => {
+  selectedFiles.value.splice(index, 1);
 };
 
 // Theo dõi thay đổi trong localStorage
@@ -38,7 +43,6 @@ watch(
   ([newName, newImage]) => {
     userName.value = newName;
     image.value = newImage;
-    // Cập nhật lại thông tin gửi tới server nếu cần
     socket.emit("updateUserInfo", {
       userId: userId.value,
       userName: newName,
@@ -49,16 +53,35 @@ watch(
 
 // Gửi tin nhắn
 const sendMessage = async () => {
-  if (message.value) {
-    message.value = escapeHtml(message.value);
+  const messageData = {
+    roomCode: roomCode.value,
+    senderId: userId.value,
+    senderName: userName.value,
+    text: message.value ? escapeHtml(message.value.trim()) : "",
+    images: [],
+  };
+
+  if (selectedFiles.value.length > 0) {
+    const formData = new FormData();
+    selectedFiles.value.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    try {
+      const response = await fetch("http://localhost:3000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      messageData.images = result.imageUrls;
+      selectedFiles.value = [];
+    } catch (error) {
+      console.error("Lỗi khi upload ảnh:", error);
+      return;
+    }
   }
-  if (message.value.trim()) {
-    const messageData = {
-      roomCode: roomCode.value,
-      senderId: userId.value,
-      senderName: userName.value,
-      text: message.value,
-    };
+
+  if (messageData.text || messageData.images.length > 0) {
     socket.emit("sendMessage", messageData);
     message.value = "";
   }
@@ -94,6 +117,7 @@ onMounted(() => {
   socket.on("roomJoined", (chatRoom) => {
     messages.value = chatRoom.messages.map((msg) => ({
       TinNhan: msg.text,
+      HinhAnh: msg.images || [],
       ThoiGian: formatTime(msg.time),
       role: msg.senderId === userId.value ? "user" : "admin",
     }));
@@ -108,6 +132,7 @@ onMounted(() => {
   socket.on("receiveMessage", (msg) => {
     messages.value.push({
       TinNhan: msg.text,
+      HinhAnh: msg.images || [],
       ThoiGian: formatTime(msg.time),
       role: msg.senderId === userId.value ? "user" : "admin",
     });
@@ -118,6 +143,7 @@ onMounted(() => {
     if (chatRoom.roomCode === roomCode.value) {
       messages.value = chatRoom.messages.map((msg) => ({
         TinNhan: msg.text,
+        HinhAnh: msg.images || [],
         ThoiGian: formatTime(msg.time),
         role: msg.senderId === userId.value ? "user" : "admin",
       }));
@@ -128,6 +154,10 @@ onMounted(() => {
       }
     }
   });
+});
+
+const imageUrls = computed(() => {
+  return selectedFiles.value.map((image) => URL.createObjectURL(image));
 });
 
 onUnmounted(() => {
@@ -157,10 +187,13 @@ onUnmounted(() => {
           <div class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-40vh)]">
             <div v-for="(msg, index) in messages" :key="index">
               <div class="flex flex-col gap-1" :class="{ 'items-end': msg.role === 'user' }" v-if="msg.role === 'user'">
-                <div class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg self-end">
-                  <p class="text-white text-[14px] inline-block">
-                    {{ msg.TinNhan }}
-                  </p>
+                <div class="self-end">
+                  <div v-if="msg.TinNhan" class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg inline-block">
+                    <p class="text-white text-[14px]">{{ msg.TinNhan }}</p>
+                  </div>
+                  <div v-if="msg.HinhAnh.length > 0">
+                    <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md" />
+                  </div>
                 </div>
                 <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
               </div>
@@ -168,11 +201,28 @@ onUnmounted(() => {
                 <img src="../../assets/img/avatar.jpg" class="w-[35px] h-[35px] rounded-full" alt="" />
                 <div class="flex flex-col gap-1">
                   <div class="p-2 rounded-md bg-gray-200 text-[#333]">
-                    <p class="text-[14px]">{{ msg.TinNhan }}</p>
+                    <div v-if="msg.TinNhan" class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg inline-block">
+                      <p class="text-white text-[14px]">{{ msg.TinNhan }}</p>
+                    </div>
+                    <div v-if="msg.HinhAnh.length > 0">
+                      <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md" />
+                    </div>
                   </div>
-                  <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
+                  <small class="text-white text-[10px]">{{
+                    msg.ThoiGian
+                  }}</small>
                 </div>
               </div>
+            </div>
+          </div>
+          <div v-if="selectedFiles.length > 0" class="flex flex-wrap gap-2 mt-2 rounded-md p-2">
+            <div v-for="(imageUrl, index) in imageUrls" :key="index" class="relative">
+              <img :src="imageUrl" class="w-20 h-20 object-cover border rounded-md" />
+              <button
+                class="absolute -top-2 -right-2 bg-[#DB3F4C] rounded-full w-5 h-5 flex items-center justify-center text-black"
+                @click="removeImage(index)">
+                <i class="fa-solid fa-xmark text-white"></i>
+              </button>
             </div>
           </div>
           <hr class="my-3" />
@@ -183,7 +233,7 @@ onUnmounted(() => {
                 placeholder="Tin nhắn của bạn ..." />
               <label for="image_upload">
                 <i class="fa-solid fa-image text-white text-[35px] cursor-pointer"></i>
-                <input type="file" class="hidden" id="image_upload" multiple @change="handleFileUpload">
+                <input type="file" class="hidden" id="image_upload" multiple @change="handleFileUpload" />
               </label>
               <button type="submit"
                 class="flex justify-center items-center bg-[#4169E1] px-5 py-4 text-white rounded-md">
