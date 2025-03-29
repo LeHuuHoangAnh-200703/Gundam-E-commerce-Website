@@ -191,7 +191,14 @@ exports.findProductsWithName = async (req, res) => {
     return res.status(400).json({ message: 'Tên sản phẩm không được để trống.' })
   }
   try {
-    const products = await Product.find({ TenSanPham: { $regex: tenSanPham, $options: 'i' } });
+    const keywords = tenSanPham.trim().split(/\s+/);
+
+    const query = {
+      $and: keywords.map(keyword => ({
+        TenSanPham: { $regex: keyword, $options: 'i' }
+      }))
+    };
+    const products = await Product.find(query);
     return res.status(200).json(products);
   } catch (err) {
     return res.status(400).json({ message: err.message });
@@ -202,7 +209,14 @@ exports.productSuggestionsWithSearch = async (req, res) => {
   const { tenSanPham } = req.query;
 
   try {
-    const products = await Product.find({ TenSanPham: {$regex: tenSanPham, $options: 'i'}}).limit(4);
+    const keywords = tenSanPham.trim().split(/\s+/);
+
+    const query = {
+      $and: keywords.map(keyword => ({
+        TenSanPham: { $regex: keyword, $options: 'i' }
+      }))
+    };
+    const products = await Product.find(query).limit(4);
     return res.status(200).json(products);
   } catch (err) {
     return res.status(400).json({ message: err.message });

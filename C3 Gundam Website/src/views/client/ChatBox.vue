@@ -185,34 +185,43 @@ onUnmounted(() => {
           </div>
           <hr />
           <div class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-40vh)]">
-            <div v-for="(msg, index) in messages" :key="index">
-              <div class="flex flex-col gap-1" :class="{ 'items-end': msg.role === 'user' }" v-if="msg.role === 'user'">
-                <div class="self-end">
-                  <div v-if="msg.TinNhan" class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg inline-block">
-                    <p class="text-white text-[14px]">{{ msg.TinNhan }}</p>
-                  </div>
-                  <div v-if="msg.HinhAnh.length > 0">
-                    <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md" />
-                  </div>
-                </div>
-                <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
-              </div>
-              <div v-if="msg.role === 'admin'" class="flex gap-2">
-                <img src="../../assets/img/avatar.jpg" class="w-[35px] h-[35px] rounded-full" alt="" />
-                <div class="flex flex-col gap-1">
-                  <div class="p-2 rounded-md bg-gray-200 text-[#333]">
+            <div v-if="messages.length > 0">
+              <div v-for="(msg, index) in messages" :key="index">
+                <div class="flex flex-col gap-1" :class="{ 'items-end': msg.role === 'user' }"
+                  v-if="msg.role === 'user'">
+                  <div class="self-end">
                     <div v-if="msg.TinNhan" class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg inline-block">
                       <p class="text-white text-[14px]">{{ msg.TinNhan }}</p>
                     </div>
-                    <div v-if="msg.HinhAnh.length > 0">
+                    <div v-if="msg.HinhAnh.length > 0" class="flex gap-3 flex-wrap">
                       <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md" />
                     </div>
                   </div>
-                  <small class="text-white text-[10px]">{{
-                    msg.ThoiGian
-                  }}</small>
+                  <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
+                </div>
+                <div v-if="msg.role === 'admin'" class="flex gap-2">
+                  <img src="../../assets/img/avatar.jpg" class="w-[35px] h-[35px] rounded-full" alt="" />
+                  <div class="flex flex-col gap-1">
+                    <div class="rounded-md text-[#333]">
+                      <div v-if="msg.TinNhan" class="bg-gray-200 p-2 rounded-lg inline-block">
+                        <p class="text-[14px]">{{ msg.TinNhan }}</p>
+                      </div>
+                      <div v-if="msg.HinhAnh.length > 0" class="flex gap-3 flex-wrap my-2">
+                        <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md" />
+                      </div>
+                    </div>
+                    <small class="text-white text-[10px]">{{
+                      msg.ThoiGian
+                    }}</small>
+                  </div>
                 </div>
               </div>
+            </div>
+            <div v-else class="flex flex-col items-center justify-center">
+              <p class="text-[20px] font-semibold text-gray-600">Hiện tại không có tin nhắn!</p>
+              <img
+                src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
+                class="w-[100px] h-[100px]" alt="">
             </div>
           </div>
           <div v-if="selectedFiles.length > 0" class="flex flex-wrap gap-2 mt-2 rounded-md p-2">

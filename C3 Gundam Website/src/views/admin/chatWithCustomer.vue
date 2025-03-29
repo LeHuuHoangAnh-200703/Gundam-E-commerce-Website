@@ -8,6 +8,7 @@ import axios from "axios"; // Thêm axios để gọi API
 const messages = ref([]);
 const message = ref("");
 const chatRooms = ref([]);
+const selectedFiles = ref([]);
 const selectedRoom = ref(null);
 const adminId = ref("AM55511");
 const adminName = ref("C3 GUNDAM STORE");
@@ -40,16 +41,37 @@ const selectRoom = (room) => {
   socket.emit("markAsRead", { roomCode: room.roomCode, userId: adminId.value });
 };
 
-const sendMessage = () => {
+const sendMessage = async () => {
   if (message.value.trim() && selectedRoom.value) {
     const messageData = {
       roomCode: selectedRoom.value.roomCode,
       senderId: adminId.value,
       senderName: adminName.value,
       text: message.value,
+      images: [],
     };
+    if (selectedFiles.value.length > 0) {
+      const formData = new FormData();
+      selectedFiles.value.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      try {
+        const response = await fetch("http://localhost:3000/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        messageData.images = result.imageUrls;
+        selectedFiles.value = [];
+      } catch (error) {
+        console.error("Lỗi khi upload ảnh:", error);
+        return;
+      }
+    }
     messages.value.push({
       TinNhan: messageData.text,
+      HinhAnh: messageData.images || [],
       ThoiGian: formatTime(new Date()),
       role: "admin",
     });
@@ -60,6 +82,18 @@ const sendMessage = () => {
 
 const formatTime = (time) => {
   return new Date(time).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+};
+
+const handleFileUpload = (event) => {
+  selectedFiles.value = Array.from(event.target.files);
+};
+
+const imageUrls = computed(() => {
+  return selectedFiles.value.map((image) => URL.createObjectURL(image));
+});
+
+const removeImage = (index) => {
+  selectedFiles.value.splice(index, 1);
 };
 
 const unreadMessagesCount = computed(() => {
@@ -86,6 +120,7 @@ onMounted(() => {
         selectedRoom.value = updatedRoom;
         messages.value = updatedRoom.messages.map((msg) => ({
           TinNhan: msg.text,
+          HinhAnh: msg.images || [],
           ThoiGian: formatTime(msg.time),
           role: msg.senderId === adminId.value ? "admin" : "user",
         }));
@@ -97,6 +132,7 @@ onMounted(() => {
     if (chatRoom.roomCode === selectedRoom.value?.roomCode) {
       messages.value = chatRoom.messages.map((msg) => ({
         TinNhan: msg.text,
+        HinhAnh: msg.images || [],
         ThoiGian: formatTime(msg.time),
         role: msg.senderId === adminId.value ? "admin" : "user",
       }));
@@ -108,6 +144,7 @@ onMounted(() => {
       if (msg.senderId !== adminId.value) {
         messages.value.push({
           TinNhan: msg.text,
+          HinhAnh: msg.images || [],
           ThoiGian: formatTime(msg.time),
           role: "user",
         });
@@ -120,6 +157,7 @@ onMounted(() => {
       selectedRoom.value = chatRoom;
       messages.value = chatRoom.messages.map((msg) => ({
         TinNhan: msg.text,
+        HinhAnh: msg.images || [],
         ThoiGian: formatTime(msg.time),
         role: msg.senderId === adminId.value ? "admin" : "user",
       }));
@@ -186,21 +224,29 @@ onUnmounted(() => {
                 <p class="text-[14px] font-bold">{{ selectedRoom.senderName }}</p>
               </div>
               <hr />
-              <div :class="(messages.length > 0) ? '' : 'items-center justify-center'" class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-53vh)]">
+              <div :class="(messages.length > 0) ? '' : 'items-center justify-center'"
+                class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-53vh)]">
                 <div v-if="messages.length > 0">
                   <div v-for="(msg, index) in messages" :key="index">
                     <div v-if="msg.role === 'admin'" class="flex flex-col justify-end gap-2 items-end">
-                      <div class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg">
-                        <p class="text-white text-[14px] inline-block">{{ msg.TinNhan }}</p>
+                      <div v-if="msg.TinNhan" class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg inline-block">
+                        <p class="text-white text-[14px]">{{ msg.TinNhan }}</p>
+                      </div>
+                      <div v-if="msg.HinhAnh.length > 0" class="flex gap-3 flex-wrap">
+                        <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md border-2" />
                       </div>
                       <small class="text-[#333] text-[10px] self-end">{{ msg.ThoiGian }}</small>
                     </div>
-                    <div v-if="msg.role === 'user'" class="flex gap-2">
+                    <div v-if="msg.role === 'user'" class="flex gap-2 my-2">
                       <img :src="selectedRoom.senderAvatar || '../../assets/img/avatar.jpg'"
                         class="w-[35px] h-[35px] rounded-full" alt="" />
                       <div class="flex flex-col gap-1">
-                        <div class="bg-gray-200 p-2 rounded-md self-end">
+                        <div v-if="msg.TinNhan" class="bg-gray-200 p-2 rounded-md self-end">
                           <p class="text-[#333] text-[14px] inline-block">{{ msg.TinNhan }}</p>
+                        </div>
+                        <div v-if="msg.HinhAnh.length > 0" class="flex gap-3 flex-wrap">
+                          <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img"
+                            class="max-w-[200px] rounded-md border-2" />
                         </div>
                         <small class="text-[#333] text-[10px]">{{ msg.ThoiGian }}</small>
                       </div>
@@ -209,7 +255,19 @@ onUnmounted(() => {
                 </div>
                 <div v-else class="flex flex-col items-center justify-center">
                   <p class="text-[20px] font-semibold text-gray-600">Hiện tại không có tin nhắn!</p>
-                  <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[100px] h-[100px]" alt="">
+                  <img
+                    src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
+                    class="w-[100px] h-[100px]" alt="">
+                </div>
+              </div>
+              <div v-if="selectedFiles.length > 0" class="flex flex-wrap gap-2 mt-2 rounded-md p-2">
+                <div v-for="(imageUrl, index) in imageUrls" :key="index" class="relative">
+                  <img :src="imageUrl" class="w-20 h-20 object-cover border rounded-md" />
+                  <button
+                    class="absolute -top-2 -right-2 bg-[#DB3F4C] rounded-full w-5 h-5 flex items-center justify-center text-black"
+                    @click="removeImage(index)">
+                    <i class="fa-solid fa-xmark text-white"></i>
+                  </button>
                 </div>
               </div>
               <hr />
@@ -220,7 +278,7 @@ onUnmounted(() => {
                     placeholder="Tin nhắn của bạn ..." />
                   <label for="image_upload">
                     <i class="fa-solid fa-image text-gray-500 text-[35px] cursor-pointer"></i>
-                    <input type="file" class="hidden" id="image_upload">
+                    <input type="file" class="hidden" id="image_upload" multiple @change="handleFileUpload" />
                   </label>
                   <button type="submit"
                     class="flex justify-center items-center bg-[#4169E1] px-5 py-4 text-white rounded-md">
