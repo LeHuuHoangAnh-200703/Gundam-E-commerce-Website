@@ -63,12 +63,13 @@ const fectchProducts = async () => {
         listProducts.value = response.data.map(product => {
             return {
                 ...product,
+                NgayBan: new Date(product.NgayBan)
             }
         })
         
         const productsNormal = listProducts.value.filter(product => product.TrangThai !== 'Ngừng kinh doanh');
         const productsSpecial = listProducts.value.filter(product => product.TrangThai === 'Ngừng kinh doanh');
-        listProducts.value = [...productsNormal, ...productsSpecial];
+        listProducts.value = [...productsNormal.sort((a, b) => b.NgayBan - a.NgayBan), ...productsSpecial];
     } catch (err) {
         console.log("error fetching: ", err);
     }

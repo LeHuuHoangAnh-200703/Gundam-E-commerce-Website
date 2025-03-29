@@ -7,7 +7,7 @@ import Chat from '../../components/client/Chat.vue';
 import axios from 'axios';
 
 const name = ref('');
-const phone = ref('');
+const email = ref('');
 const maKhachHang = ref('');
 const image = ref('');
 
@@ -15,7 +15,7 @@ const fetchCustomer = async (idKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         name.value = response.data.TenKhachHang;
-        phone.value = response.data.SoDienThoai;
+        email.value = response.data.Email;
         maKhachHang.value = response.data.MaKhachHang;
         image.value = response.data.Image;
     } catch (err) {
@@ -59,7 +59,7 @@ onMounted(() => {
                             <h3 class="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 text-white">{{ name
                                 }}</h3>
                             <div class="text-base leading-normal mt-0 mb-4 font-bold text-white"><i
-                                    class="fa-solid fa-phone-volume text-[#FFD700]"></i> {{ phone }}
+                                    class="fa-solid fa-envelope text-[#FFD700]"></i> {{ email }}
                             </div>
                             <hr>
                             <div class="my-5 lg:text-[16px] text-[14px] font-medium text-white">

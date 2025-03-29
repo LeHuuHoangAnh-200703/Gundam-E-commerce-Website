@@ -32,12 +32,13 @@ const fectchProducts = async () => {
         listProducts.value = response.data.map(product => {
             return {
                 ...product,
+                NgayBan: new Date(product.NgayBan)
             }
         })
-        //Lọc những sản phẩm ngừng kinh doanh đưa xuống hiển thị cuối cùng
+        
         const productsNormal = listProducts.value.filter(product => product.TrangThai !== 'Ngừng kinh doanh');
         const productsSpecial = listProducts.value.filter(product => product.TrangThai === 'Ngừng kinh doanh');
-        listProducts.value = [...productsNormal, ...productsSpecial];
+        listProducts.value = [...productsNormal.sort((a, b) => b.NgayBan - a.NgayBan), ...productsSpecial];
     } catch (err) {
         console.log("error fetching: ", err);
     }

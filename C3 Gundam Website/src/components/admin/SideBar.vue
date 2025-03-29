@@ -16,7 +16,6 @@ const sidebarMenu = [
 
 const saveStatus = (index) => {
     status.value = index;
-    localStorage.setItem("sidebarStatus", index);
 };
 
 onMounted(() => {

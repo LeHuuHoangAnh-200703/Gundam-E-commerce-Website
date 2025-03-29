@@ -16,7 +16,7 @@ const escapeHtml = (unsafe) => {
 const errors = ref({});
 const router = useRouter();
 const formData = ref({
-    phone: '',
+    email: '',
     password: '',
 });
 const showPassword = ref(false);
@@ -38,14 +38,14 @@ const togglePassword = () => {
 
 const login = async () => {
     errors.value = {};
-    const phoneRegex = /^(0|\+84)[3-9][0-9]{8}$/;
+    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
-    if (!formData.value.phone) {
-        errors.value.phone = "Số điện thoại không để trống!";
-    } else if (!phoneRegex.test(formData.value.phone)) {
-        errors.value.phone = "Số điện thoại không hợp lệ!";
+    if (!formData.value.email) {
+        errors.value.email = "Email không được để trống!";
+    } else if (!emailRegex.test(formData.value.email)) {
+        errors.value.email = "Email không hợp lệ!";
     } else {
-        formData.value.phone = escapeHtml(formData.value.phone);
+        formData.value.email = escapeHtml(formData.value.email);
     }
 
     if (!formData.value.password) {
@@ -62,10 +62,10 @@ const login = async () => {
 
     try {
         const response = await axios.post('http://localhost:3000/api/khachhang/login', {
-            phone: formData.value.phone,
+            email: formData.value.email,
             password: formData.value.password
         });
-        localStorage.setItem('SoDienThoai', response.data.customer.SoDienThoai);
+        localStorage.setItem('Email', response.data.customer.Email);
         localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
         localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);
         localStorage.setItem('TrangThai', response.data.customer.TrangThai);
@@ -109,11 +109,10 @@ const login = async () => {
                         </p>
                         <form @submit.prevent="login" method="POST" class="flex flex-col gap-4 w-full">
                             <div class="w-full">
-                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Số điện
-                                    thoại</label>
-                                <input type="text" v-model="formData.phone" placeholder="079xxxxxxx"
+                                <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Email</label>
+                                <input type="text" v-model="formData.email" placeholder="Test@gmail.com"
                                     class="w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                <p v-if="errors.phone" class="text-red-500 text-sm my-2">{{ errors.phone }}</p>
+                                <p v-if="errors.email" class="text-red-500 text-sm my-2">{{ errors.email }}</p>
                             </div>
                             <div class="w-full relative">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>

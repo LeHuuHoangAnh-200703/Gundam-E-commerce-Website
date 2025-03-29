@@ -28,7 +28,7 @@ const formData = ref({
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
 const nameCustomer = ref("");
-const phoneCustomer = ref("");
+const emailCustomer = ref("");
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
 const images = ref([]);
@@ -78,7 +78,7 @@ const fetchCustomer = async (idKhachHang) => {
             `http://localhost:3000/api/khachhang/${idKhachHang}`
         );
         nameCustomer.value = response.data.TenKhachHang;
-        phoneCustomer.value = response.data.SoDienThoai;
+        emailCustomer.value = response.data.Email;
         listAddress.value = response.data.DanhSachDiaChi;
         listDiscountCodes.value = response.data.DanhSachMaGiamGia;
     } catch (err) {
@@ -285,8 +285,8 @@ watch(
                                     </div>
                                     <div class="w-full">
                                         <label for=""
-                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Số điện thoại</label>
-                                        <input type="text" v-model="phoneCustomer" readonly
+                                            class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
+                                        <input type="text" v-model="emailCustomer" readonly
                                             placeholder="079xxxxxxx"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>

@@ -22,7 +22,7 @@ const errors = ref({});
 const formData = ref({
     idKhachHang: '',
     name: '',
-    phone: '',
+    email: '',
     password: '',
     confirmPassword: '',
     image: [],
@@ -43,7 +43,7 @@ const fetchCustomer = async (idKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         formData.value.name = response.data.TenKhachHang;
-        formData.value.phone = response.data.SoDienThoai;
+        formData.value.email = response.data.Email;
         formData.value.idKhachHang = response.data.MaKhachHang;
     } catch (err) {
         console.log("Error fetching: ", err);
@@ -140,11 +140,11 @@ onMounted(() => {
                                     <p v-if="errors.name" class="text-red-500 text-sm my-2">{{ errors.name }}</p>
                                 </div>
                                 <div class="md:col-span-5 mb-2">
-                                    <label for="phone" class="font-semibold text-[16px]">Số điện thoại</label>
-                                    <input v-model="formData.phone" readonly type="text" name="phone" id="phone"
+                                    <label for="email" class="font-semibold text-[16px]">Email</label>
+                                    <input v-model="formData.email" readonly type="text" name="email" id="email"
                                         class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent" value=""
-                                        placeholder="079xxxxxxx" />
-                                    <p v-if="errors.phone" class="text-red-500 text-sm my-2">{{ errors.phone }}</p>
+                                        placeholder="Test@gmail.com" />
+                                    <p v-if="errors.email" class="text-red-500 text-sm my-2">{{ errors.email }}</p>
                                 </div>
                                 <div class="md:col-span-3 mb-2">
                                     <label for="password" class="font-semibold text-[16px]">Mật khẩu mới</label>

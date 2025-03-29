@@ -62,12 +62,12 @@ exports.getCustomer = async (req, res) => {
 };
 
 exports.createCustomer = async (req, res) => {
-  const { SoDienThoai } = req.body;
+  const { Email } = req.body;
   const customer = new Customer(req.body);
   try {
-    const checkPhone = await Customer.findOne({ SoDienThoai });
-    if (checkPhone) {
-      return res.status(400).json({ message: "Số điện thoại này đã được đăng ký!" });
+    const checkEmail = await Customer.findOne({ Email });
+    if (checkEmail) {
+      return res.status(400).json({ message: "Email này đã được đăng ký!" });
     }
     await customer.save();
     res.status(200).json(customer);
@@ -166,11 +166,11 @@ exports.deleteCustomer = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { phone, password } = req.body;
+  const { email, password } = req.body;
   try {
-    const customer = await Customer.findOne({ SoDienThoai: phone });
+    const customer = await Customer.findOne({ Email: email });
     if (!customer) {
-      return res.status(400).json({ message: "Số điện thoại không tồn tại." });
+      return res.status(400).json({ message: "Email không tồn tại." });
     }
     const isMatch = await bcrypt.compare(password, customer.MatKhau);
     if (!isMatch) {
@@ -183,7 +183,7 @@ exports.login = async (req, res) => {
       customer: {
         MaKhachHang: customer.MaKhachHang,
         TenKhachHang: customer.TenKhachHang,
-        SoDienThoai: customer.SoDienThoai,
+        Email: customer.Email,
         TrangThai: customer.TrangThai,
         HinhAnh: customer.Image
       },
