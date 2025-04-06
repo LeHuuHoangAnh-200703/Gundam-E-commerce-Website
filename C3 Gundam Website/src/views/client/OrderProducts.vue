@@ -58,7 +58,7 @@ const fetchCustomer = async (idKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         nameCustomer.value = response.data.TenKhachHang;
-        emailCustomer.value = response.data.SoDienThoai;
+        emailCustomer.value = response.data.Email;
         listAddress.value = response.data.DanhSachDiaChi;
         listDiscountCodes.value = response.data.DanhSachMaGiamGia;
     } catch (err) {

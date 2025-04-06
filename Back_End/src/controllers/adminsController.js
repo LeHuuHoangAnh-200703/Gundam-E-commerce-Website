@@ -84,10 +84,6 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Email này không tồn tại." });
     }
 
-    if (admin.TrangThai === "Đã vô hiệu hóa") {
-      return res.status(400).json({ message: "Tài khoản này đã bị vô hiệu hóa."});
-    }
-
     const isMatch = await bcrypt.compare(password, admin.MatKhau);
     if (!isMatch) {
       return res.status(400).json({ message: "Mật khẩu không đúng." });

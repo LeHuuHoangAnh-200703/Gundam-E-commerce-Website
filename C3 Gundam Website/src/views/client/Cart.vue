@@ -105,30 +105,26 @@ const goToOrderPage = async () => {
     }
 
     try {
-        // Kiểm tra tồn kho cho từng sản phẩm
-        const stockCheckPromises = selectedProducts.map(cart =>
-            axios.get(`http://localhost:3000/api/giohang/kiemtra/${cart.MaKhachHang}`)
-        );
-        const stockResponses = await Promise.all(stockCheckPromises);
+        const maKhachHang = selectedProducts[0].MaKhachHang; // Vì chắc cùng 1 người mua
 
-        // Duyệt qua từng sản phẩm đã chọn và kiểm tra số lượng tồn kho
-        for (let i = 0; i < selectedProducts.length; i++) {
-            const cart = selectedProducts[i];
-            const stockData = stockResponses[i].data; // Dữ liệu tồn kho trả về từ API
-            console.log(stockData)
-            const product = stockData.find(p => p.MaSanPham === cart.MaSanPham);
-            if (!product || cart.SoLuong > product.SoLuongTon) {
-                showNotification(`Sản phẩm ${cart.TenSanPham} chỉ còn ${product?.SoLuongTon || 0} trong kho!`, "error");
-                setTimeout(() => (notification.value.message = ""), 3000);
-                return;
-            }
-        }
+        // Gửi danh sách mã sản phẩm cần kiểm tra
+        const response = await axios.post(`http://localhost:3000/api/giohang/kiemtra/${maKhachHang}`, {
+            sanPhams: selectedProducts.map(p => p.MaSanPham)
+        });
 
+        // Nếu không có lỗi, tiếp tục xử lý
         localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
         await deleteSelectedCarts();
         router.push("/orders");
     } catch (err) {
-        showNotification(err.response?.data?.message || "Có lỗi xảy ra khi kiểm tra tồn kho!", "error");
+        const error = err.response?.data;
+        if (error?.errors) {
+            const messages = error.errors.map(e => e.message).join("\n");
+            showNotification(messages, "error");
+        } else {
+            showNotification(error?.message || "Có lỗi xảy ra khi kiểm tra tồn kho!", "error");
+        }
+
         setTimeout(() => (notification.value.message = ""), 3000);
     }
 };
