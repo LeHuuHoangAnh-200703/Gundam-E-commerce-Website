@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-const status = ref(0);
+const status = ref('');
 const sidebarMenu = [
     { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
     { name: "Quản lý sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
@@ -16,6 +16,7 @@ const sidebarMenu = [
 
 const saveStatus = (index) => {
     status.value = index;
+    localStorage.setItem("sidebarStatus", index);
 };
 
 onMounted(() => {

@@ -128,7 +128,7 @@ onMounted(() => {
         <div v-else class="flex flex-1 justify-center items-center m-auto w-full">
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Không có sản phẩm phù hợp với "{{ searchQuery }}"</p>
-                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[200px]" alt="">
+                <img src="../../assets/img/empty_client.png" class="w-[150px]" alt="">
             </div>
         </div>
         <div class="flex justify-center my-10 space-x-2">

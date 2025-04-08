@@ -243,7 +243,7 @@ onMounted(() => {
                                 <div class="flex flex-col items-center justify-center gap-3">
                                     <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
                                         không có đơn hàng nào!</p>
-                                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
+                                    <img src="../../assets/img/empty_admin.png"
                                         class="w-[350px]" alt="">
                                 </div>
                             </div>

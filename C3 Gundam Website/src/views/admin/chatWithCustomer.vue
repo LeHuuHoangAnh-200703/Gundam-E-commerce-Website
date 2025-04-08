@@ -195,7 +195,7 @@ onUnmounted(() => {
                   class="flex gap-2 items-center hover:bg-gray-200 p-2 cursor-pointer border-b-2 pb-4"
                   @click="selectRoom(room)">
                   <div class="flex gap-2 items-center">
-                    <img :src="room.senderAvatar || '../../assets/img/avatar.jpg'"
+                    <img :src="room.senderAvatar || '/src/assets/img/avatar.jpg'"
                       class="w-[50px] h-[50px] rounded-full" alt="" />
                     <div class="flex flex-col justify-center">
                       <p class="text-[14px] font-bold">{{ room.senderName }}</p>
@@ -219,7 +219,7 @@ onUnmounted(() => {
             <div v-if="selectedRoom"
               class="bg-white p-4 w-full h-full border-2 rounded-lg shadow-lg flex flex-col gap-4 overflow-hidden">
               <div class="flex gap-2 items-center">
-                <img :src="selectedRoom.senderAvatar || '../../assets/img/avatar.jpg'"
+                <img :src="selectedRoom.senderAvatar || '/src/assets/img/avatar.jpg'"
                   class="w-[50px] h-[50px] rounded-full" alt="" />
                 <p class="text-[14px] font-bold">{{ selectedRoom.senderName }}</p>
               </div>
@@ -238,7 +238,7 @@ onUnmounted(() => {
                       <small class="text-[#333] text-[10px] self-end">{{ msg.ThoiGian }}</small>
                     </div>
                     <div v-if="msg.role === 'user'" class="flex gap-2 my-2">
-                      <img :src="selectedRoom.senderAvatar || '../../assets/img/avatar.jpg'"
+                      <img :src="selectedRoom.senderAvatar || '/src/assets/img/avatar.jpg'"
                         class="w-[35px] h-[35px] rounded-full" alt="" />
                       <div class="flex flex-col gap-1">
                         <div v-if="msg.TinNhan" class="bg-gray-200 p-2 rounded-md self-end">
@@ -256,7 +256,7 @@ onUnmounted(() => {
                 <div v-else class="flex flex-col items-center justify-center">
                   <p class="text-[20px] font-semibold text-gray-600">Hiện tại không có tin nhắn!</p>
                   <img
-                    src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
+                    src="../../assets/img/empty_admin.png"
                     class="w-[100px] h-[100px]" alt="">
                 </div>
               </div>
@@ -295,8 +295,8 @@ onUnmounted(() => {
                     Vui lòng chọn một khách hàng để trò chuyện!
                   </p>
                   <img
-                    src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
-                    class="w-[200px] lg:w-[350px]" alt="">
+                    src="../../assets/img/empty_admin.png"
+                    class="w-[200px] lg:w-[300px]" alt="">
                 </div>
               </div>
             </div>

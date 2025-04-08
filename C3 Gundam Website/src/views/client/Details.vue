@@ -443,11 +443,11 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             </div>
                         </div>
                     </div>
-                    <div v-else class="flex justify-center items-center m-auto w-full">
+                    <div v-else class="flex justify-center items-center m-auto w-full mt-8">
                         <div class="flex flex-col items-center justify-center gap-3">
                             <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại
                                 không có đánh giá nào!</p>
-                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[200px]" alt="">
+                            <img src="../../assets/img/empty_client.png" class="w-[150px]" alt="">
                         </div>
                     </div>
                     <div class="flex justify-center items-center gap-4 mt-4">

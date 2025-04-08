@@ -217,11 +217,9 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
-            <div v-else class="flex flex-col items-center justify-center">
-              <p class="text-[20px] font-semibold text-gray-600">Hiện tại không có tin nhắn!</p>
-              <img
-                src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png"
-                class="w-[100px] h-[100px]" alt="">
+            <div v-else class="flex flex-col items-center justify-center lg:mt-16 mt-40">
+              <p class="text-[20px] font-semibold text-white">Hiện tại không có tin nhắn!</p>
+              <img src="../../assets/img/empty_client.png" class="w-[120px] h-[120px]" alt="">
             </div>
           </div>
           <div v-if="selectedFiles.length > 0" class="flex flex-wrap gap-2 mt-2 rounded-md p-2">

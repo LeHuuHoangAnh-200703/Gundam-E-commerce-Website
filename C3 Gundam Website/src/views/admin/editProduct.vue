@@ -68,6 +68,7 @@ const fetchProduct = async (maSanPham) => {
         formData.value.supplier = response.data.MaNhaCungCap;
         formData.value.description = response.data.MoTa;
         formData.value.idSanPham = response.data.MaSanPham;
+        
     } catch (err) {
         console.log("error fetching:", err);
     }

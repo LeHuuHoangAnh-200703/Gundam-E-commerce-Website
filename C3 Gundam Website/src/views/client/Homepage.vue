@@ -152,7 +152,7 @@ onMounted(() => {
                     </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/banner_ycqsds.png" class="w-[350px]" alt="">
+                    <img src="../../assets/img/banner.png" class="w-[350px]" alt="">
                 </div>
             </div>
         </div>

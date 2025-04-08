@@ -126,7 +126,7 @@ onMounted(() => {
                             <div class="flex flex-col items-center justify-center gap-3">
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có địa chỉ, hãy cập nhật!</p>
-                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[200px]" alt="">
+                                <img src="../../assets/img/empty_admin.png" class="w-[200px]" alt="">
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@ onMounted(() => {
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có mã giảm giá
                                     nào!</p>
-                                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[200px]" alt="">
+                                <img src="../../assets/img/empty_admin.png" class="w-[150px]" alt="">
                             </div>
                         </div>
                     </div>

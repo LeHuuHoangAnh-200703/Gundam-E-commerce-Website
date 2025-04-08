@@ -88,7 +88,7 @@ onMounted(() => {
                     </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/voucher_jnfndb.png" class="w-[350px]" alt="">
+                    <img src="../../assets/img/voucher_2.png" class="w-[350px]" alt="">
                 </div>
             </div>
         </div>
@@ -100,7 +100,7 @@ onMounted(() => {
                 <p class="text-white font-medium my-1">Số lượng có hạn, chỉ áp dụng phù hợp cho một số đơn hàng thõa
                     điều kiện của voucher.</p>
             </div>
-            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/voucher_2_l2owyn.png" class="w-[100px]" alt="">
+            <img src="../../assets/img/voucher.png" class="w-[100px]" alt="">
         </div>
         <div v-if="validDiscountCodes.length > 0" class="flex flex-col gap-4 lg:mx-[210px] mt-2 mb-20 p-5 lg:p-0">
             <h1 class="font-bold text-[20px] uppercase text-white">Danh sách mã giảm giá</h1>
@@ -137,11 +137,11 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div v-else class="flex justify-center items-center m-auto w-full">
+        <div v-else class="flex justify-center items-center m-auto w-full mt-8">
             <div class="flex flex-col items-center justify-center gap-3">
                 <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có mã giảm giá
                     nào!</p>
-                <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/cute-astronaut-sleeping-pillow-illustration_m4shij.png" class="w-[200px]" alt="">
+                <img src="../../assets/img/empty_client.png" class="w-[150px]" alt="">
             </div>
         </div>
         <Footer />
