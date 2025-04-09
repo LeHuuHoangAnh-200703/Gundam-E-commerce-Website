@@ -28,7 +28,9 @@ const formData = ref({
     typeProduct: '',
     supplier: '',
     description: '',
-    images: [],
+    existingImages: [], // Lưu các hình ảnh cũ từ server
+    newImages: [],      // Lưu các file hình ảnh mới thêm vào
+    removedImages: [],  // Lưu các URL của hình ảnh bị xóa
 });
 
 const notification = ref({
@@ -43,7 +45,9 @@ const showNotification = (msg, type) => {
 };
 
 const handleFileUpload = (event) => {
-    formData.value.images = Array.from(event.target.files);
+    const files = Array.from(event.target.files);
+    formData.value.newImages = [...formData.value.newImages, ...files];
+    event.target.value = ''; // Reset input file để có thể chọn lại file nếu cần
 };
 
 const fetchSuppliers = async () => {
@@ -62,13 +66,16 @@ const fetchSuppliers = async () => {
 const fetchProduct = async (maSanPham) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${maSanPham}`);
+        console.log(response.data)
         formData.value.nameProduct = response.data.TenSanPham;
         formData.value.price = response.data.GiaBan;
         formData.value.typeProduct = response.data.LoaiSanPham;
         formData.value.supplier = response.data.MaNhaCungCap;
         formData.value.description = response.data.MoTa;
         formData.value.idSanPham = response.data.MaSanPham;
-        
+        formData.value.existingImages = response.data.Images || [],
+        formData.value.newImages = [],
+        formData.value.removedImages = []
     } catch (err) {
         console.log("error fetching:", err);
     }
@@ -115,17 +122,29 @@ const editProduct = async () => {
         dataToSend.append('MaNhaCungCap', formData.value.supplier);
         dataToSend.append('MoTa', formData.value.description);
 
-        if (formData.value.images.length > 0) {
-            formData.value.images.forEach(image => {
+        // Gửi danh sách hình ảnh cũ còn lại
+        formData.value.existingImages.forEach((image, index) => {
+            dataToSend.append(`existingImages[${index}]`, image);
+        });
+
+        // Upload hình ảnh mới lên Cloudinary
+        if (formData.value.newImages.length > 0) {
+            formData.value.newImages.forEach((image) => {
                 dataToSend.append('Images', image);
             });
-        } 
+        }
+
+        // Gửi danh sách hình ảnh bị xóa (nếu cần xử lý phía server)
+        formData.value.removedImages.forEach((image, index) => {
+            dataToSend.append(`removedImages[${index}]`, image);
+        });
+
         const response = await axios.put(`http://localhost:3000/api/sanpham/${formData.value.idSanPham}`, dataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
-  
+
         const notificationData = {
             ThongBao: `Vừa cập nhật sản phẩm ${formData.value.nameProduct}`,
             NguoiChinhSua: TenAdmin,
@@ -146,9 +165,25 @@ const editProduct = async () => {
     }, 3000);
 }
 
+// Tạo danh sách URL để hiển thị hình ảnh
 const imageUrls = computed(() => {
-    return formData.value.images.map(image => URL.createObjectURL(image));
+    const existingUrls = formData.value.existingImages.map(url => ({ url, isExisting: true }));
+    const newUrls = formData.value.newImages.map(file => ({ url: URL.createObjectURL(file), isExisting: false }));
+    return [...existingUrls, ...newUrls];
 });
+
+const removeImage = (index) => {
+    const totalExisting = formData.value.existingImages.length;
+    if (index < totalExisting) {
+        // Xóa ảnh cũ
+        const removedImage = formData.value.existingImages.splice(index, 1)[0];
+        formData.value.removedImages.push(removedImage);
+    } else {
+        // Xóa ảnh mới
+        const newImageIndex = index - totalExisting;
+        formData.value.newImages.splice(newImageIndex, 1);
+    }
+};
 
 onMounted(() => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
@@ -213,8 +248,8 @@ onMounted(() => {
                                                 <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp
                                                     phù hợp</option>
                                                 <option v-for="(supplier, index) in listSuppliers" :key="index"
-                                                    :value="supplier.MaNhaCungCap"
-                                                    class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} -
+                                                    :value="supplier.MaNhaCungCap" class="text-[#003171] font-semibold">
+                                                    {{ supplier.MaNhaCungCap }} -
                                                     {{ supplier.TenNhaCungCap }}</option>
                                             </select>
                                             <p v-if="errors.supplier" class="text-red-500 text-sm mt-2">{{
@@ -246,9 +281,16 @@ onMounted(() => {
                                             </label>
                                             <input type="file" class="hidden" id="image_upload" multiple
                                                 @change="handleFileUpload">
-                                            <div class="flex flex-wrap gap-2 mt-2">
-                                                <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
-                                                    class="w-24 h-24 object-cover border rounded-md" />
+                                            <div class="flex flex-wrap gap-2 mt-2 relative">
+                                                <div v-for="(image, index) in imageUrls" :key="index" class="relative">
+                                                    <img :src="image.url"
+                                                        class="w-24 h-24 object-cover border rounded-md" />
+                                                    <button type="button"
+                                                        class="absolute -top-2 -right-2 bg-[#DB3F4C] rounded-full w-5 h-5 flex items-center justify-center text-black"
+                                                        @click.prevent="removeImage(index)">
+                                                        <i class="fa-solid fa-xmark text-white"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </label>
                                         <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{ errors.images }}

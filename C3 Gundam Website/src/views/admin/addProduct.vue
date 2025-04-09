@@ -56,7 +56,9 @@ const fetchSuppliers = async () => {
 };
 
 const handleFileUpload = (event) => {
-    formData.value.images = Array.from(event.target.files);
+    const files = Array.from(event.target.files);
+    formData.value.images = [...formData.value.images, ...files];
+    event.target.value = '';
 };
 
 const addProduct = async () => {
@@ -137,6 +139,10 @@ const addProduct = async () => {
 const imageUrls = computed(() => {
     return formData.value.images.map(image => URL.createObjectURL(image));
 });
+
+const removeImage = (index) => {
+    formData.value.images.splice(index, 1);
+};
 
 onMounted(() => {
     fetchSuppliers();
@@ -233,8 +239,15 @@ onMounted(() => {
                                             <input type="file" class="hidden" id="image_upload" multiple
                                                 @change="handleFileUpload">
                                             <div class="flex flex-wrap gap-2 mt-2">
-                                                <img v-for="(imageUrl, index) in imageUrls" :key="index" :src="imageUrl"
+                                                <div v-for="(imageUrl, index) in imageUrls" :key="index" class="relative">
+                                                    <img :src="imageUrl"
                                                     class="w-24 h-24 object-cover border rounded-md" />
+                                                    <button type="button"
+                                                        class="absolute -top-2 -right-2 bg-[#DB3F4C] rounded-full w-5 h-5 flex items-center justify-center text-black"
+                                                        @click="removeImage(index)">
+                                                        <i class="fa-solid fa-xmark text-white"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </label>
                                         <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{ errors.images }}
