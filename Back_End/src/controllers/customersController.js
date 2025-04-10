@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
+const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
 
 cloudinary.config({
   cloud_name: 'dwcajbc6f',
