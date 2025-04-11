@@ -84,7 +84,7 @@ const sendOTP = async () => {
     }
 }
 
-const register = async () => {
+const verifyOtpAndRegister = async () => {
     errors.value = {};
     const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 

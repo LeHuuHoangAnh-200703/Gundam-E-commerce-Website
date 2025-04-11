@@ -9,7 +9,6 @@ const { Server } = require("socket.io");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const path = require("path");
-const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 
 dotenv.config();
@@ -49,16 +48,6 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Giới hạn 5MB
 });
-
-const serviceAccount = require("./c3-gundam-store-firebase-adminsdk-fbsvc-b69cca2498.json");
-try {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-  console.log("Firebase Admin SDK initialized successfully");
-} catch (error) {
-  console.error("Error initializing Firebase Admin SDK:", error);
-}
 
 // Tạo thư mục uploads nếu chưa tồn tại
 const fs = require("fs");
@@ -143,23 +132,28 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const OTP = require("./src/models/otpModels");
+
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Endpoint gửi OTP
 app.post("/api/send-otp", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Vui lòng cung cấp email" });
 
   const otp = generateOtp();
-  try {
-    await admin.firestore().collection("otps").doc(email).set({
-      otp,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // Hết hạn sau 5 phút
-    });
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Hết hạn sau 5 phút
 
+  try {
+    // Lưu OTP vào MongoDB
+    await OTP.findOneAndUpdate(
+      { email }, // Tìm document theo email
+      { email, otp, createdAt: new Date(), expiresAt }, // Cập nhật hoặc tạo mới
+      { upsert: true, new: true } // upsert: tạo mới nếu không tồn tại
+    );
+
+    // Gửi email chứa OTP
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -170,7 +164,7 @@ app.post("/api/send-otp", async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ message: "OTP đã được gửi tới email của bạn!" });
   } catch (error) {
-    console.error("Lỗi khi gửi OTP:", error.code, error.message, error.stack);
+    console.error("Lỗi khi gửi OTP:", error);
     res.status(500).json({ error: "Lỗi khi gửi OTP" });
   }
 });
@@ -182,25 +176,35 @@ app.post("/api/verify-otp", async (req, res) => {
     return res.status(400).json({ error: "Vui lòng cung cấp email và OTP" });
 
   try {
-    const otpDoc = await admin.firestore().collection("otps").doc(email).get();
-    if (!otpDoc.exists)
+    const otpDoc = await OTP.findOne({ email });
+    if (!otpDoc)
       return res.status(400).json({ error: "OTP không tồn tại hoặc đã hết hạn" });
 
-    const otpData = otpDoc.data();
     const currentTime = new Date();
-
-    if (otpData.otp !== otp)
+    if (otpDoc.otp !== otp)
       return res.status(400).json({ error: "Mã OTP không đúng" });
-    if (currentTime > otpData.expiresAt.toDate())
+    if (currentTime > otpDoc.expiresAt)
       return res.status(400).json({ error: "Mã OTP đã hết hạn" });
 
-    await admin.firestore().collection("otps").doc(email).delete();
+    // Xóa OTP sau khi xác thực thành công
+    await OTP.deleteOne({ email });
     res.json({ message: "Xác thực OTP thành công!" });
   } catch (error) {
     console.error("Lỗi khi xác thực OTP:", error);
     res.status(500).json({ error: "Lỗi khi xác thực OTP" });
   }
 });
+
+// Xóa OTP hết hạn định kỳ (mỗi 5 phút)
+setInterval(async () => {
+  try {
+    const currentTime = new Date();
+    await OTP.deleteMany({ expiresAt: { $lt: currentTime } });
+    console.log("Đã xóa các OTP hết hạn");
+  } catch (error) {
+    console.error("Lỗi khi xóa OTP hết hạn:", error);
+  }
+}, 5 * 60 * 1000);
 
 // Middleware xác thực Socket.IO
 socketIO.use((socket, next) => {
