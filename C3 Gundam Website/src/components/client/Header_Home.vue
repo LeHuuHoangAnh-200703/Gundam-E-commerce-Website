@@ -142,6 +142,10 @@ const startVoiceSearch = () => {
     };
 };
 
+const closeProductDisplay = () => {
+    return listProducts.value = [];
+}
+
 // Sử dụng debounce để giảm tần suất gọi API
 const debouncedSearch = debounce(searchProducts, 300);
 
@@ -229,6 +233,13 @@ onMounted(() => {
             </div>
             <div v-if="listProducts.length"
                 class="absolute top-20 right-16 rounded-md bg-white p-6 shadow-md hidden lg:block">
+                <div class="flex items-center justify-between">
+                    <p class="font-semibold text-[20px]">Hiện có</p>
+                    <button class="group" type="Button" @click.prevent="closeProductDisplay">
+                        <i class="fa-solid fa-xmark text-[25px] group-hover:text-[#DB3F4C] transition-all duration-300"></i>
+                    </button>
+                </div>
+                <hr class="mb-4 mt-2 bg-[#1A1D27]">
                 <div class="flex flex-col gap-4">
                     <router-link :to="`/details/${product.MaSanPham}`" v-for="(product, index) in listProducts"
                         :key="index" class="flex gap-2 items-center border-b-2 pb-3 group">

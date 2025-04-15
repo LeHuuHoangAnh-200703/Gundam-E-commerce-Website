@@ -7,6 +7,7 @@ import NotificationClient from "@/components/Notification/NotificationClient.vue
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import Chat from '../../components/client/Chat.vue';
+import ChatBot from '../../components/client/ChatBot.vue';
 
 const router = useRouter();
 
@@ -201,6 +202,7 @@ onMounted(() => {
         <Footer />
         <BackToTop />
         <Chat />
+        <ChatBot />
         <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>

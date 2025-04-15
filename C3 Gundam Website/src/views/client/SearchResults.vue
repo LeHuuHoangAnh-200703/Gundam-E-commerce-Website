@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useRouter, useRoute } from "vue-router";
 import { watch } from 'vue';
 import Chat from '../../components/client/Chat.vue';
+import ChatBot from '../../components/client/ChatBot.vue';
 
 const router = useRouter();
 const route = useRoute(); // Sử dụng useRoute để theo dõi thay đổi của query
@@ -142,6 +143,7 @@ onMounted(() => {
         <Footer />
         <BackToTop />
         <Chat />
+        <ChatBot />
         <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
