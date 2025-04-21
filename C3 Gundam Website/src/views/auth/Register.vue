@@ -146,14 +146,14 @@ const verifyOtpAndRegister = async () => {
             showNotification("Đăng ký tài khoản thành công!", "success");
             setTimeout(() => {
                 router.push('/login');
-            }, 3000);
+            }, 2000);
         }
     } catch (error) {
         showNotification(error.response?.data?.message || "Đăng ký thất bại!", "error");
     }
     setTimeout(() => {
         notification.value.message = '';
-    }, 3000);
+    }, 2000);
 };
 </script>
 

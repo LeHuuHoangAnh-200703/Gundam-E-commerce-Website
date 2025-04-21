@@ -10,6 +10,7 @@ const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const path = require("path");
 const nodemailer = require("nodemailer");
+const fs = require('fs');
 
 dotenv.config();
 
@@ -50,7 +51,6 @@ const upload = multer({
 });
 
 // Tạo thư mục uploads nếu chưa tồn tại
-const fs = require("fs");
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
 }
@@ -85,6 +85,25 @@ mongoose
     console.log("Connected to MongoDB");
   })
   .catch((err) => console.log(err));
+
+// Endpoint để nhập dữ liệu tỉnh, huyện, xã
+// app.post("/api/import-provinces", async (req, res) => {
+//   try {
+//     // Đọc file JSON
+//     const rawData = fs.readFileSync("./data.json");
+//     const provinces = JSON.parse(rawData);
+
+//     // Xóa dữ liệu cũ (tùy chọn, có thể bỏ nếu không muốn xóa)
+//     await Province.deleteMany({});
+
+//     // Nhập dữ liệu mới
+//     await Province.insertMany(provinces);
+//     res.status(200).json({ message: "Imported provinces successfully!" });
+//   } catch (error) {
+//     console.error("Error importing provinces:", error);
+//     res.status(500).json({ error: "Failed to import provinces" });
+//   }
+// });
 
 // Thiết lập PayPal client
 const environment = new paypal.core.SandboxEnvironment(

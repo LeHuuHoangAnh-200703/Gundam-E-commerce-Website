@@ -104,7 +104,7 @@ onMounted(() => {
             <div class="w-full m-4">
                 <div class="flex flex-col gap-4">
                     <div class="flex flex-col gap-4">
-                        <h1 class="font-bold text-[20px] uppercase text-white">Danh sách địa chỉ của bạn</h1>
+                        <h1 class="font-bold text-[20px] uppercase text-white">Danh sách địa chỉ</h1>
                         <div v-if="listAddress.length > 0" class="px-4 pb-4 pt-2 bg-white rounded-md">
                             <div v-for="(address, index) in listAddress" :key="index"
                                 class="flex lg:flex-row flex-col gap-2 justify-between items-center border-b-2 py-2">
@@ -132,7 +132,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
-                        <h1 class="font-bold text-[20px] uppercase text-white">Danh sách mã giảm giá của bạn</h1>
+                        <h1 class="font-bold text-[20px] uppercase text-white">Danh sách mã giảm giá</h1>
                         <div v-if="listDiscountCodes.length > 0"
                             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                             <div v-for="(discountCode, index) in listDiscountCodes" :key="index"

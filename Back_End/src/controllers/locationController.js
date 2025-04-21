@@ -1,44 +1,46 @@
-const axios = require("axios");
+const Province = require("../models/provinceModels");
 
 const getProvinces = async (req, res) => {
   try {
-    const response = await axios.get("https://vapi.vnappmob.com/api/v2/province");
-    // res.json(jsonGenerate(StatusCode.OK, "get Provinces", response.data));
-    res.status(200).json(response.data);
+    const provinces = await Province.find({}, "Id Name");
+    res.status(200).json(provinces);
   } catch (error) {
-    res
-      .status(error.response ? error.response.status : 500)
-      .send(error.response ? error.response.data : "Internal Server Error");
+    console.error("Error fetching provinces:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 const getDistrict = async (req, res) => {
   const { province_id } = req.query;
   try {
-    const response = await axios.get(
-      `https://vapi.vnappmob.com/api/v2/province/district/${province_id}`
+    const province = await Province.findOne(
+      { Id: province_id },
+      "Districts" // Chỉ lấy trường Districts
     );
-    // res.json(jsonGenerate(StatusCode.OK, "get District", response.data));
-    res.status(200).json(response.data);
+    if (!province) {
+      return res.status(404).json({ error: "Province not found" });
+    }
+    res.status(200).json(province.Districts);
   } catch (error) {
-    res
-      .status(error.response ? error.response.status : 500)
-      .send(error.response ? error.response.data : "Internal Server Error");
+    console.error("Error fetching districts:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 const getWard = async (req, res) => {
   const { district_id } = req.query;
   try {
-    const response = await axios.get(
-      `https://vapi.vnappmob.com/api/v2/province/ward/${district_id}`
+    const province = await Province.findOne(
+      { "Districts.Id": district_id },
+      { "Districts.$": 1 } // Lấy quận/huyện khớp với district_id
     );
-    // res.json(jsonGenerate(StatusCode.OK, "get Ward", response.data));
-    res.status(200).json(response.data);
+    if (!province || !province.Districts || province.Districts.length === 0) {
+      return res.status(404).json({ error: "District not found" });
+    }
+    res.status(200).json(province.Districts[0].Wards);
   } catch (error) {
-    res
-      .status(error.response ? error.response.status : 500)
-      .send(error.response ? error.response.data : "Internal Server Error");
+    console.error("Error fetching wards:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import { io } from "socket.io-client";
-import axios from "axios"; // Thêm axios để gọi API
+import axios from "axios";
 
 const messages = ref([]);
 const message = ref("");
@@ -12,6 +12,7 @@ const selectedFiles = ref([]);
 const selectedRoom = ref(null);
 const adminId = ref("AM55511");
 const adminName = ref("C3 GUNDAM STORE");
+const searchQuery = ref("");
 
 const socket = io("http://localhost:3000", {
   auth: {
@@ -20,11 +21,11 @@ const socket = io("http://localhost:3000", {
   },
 });
 
-// Tải danh sách phòng chat từ API
 const loadChatRooms = async () => {
   try {
     const response = await axios.get("http://localhost:3000/api/chat");
-    chatRooms.value = response.data.filter((room) => room.receiverId === adminId.value);
+    chatRooms.value = response.data.filter((room) => room.receiverId === adminId.value)
+      .sort((a, b) => b.receiverMessagesNotRead.length - a.receiverMessagesNotRead.length);
   } catch (error) {
     console.error("Lỗi khi tải danh sách phòng chat:", error);
   }
@@ -104,16 +105,27 @@ const unreadMessagesCount = computed(() => {
   return counts;
 });
 
+const filteredRooms = computed(() => {
+  return chatRooms.value.filter(room => {
+    const chatRooms = !searchQuery.value || room.senderName.toLowerCase().includes(searchQuery.value.toLowerCase());
+    return chatRooms;
+  })
+})
+
 onMounted(() => {
   // Tải danh sách phòng chat ban đầu từ API
   loadChatRooms();
 
   // Lắng nghe các sự kiện Socket.IO để cập nhật real-time
   socket.on("chatRoomsUpdated", (updatedChatRooms) => {
-    console.log("Received chatRoomsUpdated:", updatedChatRooms); // Debug
-    chatRooms.value = updatedChatRooms.filter((room) => room.receiverId === adminId.value);
+    const filteredRooms = updatedChatRooms.filter((room) => room.receiverId === adminId.value);
+    chatRooms.value = filteredRooms.sort(
+      (a, b) => b.receiverMessagesNotRead.length - a.receiverMessagesNotRead.length
+    );
+
+    // Cập nhật lại phòng đang chọn nếu có
     if (selectedRoom.value) {
-      const updatedRoom = updatedChatRooms.find(
+      const updatedRoom = filteredRooms.find(
         (room) => room.roomCode === selectedRoom.value.roomCode
       );
       if (updatedRoom) {
@@ -127,6 +139,7 @@ onMounted(() => {
       }
     }
   });
+
 
   socket.on("roomJoined", (chatRoom) => {
     if (chatRoom.roomCode === selectedRoom.value?.roomCode) {
@@ -184,19 +197,19 @@ onUnmounted(() => {
             class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full min-h-[calc(100vh-25vh)] overflow-hidden lg:w-[40%]">
             <div class="flex flex-col gap-2">
               <p class="font-semibold text-[20px]">Đoạn chat</p>
-              <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
-                <input type="text"
+              <div class="relative flex justify-center flex-1 gap-2 w-full">
+                <input type="text" v-model="searchQuery"
                   class="items-center w-full p-3 bg-gray-200 text-[12px] shadow font-semibold tracking-wider text-black rounded-md focus:outline-none"
                   placeholder="Tìm kiếm tên khách hàng ..." />
                 <i class="fa-solid fa-magnifying-glass absolute top-[10px] right-3 text-[22px] text-[#003171]"></i>
               </div>
               <div class="flex flex-col gap-2 mt-3 overflow-y-auto max-h-[calc(100vh-300px)]">
-                <div v-for="room in chatRooms" :key="room.roomCode"
+                <div v-for="room in filteredRooms" :key="room.roomCode"
                   class="flex gap-2 items-center hover:bg-gray-200 p-2 cursor-pointer border-b-2 pb-4"
                   @click="selectRoom(room)">
                   <div class="flex gap-2 items-center">
-                    <img :src="room.senderAvatar || '/src/assets/img/avatar.jpg'"
-                      class="w-[50px] h-[50px] rounded-full" alt="" />
+                    <img :src="room.senderAvatar || '/src/assets/img/avatar.jpg'" class="w-[50px] h-[50px] rounded-full"
+                      alt="" />
                     <div class="flex flex-col justify-center">
                       <p class="text-[14px] font-bold">{{ room.senderName }}</p>
                       <div class="whitespace-nowrap text-ellipsis overflow-hidden w-56">
@@ -233,7 +246,8 @@ onUnmounted(() => {
                         <p class="text-white text-[14px]">{{ msg.TinNhan }}</p>
                       </div>
                       <div v-if="msg.HinhAnh.length > 0" class="flex gap-3 flex-wrap">
-                        <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img" class="max-w-[200px] rounded-md border-2" />
+                        <img v-for="(img, i) in msg.HinhAnh" :key="i" :src="img"
+                          class="max-w-[200px] rounded-md border-2" />
                       </div>
                       <small class="text-[#333] text-[10px] self-end">{{ msg.ThoiGian }}</small>
                     </div>
@@ -255,9 +269,7 @@ onUnmounted(() => {
                 </div>
                 <div v-else class="flex flex-col items-center justify-center">
                   <p class="text-[20px] font-semibold text-gray-600">Hiện tại không có tin nhắn!</p>
-                  <img
-                    src="../../assets/img/empty_admin.png"
-                    class="w-[100px] h-[100px]" alt="">
+                  <img src="../../assets/img/empty_admin.png" class="w-[100px] h-[100px]" alt="">
                 </div>
               </div>
               <div v-if="selectedFiles.length > 0" class="flex flex-wrap gap-2 mt-2 rounded-md p-2">
@@ -294,9 +306,7 @@ onUnmounted(() => {
                   <p class="font-semibold text-[18px] lg:text-[24px] text-center">
                     Vui lòng chọn một khách hàng để trò chuyện!
                   </p>
-                  <img
-                    src="../../assets/img/empty_admin.png"
-                    class="w-[200px] lg:w-[300px]" alt="">
+                  <img src="../../assets/img/empty_admin.png" class="w-[200px] lg:w-[300px]" alt="">
                 </div>
               </div>
             </div>

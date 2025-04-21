@@ -34,8 +34,10 @@ const fetchProducts = async () => {
         listProducts.value = response.data.map(product => {
             return {
                 ...product,
+                NgayBan: new Date(product.NgayBan)
             }
         });
+        listProducts.value.sort((a, b) => b.NgayBan - a.NgayBan);
     } catch (error) {
         console.error('Error fetching:', error);
     }

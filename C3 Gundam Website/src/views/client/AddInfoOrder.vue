@@ -47,7 +47,8 @@ const showNotification = (msg, type) => {
 const fetchProvinces = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/location/provinces');
-        provinces.value = response.data.results;
+        provinces.value = response.data;
+        console.log(response.data)
     } catch (error) {
         console.error("Error fetching provinces:", error);
     }
@@ -56,7 +57,7 @@ const fetchProvinces = async () => {
 const fetchDistricts = async (provinceId) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/location/districts?province_id=${provinceId}`);
-        districts.value = response.data.results;
+        districts.value = response.data;
         wards.value = [];
     } catch (error) {
         console.error("Error fetching districts:", error);
@@ -66,7 +67,7 @@ const fetchDistricts = async (provinceId) => {
 const fetchWards = async (districtId) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/location/wards?district_id=${districtId}`);
-        wards.value = response.data.results;
+        wards.value = response.data;
     } catch (error) {
         console.error("Error fetching wards:", error);
     }
@@ -83,10 +84,10 @@ const fetchCustomer = async (idKhachHang) => {
 
 watch(() => selectedProvince.value.id, (newId) => {
     // Tìm tỉnh/thành phố tương ứng với id mới (newId)
-    const province = provinces.value.find((p) => p.province_id === newId);
+    const province = provinces.value.find((p) => p.Id === newId);
 
     // Cập nhật tên tỉnh/thành phố nếu tìm thấy, nếu không gán giá trị rỗng
-    selectedProvince.value.name = province ? province.province_name : '';
+    selectedProvince.value.name = province ? province.Name : '';
 
     // Reset giá trị quận/huyện và xã/phường vì tỉnh/thành phố đã thay đổi
     selectedDistrict.value = { id: '', name: '' };
@@ -95,10 +96,10 @@ watch(() => selectedProvince.value.id, (newId) => {
 
 watch(() => selectedDistrict.value.id, (newId) => {
     // Tìm quận/huyện tương ứng với id mới (newId)
-    const district = districts.value.find((d) => d.district_id === newId);
+    const district = districts.value.find((d) => d.Id === newId);
 
     // Cập nhật tên quận/huyện nếu tìm thấy, nếu không gán giá trị rỗng
-    selectedDistrict.value.name = district ? district.district_name : '';
+    selectedDistrict.value.name = district ? district.Name : '';
 
     // Reset giá trị xã/phường vì quận/huyện đã thay đổi
     selectedWard.value = { id: '', name: '' };
@@ -106,10 +107,10 @@ watch(() => selectedDistrict.value.id, (newId) => {
 
 watch(() => selectedWard.value.id, (newId) => {
     // Tìm xã/phường tương ứng với id mới (newId)
-    const ward = wards.value.find((w) => w.ward_id === newId);
+    const ward = wards.value.find((w) => w.Id === newId);
 
     // Cập nhật tên xã/phường nếu tìm thấy, nếu không gán giá trị rỗng
-    selectedWard.value.name = ward ? ward.ward_name : '';
+    selectedWard.value.name = ward ? ward.Name : '';
 });
 
 const addInfoOrder = async () => {
@@ -195,8 +196,8 @@ onMounted(() => {
                                         class="h-10 border mt-1 rounded px-4 w-full bg-transparent">
                                         <option value="" disabled>Chọn Tỉnh/Thành</option>
                                         <option class="text-black" v-for="province in provinces"
-                                            :key="province.province_id" :value="province.province_id">
-                                            {{ province.province_name }}
+                                            :key="province.Id" :value="province.Id">
+                                            {{ province.Name }}
                                         </option>
                                     </select>
                                     <p v-if="errors.address" class="text-red-500 text-sm my-2">{{ errors.address }}</p>
@@ -208,8 +209,8 @@ onMounted(() => {
                                         :disabled="!selectedProvince.id">
                                         <option value="" disabled>Chọn Quận/Huyện</option>
                                         <option class="text-black" v-for="district in districts"
-                                            :key="district.district_id" :value="district.district_id">
-                                            {{ district.district_name }}
+                                            :key="district.Id" :value="district.Id">
+                                            {{ district.Name }}
                                         </option>
                                     </select>
                                     <p v-if="errors.address" class="text-red-500 text-sm my-2">{{ errors.address }}</p>
@@ -220,9 +221,9 @@ onMounted(() => {
                                         class="h-10 border mt-1 rounded px-4 w-full bg-transparent"
                                         :disabled="!selectedDistrict.id">
                                         <option value="" disabled>Chọn Phường/Xã</option>
-                                        <option class="text-black" v-for="ward in wards" :key="ward.ward_id"
-                                            :value="ward.ward_id">
-                                            {{ ward.ward_name }}
+                                        <option class="text-black" v-for="ward in wards" :key="ward.Id"
+                                            :value="ward.Id">
+                                            {{ ward.Name }}
                                         </option>
                                     </select>
                                     <p v-if="errors.address" class="text-red-500 text-sm my-2">{{ errors.address }}</p>

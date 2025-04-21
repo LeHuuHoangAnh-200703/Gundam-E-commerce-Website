@@ -198,8 +198,9 @@ exports.getRevenueByMonth = async (req, res) => {
                 $match: {
                     $or: [
                         {
-                            TrangThaiDon: "Đã giao thành công"
+                            TrangThaiDon: "Đã nhận được hàng"
                         },
+                        { TrangThaiDon: "Đã giao thành công" },
                         {
                             TrangThaiThanhToan: "Đã thanh toán qua PayPal",
                             TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
@@ -272,9 +273,8 @@ exports.getRevenueByDay = async (req, res) => {
             {
                 $match: {
                     $or: [
-                        {
-                            TrangThaiDon: "Đã giao thành công"
-                        },
+                        { TrangThaiDon: "Đã nhận được hàng" },
+                        { TrangThaiDon: "Đã giao thành công" },
                         {
                             TrangThaiThanhToan: "Đã thanh toán qua PayPal",
                             TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
