@@ -114,6 +114,7 @@ const fetchRevenueData = async (year) => {
 const chartDataDay = ref(null);
 const selectedYearofDay = ref(new Date().getFullYear());
 const selectedMonthOfDay = ref(new Date().getMonth() + 1);
+const totalRevenueMonth = ref('');
 
 const chartDayOptions = ref({
     responsive: true,
@@ -153,6 +154,7 @@ const fetchRevenueDay = async (year, month) => {
         const response = await axios.get(
             `http://localhost:3000/api/donhang/thongke/revenue-by-day?year=${year}&month=${month}`
         );
+        totalRevenueMonth.value = response.data.tongDoanhThu;
 
         chartDataDay.value = {
             labels: response.data.labels,
@@ -236,6 +238,10 @@ const getTopSellingProducts = async () => {
     } catch (err) {
         console.log('Error fetching sellings products:', err);
     }
+}
+
+function formatCurrency(value) {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 onMounted(() => {
@@ -340,7 +346,7 @@ onMounted(() => {
                         <div class="flex gap-4 items-center lg:flex-row flex-col">
                             <h3
                                 class="font-bold text-[16px] lg:text-[20px] uppercase w-full lg:w-[50%] lg:text-start text-center">
-                                Thống kê doanh thu theo tháng
+                                Thống kê doanh thu của tháng {{ selectedMonthOfDay }}
                             </h3>
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
                                 <input type="number" v-model="selectedYearofDay" min="2000" max="2100"
@@ -356,6 +362,10 @@ onMounted(() => {
                                     </option>
                                 </select>
                             </div>
+                        </div>
+                        <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">
+                            <p class="text-[14px] font-semibold text-gray-600">Tổng doanh thu</p>
+                            <p class="text-[24px] font-bold">{{ formatCurrency(totalRevenueMonth.toString()) }} VNĐ</p>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                             <Bar v-if="chartDataDay" :data="chartDataDay" :options="chartDayOptions" />

@@ -305,6 +305,7 @@ exports.getRevenueByDay = async (req, res) => {
         revenueData.forEach(item => {
             revenueMap[item._id - 1] = item.totalRevenue; // Lưu doanh thu vào vị trí đúng của ngày (0-indexed)
         });
+        const totalRevenueOfYear = revenueMap.reduce((sum, val) => sum + val, 0);
 
         const response = {
             labels: Array.from({ length: daysInMonth }, (_, i) => `Ngày ${i + 1}`),
@@ -316,7 +317,8 @@ exports.getRevenueByDay = async (req, res) => {
                     borderColor: "rgba(75, 192, 192, 1)",
                     borderWidth: 1
                 }
-            ]
+            ],
+            tongDoanhThu: totalRevenueOfYear
         };
         return res.status(200).json(response);
     } catch (err) {

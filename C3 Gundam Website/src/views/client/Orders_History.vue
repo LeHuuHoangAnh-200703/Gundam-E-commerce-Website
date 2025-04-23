@@ -34,6 +34,8 @@ const options = [
 ]
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
+const tenKhachHang = localStorage.getItem('TenKhachHang');
+const tenSanPham = ref('');
 const notification = ref({
     message: '',
     type: ''
@@ -60,11 +62,25 @@ const fetchOrders = async (maKhachHang) => {
     }
 }
 
+const createNotification = async (message) => {
+    const now = new Date();
+    const notificationData = {
+        ThongBao: message,
+        NguoiChinhSua: tenKhachHang,
+        ThoiGian: now.toISOString(),
+    };
+    await axios.post('http://localhost:3000/api/thongbao', notificationData);
+};
+
+
 const deleteOrder = async (maDonHang) => {
     const confirmDelete = confirm("Bạn có chắc chắn muốn hủy đơn không?");
     if (!confirmDelete) return;
     try {
         const response = await axios.delete(`http://localhost:3000/api/donhang/${maDonHang}`);
+        
+        await createNotification(`Đơn hàng của ${tenKhachHang} vừa được hủy!`);
+
         showNotification("Hủy đơn hàng thành công!", "success");
         listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
     } catch (error) {
@@ -96,6 +112,9 @@ const updatedStatus = async (maDonHang, currentStatus) => {
         const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
             newStatus: newStatus,
         });
+
+        await createNotification(`Đơn hàng của ${tenKhachHang} đã được giao thành công!`);
+
         await fetchOrders(maKhachHang);
     } catch (err) {
         console.error("Error updating status:", err);
