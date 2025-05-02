@@ -84,6 +84,7 @@ const fectchProducts = async () => {
 }
 
 const addToCart = async (idProDuct) => {
+    console.log(idProDuct)
     const maKhachHang = localStorage.getItem("MaKhachHang");
     if (!maKhachHang) {
         showNotification("Bạn cần đăng nhập trước khi thêm sản phẩm vào giỏ hàng!", "error");

@@ -62,8 +62,7 @@ exports.createCart = async (req, res) => {
     const { maSanPham } = req.params;
     const { MaKhachHang } = req.body;
     try {
-        const product = await Product.findOne({ MaSanPham: maSanPham });
-        const cart = await Cart.findOne({ MaSanPham: maSanPham });
+        let cart = await Cart.findOne({ MaSanPham: maSanPham, MaKhachHang: MaKhachHang });
         if (cart) {
             cart.SoLuong++;
             await cart.save();
@@ -72,10 +71,6 @@ exports.createCart = async (req, res) => {
             const newCart = new Cart({
                 MaSanPham: maSanPham,
                 MaKhachHang: MaKhachHang,
-                TenSanPham: product.TenSanPham,
-                LoaiSanPham: product.LoaiSanPham,
-                DonGia: product.GiaBan,
-                HinhAnh: product.Images[0],
                 SoLuong: 1,
             });
             await newCart.save();
