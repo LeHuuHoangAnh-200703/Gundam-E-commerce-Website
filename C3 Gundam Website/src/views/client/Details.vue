@@ -417,7 +417,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             class="flex py-4 border-b flex-col gap-2 w-full">
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-4 w-full">
-                                    <img :src="`${comment.HinhAnhKhachHang ==='null' ? '../../assets/img/avatar.jpg' : comment.HinhAnhKhachHang }`"
+                                    <img :src="`${comment.HinhAnhKhachHang ==='null' ? '/src/assets/img/avatar.jpg' : comment.HinhAnhKhachHang }`"
                                         class="w-[60px] h-[60px] rounded-full object-cover" alt="">
                                     <div class="">
                                         <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>

@@ -73,7 +73,8 @@ const findProducts = computed(() => {
     return listProducts.value.filter(product => {
         const chooseType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
         const nameProducts = !searchValue.value || product.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
-        return chooseType && nameProducts;
+        const idProduct = !searchValue.value || product.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
+        return chooseType && (nameProducts || idProduct);
     })
 })
 
@@ -105,7 +106,7 @@ onMounted(() => {
                     </div>
                     <div class="flex justify-center lg:justify-end items-center flex-wrap flex-1 gap-4">
                         <button @click.prevent="selected(item.type)"
-                            class="bg-white px-8 py-3 shadow font-semibold border-2 border-s-transparent hover:border-[#003171] hover:text-[#003171] transition-all duration-300"
+                            class="bg-white px-8 py-3 shadow font-semibold border-2 hover:border-[#003171] hover:text-[#003171] transition-all duration-300"
                             v-for="(item, index) in types" :key="index">{{ item.name }}</button>
                     </div>
                     <div class="shadow-lg border-2 border-gray-300 overflow-auto">

@@ -146,7 +146,7 @@ onMounted(() => {
                                 <div v-for="(comment, index) in chooseFeedBackWithStar" :key="index"
                                     class="flex py-4 border-b flex-col gap-2 w-full">
                                     <div class="flex gap-4 w-full">
-                                        <img :src="`${comment.HinhAnhKhachHang === 'undefined' ? 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/avatar_sejn1n.jpg' : comment.HinhAnhKhachHang}`"
+                                        <img :src="`${comment.HinhAnhKhachHang ? comment.HinhAnhKhachHang : '/src/assets/img/avatar.jpg'}`"
                                             class="w-[60px] h-[60px] xl:w-[50px] xl:h-[50px] rounded-full object-cover"
                                             alt="">
                                         <div class="">
