@@ -28,6 +28,14 @@ const listChoices = [
         name: "RG Mobile Suit Gundam",
         type: "RG",
     },
+    {
+        name: "Makeblock mBot 8+",
+        type: "mBot8+"
+    },
+    {
+        name: "Makeblock mBot 6+",
+        type: "mBot6+"
+    }
 ]
 
 const arrange = ref([
@@ -75,9 +83,10 @@ const fectchProducts = async () => {
             }
         })
 
-        const productsNormal = listProducts.value.filter(product => product.TrangThai !== 'Ngừng kinh doanh');
+        const productsNormal = listProducts.value.filter(product => (product.TrangThai !== 'Ngừng kinh doanh' && product.SoLuong > 0));
         const productsSpecial = listProducts.value.filter(product => product.TrangThai === 'Ngừng kinh doanh');
-        listProducts.value = [...productsNormal.sort((a, b) => b.NgayBan - a.NgayBan), ...productsSpecial];
+        const productsOutOfStock = listProducts.value.filter(product => product.SoLuong <= 0);
+        listProducts.value = [...productsNormal.sort((a, b) => b.NgayBan - a.NgayBan), ...productsSpecial.sort((a, b) => b.NgayBan - a.NgayBan), ...productsOutOfStock.sort((a, b) => b.NgayBan - a.NgayBan)];
     } catch (err) {
         console.log("error fetching: ", err);
     }
@@ -118,15 +127,15 @@ const selectTypeProducts = (type) => {
 const filteredProducts = computed(() => {
     const products = listProducts.value;
     if (selectedType.value === "BestSeller") {
-        return products.slice().sort((a,b) => b.LuotBan - a.LuotBan);
+        return products.slice().sort((a, b) => b.LuotBan - a.LuotBan);
     }
 
     if (selectedType.value === "LowPrice") {
-        return products.slice().sort((a,b) => Number(a.GiaBan) - Number(b.GiaBan));
+        return products.slice().sort((a, b) => Number(a.GiaBan) - Number(b.GiaBan));
     }
 
     if (selectedType.value === "HighPrice") {
-        return products.slice().sort((a,b) => Number(b.GiaBan) - Number(a.GiaBan));
+        return products.slice().sort((a, b) => Number(b.GiaBan) - Number(a.GiaBan));
     }
 
     return products.filter(product => {
@@ -136,7 +145,7 @@ const filteredProducts = computed(() => {
 });
 
 const currentPage = ref(1);
-const itemsPerPage = ref(16); // 4 dòng × 4 cột = 16 sản phẩm
+const itemsPerPage = ref(15); // 4 dòng × 4 cột = 16 sản phẩm
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage.value));
 
 // Lấy sản phẩm theo trang hiện tại
@@ -194,44 +203,55 @@ onMounted(() => {
                     hãng từ
                     BANDAI NAMCO.</p>
             </div>
-            <div class="my-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                <button v-for="(choice, index) in listChoices" :key="index"
-                    @click.prevent="selectTypeProducts(choice.type)"
-                    class="w-full bg-gradient-to-b text-center flex flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
-                    <p class="text-[18px] font-semibold text-white">{{ choice.name }}</p>
+            <div class="w-full my-4 lg:grid grid-cols-4 gap-4 items-center">
+                <div
+                    class="hidden lg:flex bg-gradient-to-b text-center flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
+                    <p class="font-semibold text-white text-[20px] uppercase">Gundam Bandai</p>
+                    <span class="lg:w-[100px] w-full h-[2px] bg-white"></span>
+                    <p class="text-[14px] text-white font-medium">> Sắp xếp theo</p>
+                </div>
+                <button v-for="item in arrange" :key="item" @click.prevent="selectTypeProducts(item.type)"
+                    class="hidden lg:flex bg-gradient-to-b text-center flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-[17.5px]">
+                    <p class="text-white font-semibold text-[18px] uppercase">{{ item.name }}</p>
                     <span class="lg:w-[100px] w-full h-[2px] bg-white"></span>
                     <p class="text-[14px] text-white font-medium">> Hiển thị tất cả</p>
                 </button>
-            </div>
-            <div class="w-full my-6 lg:grid grid-cols-4 gap-4 items-center">
-                <p class="text-[20px] font-semibold text-white hidden lg:block">Sắp xếp theo: </p>
-                <button v-for="item in arrange" :key="item" @click.prevent="selectTypeProducts(item.type)"
-                    class="border-2 hidden lg:block border-white text-white font-medium p-2 hover:text-[#DB3F4C] hover:border-[#DB3F4C] duration-300 transition-all">{{
-                    item.name }}</button>
                 <select v-model="selectedType" name="" id="" class="w-full p-4 font-semibold block lg:hidden">
                     <option value="All">Sắp xếp theo</option>
                     <option :value="item.type" v-for="item in arrange" :key="item">{{ item.name }}</option>
                 </select>
             </div>
-            <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                <div v-for="(product, index) in paginatedProducts" :key="index"
-                    class="flex flex-col gap-3 items-center">
-                    <router-link :to="`/details/${product.MaSanPham}`">
-                        <img :src="`${product.Images[0]}`" class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]"
-                            alt="">
-                    </router-link>
-                    <router-link :to="`/details/${product.MaSanPham}`"
-                        class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
-                            product.TenSanPham }}</router-link>
-                    <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{
-                        formatCurrency(product.GiaBan) }}
-                            VNĐ</span></p>
-                    <button @click.prevent="addToCart(product.MaSanPham)" v-if="product.TrangThai === 'Đang bán'"
-                        class="px-5 py-2 w-full bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
-                    <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'"
-                        class="px-5 py-2 w-full bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
-                    <button v-else-if="product.SoLuong <= 0"
-                        class="px-5 py-2 w-full bg-gray-600 text-white font-medium">Hết hàng</button>
+            <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="hidden lg:flex flex-col gap-4 w-full">
+                    <button v-for="(item, index) in listChoices" :key="index"
+                        @click.prevent="selectTypeProducts(item.type)"
+                        class="w-full border-2 p-2 text-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] transition-all duration-300">
+                        {{ item.name }}
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 col-span-3">
+                    <div v-for="(product, index) in paginatedProducts" :key="index"
+                        class="flex flex-col gap-3 items-center">
+                        <router-link :to="`/details/${product.MaSanPham}`">
+                            <img :src="`${product.Images[0]}`"
+                                class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
+                        </router-link>
+                        <router-link :to="`/details/${product.MaSanPham}`" class="py-2 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-64 group">
+                            <p
+                                class="text-white overflow-hidden text-ellipsis whitespace-nowrap text-[14px] text-center flex-grow group-hover:text-[#DB3F4C] transition-all duration-300">{{
+                                    product.TenSanPham }}</p>
+                        </router-link>
+                        <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{
+                            formatCurrency(product.GiaBan) }}
+                                VNĐ</span></p>
+                        <button @click.prevent="addToCart(product.MaSanPham)"
+                            v-if="(product.TrangThai === 'Đang bán' && product.SoLuong > 0)"
+                            class="px-5 py-2 w-full bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
+                        <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'"
+                            class="px-5 py-2 w-full bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
+                        <button v-else-if="product.SoLuong <= 0"
+                            class="px-5 py-2 w-full bg-gray-600 text-white font-medium">Hết hàng</button>
+                    </div>
                 </div>
             </div>
         </div>

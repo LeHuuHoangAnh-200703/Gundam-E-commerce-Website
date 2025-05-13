@@ -192,6 +192,8 @@ onMounted(() => {
                                                 <option value="RG" class="text-[#003171] font-semibold">RG</option>
                                                 <option value="MG" class="text-[#003171] font-semibold">MG</option>
                                                 <option value="PG" class="text-[#003171] font-semibold">PG</option>
+                                                <option value="mBot8+" class="text-[#003171] font-semibold">Makeblock mBot 8+</option>
+                                                <option value="mBot6+" class="text-[#003171] font-semibold">Makeblock mBot 6+</option>
                                             </select>
                                             <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
                                                 errors.typeProduct }}</p>

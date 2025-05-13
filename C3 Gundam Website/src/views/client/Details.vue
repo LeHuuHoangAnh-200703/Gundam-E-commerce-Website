@@ -274,7 +274,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                     </div>
                 </div>
                 <div class="flex flex-col gap-4 w-full lg:w-[55%]">
-                    <p class="text-white text-[20px] font-medium text-justify">{{ nameProduct }}</p>
+                    <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Mã sản phẩm: {{ idProduct }}</p>
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
@@ -296,12 +296,18 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                 class="fa-solid fa-plus"></i></button>
                     </div>
                     <hr class="bg-gray-600">
-                    <ul class="flex flex-col gap-2 text-white ml-4">
+                    <ul v-if="typeProduct !== 'mBot8+' && typeProduct !== 'mBot6+'" class="flex flex-col gap-2 text-white ml-4">
                         <li class="list-disc">Sản phẩm Gunpla chính hãng của Bandai, sản xuất tại Nhật Bản.</li>
                         <li class="list-disc">Sản phẩm giúp phát triển trí não và rèn luyện tính kiên nhẫn cho người
                             chơi.</li>
                         <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
                         <li class="list-disc">Phân phối bởi SOTSU-SUNRISE.</li>
+                    </ul>
+                    <ul v-else class="flex flex-col gap-2 text-white ml-4">
+                        <li class="list-disc">Sử dụng cho học sinh các trường tiểu học và trung học.</li>
+                        <li class="list-disc">Thích hợp cho việc tổ chức lớp học lớn từ 7 - 8 bộ cho 40 học sinh.</li>
+                        <li class="list-disc">Hỗ trợ lập trình: Scratch, Python, AI, IOT, Arduino.</li>
+                        <li class="list-disc">Phân phối bởi MAKEBLOCK.</li>
                     </ul>
                     <router-link v-if="status === 'Đang bán' && quantity > 0"
                         :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
