@@ -9,6 +9,8 @@ const productSchema = new mongoose.Schema({
     LuotBan: { type: Number, default: 0},
     MoTa: String,
     Images: [String],
+    YoutubeUrl: String,
+    TinhNang: String,
     NgayBan: { type: Date, default: Date.now },
     TrangThai: { type: String, enum: ['Đang bán', 'Ngừng kinh doanh'], default: 'Đang bán' },
 });

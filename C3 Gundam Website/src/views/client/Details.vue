@@ -21,6 +21,8 @@ const typeProduct = ref('');
 const supplier = ref('');
 const idProduct = ref('');
 const images = ref([]);
+const youtubeLink = ref('');
+const productFeatures = ref('');
 const description = ref('');
 const quantity = ref('');
 const status = ref('');
@@ -51,6 +53,8 @@ const fetchProduct = async (idSanPham) => {
         quantity.value = response.data.SoLuong;
         status.value = response.data.TrangThai;
         sales.value = response.data.LuotBan;
+        youtubeLink.value = response.data.YoutubeUrl;
+        productFeatures.value = response.data.TinhNang;
         if (images.value.length > 0) {
             selectedImage.value = images.value[0];
         }
@@ -235,6 +239,15 @@ const chooseFeedBackWithStar = computed(() => {
     });
 })
 
+// Tách tính năng thành 2 đoạn
+const splitSentences = computed(() => {
+  return productFeatures.value
+    .split('.')
+    .map(s => s.trim())
+    .filter(s => s)
+    .map(s => s + '.');
+});
+
 onMounted(async () => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
     await fetchProduct(idSanPham);
@@ -258,7 +271,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
         <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
             <p class="text-gray-300 font-semibold text-[15px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
-                    }}</span></p>
+            }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[45%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
@@ -267,8 +280,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             class="[box-shadow:0px_0px_6px_rgba(255,255,255,0.8)] w-full" alt="" />
                     </div>
                     <div class="flex gap-3 items-center justify-center">
-                        <img v-for="(img, index) in images" :key="index" :src="`${img}`"
-                            @click="changeImage(img)"
+                        <img v-for="(img, index) in images" :key="index" :src="`${img}`" @click="changeImage(img)"
                             class="w-[75px] border-2 transition-all hover:border-[#DB3F4C] cursor-pointer"
                             :class="{ 'border-[#DB3F4C]': img === selectedImage }" alt="" />
                     </div>
@@ -296,7 +308,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                 class="fa-solid fa-plus"></i></button>
                     </div>
                     <hr class="bg-gray-600">
-                    <ul v-if="typeProduct !== 'mBot8+' && typeProduct !== 'mBot6+'" class="flex flex-col gap-2 text-white ml-4">
+                    <ul v-if="typeProduct !== 'mBot8+' && typeProduct !== 'mBot6+'"
+                        class="flex flex-col gap-2 text-white ml-4">
                         <li class="list-disc">Sản phẩm Gunpla chính hãng của Bandai, sản xuất tại Nhật Bản.</li>
                         <li class="list-disc">Sản phẩm giúp phát triển trí não và rèn luyện tính kiên nhẫn cho người
                             chơi.</li>
@@ -373,7 +386,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                     formatCurrency(product.GiaBan)
                                         }} VNĐ</span></p>
                                 <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai
-                                        }}</span>
+                                }}</span>
                                 </p>
                             </div>
                         </div>
@@ -392,6 +405,25 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">
                         <i class="fa-solid fa-chevron-right text-[24px]"></i>
                     </button>
+                </div>
+            </div>
+            <div class="my-20">
+                <div class="flex justify-center items-end">
+                    <p
+                        class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">
+                        Video minh họa</p>
+                    <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
+                </div>
+                <div class="flex gap-5 my-8 lg:flex-row flex-col">
+                    <iframe class="lg:w-[560px] lg:h-[315px] w-full h-full" :src="youtubeLink"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <div class="lg:w-[50%] w-full flex flex-col">
+                        <p class="font-semibold text-white text-[20px]">Tính năng sản phẩm</p>
+                        <span class="lg:w-[205px] w-full h-[2px] bg-white my-3"></span>
+                        <p v-for="(sentence, index) in splitSentences" :key="index" class="text-gray-300 text-justify mb-2">{{ sentence }}</p>
+                    </div>
                 </div>
             </div>
             <div class="my-20">
@@ -423,7 +455,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             class="flex py-4 border-b flex-col gap-2 w-full">
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-4 w-full">
-                                    <img :src="`${comment.HinhAnhKhachHang ==='null' ? '/src/assets/img/avatar.jpg' : comment.HinhAnhKhachHang }`"
+                                    <img :src="`${comment.HinhAnhKhachHang === 'null' ? '/src/assets/img/avatar.jpg' : comment.HinhAnhKhachHang}`"
                                         class="w-[60px] h-[60px] rounded-full object-cover" alt="">
                                     <div class="">
                                         <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
@@ -444,8 +476,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             <div class="flex flex-col">
                                 <p class="my-4 text-white text-justify">{{ comment.MoTa }}</p>
                                 <div class="flex gap-4 flex-wrap">
-                                    <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                        :src="`${img}`" class="w-[80px] rounded" alt="">
+                                    <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index" :src="`${img}`"
+                                        class="w-[80px] rounded" alt="">
                                 </div>
                             </div>
                         </div>

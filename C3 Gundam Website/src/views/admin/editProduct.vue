@@ -28,6 +28,8 @@ const formData = ref({
     typeProduct: '',
     supplier: '',
     description: '',
+    youtubeLink: '',
+    productFeatures: '',
     existingImages: [], // Lưu các hình ảnh cũ từ server
     newImages: [],      // Lưu các file hình ảnh mới thêm vào
     removedImages: [],  // Lưu các URL của hình ảnh bị xóa
@@ -73,6 +75,8 @@ const fetchProduct = async (maSanPham) => {
         formData.value.supplier = response.data.MaNhaCungCap;
         formData.value.description = response.data.MoTa;
         formData.value.idSanPham = response.data.MaSanPham;
+        formData.value.youtubeLink = response.data.YoutubeUrl;
+        formData.value.productFeatures = response.data.TinhNang;
         formData.value.existingImages = response.data.Images || [],
         formData.value.newImages = [],
         formData.value.removedImages = []
@@ -110,6 +114,18 @@ const editProduct = async () => {
         formData.value.description = escapeHtml(formData.value.description);
     }
 
+    if (!formData.value.youtubeLink) {
+        errors.value.youtubeLink = "Link youtube không được để trống.";
+    } else {
+        formData.value.youtubeLink = escapeHtml(formData.value.youtubeLink);
+    }
+
+    if (!formData.value.productFeatures) {
+        errors.value.productFeatures = "Tính năng không được để trống.";
+    } else {
+        formData.value.productFeatures = escapeHtml(formData.value.productFeatures);
+    }
+
     if (Object.keys(errors.value).length > 0) {
         return;
     }
@@ -121,6 +137,8 @@ const editProduct = async () => {
         dataToSend.append('LoaiSanPham', formData.value.typeProduct);
         dataToSend.append('MaNhaCungCap', formData.value.supplier);
         dataToSend.append('MoTa', formData.value.description);
+        dataToSend.append('YoutubeUrl', formData.value.youtubeLink);
+        dataToSend.append('TinhNang', formData.value.productFeatures);
 
         // Gửi danh sách hình ảnh cũ còn lại
         formData.value.existingImages.forEach((image, index) => {
@@ -235,6 +253,10 @@ onMounted(() => {
                                                 <option value="RG" class="text-[#003171] font-semibold">RG</option>
                                                 <option value="MG" class="text-[#003171] font-semibold">MG</option>
                                                 <option value="PG" class="text-[#003171] font-semibold">PG</option>
+                                                <option value="mBot8+" class="text-[#003171] font-semibold">Makeblock
+                                                    mBot 8+</option>
+                                                <option value="mBot6+" class="text-[#003171] font-semibold">Makeblock
+                                                    mBot 6+</option>
                                             </select>
                                             <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
                                                 errors.typeProduct }}</p>
@@ -266,7 +288,24 @@ onMounted(() => {
                                             errors.description }}</p>
                                     </div>
                                 </div>
-                                <div class="lg:w-1/2 w-full flex flex-col gap-4 justify-between">
+                                <div class="lg:w-1/2 w-full flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        <label for="youtubeLink" class="text-[15px] font-semibold">Link sản phẩm</label>
+                                        <input type="text" v-model="formData.youtubeLink" id="youtubeLink"
+                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Nhập link sản phẩm ...">
+                                        <p v-if="errors.youtubeLink" class="text-red-500 text-sm mt-2">{{
+                                            errors.youtubeLink }}</p>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label for="productFeatures" class="text-[15px] font-semibold">Tính năng sản phẩm <i
+                                                class="fa-solid fa-circle-info text-gray-300"></i></label>
+                                        <textarea type="text" v-model="formData.productFeatures" id="productFeatures"
+                                            class="p-2 border-2 rounded-md text-[14px] h-32 outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Mô tả sản phẩm ..."></textarea>
+                                        <p v-if="errors.productFeatures" class="text-red-500 text-sm mt-2">{{
+                                            errors.productFeatures }}</p>
+                                    </div>
                                     <div class="flex flex-col gap-2">
                                         <label for="image_upload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
                                                 class="fa-solid fa-circle-info text-gray-300"></i></label>

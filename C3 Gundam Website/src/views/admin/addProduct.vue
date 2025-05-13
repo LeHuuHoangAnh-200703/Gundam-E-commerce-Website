@@ -28,6 +28,8 @@ const formData = ref({
     typeProduct: '',
     supplier: '',
     description: '',
+    youtubeLink: '',
+    productFeatures: '',
     images: [],
 });
 
@@ -90,6 +92,18 @@ const addProduct = async () => {
         formData.value.description = escapeHtml(formData.value.description);
     }
 
+    if (!formData.value.youtubeLink) {
+        errors.value.youtubeLink = "Link youtube không được để trống.";
+    } else {
+        formData.value.youtubeLink = escapeHtml(formData.value.youtubeLink);
+    }
+
+    if (!formData.value.productFeatures) {
+        errors.value.productFeatures = "Tính năng không được để trống.";
+    } else {
+        formData.value.productFeatures = escapeHtml(formData.value.productFeatures);
+    }
+
     if (formData.value.images.length < 4) {
         errors.value.images = "Bạn cần thêm ít nhất 4 hình ảnh.";
     }
@@ -105,6 +119,8 @@ const addProduct = async () => {
         dataToSend.append('LoaiSanPham', formData.value.typeProduct);
         dataToSend.append('MaNhaCungCap', formData.value.supplier);
         dataToSend.append('MoTa', formData.value.description);
+        dataToSend.append('YoutubeUrl', formData.value.youtubeLink);
+        dataToSend.append('TinhNang', formData.value.productFeatures);
 
         formData.value.images.forEach(image => {
             dataToSend.append('Images', image);
@@ -123,7 +139,7 @@ const addProduct = async () => {
         };
 
         await axios.post('http://localhost:3000/api/thongbao', notificationData);
-        
+
         showNotification("Thêm sản phẩm thành công!", "success");
         setTimeout(() => {
             router.push('/admin/adminProducts');
@@ -192,8 +208,10 @@ onMounted(() => {
                                                 <option value="RG" class="text-[#003171] font-semibold">RG</option>
                                                 <option value="MG" class="text-[#003171] font-semibold">MG</option>
                                                 <option value="PG" class="text-[#003171] font-semibold">PG</option>
-                                                <option value="mBot8+" class="text-[#003171] font-semibold">Makeblock mBot 8+</option>
-                                                <option value="mBot6+" class="text-[#003171] font-semibold">Makeblock mBot 6+</option>
+                                                <option value="mBot8+" class="text-[#003171] font-semibold">Makeblock
+                                                    mBot 8+</option>
+                                                <option value="mBot6+" class="text-[#003171] font-semibold">Makeblock
+                                                    mBot 6+</option>
                                             </select>
                                             <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
                                                 errors.typeProduct }}</p>
@@ -207,8 +225,8 @@ onMounted(() => {
                                                 <option value="" class="text-[#003171] font-semibold">Chọn nhà cung cấp
                                                     phù hợp</option>
                                                 <option v-for="(supplier, index) in listSuppliers" :key="index"
-                                                    :value="supplier.MaNhaCungCap"
-                                                    class="text-[#003171] font-semibold">{{ supplier.MaNhaCungCap }} -
+                                                    :value="supplier.MaNhaCungCap" class="text-[#003171] font-semibold">
+                                                    {{ supplier.MaNhaCungCap }} -
                                                     {{ supplier.TenNhaCungCap }}</option>
                                             </select>
                                             <p v-if="errors.supplier" class="text-red-500 text-sm mt-2">{{
@@ -225,7 +243,24 @@ onMounted(() => {
                                             errors.description }}</p>
                                     </div>
                                 </div>
-                                <div class="lg:w-1/2 w-full flex flex-col gap-4 justify-between">
+                                <div class="lg:w-1/2 w-full flex flex-col gap-4">
+                                    <div class="flex flex-col gap-2">
+                                        <label for="youtubeLink" class="text-[15px] font-semibold">Link sản phẩm</label>
+                                        <input type="text" v-model="formData.youtubeLink" id="youtubeLink"
+                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Nhập link sản phẩm ...">
+                                        <p v-if="errors.youtubeLink" class="text-red-500 text-sm mt-2">{{
+                                            errors.youtubeLink }}</p>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label for="productFeatures" class="text-[15px] font-semibold">Tính năng sản phẩm <i
+                                                class="fa-solid fa-circle-info text-gray-300"></i></label>
+                                        <textarea type="text" v-model="formData.productFeatures" id="productFeatures"
+                                            class="p-2 border-2 rounded-md text-[14px] h-32 outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                            placeholder="Mô tả sản phẩm ..."></textarea>
+                                        <p v-if="errors.productFeatures" class="text-red-500 text-sm mt-2">{{
+                                            errors.productFeatures }}</p>
+                                    </div>
                                     <div class="flex flex-col gap-2">
                                         <label for="image_upload" class="text-[15px] font-semibold">Hình ảnh sản phẩm <i
                                                 class="fa-solid fa-circle-info text-gray-300"></i></label>
@@ -241,9 +276,10 @@ onMounted(() => {
                                             <input type="file" class="hidden" id="image_upload" multiple
                                                 @change="handleFileUpload">
                                             <div class="flex flex-wrap gap-2 mt-2">
-                                                <div v-for="(imageUrl, index) in imageUrls" :key="index" class="relative">
+                                                <div v-for="(imageUrl, index) in imageUrls" :key="index"
+                                                    class="relative">
                                                     <img :src="imageUrl"
-                                                    class="w-24 h-24 object-cover border rounded-md" />
+                                                        class="w-24 h-24 object-cover border rounded-md" />
                                                     <button type="button"
                                                         class="absolute -top-2 -right-2 bg-[#DB3F4C] rounded-full w-5 h-5 flex items-center justify-center text-black"
                                                         @click="removeImage(index)">
