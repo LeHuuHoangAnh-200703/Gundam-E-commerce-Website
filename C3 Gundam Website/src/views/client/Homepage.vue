@@ -220,6 +220,10 @@ onMounted(() => {
                     <option value="All">Sắp xếp theo</option>
                     <option :value="item.type" v-for="item in arrange" :key="item">{{ item.name }}</option>
                 </select>
+                <select v-model="selectedType" name="" id="" class="w-full mt-4 p-4 font-semibold block lg:hidden">
+                    <option value="All">Loại sản phẩm</option>
+                    <option :value="item.type" v-for="item in listChoices" :key="item">{{ item.name }}</option>
+                </select>
             </div>
             <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <div class="hidden lg:flex flex-col gap-4 w-full">

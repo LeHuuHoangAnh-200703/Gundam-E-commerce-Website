@@ -39,6 +39,13 @@ const options = [
 const listOrders = ref([]);
 const selectedType = ref("Tất cả đơn hàng");
 const searchValue = ref("");
+const filterYear = ref("");
+const filterMonth = ref("");
+const filterDay = ref("");
+const years = Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() - i).toString());
+const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+
 const notification = ref({
     message: '',
     type: ''
@@ -104,18 +111,50 @@ const updatedStatus = async (maDonHang, currentStatus) => {
     }
 };
 
+const fetchOrderByDayMonth = async () => {
+    try {
+        const params = {};
+        if (filterYear.value) params.year = filterYear.value;
+        if (filterMonth.value) params.month = filterMonth.value;
+        if (filterDay.value) params.day = filterDay.value;
+
+        const response = await axios.get('http://localhost:3000/api/donhang/locdonhang/ngaythangnam', { params });
+        listOrders.value = response.data.map(order => ({
+            ...order,
+            NgayDatHang: new Date(order.NgayDatHang)
+        }));
+
+        const ordersNormal = listOrders.value.filter(order => order.TrangThaiDon !== 'Đơn hàng đã hủy');
+        const ordersLost = listOrders.value.filter(order => order.TrangThaiDon === 'Đơn hàng đã hủy');
+
+        listOrders.value = [
+            ...ordersNormal.sort((a, b) => b.NgayDatHang - a.NgayDatHang),
+            ...ordersLost.sort((a, b) => b.NgayDatHang - a.NgayDatHang)
+        ];
+    } catch (err) {
+        console.log("Lỗi khi lọc đơn hàng", err);
+    }
+}
+
 const filteredOrders = computed(() => {
     return listOrders.value.filter(order => {
         const matchesType = selectedType.value === "Tất cả đơn hàng" || order.TrangThaiDon === selectedType.value;
-        const matchesSearch = !searchValue.value || order.DiaChiNhanHang.some(item => 
+        const matchesSearch = !searchValue.value || order.DiaChiNhanHang.some(item =>
             item.TenNguoiNhan.toLowerCase().includes(searchValue.value.toLowerCase())
         );
-        const nameProducts = !searchValue.value || order.SanPhamDaMua.some(item => 
+        const nameProducts = !searchValue.value || order.SanPhamDaMua.some(item =>
             item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
         );
         return matchesType && (matchesSearch || nameProducts);
     });
 });
+
+const resetFilter = () => {
+    filterYear.value = "";
+    filterMonth.value = "";
+    filterDay.value = "";
+    fetchOrders();
+};
 
 const formatDate = (date) => {
     const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
@@ -158,7 +197,28 @@ onMounted(() => {
                             <input type="text" v-model="searchValue"
                                 class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
                                 placeholder="Tìm kiếm đơn hàng ..." />
-                            <i class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                        </div>
+                        <div class="flex justify-end items-center gap-4">
+                            <select v-model="filterDay" class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                <option value="">Chọn ngày (tùy chọn)</option>
+                                <option v-for="day in days" :key="day" :value="day">{{ day }}</option>
+                            </select>
+                            <select v-model="filterMonth" class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                <option value="">Chọn tháng (tùy chọn)</option>
+                                <option v-for="month in months" :key="month" :value="month">Tháng {{ month }}</option>
+                            </select>
+                            <select v-model="filterYear" class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                <option value="">Chọn năm (tùy chọn)</option>
+                                <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+                            </select>
+                            <div class="flex gap-2">
+                                <button @click="fetchOrderByDayMonth"
+                                    class="px-4 py-2 bg-[#003171] text-white rounded-md hover:bg-[#1A1D27]">Lọc</button>
+                                <button @click="resetFilter"
+                                    class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Reset</button>
+                            </div>
                         </div>
                         <div v-if="filteredOrders.length > 0"
                             class="flex flex-col gap-8 w-full overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
@@ -206,15 +266,18 @@ onMounted(() => {
                                                         address.DienThoai }}</span></p>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Địa chỉ nhận hàng: <span
                                                     class="font-semibold">{{ address.DiaChi }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Hình thức vận chuyển: <span
-                                                    class="font-semibold text-[#003171]">{{ order.HinhThucVanChuyen }}</span></p>
+                                            <p class="font-medium text-[14px] xl:text-[12px]">Hình thức vận chuyển:
+                                                <span class="font-semibold text-[#003171]">{{ order.HinhThucVanChuyen
+                                                    }}</span>
+                                            </p>
                                         </div>
                                         <div>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Trạng thái: <span
                                                     class="font-semibold">{{
                                                         order.TrangThaiThanhToan }}</span></p>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Hình thức thanh toán:
-                                                <span class="font-semibold">{{ order.HinhThucThanhToan }}</span></p>
+                                                <span class="font-semibold">{{ order.HinhThucThanhToan }}</span>
+                                            </p>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Mã giảm giá: <span
                                                     class="font-semibold">{{
                                                         order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia
@@ -224,7 +287,7 @@ onMounted(() => {
                                                         order.GhiChu }}</span></p>
                                             <p class="font-medium text-[14px] xl:text-[12px]">Tổng đơn: <span
                                                     class="font-semibold text-[#003171]">{{
-                                                    formatCurrency(order.TongDon) }}
+                                                        formatCurrency(order.TongDon) }}
                                                     VNĐ</span></p>
                                         </div>
                                     </div>
@@ -243,8 +306,7 @@ onMounted(() => {
                                 <div class="flex flex-col items-center justify-center gap-3">
                                     <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
                                         không có đơn hàng nào!</p>
-                                    <img src="../../assets/img/empty_admin.png"
-                                        class="w-[350px]" alt="">
+                                    <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
                                 </div>
                             </div>
                         </div>

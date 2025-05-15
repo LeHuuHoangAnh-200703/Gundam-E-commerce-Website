@@ -13,5 +13,6 @@ router.get("/thongke/revenue-by-month", orderController.getRevenueByMonth);
 router.get("/thongke/get-order-status", orderController.getOrderStatus);
 router.get("/thongke/revenue-by-day", orderController.getRevenueByDay);
 router.get("/kiemtradanhgia/:maDonHang", orderController.checkOrderReviewed);
+router.get("/locdonhang/ngaythangnam", orderController.getOrderByDayMonth);
 
 module.exports = router;
