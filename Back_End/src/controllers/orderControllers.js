@@ -3,6 +3,15 @@ const Feedback = require("../models/feedbackModels");
 const DiscountCode = require("../models/discountCodeModels");
 const Inventory = require("../models/inventoryModels");
 const Product = require("../models/productModels");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find();
@@ -342,81 +351,99 @@ exports.checkOrderReviewed = async (req, res) => {
 
 exports.getOrderByDayMonth = async (req, res) => {
     try {
-      const year = req.query.year ? parseInt(req.query.year) : null;
-      const month = req.query.month ? parseInt(req.query.month) : null;
-      const day = req.query.day ? parseInt(req.query.day) : null;
-  
-      // Xây dựng pipeline aggregation
-      let pipeline = [];
-  
-      if (month && !day && !year) {
-        // Lọc chỉ theo tháng (bất kỳ ngày/năm nào)
-        pipeline.push({
-          $match: {
-            $expr: {
-              $eq: [{ $month: "$NgayDatHang" }, month]
-            }
-          }
-        });
-      } else if (day && month && !year) {
-        // Lọc chỉ theo tháng và ngày (bất kỳ năm nào)
-        pipeline.push({
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: [{ $month: "$NgayDatHang" }, month] },
-                { $eq: [{ $dayOfMonth: "$NgayDatHang" }, day] }
-              ]
-            }
-          }
-        });
-      } else if (day && !month && !year) {
-        // Lọc chỉ theo ngày (bất kỳ tháng/năm nào)
-        pipeline.push({
-          $match: {
-            $expr: {
-              $eq: [{ $dayOfMonth: "$NgayDatHang" }, day]
-            }
-          }
-        });
-      } else {
-        // Xây dựng điều kiện lọc cho các trường hợp khác
-        let matchCondition = {};
-  
-        if (day && month && year) {
-          // Lọc theo ngày-tháng-năm
-          matchCondition.NgayDatHang = {
-            $gte: new Date(year, month - 1, day),
-            $lte: new Date(year, month - 1, day, 23, 59, 59, 999)
-          };
-        } else if (month && year) {
-          // Lọc theo tháng-năm
-          matchCondition.NgayDatHang = {
-            $gte: new Date(year, month - 1, 1),
-            $lte: new Date(year, month, 0, 23, 59, 59, 999)
-          };
-        } else if (year) {
-          // Lọc theo năm
-          matchCondition.NgayDatHang = {
-            $gte: new Date(year, 0, 1),
-            $lte: new Date(year, 11, 31, 23, 59, 59, 999)
-          };
+        const year = req.query.year ? parseInt(req.query.year) : null;
+        const month = req.query.month ? parseInt(req.query.month) : null;
+        const day = req.query.day ? parseInt(req.query.day) : null;
+
+        // Xây dựng pipeline aggregation
+        let pipeline = [];
+
+        if (month && !day && !year) {
+            // Lọc chỉ theo tháng (bất kỳ ngày/năm nào)
+            pipeline.push({
+                $match: {
+                    $expr: {
+                        $eq: [{ $month: "$NgayDatHang" }, month]
+                    }
+                }
+            });
+        } else if (day && month && !year) {
+            // Lọc chỉ theo tháng và ngày (bất kỳ năm nào)
+            pipeline.push({
+                $match: {
+                    $expr: {
+                        $and: [
+                            { $eq: [{ $month: "$NgayDatHang" }, month] },
+                            { $eq: [{ $dayOfMonth: "$NgayDatHang" }, day] }
+                        ]
+                    }
+                }
+            });
+        } else if (day && !month && !year) {
+            // Lọc chỉ theo ngày (bất kỳ tháng/năm nào)
+            pipeline.push({
+                $match: {
+                    $expr: {
+                        $eq: [{ $dayOfMonth: "$NgayDatHang" }, day]
+                    }
+                }
+            });
         } else {
-          return res.status(400).json({ message: "At least one of year, month, or day is required" });
+            // Xây dựng điều kiện lọc cho các trường hợp khác
+            let matchCondition = {};
+
+            if (day && month && year) {
+                // Lọc theo ngày-tháng-năm
+                matchCondition.NgayDatHang = {
+                    $gte: new Date(year, month - 1, day),
+                    $lte: new Date(year, month - 1, day, 23, 59, 59, 999)
+                };
+            } else if (month && year) {
+                // Lọc theo tháng-năm
+                matchCondition.NgayDatHang = {
+                    $gte: new Date(year, month - 1, 1),
+                    $lte: new Date(year, month, 0, 23, 59, 59, 999)
+                };
+            } else if (year) {
+                // Lọc theo năm
+                matchCondition.NgayDatHang = {
+                    $gte: new Date(year, 0, 1),
+                    $lte: new Date(year, 11, 31, 23, 59, 59, 999)
+                };
+            } else {
+                return res.status(400).json({ message: "At least one of year, month, or day is required" });
+            }
+
+            pipeline.push({ $match: matchCondition });
         }
-  
-        pipeline.push({ $match: matchCondition });
-      }
-  
-      // Thêm stage sắp xếp theo NgayDatHang giảm dần
-      pipeline.push({ $sort: { NgayDatHang: -1 } });
-  
-      // Thực thi pipeline
-      const results = await Order.aggregate(pipeline);
-  
-      return res.status(200).json(results);
+
+        // Thêm stage sắp xếp theo NgayDatHang giảm dần
+        pipeline.push({ $sort: { NgayDatHang: -1 } });
+
+        // Thực thi pipeline
+        const results = await Order.aggregate(pipeline);
+
+        return res.status(200).json(results);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal server error" });
+        console.error(error);
+        return res.status(500).json({ message: "Internal server error" });
     }
-  };
+};
+
+exports.sendEmailOrderSuccess = async (req, res) => {
+    const email = req.query.email;
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "Đặt hàng thành công tại C3 GUNDAM STORE",
+            text: "Cám ơn bạn đã đặt hàng. Đơn hàng sẽ được giao đến bạn trong vòng 3 - 5 ngày.",
+        };
+
+        await transporter.sendMail(mailOptions);
+        return res.status(200).json(true)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Lỗi khi gửi email khi đặt hàng." });
+    }
+}

@@ -14,5 +14,6 @@ router.get("/thongke/get-order-status", orderController.getOrderStatus);
 router.get("/thongke/revenue-by-day", orderController.getRevenueByDay);
 router.get("/kiemtradanhgia/:maDonHang", orderController.checkOrderReviewed);
 router.get("/locdonhang/ngaythangnam", orderController.getOrderByDayMonth);
+router.post("/guiemail", orderController.sendEmailOrderSuccess);
 
 module.exports = router;
