@@ -1,7 +1,5 @@
 <script setup>
-import { onUnmounted, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { io } from "socket.io-client";
 
 const router = useRouter();
 
@@ -9,10 +7,9 @@ const chatBot = () => {
     const MaKhachHang = localStorage.getItem('MaKhachHang');
     if (!MaKhachHang) {
         router.push('/login');
+    } else {
+        router.push('/chatBot');
     }
-    // } else {
-    //     router.push('/chatbox');
-    // }
 }
 
 </script>

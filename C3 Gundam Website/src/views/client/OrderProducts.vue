@@ -134,7 +134,9 @@ const addOrders = async () => {
         }
 
         const response = await axios.post('http://localhost:3000/api/donhang', dataToSend);
-        showNotification("Đặt hàng thành công!", "success");
+        showNotification("Đặt hàng thành công, vui lòng kiểm tra email xác nhận!", "success");
+
+        await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`)
         setTimeout(() => {
             router.push('/orders_history');
         }, 3000);
@@ -175,7 +177,7 @@ const initializePayPalButton = () => {
                 await addOrders();
 
                 if (notification.value.type === 'success') {
-                    showNotification("Thanh toán qua PayPal và đặt hàng thành công!", "success");
+                    showNotification("Thanh toán qua PayPal và đặt hàng thành công, vui lòng kiểm tra email xác nhận!!", "success");
                 }
             } catch (error) {
                 console.error('Lỗi khi xử lý đơn hàng sau thanh toán PayPal:', error);

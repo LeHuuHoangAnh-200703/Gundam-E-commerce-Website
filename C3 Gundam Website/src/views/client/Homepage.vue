@@ -225,15 +225,15 @@ onMounted(() => {
                     <option :value="item.type" v-for="item in listChoices" :key="item">{{ item.name }}</option>
                 </select>
             </div>
-            <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <div class="hidden lg:flex flex-col gap-4 w-full">
+            <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div class="hidden lg:flex flex-col gap-4 w-full col-span-1">
                     <button v-for="(item, index) in listChoices" :key="index"
                         @click.prevent="selectTypeProducts(item.type)"
                         class="w-full border-2 p-2 text-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] transition-all duration-300">
                         {{ item.name }}
                     </button>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 col-span-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 col-span-3">
                     <div v-for="(product, index) in paginatedProducts" :key="index"
                         class="flex flex-col gap-3 items-center">
                         <router-link :to="`/details/${product.MaSanPham}`">

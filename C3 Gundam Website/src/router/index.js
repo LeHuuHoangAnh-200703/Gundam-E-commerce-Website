@@ -39,6 +39,7 @@ import Statistical from "@/views/admin/adminStatistical.vue";
 import personalDirectory from "@/views/client/personalDirectory.vue";
 import Voucher from "@/views/client/Voucher.vue";
 import SearchResults from "@/views/client/SearchResults.vue";
+import ChatBot from "../views/client/ChatBot.vue";
 
 const routes = [
     {
@@ -120,6 +121,11 @@ const routes = [
         path: "/seachResults",
         name: "Seach Results",
         component: SearchResults,
+    },
+    {
+        path: "/chatBot",
+        name: "ChatBot",
+        component: ChatBot,
     },
     {
         path: "/admin/adminLogin",
