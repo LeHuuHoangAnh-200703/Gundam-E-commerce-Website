@@ -81,6 +81,10 @@ const login = async () => {
         notification.value.message = '';
     }, 2000);
 }
+
+const loginWithGoogle = () => {
+  window.location.href = 'http://localhost:3000/auth/google';
+};
 </script>
 
 <template>
@@ -91,8 +95,7 @@ const login = async () => {
                     <div class="hidden lg:block bg-[#DB3F4C] rounded-md p-4 lg:w-1/2">
                         <p class="text-white font-bold text-[24px]">C3 GUNDAM</p>
                         <div class="flex flex-col gap-2 items-center justify-center">
-                            <img src="../../assets/img/banner.png"
-                                class="w-[200px] lg:w-[300px]" alt="banner">
+                            <img src="../../assets/img/banner.png" class="w-[200px] lg:w-[300px]" alt="banner">
                             <p class="text-[18px] lg:text-[24px] text-white font-semibold uppercase text-center">
                                 C3 GUNDAM xin chào!
                             </p>
@@ -117,17 +120,29 @@ const login = async () => {
                             <div class="w-full relative">
                                 <label for="" class="block font-medium mb-1 text-[14px] md:text-[16px]">Mật khẩu</label>
                                 <div class="flex gap-2">
-                                    <input :type="showPassword ? 'text' : 'password'" v-model="formData.password" placeholder="••••••••"
+                                    <input :type="showPassword ? 'text' : 'password'" v-model="formData.password"
+                                        placeholder="••••••••"
                                         class="relative w-full px-4 py-2 md:py-3 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
-                                    <button @click.prevent="togglePassword" class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                                    <button @click.prevent="togglePassword"
+                                        class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i
+                                            :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
                                 </div>
                                 <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <button type="submit"
-                                class="px-4 py-2 inline-block md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
+                                class="p-3 inline-block md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
                                 Đăng nhập
                             </button>
                         </form>
+                        <div class="flex items-center justify-center font-semibold">
+                            <p>Hoặc</p>
+                        </div>
+                        <button @click="loginWithGoogle"
+                            class="w-full p-3 bg-[#4285F4] text-white rounded-md font-medium text-[14px] md:text-[16px] flex justify-center items-center gap-2 transition duration-300 ease-in-out transform hover:scale-105">
+                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo"
+                                class="w-6 h-6" />
+                            Đăng nhập với Google
+                        </button>
                         <p class="mt-4 md:mt-8 text-center text-[14px] md:text-[16px]">
                             Nếu chưa có tài khoản?
                             <router-link to="/register"

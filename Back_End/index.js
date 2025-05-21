@@ -11,6 +11,11 @@ const multer = require("multer");
 const path = require("path");
 const nodemailer = require("nodemailer");
 const fs = require('fs');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
+
+const Customer = require('./src/models/customersModels');
 
 dotenv.config();
 
@@ -34,6 +39,19 @@ cloudinary.config({
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport config
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
 
 // Cấu hình multer để lưu file tạm thời
 const storage = multer.diskStorage({
@@ -85,25 +103,6 @@ mongoose
     console.log("Connected to MongoDB");
   })
   .catch((err) => console.log(err));
-
-// Endpoint để nhập dữ liệu tỉnh, huyện, xã
-// app.post("/api/import-provinces", async (req, res) => {
-//   try {
-//     // Đọc file JSON
-//     const rawData = fs.readFileSync("./data.json");
-//     const provinces = JSON.parse(rawData);
-
-//     // Xóa dữ liệu cũ (tùy chọn, có thể bỏ nếu không muốn xóa)
-//     await Province.deleteMany({});
-
-//     // Nhập dữ liệu mới
-//     await Province.insertMany(provinces);
-//     res.status(200).json({ message: "Imported provinces successfully!" });
-//   } catch (error) {
-//     console.error("Error importing provinces:", error);
-//     res.status(500).json({ error: "Failed to import provinces" });
-//   }
-// });
 
 // Thiết lập PayPal client
 const environment = new paypal.core.SandboxEnvironment(
@@ -411,6 +410,47 @@ app.get("/api/chat", async (req, res) => {
     res.status(500).json({ error: "Lỗi khi lấy danh sách phòng chat" });
   }
 });
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await Customer.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: '/'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    let user = await Customer.findOne({ providerId: profile.id, provider: 'google' });
+    if (!user) {
+      user = await new Customer({
+        provider: 'google',
+        providerId: profile.id,
+        Email: profile.emails[0].value,
+        TenKhachHang: profile.displayName,
+        NgayTao: new Date(),
+        TrangThai: 0,
+      }).save();
+    }
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+}));
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/login' }),
+  (req, res) => {
+    // Chuyển hướng đến trang chủ sau khi đăng nhập thành công
+    res.redirect(`http://localhost:5173/`);
+  }
+);
 
 // Chạy server
 server.listen(PORT, () => {

@@ -119,7 +119,7 @@ const loginAdmin = async () => {
                                 <p v-if="errors.password" class="text-red-500 text-sm my-2">{{ errors.password }}</p>
                             </div>
                             <button type="submit"
-                                class="px-4 py-2 inline-block md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
+                                class="p-3 inline-block md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
                                 Đăng nhập
                             </button>
                         </form>

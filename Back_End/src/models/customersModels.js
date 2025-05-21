@@ -28,6 +28,8 @@ const customerSchema = new mongoose.Schema({
     },
   ],
   TrangThai: { type: Number, default: 0 },
+  provider: String, // Thêm: 'google' hoặc null cho đăng nhập thường
+  providerId: String, // Thêm: ID từ Google
 });
 
 function generateMaKhachHang() {
@@ -35,18 +37,21 @@ function generateMaKhachHang() {
 }
 
 customerSchema.pre("save", async function (next) {
-  if (!this.isModified("MatKhau")) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.MatKhau = await bcrypt.hash(this.MatKhau, salt);
-    if (!this.MaKhachHang) {
-      this.MaKhachHang = generateMaKhachHang();
+  if (this.isModified("MatKhau") && this.MatKhau) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.MatKhau = await bcrypt.hash(this.MatKhau, salt);
+    } catch (error) {
+      return next(error);
     }
-    next();
-  } catch (error) {
-    next(error);
   }
+  if (!this.MaKhachHang) {
+    this.MaKhachHang = generateMaKhachHang();
+  }
+  if (!this.NgayTao) {
+    this.NgayTao = new Date();
+  }
+  next();
 });
 
 module.exports = mongoose.model("Customer", customerSchema);

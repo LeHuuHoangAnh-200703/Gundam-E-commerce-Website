@@ -245,7 +245,7 @@ const verifyOtpAndRegister = async () => {
                                 </p>
                             </div>
                             <button type="submit"
-                                class="px-4 py-2 md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
+                                class="p-3 md:px-5 bg-[#DB3F4C] rounded-md font-medium text-[14px] md:text-[16px] transition duration-300 ease-in-out transform hover:scale-105">
                                 {{ isOtpSent ? "Xác thực & Đăng ký" : "Gửi OTP" }}
                             </button>
                         </form>
