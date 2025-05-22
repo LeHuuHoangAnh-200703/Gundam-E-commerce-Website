@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
@@ -15,6 +15,7 @@ const escapeHtml = (unsafe) => {
 
 const errors = ref({});
 const router = useRouter();
+const route = useRoute();
 const formData = ref({
     email: '',
     password: '',
@@ -82,9 +83,33 @@ const login = async () => {
     }, 2000);
 }
 
-const loginWithGoogle = () => {
-  window.location.href = 'http://localhost:3000/auth/google';
+const loginWithGoogle = async () => {
+    window.location.href = 'http://localhost:3000/auth/google';
 };
+
+onMounted(async () => {
+    const maKhachHang = route.query.maKhachHang;
+    const googleSuccess = route.query.googleSuccess === 'true';
+
+    if (googleSuccess && maKhachHang) {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/khachhang/loginGoogle/google?maKhachHang=${maKhachHang}`);
+            localStorage.setItem('Email', response.data.customer.Email);
+            localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
+            localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);
+            localStorage.setItem('TrangThai', response.data.customer.TrangThai);
+            localStorage.setItem('HinhAnh', response.data.customer.HinhAnh);
+            showNotification("Đăng nhập với Google thành công!", "success");
+            setTimeout(() => {
+                router.push('/');
+            }, 2000);
+        } catch (error) {
+            showNotification(error.response?.data?.message || "Có lỗi xảy ra!", "error");
+        }
+    } else if (route.query.googleSuccess === 'false') {
+        showNotification("Đăng nhập với Google thất bại!", "error");
+    }
+})
 </script>
 
 <template>

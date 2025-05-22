@@ -8,6 +8,7 @@ router.post("/", customersController.createCustomer);
 router.put("/:maKhachHang", customersController.upload, customersController.updateCustomer);
 router.delete("/:maKhachHang", customersController.deleteCustomer);
 router.post("/login", customersController.login);
+router.get("/loginGoogle/google", customersController.loginGoogle);
 router.post("/thongtin/:maKhachHang", customersController.createInfoCustomer);
 router.post("/logout", customersController.logout);
 router.delete("/diachi/:maKhachHang/:id", customersController.deleteLocation);

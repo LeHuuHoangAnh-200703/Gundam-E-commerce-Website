@@ -155,6 +155,10 @@ const verifyOtpAndRegister = async () => {
         notification.value.message = '';
     }, 2000);
 };
+
+const loginWithGoogle = () => {
+  window.location.href = 'http://localhost:3000/auth/google';
+};
 </script>
 
 <template>
@@ -249,6 +253,15 @@ const verifyOtpAndRegister = async () => {
                                 {{ isOtpSent ? "Xác thực & Đăng ký" : "Gửi OTP" }}
                             </button>
                         </form>
+                        <div class="flex items-center justify-center font-semibold">
+                            <p>Hoặc</p>
+                        </div>
+                        <button @click="loginWithGoogle"
+                            class="w-full p-3 bg-[#4285F4] text-white rounded-md font-medium text-[14px] md:text-[16px] flex justify-center items-center gap-2 transition duration-300 ease-in-out transform hover:scale-105">
+                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo"
+                                class="w-6 h-6" />
+                            Đăng ký với Google
+                        </button>
                         <p class="mt-4 md:mt-8 text-center text-[14px] md:text-[16px]">
                             Nếu đã có tài khoản?
                             <router-link to="/login"

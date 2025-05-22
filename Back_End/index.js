@@ -218,7 +218,6 @@ setInterval(async () => {
   try {
     const currentTime = new Date();
     await OTP.deleteMany({ expiresAt: { $lt: currentTime } });
-    console.log("Đã xóa các OTP hết hạn");
   } catch (error) {
     console.error("Lỗi khi xóa OTP hết hạn:", error);
   }
@@ -242,7 +241,7 @@ socketIO.on("connection", (socket) => {
   socket.on("getChatRooms", async () => {
     try {
       const ChatRoom = require("./src/models/messageModels");
-      const User = require("./src/models/userModels");
+      const User = require("./src/models/customersModels");
       const chatRooms = await ChatRoom.find();
       const enrichedChatRooms = await Promise.all(
         chatRooms.map(async (room) => {
@@ -426,16 +425,31 @@ passport.use(new GoogleStrategy({
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    let user = await Customer.findOne({ providerId: profile.id, provider: 'google' });
-    if (!user) {
-      user = await new Customer({
+    // Kiểm tra email đã tồn tại trong hệ thống chưa
+    let user = await Customer.findOne({ Email: profile.emails[0].value });
+    
+    if (user) {
+      // Nếu email đã tồn tại, cập nhật thông tin Google (nếu cần) và trạng thái
+      if (!user.provider) {
+        // Nếu tài khoản không có provider (tài khoản thông thường), thêm thông tin Google
+        user.provider = 'google';
+        user.providerId = profile.id;
+      }
+      user.TrangThai = 1; // Đánh dấu đã đăng nhập
+      user.TenKhachHang = profile.displayName || user.TenKhachHang;
+      await user.save();
+    } else {
+      // Nếu email chưa tồn tại, tạo tài khoản mới
+      const count = await Customer.countDocuments();
+      user = new Customer({
         provider: 'google',
         providerId: profile.id,
         Email: profile.emails[0].value,
         TenKhachHang: profile.displayName,
         NgayTao: new Date(),
-        TrangThai: 0,
-      }).save();
+        TrangThai: 1, // Đánh dấu đã đăng nhập
+      });
+      await user.save();
     }
     done(null, user);
   } catch (err) {
@@ -444,11 +458,15 @@ passport.use(new GoogleStrategy({
 }));
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
 app.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/login' }),
+  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/login?googleSuccess=false' }),
   (req, res) => {
-    // Chuyển hướng đến trang chủ sau khi đăng nhập thành công
-    res.redirect(`http://localhost:5173/`);
+    if (req.user && req.user.MaKhachHang) {
+      res.redirect(`http://localhost:5173/login/?maKhachHang=${req.user.MaKhachHang}&googleSuccess=true`);
+    } else {
+      res.redirect('http://localhost:5173/login?googleSuccess=false');
+    }
   }
 );
 

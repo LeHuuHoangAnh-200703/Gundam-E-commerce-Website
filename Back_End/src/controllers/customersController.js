@@ -48,7 +48,6 @@ exports.getAllCustomers = async (req, res) => {
   }
 };
 
-
 exports.getCustomer = async (req, res) => {
   try {
     const customer = await Customer.findOne({
@@ -182,6 +181,28 @@ exports.login = async (req, res) => {
     await customer.save();
     return res.status(200).json({
       message: "Đăng nhập thành công!",
+      customer: {
+        MaKhachHang: customer.MaKhachHang,
+        TenKhachHang: customer.TenKhachHang,
+        Email: customer.Email,
+        TrangThai: customer.TrangThai,
+        HinhAnh: customer.Image
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Có lỗi xảy ra, vui lòng thử lại." });
+  }
+};
+
+exports.loginGoogle = async (req, res) => {
+  const { maKhachHang } = req.query;
+  try {
+    const customer = await Customer.findOne({ MaKhachHang: maKhachHang });
+
+    customer.TrangThai = 1;
+    await customer.save();
+    return res.status(200).json({
+      message: "Đăng nhập với google thành công!",
       customer: {
         MaKhachHang: customer.MaKhachHang,
         TenKhachHang: customer.TenKhachHang,
