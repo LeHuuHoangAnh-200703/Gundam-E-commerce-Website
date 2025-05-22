@@ -27,15 +27,6 @@ const logout = async () => {
     }
 };
 
-const orders_history = () => {
-    const MaKhachHang = localStorage.getItem('MaKhachHang');
-    if (!MaKhachHang) {
-        router.push('/login');
-    } else {
-        router.push('/orders_history');
-    }
-}
-
 const profile = () => {
     const MaKhachHang = localStorage.getItem('MaKhachHang');
     if (!MaKhachHang) {
@@ -62,6 +53,16 @@ const voucher = () => {
         router.push('/voucher');
     }
 }
+
+const community = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/community');
+    }
+}
+
 const emit = defineEmits();
 const searchQuery = ref("");
 const handleSearch = () => {
@@ -185,17 +186,17 @@ onMounted(() => {
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><button @click.prevent="orders_history">Theo dõi đơn hàng</button>
-                        <div
-                            class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
-                        </div>
-                    </li>
                     <li class="group"><button @click.prevent="profile">Tài khoản</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
                     <li class="group"><button @click.prevent="voucher" to="/voucher">Giảm giá</button>
+                        <div
+                            class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
+                        </div>
+                    </li>
+                    <li class="group"><button @click.prevent="community" to="/community">Cộng đồng Gundam</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
@@ -236,7 +237,8 @@ onMounted(() => {
                 <div class="flex items-center justify-between">
                     <p class="font-semibold text-[20px]">Hiện có</p>
                     <button class="group" type="Button" @click.prevent="closeProductDisplay">
-                        <i class="fa-solid fa-xmark text-[25px] group-hover:text-[#DB3F4C] transition-all duration-300"></i>
+                        <i
+                            class="fa-solid fa-xmark text-[25px] group-hover:text-[#DB3F4C] transition-all duration-300"></i>
                     </button>
                 </div>
                 <hr class="mb-4 mt-2 bg-[#1A1D27]">
@@ -280,12 +282,11 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="orders_history">Theo dõi đơn
-                        hàng</button></li>
-                <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-tags"></i> <button @click.prevent="voucher">Giảm giá</button></li>
+                <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
+                        class="fa-solid fa-tags"></i> <button @click.prevent="community">Cộng đồng Gundam</button></li>
                 <li v-if="isLoggedIn"
                     class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>

@@ -127,7 +127,7 @@ onMounted(() => {
                             <div class="flex flex-col items-center justify-center gap-3">
                                 <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
                                     không có địa chỉ, hãy cập nhật!</p>
-                                <img src="../../assets/img/empty_admin.png" class="w-[200px]" alt="">
+                                <img src="../../assets/img/empty_admin.png" class="w-[150px]" alt="">
                             </div>
                         </div>
                     </div>
