@@ -13,7 +13,7 @@ const router = useRouter();
 
 const listChoices = [
     {
-        name: "TẤT CẢ SẢN PHẨM",
+        name: "Tất cả sản phẩm",
         type: "All",
     },
     {
@@ -226,11 +226,16 @@ onMounted(() => {
                 </select>
             </div>
             <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div class="hidden lg:flex flex-col gap-4 w-full col-span-1">
+                <div class="hidden lg:flex flex-col gap-4 w-full col-span-1 items-start">
+                    <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-3">Loại gundam
+                    </p>
                     <button v-for="(item, index) in listChoices" :key="index"
                         @click.prevent="selectTypeProducts(item.type)"
-                        class="w-full border-2 p-2 text-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] transition-all duration-300">
+                        class="text-white font-semibold text-[18px] group">
                         {{ item.name }}
+                        <div
+                            class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
+                        </div>
                     </button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 col-span-3">
@@ -240,9 +245,11 @@ onMounted(() => {
                             <img :src="`${product.Images[0]}`"
                                 class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                         </router-link>
-                        <router-link :to="`/details/${product.MaSanPham}`" class="py-2 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-64 group">
+                        <router-link :to="`/details/${product.MaSanPham}`"
+                            class="py-2 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-64 group">
                             <p
-                                class="text-white overflow-hidden text-ellipsis whitespace-nowrap text-[14px] text-center flex-grow group-hover:text-[#DB3F4C] transition-all duration-300">{{
+                                class="text-white overflow-hidden text-ellipsis whitespace-nowrap text-[14px] text-center flex-grow group-hover:text-[#DB3F4C] transition-all duration-300">
+                                {{
                                     product.TenSanPham }}</p>
                         </router-link>
                         <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{

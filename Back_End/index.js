@@ -125,6 +125,7 @@ const inventoryRoutes = require("./src/routes/inventories");
 const cartRoutes = require("./src/routes/carts");
 const locationRoutes = require("./src/routes/locations");
 const statisticalRoutes = require("./src/routes/statisticals");
+const communityPost = require("./src/routes/communityPosts");
 
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
@@ -140,6 +141,7 @@ app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/thongke", statisticalRoutes);
+app.use("/api/baidang", communityPost);
 
 // Cấu hình Nodemailer
 const transporter = nodemailer.createTransport({

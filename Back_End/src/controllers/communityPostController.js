@@ -22,9 +22,9 @@ exports.getAllCommunityPost = async (req, res) => {
 
 exports.getCommunityPost = async (req, res) => {
   try {
-    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang});
+    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
     if (!communityPost) {
-      return res.status(400).json({ message: "Bài đăng không tồn tại!"});
+      return res.status(400).json({ message: "Bài đăng không tồn tại!" });
     }
     res.status(200).json(communityPost);
   } catch (error) {
@@ -34,36 +34,36 @@ exports.getCommunityPost = async (req, res) => {
 
 exports.createCommunityPost = async (req, res) => {
   if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No files were uploaded.' });
-    }
-  
-    const imageUploadPromises = req.files.map(file => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: 'communityPost',
-          },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            }
-            resolve(result);
-          });
-        stream.end(file.buffer); // Kết thúc stream với buffer
-      });
+    return res.status(400).json({ message: 'No files were uploaded.' });
+  }
+
+  const imageUploadPromises = req.files.map(file => {
+    return new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'communityPost',
+        },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+      stream.end(file.buffer); // Kết thúc stream với buffer
     });
-  
-    try {
-      const imageUploadResults = await Promise.all(imageUploadPromises); // Chờ tất cả hình ảnh được upload
-      const communityPost = new CommunityPost({
-        ...req.body,
-        HinhAnh: imageUploadResults.map(result => result.secure_url)
-      });
-      await communityPost.save();
-      res.status(200).json(communityPost);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
+  });
+
+  try {
+    const imageUploadResults = await Promise.all(imageUploadPromises); // Chờ tất cả hình ảnh được upload
+    const communityPost = new CommunityPost({
+      ...req.body,
+      HinhAnh: imageUploadResults.map(result => result.secure_url)
+    });
+    await communityPost.save();
+    res.status(200).json(communityPost);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 }
 
 exports.likeCommunityPost = async (req, res) => {
@@ -73,7 +73,7 @@ exports.likeCommunityPost = async (req, res) => {
   try {
     const communityPost = await CommunityPost.findOne({ MaBaiDang: maBaiDang });
     if (!communityPost) {
-      return res.status(400).json({ message: "Bài đăng không tồn tại!"});
+      return res.status(400).json({ message: "Bài đăng không tồn tại!" });
     }
     if (communityPost.MaKhachHangDaThich.includes(maKhachHang)) {
       return res.status(400).json({ message: "Bạn đã thích bài đăng này rồi!" });
@@ -86,9 +86,29 @@ exports.likeCommunityPost = async (req, res) => {
   }
 }
 
-exports.comment = async (req, res) => {
+const bannedWords = [
+  "ngu",
+  "đần",
+  "ngu dốt",
+  "khốn nạn",
+  "vô học",
+  "đồ rác rưởi",
+  "thằng", "con", "mày", "đồ dốt", "đồ điên",
+  "chết tiệt", "vô dụng", "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại", "Địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc", "đm nó", "con cat", "con cac",
+  "M nó", "đồ cút", "thằng chó", "Con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "Thằng chó", "đồ chó", "đồ con chó", "Đồ mạt hạng", "đồ vô học", "đồ khốn", "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "Thằng lừa đảo", "đồ thất đức", "Lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct", "Đ mày", "dmtt", "cmnr"
+];
+
+const containsBannedWords = (text) => {
+  return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
+};
+
+exports.commentCommunityPost = async (req, res) => {
   const maBaiDang = req.params;
   const { MaKhachHang, NoiDungBinhLuan } = req.body;
+
+  if (containsBannedWords(NoiDungBinhLuan)) {
+    return res.status(400).json({ message: "Binh luận chứa nội dung không phù hợp!" });
+  }
 
   try {
     const communityPost = await CommunityPost.findOne({ MaBaiDang: maBaiDang });
@@ -134,7 +154,7 @@ exports.replyComment = async (req, res) => {
       TraLoiCho: maBinhLuan, // Lưu MaBinhLuan của bình luận cha
       ThoiGian: new Date()
     }
-    
+
     communityPost.BinhLuan.push(post);
     await communityPost.save();
     res.status(200).json(communityPost);

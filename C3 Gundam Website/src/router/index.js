@@ -41,6 +41,8 @@ import Voucher from "@/views/client/Voucher.vue";
 import SearchResults from "@/views/client/SearchResults.vue";
 import ChatBot from "../views/client/ChatBot.vue";
 import CommunityPost from "@/views/client/communityPost.vue";
+import AddCommunityPost from "@/views/client/addCommunityPost.vue";
+import CommentCommunityPost from "@/views/client/commentCommunityPost.vue";
 
 const routes = [
     {
@@ -132,6 +134,16 @@ const routes = [
         path: "/communityPost",
         name: "Community Post",
         component: CommunityPost,
+    },
+    {
+        path: "/addCommunityPost/:maKhachHang",
+        name: "Add Community Post",
+        component: AddCommunityPost,
+    },
+    {
+        path: "/commentCommunityPost",
+        name: "Comment Community Post",
+        component: CommentCommunityPost,
     },
     {
         path: "/admin/adminLogin",

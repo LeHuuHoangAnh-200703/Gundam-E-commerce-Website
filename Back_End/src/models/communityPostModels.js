@@ -6,26 +6,24 @@ const communityPostSchema = new mongoose.Schema({
   NoiDung: String,
   HinhAnh: [String],
   LoaiBaiDang: String,
-  LuotThich: Number,
+  LuotThich: { type: Number, default: 0},
   BinhLuan: [
     {
       MaBinhLuan: String,
       MaKhachHang: String,
       NoiDungBinhLuan: String,
       TraLoiCho: { type: String, default: null },
-      ThoiGian: Date,
+      ThoiGian: { type: Date, default: Date.now },
     },
   ],
-  SoLanLuuMa: Number,
   MaKhachHangDaThich: [String],
-  TrangThaiDang: [
+  TrangThaiDang:
     {
       type: String,
       enum: ["Đang chờ duyệt", "Đã duyệt"],
-      default: "pending",
+      default: "Đang chờ duyệt",
     },
-  ],
-  ThoiGianDang: Date,
+  ThoiGianDang: { type: Date, default: Date.now },
 });
 
 function generateMaBaiDang() {
