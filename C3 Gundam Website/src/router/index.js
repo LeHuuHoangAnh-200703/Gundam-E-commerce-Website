@@ -40,6 +40,7 @@ import personalDirectory from "@/views/client/personalDirectory.vue";
 import Voucher from "@/views/client/Voucher.vue";
 import SearchResults from "@/views/client/SearchResults.vue";
 import ChatBot from "../views/client/ChatBot.vue";
+import CommunityPost from "@/views/client/communityPost.vue";
 
 const routes = [
     {
@@ -126,6 +127,11 @@ const routes = [
         path: "/chatBot",
         name: "ChatBot",
         component: ChatBot,
+    },
+    {
+        path: "/communityPost",
+        name: "Community Post",
+        component: CommunityPost,
     },
     {
         path: "/admin/adminLogin",

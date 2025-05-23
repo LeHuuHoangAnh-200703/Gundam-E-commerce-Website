@@ -53,6 +53,15 @@ const voucher = () => {
     }
 }
 
+const community = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    } else {
+        router.push('/communityPost');
+    }
+}
+
 const cartLists = ref([]);
 const fetchCarts = async (maKhachHang) => {
     try {
@@ -151,7 +160,7 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-tags"></i> <button @click.prevent="voucher">Giảm giá</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-tags"></i> <button @click.prevent="community">Cộng đồng Gundam</button></li>
+                        class="fa-solid fa-users"></i> <button @click.prevent="community">Cộng đồng Gundam</button></li>
                 <li v-if="isLoggedIn"
                     class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>

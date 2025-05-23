@@ -239,7 +239,7 @@ exports.getTopSellingProducts = async (req, res) => {
       .limit(3);
 
     return res.status(200).json(topProducts);
-  } catch (err) {
+  } catch (error) {
     return res.status(500).json({ message: "Lỗi khi lấy sản phẩm bán chạy", error });
   }
 }
