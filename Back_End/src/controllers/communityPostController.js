@@ -1,4 +1,5 @@
 const CommunityPost = require("../models/communityPostModels");
+const Customer = require("../models/customersModels");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
 
@@ -13,7 +14,24 @@ const upload = multer({ storage: storage });
 
 exports.getAllCommunityPost = async (req, res) => {
   try {
-    const communityPost = await CommunityPost.find();
+    const posts = await CommunityPost.find();
+    const customerIds = [...new Set(posts.map(post => post.MaKhachHang))];
+
+    const customers = await Customer.find({ MaKhachHang: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.MaKhachHang] = {
+        TenKhachHang: customer.TenKhachHang,
+        HinhAnhKhachHang: customer.Image
+      };
+    });
+
+    const communityPost = posts.map(post => ({
+      ...post.toObject(),
+      TenKhachHang: customerMap[post.MaKhachHang]?.TenKhachHang || "Không xác định",
+      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null
+    }));
+
     res.status(200).json(communityPost);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -221,6 +239,22 @@ exports.deleteComment = async (req, res) => {
     res.json({ message: "Xóa bình luận thành công!", post: communityPost });
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi xóa bình luận: " + error.message });
+  }
+};
+
+exports.updateStatus = async (req, res) => {
+  const { TrangThaiDang } = req.body;
+  try {
+    const updatedStatus = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
+
+    if (!updatedStatus) {
+      return res.status(404).json({ message: "Bài đăng không tồn tại!" });
+    }
+    updatedStatus.TrangThaiDang = TrangThaiDang;
+    await updatedStatus.save();
+    res.status(200).json({ message: "Duyệt bài thành công." });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 };
 

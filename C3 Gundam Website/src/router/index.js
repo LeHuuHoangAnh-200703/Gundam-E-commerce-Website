@@ -43,6 +43,7 @@ import ChatBot from "../views/client/ChatBot.vue";
 import CommunityPost from "@/views/client/communityPost.vue";
 import AddCommunityPost from "@/views/client/addCommunityPost.vue";
 import CommentCommunityPost from "@/views/client/commentCommunityPost.vue";
+import CommunityPostManage from "@/views/admin/communityPostManage.vue";
 
 const routes = [
     {
@@ -274,6 +275,12 @@ const routes = [
         path: "/admin/statisticals",
         name: "Admin statistical",
         component: Statistical,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/communityPostManage",
+        name: "Comunity Post Manage",
+        component: CommunityPostManage,
         meta: { requiresAuth: true },
     },
     {

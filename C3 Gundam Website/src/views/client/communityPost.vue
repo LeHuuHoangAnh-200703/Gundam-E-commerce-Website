@@ -6,9 +6,11 @@ import BackToTop from '@/components/client/BackToTop.vue';
 import axios from "axios";
 import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const avatarCustomer = ref('');
 const nameCustomer = ref('');
 const idCustomer = ref('');
+const listPost = ref([]);
 const categoryPost = [
     {
         name: 'Hướng dẫn lắp ráp',
@@ -35,14 +37,34 @@ const fetchCustomer = async () => {
         nameCustomer.value = response.data.TenKhachHang;
         idCustomer.value = response.data.MaKhachHang;
     } catch (error) {
-        console.log(error);
+        console.log("Error fetching: ", error);
     }
 }
 
-const router = useRouter();
+const fetchCommunityPost = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/baidang");
+        listPost.value = response.data.filter(post => {
+            return post.TrangThaiDang === 'Đã duyệt'
+        }).map(post => {
+            return {
+                ...post,
+                ThoiGianDang: new Date(post.ThoiGianDang)
+            }
+        }).sort((a, b) => b.ThoiGianDang - a.ThoiGianDang);
+        console.log(listPost.value)
+    } catch (error) {
+        console.log("Error fetching: ", error);
+    }
+}
+
+const formatTime = (time) => {
+    return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+};
 
 onMounted(() => {
     fetchCustomer();
+    fetchCommunityPost();
 })
 </script>
 
@@ -53,7 +75,7 @@ onMounted(() => {
             <div class="w-full overflow-y-auto flex items-center flex-col gap-6">
                 <div class="w-full flex gap-5 items-center bg-gray-700 p-3 rounded-lg border-2">
                     <div class="lg:w-[7%] w-[20%]">
-                        <img :src="`${avatarCustomer === 'null' ? '/src/assets/img/avatar.jpg' : avatarCustomer}`"
+                        <img :src="avatarCustomer ? `${avatarCustomer}` : '/src/assets/img/avatar.jpg'"
                             class="w-12 h-12 lg:w-12 lg:h-12 rounded-full object-cover" alt="">
                     </div>
                     <router-link :to="`/addCommunityPost/${idCustomer}`"
@@ -63,7 +85,8 @@ onMounted(() => {
                 </div>
                 <div class="flex lg:flex-row flex-col gap-6">
                     <div class="hidden lg:flex flex-col items-start gap-6 w-[35%]">
-                        <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-5">Cộng đồng fan gundam của c3</p>
+                        <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-5">Cộng đồng
+                            fan gundam của c3</p>
                         <button v-for="item in categoryPost" :key="item"
                             class="text-white font-semibold text-[18px] group">{{
                                 item.name }}
@@ -76,53 +99,52 @@ onMounted(() => {
                         <option value="All" class="uppercase">Cộng đồng fan gundam của c3</option>
                         <option :value="item.type" v-for="item in categoryPost" :key="item">{{ item.name }}</option>
                     </select>
-                    <div class="bg-gray-700 rounded-lg border-2 w-full lg:w-[65%] flex flex-col gap-4">
-                        <div class="pt-4 px-4 flex flex-col gap-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex gap-2">
-                                    <img :src="`${avatarCustomer === 'null' ? '/src/assets/img/avatar.jpg' : avatarCustomer}`"
-                                        class="w-12 h-12 lg:w-12 lg:h-12 rounded-full object-cover" alt="">
-                                    <div class="flex flex-col">
-                                        <p class="text-white font-semibold text-[18px]">Hoàng Anh</p>
-                                        <p class="text-white text-[12px] font-medium">20/07/2003</p>
+                    <div class="flex flex-col gap-6 w-full lg:w-[65%]">
+                        <div v-for="post in listPost" :key="post.MaBaiDang"
+                            class="bg-gray-700 rounded-lg border-2 flex flex-col gap-4">
+                            <div class="pt-4 px-4 flex flex-col gap-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex gap-2">
+                                        <img :src="`${post.HinhAnhKhachHang === 'null' ? '/src/assets/img/avatar.jpg' : post.HinhAnhKhachHang}`"
+                                            class="w-12 h-12 lg:w-12 lg:h-12 rounded-full object-cover" alt="">
+                                        <div class="flex flex-col">
+                                            <p class="text-white font-semibold text-[18px]">{{ post.TenKhachHang }}</p>
+                                            <p class="text-white text-[12px] font-medium">{{
+                                                formatTime(post.ThoiGianDang) }}</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-white text-[16px]">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                                <p class="text-white font-medium font-sans">{{ post.NoiDung }}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img" class="w-full h-full"
+                                    alt="">
+                            </div>
+                            <div class="px-4 flex flex-col gap-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex gap-2 items-center">
+                                        <i class="fa-solid fa-heart text-[#DC143C] text-[18px]"></i>
+                                        <p class="text-white font-medium">{{ post.LuotThich }} lượt yêu thích</p>
+                                    </div>
+                                    <div class="flex gap-2 items-center">
+                                        <p class="text-white font-medium">{{ post.BinhLuan.length }}</p>
+                                        <i class="fa-solid fa-comment text-white text-[18px]"></i>
                                     </div>
                                 </div>
-                                <button class="text-white text-[16px]">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                            <p class="text-white font-medium font-sans">CTU Media cám ơn tất cả vì một mùa hội diễn
-                                thành
-                                công,
-                                chúng mình vinh dự khi được góp sức để lan tỏa những giá trị nhân văn của Hội diễn.</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-1">
-                            <img src="../../assets/img/GD01.jpg" class="w-full h-full" alt="">
-                            <img src="../../assets/img/GD01DT1.jpg" class="w-full h-full" alt="">
-                            <img src="../../assets/img/GD01DT2.jpg" class="w-full h-full" alt="">
-                            <img src="../../assets/img/GD01DT3.jpg" class="w-full h-full" alt="">
-                        </div>
-                        <div class="px-4 flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <div class="flex gap-2 items-center">
-                                    <i class="fa-solid fa-heart text-[#DC143C] text-[18px]"></i>
-                                    <p class="text-white font-medium">300 lượt yêu thích</p>
+                                <hr class="mb-2">
+                                <div class="flex items-center justify-between mb-3">
+                                    <button class="flex gap-2 items-center">
+                                        <i class="fa-solid fa-heart text-gray-500 text-[25px]"></i>
+                                        <p class="text-white text-[16px] font-medium">Thích</p>
+                                    </button>
+                                    <button class="flex gap-2 items-center">
+                                        <i class="fa-solid fa-comment text-gray-500 text-[25px]"></i>
+                                        <p class="text-white text-[16px] font-medium">Bình luận</p>
+                                    </button>
                                 </div>
-                                <div class="flex gap-2 items-center">
-                                    <p class="text-white font-medium">30</p>
-                                    <i class="fa-solid fa-comment text-white text-[18px]"></i>
-                                </div>
-                            </div>
-                            <hr class="mb-2">
-                            <div class="flex items-center justify-between mb-3">
-                                <button class="flex gap-2 items-center">
-                                    <i class="fa-solid fa-heart text-gray-500 text-[25px]"></i>
-                                    <p class="text-white text-[16px] font-medium">Thích</p>
-                                </button>
-                                <button class="flex gap-2 items-center">
-                                    <i class="fa-solid fa-comment text-gray-500 text-[25px]"></i>
-                                    <p class="text-white text-[16px] font-medium">Bình luận</p>
-                                </button>
                             </div>
                         </div>
                     </div>
