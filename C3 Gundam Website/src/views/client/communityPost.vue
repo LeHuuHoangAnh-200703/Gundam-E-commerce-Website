@@ -167,9 +167,6 @@ onMounted(() => {
                                                 formatTime(post.ThoiGianDang) }}</p>
                                         </div>
                                     </div>
-                                    <button class="text-white text-[16px]">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
                                 </div>
                                 <p class="text-white font-medium font-sans">{{ post.NoiDung }}</p>
                             </div>

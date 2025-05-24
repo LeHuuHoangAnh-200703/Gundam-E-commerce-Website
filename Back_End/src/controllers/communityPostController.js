@@ -170,7 +170,7 @@ exports.commentCommunityPost = async (req, res) => {
   const { MaKhachHang, NoiDungBinhLuan } = req.body;
 
   if (containsBannedWords(NoiDungBinhLuan)) {
-    return res.status(400).json({ message: "Binh luận chứa nội dung không phù hợp!" });
+    return res.status(400).json({ message: "Bình luận chứa nội dung không phù hợp!" });
   }
 
   try {
@@ -197,12 +197,9 @@ exports.commentCommunityPost = async (req, res) => {
 }
 
 exports.replyComment = async (req, res) => {
-  const { maBaiDang, maBinhLuan } = req.params;
-  const { MaKhachHang, NoiDungBinhLuan } = req.body;
-
   try {
-    const communityPost = await CommunityPost.findOne({ MaBaiDang: maBaiDang });
-    const comment = communityPost.BinhLuan.find(comment => comment.MaBinhLuan === maBinhLuan);
+    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
+    const comment = communityPost.BinhLuan.find(comment => comment.MaBinhLuan === req.params.maBinhLuan);
     if (!communityPost) {
       return res.status(400).json({ message: "Bài đăng không tồn tại!" });
     }
@@ -213,9 +210,9 @@ exports.replyComment = async (req, res) => {
     const MaBinhLuan = 'BLuan' + Math.floor(10000 + Math.random() * 90000);
     const post = {
       MaBinhLuan,
-      MaKhachHang,
-      NoiDungBinhLuan,
-      TraLoiCho: maBinhLuan, // Lưu MaBinhLuan của bình luận cha
+      MaKhachHang: req.body.MaKhachHang,
+      NoiDungBinhLuan: req.body.NoiDungBinhLuan,
+      TraLoiCho: req.params.maBinhLuan, // Lưu MaBinhLuan của bình luận cha
       ThoiGian: new Date()
     }
 
