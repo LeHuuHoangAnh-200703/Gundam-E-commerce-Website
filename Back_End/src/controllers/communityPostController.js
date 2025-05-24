@@ -40,15 +40,56 @@ exports.getAllCommunityPost = async (req, res) => {
 
 exports.getCommunityPost = async (req, res) => {
   try {
-    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
-    if (!communityPost) {
+    const post = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
+    if (!post) {
       return res.status(400).json({ message: "Bài đăng không tồn tại!" });
     }
+
+    const customer = await Customer.findOne({ MaKhachHang: post.MaKhachHang });
+
+    // Join Customer cho từng bình luận và xử lý reply
+    const binhLuanWithCustomer = await Promise.all(
+      post.BinhLuan.map(async (binhLuan) => {
+        // Join Customer cho người bình luận
+        const commenter = await Customer.findOne({ MaKhachHang: binhLuan.MaKhachHang });
+
+        // Nếu là reply, tìm bình luận cha và lấy TenKhachHang
+        let replyToTenKhachHang = null;
+        if (binhLuan.TraLoiCho) {
+          const parentComment = post.BinhLuan.find(
+            (c) => c.MaBinhLuan === binhLuan.TraLoiCho
+          );
+          if (parentComment) {
+            const parentCustomer = await Customer.findOne({
+              MaKhachHang: parentComment.MaKhachHang,
+            });
+            replyToTenKhachHang = parentCustomer
+              ? parentCustomer.TenKhachHang
+              : "Không xác định";
+          }
+        }
+
+        return {
+          ...binhLuan._doc,
+          TenKhachHang: commenter ? commenter.TenKhachHang : "Không xác định",
+          HinhAnhKhachHang: commenter ? commenter.Image : null,
+          ReplyToTenKhachHang: replyToTenKhachHang,
+        };
+      })
+    );
+
+    const communityPost = {
+      ...post._doc,
+      TenKhachHang: customer ? customer.TenKhachHang : "Không xác định",
+      HinhAnhKhachHang: customer ? customer.Image : null,
+      BinhLuan: binhLuanWithCustomer,
+    };
+
     res.status(200).json(communityPost);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 exports.createCommunityPost = async (req, res) => {
   if (!req.files || req.files.length === 0) {
@@ -121,7 +162,6 @@ const containsBannedWords = (text) => {
 };
 
 exports.commentCommunityPost = async (req, res) => {
-  const maBaiDang = req.params;
   const { MaKhachHang, NoiDungBinhLuan } = req.body;
 
   if (containsBannedWords(NoiDungBinhLuan)) {
@@ -129,7 +169,7 @@ exports.commentCommunityPost = async (req, res) => {
   }
 
   try {
-    const communityPost = await CommunityPost.findOne({ MaBaiDang: maBaiDang });
+    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
     if (!communityPost) {
       return res.status(400).json({ message: "Bài đăng không tồn tại!" });
     }
@@ -146,6 +186,7 @@ exports.commentCommunityPost = async (req, res) => {
     await communityPost.save();
     res.status(200).json(communityPost);
   } catch (error) {
+    console.log(error.message)
     res.status(500).json({ message: error.message });
   }
 }

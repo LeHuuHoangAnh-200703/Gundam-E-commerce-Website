@@ -54,7 +54,7 @@ const fetchCommunityPost = async () => {
         }).sort((a, b) => b.ThoiGianDang - a.ThoiGianDang);
         console.log(listPost.value)
     } catch (error) {
-        console.log("Error fetching: ", error);
+        console.log("Error fetching: ", message.error);
     }
 }
 
@@ -105,7 +105,7 @@ onMounted(() => {
                             <div class="pt-4 px-4 flex flex-col gap-3">
                                 <div class="flex items-center justify-between">
                                     <div class="flex gap-2">
-                                        <img :src="`${post.HinhAnhKhachHang === 'null' ? '/src/assets/img/avatar.jpg' : post.HinhAnhKhachHang}`"
+                                        <img :src="post.HinhAnhKhachHang ? `${post.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
                                             class="w-12 h-12 lg:w-12 lg:h-12 rounded-full object-cover" alt="">
                                         <div class="flex flex-col">
                                             <p class="text-white font-semibold text-[18px]">{{ post.TenKhachHang }}</p>
@@ -140,10 +140,10 @@ onMounted(() => {
                                         <i class="fa-solid fa-heart text-gray-500 text-[25px]"></i>
                                         <p class="text-white text-[16px] font-medium">Thích</p>
                                     </button>
-                                    <button class="flex gap-2 items-center">
+                                    <router-link :to="`/commentCommunityPost/${post.MaBaiDang}`" class="flex gap-2 items-center">
                                         <i class="fa-solid fa-comment text-gray-500 text-[25px]"></i>
                                         <p class="text-white text-[16px] font-medium">Bình luận</p>
-                                    </button>
+                                    </router-link>
                                 </div>
                             </div>
                         </div>

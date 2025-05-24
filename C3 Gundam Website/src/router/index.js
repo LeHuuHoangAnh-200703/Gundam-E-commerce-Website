@@ -142,7 +142,7 @@ const routes = [
         component: AddCommunityPost,
     },
     {
-        path: "/commentCommunityPost",
+        path: "/commentCommunityPost/:maBaiDang",
         name: "Comment Community Post",
         component: CommentCommunityPost,
     },
