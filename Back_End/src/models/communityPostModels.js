@@ -6,7 +6,6 @@ const communityPostSchema = new mongoose.Schema({
   NoiDung: String,
   HinhAnh: [String],
   LoaiBaiDang: String,
-  LuotThich: { type: Number, default: 0},
   BinhLuan: [
     {
       MaBinhLuan: String,

@@ -11,7 +11,12 @@ const avatarCustomer = ref('');
 const nameCustomer = ref('');
 const idCustomer = ref('');
 const listPost = ref([]);
+const selectedType = ref("All");
 const categoryPost = [
+    {
+        name: 'Tất cả bài đăng',
+        type: 'All'
+    },
     {
         name: 'Hướng dẫn lắp ráp',
         type: 'Assemble'
@@ -41,6 +46,15 @@ const fetchCustomer = async () => {
     }
 }
 
+const fetchCommunityPostById = async (idBaiDang) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/baidang/${idBaiDang}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 const fetchCommunityPost = async () => {
     try {
         const response = await axios.get("http://localhost:3000/api/baidang");
@@ -52,11 +66,51 @@ const fetchCommunityPost = async () => {
                 ThoiGianDang: new Date(post.ThoiGianDang)
             }
         }).sort((a, b) => b.ThoiGianDang - a.ThoiGianDang);
-        console.log(listPost.value)
     } catch (error) {
         console.log("Error fetching: ", message.error);
     }
 }
+
+const likePost = async (idBaiDang) => {
+    try {
+        const response = await axios.post(`http://localhost:3000/api/baidang/yeuthich/${idBaiDang}`, {
+            MaKhachHang: idCustomer.value
+        });
+        const postIndex = listPost.value.findIndex(p => p.MaBaiDang === idBaiDang);
+        if (postIndex !== -1) {
+            // Gán lại toàn bộ bài đăng để đảm bảo reactivity
+            listPost.value[postIndex] = {
+                ...listPost.value[postIndex],
+                MaKhachHangDaThich: [...response.data.post.MaKhachHangDaThich]
+            };
+            // Trigger reactivity
+            listPost.value = [...listPost.value];
+        } else {
+            console.error("Post not found in listPost:", idBaiDang);
+            // Gọi fetchCommunityPostById để lấy bài đăng mới
+            const updatedPost = await fetchCommunityPostById(idBaiDang);
+            if (updatedPost) {
+                const index = listPost.value.findIndex(p => p.MaBaiDang === idBaiDang);
+                if (index !== -1) {
+                    listPost.value[index] = { ...updatedPost, ThoiGianDang: new Date(updatedPost.ThoiGianDang) };
+                    listPost.value = [...listPost.value];
+                }
+            }
+        }
+    } catch (error) {
+        console.log('Error like post: ', error);
+    }
+}
+
+const selectTypePosts = (type) => {
+    selectedType.value = type;
+}
+
+const filteredCommunityPost = computed(() => {
+    return listPost.value.filter(post => {
+        return selectedType.value === "All" || post.LoaiBaiDang === selectedType.value;
+    })
+})
 
 const formatTime = (time) => {
     return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
@@ -87,7 +141,7 @@ onMounted(() => {
                     <div class="hidden lg:flex flex-col items-start gap-6 w-[35%]">
                         <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-5">Cộng đồng
                             fan gundam của c3</p>
-                        <button v-for="item in categoryPost" :key="item"
+                        <button v-for="item in categoryPost" :key="item" @click="selectTypePosts(item.type)"
                             class="text-white font-semibold text-[18px] group">{{
                                 item.name }}
                             <div
@@ -95,12 +149,12 @@ onMounted(() => {
                             </div>
                         </button>
                     </div>
-                    <select name="" id="" class="w-full p-4 font-semibold block lg:hidden">
+                    <select v-model="selectedType" name="" id="" class="w-full p-4 font-semibold block lg:hidden">
                         <option value="All" class="uppercase">Cộng đồng fan gundam của c3</option>
                         <option :value="item.type" v-for="item in categoryPost" :key="item">{{ item.name }}</option>
                     </select>
-                    <div class="flex flex-col gap-6 w-full lg:w-[65%]">
-                        <div v-for="post in listPost" :key="post.MaBaiDang"
+                    <div v-if="filteredCommunityPost.length > 0" class="flex flex-col gap-6 w-full lg:w-[65%]">
+                        <div v-for="post in filteredCommunityPost" :key="post.MaBaiDang"
                             class="bg-gray-700 rounded-lg border-2 flex flex-col gap-4">
                             <div class="pt-4 px-4 flex flex-col gap-3">
                                 <div class="flex items-center justify-between">
@@ -127,7 +181,7 @@ onMounted(() => {
                                 <div class="flex items-center justify-between">
                                     <div class="flex gap-2 items-center">
                                         <i class="fa-solid fa-heart text-[#DC143C] text-[18px]"></i>
-                                        <p class="text-white font-medium">{{ post.LuotThich }} lượt yêu thích</p>
+                                        <p class="text-white font-medium">{{ post.MaKhachHangDaThich.length }} lượt yêu thích</p>
                                     </div>
                                     <div class="flex gap-2 items-center">
                                         <p class="text-white font-medium">{{ post.BinhLuan.length }}</p>
@@ -136,16 +190,24 @@ onMounted(() => {
                                 </div>
                                 <hr class="mb-2">
                                 <div class="flex items-center justify-between mb-3">
-                                    <button class="flex gap-2 items-center">
-                                        <i class="fa-solid fa-heart text-gray-500 text-[25px]"></i>
-                                        <p class="text-white text-[16px] font-medium">Thích</p>
+                                    <button @click="likePost(post.MaBaiDang)" class="flex gap-2 items-center">
+                                        <i :class="post.MaKhachHangDaThich.includes(idCustomer) ? 'text-[#DC143C]' : 'text-gray-500'" class="fa-solid fa-heart text-[25px]"></i>
+                                        <p class="text-white text-[16px] font-medium">{{ post.MaKhachHangDaThich.includes(idCustomer) ? 'Đã thích' : 'Thích' }}</p>
                                     </button>
-                                    <router-link :to="`/commentCommunityPost/${post.MaBaiDang}`" class="flex gap-2 items-center">
+                                    <router-link :to="`/commentCommunityPost/${post.MaBaiDang}`"
+                                        class="flex gap-2 items-center">
                                         <i class="fa-solid fa-comment text-gray-500 text-[25px]"></i>
                                         <p class="text-white text-[16px] font-medium">Bình luận</p>
                                     </router-link>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div v-else class="flex justify-center items-center w-full lg:w-[65%] bg-white rounded-md p-4">
+                        <div class="flex flex-col items-center justify-center gap-3">
+                            <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
+                                không có bài đăng nào!</p>
+                            <img src="../../assets/img/empty_admin.png" class="w-1/3" alt="">
                         </div>
                     </div>
                 </div>

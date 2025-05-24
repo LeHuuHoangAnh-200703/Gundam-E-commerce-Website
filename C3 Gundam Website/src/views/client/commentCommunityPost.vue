@@ -31,7 +31,6 @@ const fetchCommunityPost = async (idBaiDang) => {
         images.value = response.data.HinhAnh;
         likes.value = response.data.LuotThich;
         comments.value = response.data.BinhLuan;
-        console.log(comments.value)
     } catch (error) {
         console.log(error)
     }
