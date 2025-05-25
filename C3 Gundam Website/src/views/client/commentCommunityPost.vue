@@ -10,11 +10,12 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const idCustomer = ref('');
+const idCustomerLocal = localStorage.getItem('MaKhachHang');
 const idPost = ref('');
 const avatarCustomer = ref('');
 const nameCustomer = ref('');
 const timePost = ref('');
-const content = ref ('');
+const content = ref('');
 const images = ref([]);
 const idCustomerLikePost = ref([]);
 const comments = ref([]);
@@ -52,7 +53,7 @@ const addComment = async () => {
     if (!newComment.value.trim()) return;
     const maKhachHangBinhLuan = localStorage.getItem("MaKhachHang");
     try {
-        const response = await axios.post(`http://localhost:3000/api/baidang/binhluan/${idPost.value}`,{
+        const response = await axios.post(`http://localhost:3000/api/baidang/binhluan/${idPost.value}`, {
             MaKhachHang: maKhachHangBinhLuan,
             NoiDungBinhLuan: newComment.value
         })
@@ -90,6 +91,17 @@ const submitReply = async (commentId) => {
         console.error('Lỗi khi gửi trả lời:', error);
     }
 };
+
+const deleteComment = async (commentId) => {
+    const confirmUpdate = confirm("Bạn có chắc chắn xóa bình luận này không?");
+    if (!confirmUpdate) return;
+    try {
+        await axios.delete(`http://localhost:3000/api/baidang/xoabinhluan/${idPost.value}/${commentId}`);
+        await fetchCommunityPost(idPost.value);
+    } catch (error) {
+        console.error('Lỗi khi xóa bình luận:', error);
+    }
+}
 
 // Thu thập tất cả trả lời cho một bình luận gốc, không phân cấp
 const replies = computed(() => (commentId) => {
@@ -153,61 +165,88 @@ onMounted(() => {
                 </div>
             </div>
             <div class="bg-gray-700 rounded-lg border-2 w-full lg:w-[50%] flex flex-col gap-4 p-4 overflow-hidden">
-                <div class="flex flex-col gap-2 flex-grow max-h-[calc(100vh-40vh)] overflow-y-auto">
-                    <div v-for="(comment, index) in comments" :key="index" :class="comment.TraLoiCho === null ? 'flex' : 'hidden'" class="gap-2">
-                        <img :src="comment.HinhAnhKhachHang ? `${comment.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                            class="w-8 h-8 rounded-full object-cover" alt="Avatar" />
-                        <div class="flex flex-col gap-1 w-full">
-                            <div class="bg-gray-600 rounded-lg p-2">
-                                <p class="text-white text-[12px] font-semibold">{{ comment.TenKhachHang }}</p>
-                                <p class="text-white text-[14px]">{{ comment.NoiDungBinhLuan }}</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-white text-[12px]">{{ formatTime(new Date(comment.ThoiGian)) }}</p>
-                                <button @click="toggleReplyForm(comment.MaBinhLuan)"
-                                    class="text-gray-300 text-[12px] text-end hover:text-white">
-                                    Trả lời
-                                </button>
-                            </div>
-                            <div v-if="showReplyForm[comment.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
-                                <textarea v-model="replyContent"
-                                    class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
-                                    placeholder="Viết trả lời..." rows="2"></textarea>
-                                <div class="flex gap-2 justify-end">
-                                    <button @click="submitReply(comment.MaBinhLuan)"
-                                        class="bg-blue-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-blue-600">Gửi</button>
-                                    <button @click="toggleReplyForm(comment.MaBinhLuan)"
-                                        class="bg-gray-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-gray-600">Hủy</button>
+                <div class="flex flex-col gap-2 flex-grow max-h-[calc(100vh-25vh)] overflow-y-auto">
+                    <div v-if="comments.length > 0">
+                        <div v-for="(comment, index) in comments" :key="index"
+                            :class="comment.TraLoiCho === null ? 'flex' : 'hidden'" class="gap-2">
+                            <img :src="comment.HinhAnhKhachHang ? `${comment.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
+                                class="w-8 h-8 rounded-full object-cover" alt="Avatar" />
+                            <div class="flex flex-col gap-1 w-full">
+                                <div class="bg-gray-600 rounded-lg p-2">
+                                    <p class="text-white text-[12px] font-semibold">{{ comment.TenKhachHang }}</p>
+                                    <p class="text-white text-[14px]">{{ comment.NoiDungBinhLuan }}</p>
                                 </div>
-                            </div>
-                            <div v-for="reply in replies(comment.MaBinhLuan)" :key="reply.MaBinhLuan" class="ml-4 flex gap-2 items-start relative">
-                                <img :src="reply.HinhAnhKhachHang ? `${reply.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                                    class="w-8 h-8 rounded-full object-cover" alt="Avatar" />
-                                <div class="flex flex-col gap-1 w-full">
-                                    <div class="bg-gray-600 rounded-lg p-2">
-                                        <p class="text-white text-[12px] font-semibold">{{ reply.TenKhachHang }}</p>
-                                        <p class="text-white text-[14px]"><span class="font-semibold mr-1">{{ reply.ReplyToTenKhachHang }}</span>{{ reply.NoiDungBinhLuan }}</p>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <p class="text-white text-[12px]">{{ formatTime(new Date(reply.ThoiGian)) }}</p>
-                                        <button @click="toggleReplyForm(reply.MaBinhLuan)"
+                                <div class="flex justify-between items-center">
+                                    <p class="text-white text-[12px]">{{ formatTime(new Date(comment.ThoiGian)) }}</p>
+                                    <div class="flex gap-2">
+                                        <button @click="deleteComment(comment.MaBinhLuan)"
+                                            :class="comment.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
+                                            class="text-gray-300 text-[12px] text-end hover:text-white">
+                                            Xóa
+                                        </button>
+                                        <button @click="toggleReplyForm(comment.MaBinhLuan)"
                                             class="text-gray-300 text-[12px] text-end hover:text-white">
                                             Trả lời
                                         </button>
                                     </div>
-                                    <div v-if="showReplyForm[reply.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
-                                        <textarea v-model="replyContent"
-                                            class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
-                                            placeholder="Viết trả lời..." rows="2"></textarea>
-                                        <div class="flex gap-2 justify-end">
-                                            <button @click="submitReply(reply.MaBinhLuan)"
-                                                class="bg-blue-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-blue-600">Gửi</button>
-                                            <button @click="toggleReplyForm(reply.MaBinhLuan)"
-                                                class="bg-gray-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-gray-600">Hủy</button>
+                                </div>
+                                <div v-if="showReplyForm[comment.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
+                                    <textarea v-model="replyContent"
+                                        class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
+                                        placeholder="Viết trả lời..." rows="2"></textarea>
+                                    <div class="flex gap-2 justify-end">
+                                        <button @click="submitReply(comment.MaBinhLuan)"
+                                            class="bg-blue-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-blue-600">Gửi</button>
+                                        <button @click="toggleReplyForm(comment.MaBinhLuan)"
+                                            class="bg-gray-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-gray-600">Hủy</button>
+                                    </div>
+                                </div>
+                                <div v-for="reply in replies(comment.MaBinhLuan)" :key="reply.MaBinhLuan"
+                                    class="ml-4 flex gap-2 items-start relative">
+                                    <img :src="reply.HinhAnhKhachHang ? `${reply.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
+                                        class="w-8 h-8 rounded-full object-cover" alt="Avatar" />
+                                    <div class="flex flex-col gap-1 w-full">
+                                        <div class="bg-gray-600 rounded-lg p-2">
+                                            <p class="text-white text-[12px] font-semibold">{{ reply.TenKhachHang }}</p>
+                                            <p class="text-white text-[14px]"><span class="font-semibold mr-1">{{
+                                                reply.ReplyToTenKhachHang }}</span>{{ reply.NoiDungBinhLuan }}</p>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <p class="text-white text-[12px]">{{ formatTime(new Date(reply.ThoiGian)) }}
+                                            </p>
+                                            <div class="flex gap-2">
+                                                <button @click="deleteComment(reply.MaBinhLuan)"
+                                                    :class="reply.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
+                                                    class="text-gray-300 text-[12px] text-end hover:text-white">
+                                                    Xóa
+                                                </button>
+                                                <button @click="toggleReplyForm(reply.MaBinhLuan)"
+                                                    class="text-gray-300 text-[12px] text-end hover:text-white">
+                                                    Trả lời
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div v-if="showReplyForm[reply.MaBinhLuan]"
+                                            class="mt-2 ml-4 flex flex-col gap-2">
+                                            <textarea v-model="replyContent"
+                                                class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
+                                                placeholder="Viết trả lời..." rows="2"></textarea>
+                                            <div class="flex gap-2 justify-end">
+                                                <button @click="submitReply(reply.MaBinhLuan)"
+                                                    class="bg-blue-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-blue-600">Gửi</button>
+                                                <button @click="toggleReplyForm(reply.MaBinhLuan)"
+                                                    class="bg-gray-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-gray-600">Hủy</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div v-else class="flex justify-center items-center m-auto w-full rounded-md p-4">
+                        <div class="flex flex-col items-center justify-center gap-3">
+                            <p class="font-semibold text-white text-[20px] text-center">Hiện tại không có bình luận nào!</p>
+                            <img src="../../assets/img/empty_client.png" class="w-[140px]" alt="">
                         </div>
                     </div>
                 </div>

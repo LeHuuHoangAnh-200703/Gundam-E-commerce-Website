@@ -8,12 +8,9 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const avatarCustomer = ref('');
-const nameCustomer = ref('');
 const idCustomer = ref('');
 const listPost = ref([]);
 const selectedType = ref("All");
-
 const notification = ref({
     message: '',
     type: ''
@@ -47,12 +44,9 @@ const categoryPost = [
         type: 'Custom'
     },
 ]
-const fetchCustomer = async () => {
-    const maKhachHang = localStorage.getItem("MaKhachHang");
+const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${maKhachHang}`);
-        avatarCustomer.value = response.data.Image;
-        nameCustomer.value = response.data.TenKhachHang;
+        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         idCustomer.value = response.data.MaKhachHang;
     } catch (error) {
         console.log("Error fetching: ", error);
@@ -68,9 +62,9 @@ const fetchCommunityPostById = async (idBaiDang) => {
     }
 }
 
-const fetchCommunityPost = async () => {
+const fetchCommunityPost = async (idKhachHang) => {
     try {
-        const response = await axios.get("http://localhost:3000/api/baidang");
+        const response = await axios.get(`http://localhost:3000/api/baidang/danhsachbaidang/${idKhachHang}`);
         listPost.value = response.data.filter(post => {
             return post.TrangThaiDang === 'Đã duyệt'
         }).map(post => {
@@ -115,13 +109,13 @@ const likePost = async (idBaiDang) => {
     }
 }
 
-const deletePost = async (idBaiDang) => {
+const deletePost = async (idBaiDang, idKhachHang) => {
     const confirmUpdate = confirm("Bạn có chắc chắn xóa bài đăng này không?");
     if (!confirmUpdate) return;
     try {
         await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
         showNotification("Xóa bài đăng thành công!", "success");
-        await fetchCommunityPost();
+        await fetchCommunityPost(idKhachHang);
     } catch (error) {
         console.log("Error delete post: ", error);
     }
@@ -142,8 +136,9 @@ const formatTime = (time) => {
 };
 
 onMounted(() => {
-    fetchCustomer();
-    fetchCommunityPost();
+    const idKhachHang = router.currentRoute.value.params.maKhachHang;
+    fetchCustomer(idKhachHang);
+    fetchCommunityPost(idKhachHang);
 })
 </script>
 
@@ -152,20 +147,9 @@ onMounted(() => {
         <Header />
         <div class="relative mb-5 m-2 lg:mx-[200px] flex flex-grow gap-6">
             <div class="w-full overflow-y-auto flex items-center flex-col gap-6">
-                <div class="w-full flex gap-5 items-center bg-gray-700 p-3 rounded-lg border-2">
-                    <div class="lg:w-[7%] w-[20%]">
-                        <img :src="avatarCustomer ? `${avatarCustomer}` : '/src/assets/img/avatar.jpg'"
-                            class="w-12 h-12 lg:w-12 lg:h-12 rounded-full object-cover" alt="">
-                    </div>
-                    <router-link :to="`/addCommunityPost/${idCustomer}`"
-                        class="w-full text-white text-[12px] lg:text-[16px] font-medium p-4 bg-gray-600 rounded-lg hover:bg-gray-500 transition-all duration-200">
-                        {{ nameCustomer }} ơi, bạn đang nghĩ gì thế ?
-                    </router-link>
-                </div>
                 <div class="flex lg:flex-row flex-col gap-6">
                     <div class="hidden lg:flex flex-col items-start gap-6 w-[35%]">
-                        <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-5">Cộng đồng
-                            fan gundam của c3</p>
+                        <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-5">Danh sách bài đăng của bạn</p>
                         <button v-for="item in categoryPost" :key="item" @click="selectTypePosts(item.type)"
                             class="text-white font-semibold text-[18px] group">{{
                                 item.name }}
@@ -192,14 +176,14 @@ onMounted(() => {
                                                 formatTime(post.ThoiGianDang) }}</p>
                                         </div>
                                     </div>
-                                    <button @click="deletePost(post.MaBaiDang)" :class="post.MaKhachHang.includes(idCustomer) ? 'block' :'hidden' ">
+                                    <button @click="deletePost(post.MaBaiDang, post.MaKhachHang)">
                                         <i class="fa-solid fa-trash text-white text-[18px]"></i>
                                     </button>
                                 </div>
                                 <p class="text-white font-medium font-sans">{{ post.NoiDung }}</p>
                             </div>
                             <div class="grid grid-cols-2 gap-1">
-                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img" class="w-full max-h-[300px] object-cover"
+                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img" class="w-full h-full"
                                     alt="">
                             </div>
                             <div class="px-4 flex flex-col gap-2">

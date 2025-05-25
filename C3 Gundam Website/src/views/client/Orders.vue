@@ -308,7 +308,7 @@ watch(
                                                 {{ address.DiaChi }}
                                             </option>
                                         </select>
-                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần tài khoản nếu chưa có.</p>
+                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần danh mục cá nhân nếu chưa có.</p>
                                         <p v-if="errors.address" class="text-red-500 text-sm mt-2">
                                             {{ errors.address }}
                                         </p>

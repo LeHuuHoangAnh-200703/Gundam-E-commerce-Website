@@ -44,6 +44,7 @@ import CommunityPost from "@/views/client/communityPost.vue";
 import AddCommunityPost from "@/views/client/addCommunityPost.vue";
 import CommentCommunityPost from "@/views/client/commentCommunityPost.vue";
 import CommunityPostManage from "@/views/admin/communityPostManage.vue";
+import YourPostLists from "@/views/client/yourPostLists.vue";
 
 const routes = [
     {
@@ -145,6 +146,11 @@ const routes = [
         path: "/commentCommunityPost/:maBaiDang",
         name: "Comment Community Post",
         component: CommentCommunityPost,
+    },
+    {
+        path: "/yourPostLists/:maKhachHang",
+        name: "Your Post Lists",
+        component: YourPostLists,
     },
     {
         path: "/admin/adminLogin",

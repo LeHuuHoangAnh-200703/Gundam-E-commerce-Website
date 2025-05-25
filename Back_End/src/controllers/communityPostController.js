@@ -91,6 +91,31 @@ exports.getCommunityPost = async (req, res) => {
   }
 };
 
+exports.getCommunityPostById = async (req, res) => {
+  try {
+    const posts = await CommunityPost.find({ MaKhachHang: req.params.maKhachHang });
+    const customerIds = [...new Set(posts.map(post => post.MaKhachHang))];
+
+    const customers = await Customer.find({ MaKhachHang: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.MaKhachHang] = {
+        TenKhachHang: customer.TenKhachHang,
+        HinhAnhKhachHang: customer.Image
+      };
+    });
+
+    const communityPost = posts.map(post => ({
+      ...post.toObject(),
+      TenKhachHang: customerMap[post.MaKhachHang]?.TenKhachHang || "Không xác định",
+      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null
+    }));
+    res.status(200).json(communityPost);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 exports.createCommunityPost = async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ message: 'No files were uploaded.' });
@@ -225,16 +250,10 @@ exports.replyComment = async (req, res) => {
 }
 
 exports.deleteCommunityPost = async (req, res) => {
-  const maBaiDang = req.params;
-  const MaKhachHang = req.body;
   try {
-    const communityPost = await CommunityPost.findOne({ MaBaiDang: maBaiDang });
+    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
     if (!communityPost) {
       return res.status(400).json({ message: "Bài đăng không tồn tại!" });
-    }
-
-    if (communityPost.MaKhachHang !== MaKhachHang) {
-      return res.status(400).json({ message: "Bạn không có quyền xóa bài đăng này!" });
     }
 
     // Xóa tất cả hình ảnh trên Cloudinary nếu có
@@ -246,7 +265,7 @@ exports.deleteCommunityPost = async (req, res) => {
       await Promise.all(destroyPromises);
     }
 
-    const delelePost = await CommunityPost.findOneAndUpdate({ MaBaiDang: maBaiDang });
+    await CommunityPost.findOneAndDelete({ MaBaiDang: req.params.maBaiDang });
 
     res.status(200).json({ message: "Xóa bài đăng thành công!" });
   } catch (error) {
@@ -255,8 +274,8 @@ exports.deleteCommunityPost = async (req, res) => {
 }
 
 exports.deleteComment = async (req, res) => {
-  const { maBaiDang, maBinhLuan } = req.params;
-  const { MaKhachHang } = req.body;
+  const maBaiDang = req.params.maBaiDang;
+  const maBinhLuan = req.params.maBinhLuan;
   try {
     const communityPost = await CommunityPost.findOne({ MaBaiDang: maBaiDang });
     if (!communityPost) {
@@ -268,14 +287,20 @@ exports.deleteComment = async (req, res) => {
       return res.status(400).json({ message: "Bình luận không tồn tại!" });
     }
 
-    // Kiểm tra quyền xóa (chỉ người tạo bình luận được xóa)
-    if (comment.MaKhachHang !== MaKhachHang) {
-      return res.status(400).json({ message: "Bạn không có quyền xóa bình luận này!" });
-    }
+    // Thu thập tất cả MaBinhLuan cần xóa (bình luận gốc và trả lời liên quan)
+    const commentsToDelete = new Set([maBinhLuan]);
+    const collectReplies = (commentId) => {
+      const replies = communityPost.BinhLuan.filter(c => c.TraLoiCho === commentId);
+      replies.forEach(reply => {
+        commentsToDelete.add(reply.MaBinhLuan);
+        collectReplies(reply.MaBinhLuan); // Đệ quy để lấy trả lời của trả lời
+      });
+    };
+    collectReplies(maBinhLuan);
 
-    // Xóa bình luận và các trả lời liên quan
+    // Xóa tất cả bình luận/trả lời trong commentsToDelete
     communityPost.BinhLuan = communityPost.BinhLuan.filter(
-      c => c.MaBinhLuan !== maBinhLuan && c.TraLoiCho !== maBinhLuan
+      c => !commentsToDelete.has(c.MaBinhLuan)
     );
 
     await communityPost.save();

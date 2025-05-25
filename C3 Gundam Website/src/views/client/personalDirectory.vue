@@ -104,7 +104,12 @@ onMounted(() => {
             <div class="w-full m-4">
                 <div class="flex flex-col gap-4">
                     <div class="flex flex-col gap-4">
-                        <h1 class="font-bold text-[20px] uppercase text-white">Danh sách địa chỉ</h1>
+                        <div class="flex items-center justify-between">
+                            <h1 class="font-bold text-[20px] uppercase text-white">Danh sách địa chỉ</h1>
+                            <router-link :to="`/addInfoOrder/${maKhachHang}`"
+                                class="px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md"><i class="fa-solid fa-plus"></i> Thêm
+                                địa chỉ</router-link>
+                        </div>
                         <div v-if="listAddress.length > 0" class="px-4 pb-4 pt-2 bg-white rounded-md">
                             <div v-for="(address, index) in listAddress" :key="index"
                                 class="flex lg:flex-row flex-col gap-2 justify-between items-center border-b-2 py-2">
