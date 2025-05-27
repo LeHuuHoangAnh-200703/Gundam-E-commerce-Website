@@ -36,6 +36,18 @@ const updateStatus = async (maBaiDang, newStatus) => {
     }
 };
 
+const deletePost = async (idBaiDang) => {
+    const confirmUpdate = confirm("Bạn có chắc chắn xóa bài đăng này không?");
+    if (!confirmUpdate) return;
+    try {
+        await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
+        showNotification("Xóa bài đăng thành công!", "success");
+        await fetchCommunityPost();
+    } catch (error) {
+        console.log("Error delete post: ", error);
+    }
+}
+
 const formatTime = (time) => {
     return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
 };
@@ -77,7 +89,7 @@ onMounted(() => {
                                 <button type="submit" @click="updateStatus(post.MaBaiDang, post.TrangThaiDang)"
                                     class="inline-block text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
                                         class="fa-solid fa-check"></i></button>
-                                <button type="submit"
+                                <button type="submit" @click="deletePost(post.MaBaiDang)"
                                     class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
                                         class="fa-solid fa-trash"></i></button>
                             </div>
