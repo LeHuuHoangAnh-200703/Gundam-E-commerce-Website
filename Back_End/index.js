@@ -15,6 +15,23 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 
+const khachHangRoutes = require("./src/routes/customers");
+const adminRoutes = require("./src/routes/admins");
+const supplierRoutes = require("./src/routes/suppliers");
+const discountCodeRoutes = require("./src/routes/discountCodes");
+const notificationRoutes = require("./src/routes/Notifications");
+const productRoutes = require("./src/routes/products");
+const entryFormRoutes = require("./src/routes/entryForms");
+const entryFormInfoRoutes = require("./src/routes/entryFormInfos");
+const orderRoutes = require("./src/routes/orders");
+const feeabackRoutes = require("./src/routes/feedbacks");
+const inventoryRoutes = require("./src/routes/inventories");
+const cartRoutes = require("./src/routes/carts");
+const locationRoutes = require("./src/routes/locations");
+const statisticalRoutes = require("./src/routes/statisticals");
+const communityPost = require("./src/routes/communityPosts");
+const vnpayPayment = require("./src/routes/vnpay");
+
 const Customer = require('./src/models/customersModels');
 
 dotenv.config();
@@ -111,22 +128,6 @@ const environment = new paypal.core.SandboxEnvironment(
 );
 const client = new paypal.core.PayPalHttpClient(environment);
 
-const khachHangRoutes = require("./src/routes/customers");
-const adminRoutes = require("./src/routes/admins");
-const supplierRoutes = require("./src/routes/suppliers");
-const discountCodeRoutes = require("./src/routes/discountCodes");
-const notificationRoutes = require("./src/routes/Notifications");
-const productRoutes = require("./src/routes/products");
-const entryFormRoutes = require("./src/routes/entryForms");
-const entryFormInfoRoutes = require("./src/routes/entryFormInfos");
-const orderRoutes = require("./src/routes/orders");
-const feeabackRoutes = require("./src/routes/feedbacks");
-const inventoryRoutes = require("./src/routes/inventories");
-const cartRoutes = require("./src/routes/carts");
-const locationRoutes = require("./src/routes/locations");
-const statisticalRoutes = require("./src/routes/statisticals");
-const communityPost = require("./src/routes/communityPosts");
-
 app.use("/api/khachhang", khachHangRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/nhacungcap", supplierRoutes);
@@ -142,6 +143,7 @@ app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/thongke", statisticalRoutes);
 app.use("/api/baidang", communityPost);
+app.use("/api/thanhtoanvnp", vnpayPayment);
 
 // Cấu hình Nodemailer
 const transporter = nodemailer.createTransport({

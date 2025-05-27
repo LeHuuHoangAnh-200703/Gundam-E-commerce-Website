@@ -6,11 +6,11 @@ const Product = require("../models/productModels");
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
 });
 exports.getAllOrders = async (req, res) => {
     try {
@@ -129,6 +129,81 @@ exports.createOrder = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.createTempOrder = async (req, res) => {
+    let { IdMaGiamGia, TongDon, SanPhamDaMua, MaKhachHang } = req.body;
+    let finalPrice = TongDon;
+    try {
+        if (SanPhamDaMua && !Array.isArray(SanPhamDaMua)) {
+            SanPhamDaMua = [SanPhamDaMua];
+        }
+        if (IdMaGiamGia) {
+            const discount = await DiscountCode.findOne({ IdMaGiamGia: IdMaGiamGia });
+            if (!discount) {
+                return res.status(400).json({ message: "Mã giảm giá không tồn tại." });
+            }
+
+            const currentDay = new Date();
+            if (currentDay > discount.NgayHetHan) {
+                return res.status(400).json({ message: "Mã giảm giá đã hết hạn." });
+            }
+
+            if (discount.SoLanSuDung <= 0) {
+                return res.status(400).json({ message: "Mã giảm giá đã hết lượt sử dụng." });
+            }
+
+            // Kiểm tra khách hàng đã sử dụng mã này chưa
+            if (discount.IdKhachHangSuDung?.includes(MaKhachHang)) {
+                return res.status(400).json({ message: "Bạn đã sử dụng mã giảm giá này rồi." });
+            }
+
+            const giaApDung = Number(discount.GiaApDung);
+            const giamTien = Number(discount.GiamTien || 0);
+            const giamPhanTram = discount.GiamPhanTram || 0;
+
+            if (TongDon >= giaApDung) {
+                if (giamTien > 0) {
+                    finalPrice -= giamTien;
+                } else if (giamPhanTram > 0) {
+                    finalPrice -= (finalPrice * (giamPhanTram / 100));
+                }
+
+                if (finalPrice < 0) {
+                    finalPrice = 0;
+                }
+
+                discount.SoLanSuDung -= 1;
+                discount.IdKhachHangSuDung = [...(discount.IdKhachHangSuDung || []), MaKhachHang];
+                await discount.save();
+            } else {
+                return res.status(400).json({ message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });
+            }
+        }
+        for (const sp of SanPhamDaMua) {
+            const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
+            if (!inventory || inventory.SoLuongTon < sp.SoLuong) return res.status(400).json({ message: `Sản phẩm ${sp.TenSanPham} không đủ số lượng.` });
+        }
+        const orderData = {
+            MaKhachHang: req.body.MaKhachHang,
+            DiaChiNhanHang: req.body.DiaChiNhanHang,
+            SanPhamDaMua: req.body.SanPhamDaMua,
+            IdMaGiamGia: req.body.IdMaGiamGia,
+            HinhThucThanhToan: 'Thanh toán qua VNPAY',
+            TongDon: finalPrice,
+            GhiChu: req.body.GhiChu || 'Không có ghi chú',
+            NgayDatHang: new Date(),
+            HinhThucVanChuyen: req.body.HinhThucVanChuyen,
+            TrangThaiThanhToan: 'Chờ thanh toán',
+            TrangThaiDon: 'Đang chờ xác nhận',
+        };
+        const order = new Order(orderData);
+        await order.save();
+        res.json({ MaDonHang: order.MaDonHang });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 exports.updatedOrder = async (req, res) => {
     try {
@@ -431,6 +506,24 @@ exports.getOrderByDayMonth = async (req, res) => {
 };
 
 exports.sendEmailOrderSuccess = async (req, res) => {
+    const email = req.query.email;
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "Đặt hàng thành công tại C3 GUNDAM STORE",
+            text: "Cám ơn bạn đã đặt hàng. Đơn hàng sẽ được giao đến bạn trong vòng 3 - 5 ngày.",
+        };
+
+        await transporter.sendMail(mailOptions);
+        return res.status(200).json(true)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Lỗi khi gửi email khi đặt hàng." });
+    }
+}
+
+exports.sendEmailOrderSuccessByVNPay = async (req, res) => {
     const email = req.query.email;
     try {
         const mailOptions = {

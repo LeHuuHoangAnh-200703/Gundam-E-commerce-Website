@@ -39,6 +39,7 @@ const price = ref(0);
 const quantity = ref(1);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
+const isVNPayReady = ref(false)
 
 const notification = ref({
     message: '',
@@ -56,6 +57,34 @@ const showNotification = (msg, type) => {
         notification.value.message = '';
     }, 3000);
 };
+
+const validateForm = () => {
+    errors.value = {};
+
+    if (!formData.value.address) {
+        errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
+    }
+
+    if (formData.value.description) {
+        formData.value.description = escapeHtml(formData.value.description);
+    }
+
+    if (formData.value.discountCode) {
+        formData.value.discountCode = escapeHtml(formData.value.discountCode);
+    }
+
+    if (!formData.value.payment) {
+        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
+    }
+
+    if (!formData.value.shippingMethod) {
+        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
+    }
+
+    if (Object.keys(errors.value).length > 0) {
+        return;
+    }
+}
 
 const fetchProduct = async (idProduct) => {
     try {
@@ -104,32 +133,10 @@ watch([price, quantity, () => formData.value.shippingMethod], () => {
 });
 
 const addOrders = async () => {
-    errors.value = {};
-
-    if (!formData.value.address) {
-        errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
-    }
-
-    if (formData.value.description) {
-        formData.value.description = escapeHtml(formData.value.description);
-    }
-
-    if (formData.value.discountCode) {
-        formData.value.discountCode = escapeHtml(formData.value.discountCode);
-    }
-
-    if (!formData.value.payment) {
-        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
-    }
-
-    if (!formData.value.shippingMethod) {
-        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
-    }
-
-    if (Object.keys(errors.value).length > 0) {
+    if (!validateForm()) {
         return;
     }
-
+    
     if (formData.value.payment !== "Thanh toán qua Paypal") {
         const confirmUpdate = confirm(
             "Vui lòng kiểm tra lại thông tin trước khi đặt hàng?"
@@ -248,17 +255,19 @@ onMounted(() => {
     fetchCustomer(maKhachHang);
 });
 
-watch(
-    () => formData.value.payment,
-    (newPayment) => {
-        if (newPayment === "Thanh toán qua Paypal") {
-            isPayPalReady.value = true; // Hiển thị nút PayPal
-            initializePayPalButton();
-        } else {
-            isPayPalReady.value = false; // Ẩn nút PayPal
-        }
+watch(() => formData.value.payment, (newPayment) => {
+    if (newPayment === 'Thanh toán qua Paypal') {
+        isPayPalReady.value = true;  // Hiển thị nút PayPal
+        isVNPayReady = false;
+        initializePayPalButton();
+    } else if (newPayment === 'Thanh toán qua VNPay') {
+        isVNPayReady.value = true;
+        isPayPalReady.value = false;  // Ẩn nút PayPal
+    } else {
+        isPayPalReady.value  = false;
+        isVNPayReady.value  = false;
     }
-);
+});
 </script>
 
 <template>
@@ -288,8 +297,7 @@ watch(
                                     <div class="w-full">
                                         <label for=""
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Email</label>
-                                        <input type="text" v-model="emailCustomer" readonly
-                                            placeholder="079xxxxxxx"
+                                        <input type="text" v-model="emailCustomer" readonly placeholder="079xxxxxxx"
                                             class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out" />
                                     </div>
                                     <div class="w-full">
@@ -308,7 +316,8 @@ watch(
                                                 {{ address.DiaChi }}
                                             </option>
                                         </select>
-                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần danh mục cá nhân nếu chưa có.</p>
+                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần danh mục cá nhân
+                                            nếu chưa có.</p>
                                         <p v-if="errors.address" class="text-red-500 text-sm mt-2">
                                             {{ errors.address }}
                                         </p>
@@ -330,8 +339,8 @@ watch(
                                     <div class="flex flex-col gap-4 overflow-hidden">
                                         <div class="overflow-y-auto max-h-[200px] flex flex-col gap-4">
                                             <div class="flex gap-4 items-start">
-                                                <img :src="`${images[0]}`"
-                                                    class="w-[50px] lg:w-[80px] border-2" alt="" />
+                                                <img :src="`${images[0]}`" class="w-[50px] lg:w-[80px] border-2"
+                                                    alt="" />
                                                 <div class="overflow-hidden">
                                                     <div
                                                         class="w-52 lg:w-96 whitespace-nowrap text-ellipsis overflow-hidden">
@@ -367,14 +376,16 @@ watch(
                                                 <option class="text-[#333] cursor-pointer" value="">
                                                     Danh sách mã giảm giá của bạn
                                                 </option>
-                                                <option v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())" :key="index"
-                                                    :value="discountCode.IdMaGiamGia"
-                                                    class="text-[#333] cursor-pointer">Id Mã: {{ discountCode.IdMaGiamGia }}
+                                                <option
+                                                    v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())"
+                                                    :key="index" :value="discountCode.IdMaGiamGia"
+                                                    class="text-[#333] cursor-pointer">Id Mã: {{
+                                                        discountCode.IdMaGiamGia }}
                                                     / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
                                                     {{
-                                                    discountCode.GiamTien
-                                                    ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
-                                                    : `${discountCode.GiamPhanTram}%`
+                                                        discountCode.GiamTien
+                                                            ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
+                                                            : `${discountCode.GiamPhanTram}%`
                                                     }}
                                                 </option>
                                             </select>
@@ -400,6 +411,8 @@ watch(
                                                     value="Thanh toán qua Paypal">
                                                     Thanh toán qua Paypal
                                                 </option>
+                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua VNPay">
+                                                    Thanh toán qua VNPay</option>
                                             </select>
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">
                                                 {{ errors.payment }}
@@ -409,8 +422,10 @@ watch(
                                             <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
                                                 Hình thức giao hàng:
                                             </label>
-                                            <div v-if="price * quantity >= 2000000" class="p-3 rounded-lg border border-gray-500 bg-gray-800">
-                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000 VNĐ</span>
+                                            <div v-if="price * quantity >= 2000000"
+                                                class="p-3 rounded-lg border border-gray-500 bg-gray-800">
+                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000
+                                                    VNĐ</span>
                                             </div>
                                             <div v-else class="space-y-2">
                                                 <label v-for="ship in shippingFee" :key="ship"
@@ -440,13 +455,17 @@ watch(
                                                 {{ formatCurrency(totalPrice) }} VNĐ</span>
                                         </p>
                                         <button type="submit" :class="formData.payment === 'Thanh toán khi nhận hàng' ||
-                                                formData.payment === ''
-                                                ? 'block'
-                                                : 'hidden'
+                                            formData.payment === ''
+                                            ? 'block'
+                                            : 'hidden'
                                             "
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
                                             Đặt hàng
                                         </button>
+                                        <button type="submit" :class="isVNPayReady ? 'block' : 'hidden'"
+                                            class="flex gap-2 items-center justify-center px-6 py-3 bg-[#4169E1] rounded-md text-white font-medium self-end w-full">Thanh
+                                            toán qua <img src="../../assets/img/vnpay.png" class="w-8 h-8"
+                                                alt=""><Span class="font-bold font-bungee">VN <span class="text-[#DC143C]">Pay</span></Span></button>
                                         <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
                                         </div>
                                     </div>

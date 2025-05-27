@@ -35,7 +35,7 @@ const listAddress = ref([]);
 const listDiscountCodes = ref([]);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
-
+const isVNPayReady = ref(false);
 const notification = ref({
     message: '',
     type: ''
@@ -54,18 +54,7 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
-const fetchCustomer = async (idKhachHang) => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
-        nameCustomer.value = response.data.TenKhachHang;
-        emailCustomer.value = response.data.Email;
-        listAddress.value = response.data.DanhSachDiaChi;
-        listDiscountCodes.value = response.data.DanhSachMaGiamGia;
-    } catch (err) {
-        console.log("Error fetching: ", err);
-    }
-}
-const addOrders = async () => {
+const validateForm = () => {
     errors.value = {};
 
     if (!formData.value.address) {
@@ -95,7 +84,24 @@ const addOrders = async () => {
     if (Object.keys(errors.value).length > 0) {
         return;
     }
+}
 
+const fetchCustomer = async (idKhachHang) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        nameCustomer.value = response.data.TenKhachHang;
+        emailCustomer.value = response.data.Email;
+        listAddress.value = response.data.DanhSachDiaChi;
+        listDiscountCodes.value = response.data.DanhSachMaGiamGia;
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+const addOrders = async () => {
+    if (!validateForm()) {
+        return;
+    }
+    
     if (formData.value.payment !== 'Thanh toán qua Paypal') {
         const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
         if (!confirmUpdate) return;
@@ -236,9 +242,14 @@ watch(() => formData.value.shippingMethod, () => {
 watch(() => formData.value.payment, (newPayment) => {
     if (newPayment === 'Thanh toán qua Paypal') {
         isPayPalReady.value = true;  // Hiển thị nút PayPal
+        isVNPayReady = false;
         initializePayPalButton();
-    } else {
+    } else if (newPayment === 'Thanh toán qua VNPay') {
+        isVNPayReady.value = true;
         isPayPalReady.value = false;  // Ẩn nút PayPal
+    } else {
+        isPayPalReady.value = false;
+        isVNPayReady.value = false;
     }
 });
 </script>
@@ -285,7 +296,8 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 {{ address.TenNguoiNhan }} / {{ address.DienThoai }} / {{ address.DiaChi
                                                 }}</option>
                                         </select>
-                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần danh mục cá nhân nếu chưa có.</p>
+                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần danh mục cá nhân
+                                            nếu chưa có.</p>
                                         <p v-if="errors.address" class="text-red-500 text-sm mt-2">{{
                                             errors.address }}</p>
                                     </div>
@@ -367,6 +379,8 @@ watch(() => formData.value.payment, (newPayment) => {
                                                     value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
                                                 <option class="text-[#333] cursor-pointer"
                                                     value="Thanh toán qua Paypal">Thanh toán qua Paypal</option>
+                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua VNPay">
+                                                    Thanh toán qua VNPay</option>
                                             </select>
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">{{
                                                 errors.payment }}</p>
@@ -408,6 +422,11 @@ watch(() => formData.value.payment, (newPayment) => {
                                             :class="(formData.payment === 'Thanh toán khi nhận hàng' || formData.payment === '') ? 'block' : 'hidden'"
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">Đặt
                                             hàng</button>
+                                        <button type="submit" :class="isVNPayReady ? 'block' : 'hidden'"
+                                            class="flex gap-2 items-center justify-center px-6 py-3 bg-[#4169E1] rounded-md text-white font-medium self-end w-full">Thanh
+                                            toán qua <img src="../../assets/img/vnpay.png" class="w-8 h-8" alt=""><Span
+                                                class="font-bold font-bungee">VN <span
+                                                    class="text-[#DC143C]">Pay</span></Span></button>
                                         <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
                                         </div>
                                     </div>

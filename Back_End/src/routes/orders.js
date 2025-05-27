@@ -5,6 +5,7 @@ const orderController = require('../controllers/orderControllers');
 router.get("/", orderController.getAllOrders);
 router.get("/:maDonHang", orderController.getOrder);
 router.post("/", orderController.createOrder);
+router.post("/luutamdon", orderController.createTempOrder);
 router.put("/:maDonHang", orderController.updatedOrder);
 router.delete("/:maDonHang",orderController.deleteOrder);
 router.get("/khachhang/:maKhachHang", orderController.getOrderById);
@@ -15,5 +16,6 @@ router.get("/thongke/revenue-by-day", orderController.getRevenueByDay);
 router.get("/kiemtradanhgia/:maDonHang", orderController.checkOrderReviewed);
 router.get("/locdonhang/ngaythangnam", orderController.getOrderByDayMonth);
 router.post("/guiemail", orderController.sendEmailOrderSuccess);
+router.get('/guiemail', orderController.sendEmailOrderSuccessByVNPay);
 
 module.exports = router;
