@@ -29,8 +29,8 @@ const inventoryRoutes = require("./src/routes/inventories");
 const cartRoutes = require("./src/routes/carts");
 const locationRoutes = require("./src/routes/locations");
 const statisticalRoutes = require("./src/routes/statisticals");
-const communityPost = require("./src/routes/communityPosts");
-const vnpayPayment = require("./src/routes/vnpay");
+const communityPostRoutes = require("./src/routes/communityPosts");
+const vnpayRoutes = require("./src/routes/vnpay");
 
 const Customer = require('./src/models/customersModels');
 
@@ -142,8 +142,8 @@ app.use("/api/quanlykho", inventoryRoutes);
 app.use("/api/giohang", cartRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/thongke", statisticalRoutes);
-app.use("/api/baidang", communityPost);
-app.use("/api/thanhtoanvnp", vnpayPayment);
+app.use("/api/baidang", communityPostRoutes);
+app.use("/api/thanhtoanvnp", vnpayRoutes);
 
 // Cấu hình Nodemailer
 const transporter = nodemailer.createTransport({

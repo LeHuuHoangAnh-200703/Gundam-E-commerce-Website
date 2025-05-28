@@ -39,52 +39,24 @@ const price = ref(0);
 const quantity = ref(1);
 const totalPrice = ref(0);
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
-const isVNPayReady = ref(false)
+const isVNPayReady = ref(false);
 
 const notification = ref({
-    message: '',
-    type: ''
+    message: "",
+    type: "",
 });
 
 const shippingFee = [
-    { fee: 'Giao tiêu chuẩn (20.000đ)' },
-    { fee: 'Giao nhanh (30.000đ)' },
-    { fee: 'Ship hỏa tốc (50.000đ)' },
-]
+    { fee: "Giao tiêu chuẩn (20.000đ)" },
+    { fee: "Giao nhanh (30.000đ)" },
+    { fee: "Ship hỏa tốc (50.000đ)" },
+];
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
-        notification.value.message = '';
+        notification.value.message = "";
     }, 3000);
 };
-
-const validateForm = () => {
-    errors.value = {};
-
-    if (!formData.value.address) {
-        errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
-    }
-
-    if (formData.value.description) {
-        formData.value.description = escapeHtml(formData.value.description);
-    }
-
-    if (formData.value.discountCode) {
-        formData.value.discountCode = escapeHtml(formData.value.discountCode);
-    }
-
-    if (!formData.value.payment) {
-        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
-    }
-
-    if (!formData.value.shippingMethod) {
-        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
-    }
-
-    if (Object.keys(errors.value).length > 0) {
-        return;
-    }
-}
 
 const fetchProduct = async (idProduct) => {
     try {
@@ -133,10 +105,32 @@ watch([price, quantity, () => formData.value.shippingMethod], () => {
 });
 
 const addOrders = async () => {
-    if (!validateForm()) {
+    errors.value = {};
+
+    if (!formData.value.address) {
+        errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
+    }
+
+    if (formData.value.description) {
+        formData.value.description = escapeHtml(formData.value.description);
+    }
+
+    if (formData.value.discountCode) {
+        formData.value.discountCode = escapeHtml(formData.value.discountCode);
+    }
+
+    if (!formData.value.payment) {
+        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
+    }
+
+    if (!formData.value.shippingMethod) {
+        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
+    }
+
+    if (Object.keys(errors.value).length > 0) {
         return;
     }
-    
+
     if (formData.value.payment !== "Thanh toán qua Paypal") {
         const confirmUpdate = confirm(
             "Vui lòng kiểm tra lại thông tin trước khi đặt hàng?"
@@ -171,21 +165,29 @@ const addOrders = async () => {
             NgayDatHang: new Date(),
             GhiChu: formData.value.description || "Không có ghi chú",
             TrangThaiThanhToan: trangThaiThanhToan,
-            HinhThucVanChuyen: formData.value.shippingMethod
+            HinhThucVanChuyen: formData.value.shippingMethod,
         };
 
         const response = await axios.post(
             "http://localhost:3000/api/donhang",
             dataToSend
         );
-        showNotification("Đặt hàng thành công, vui lòng kiểm tra email xác nhận!", "success");
+        showNotification(
+            "Đặt hàng thành công, vui lòng kiểm tra email xác nhận!",
+            "success"
+        );
 
-        await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`)
+        await axios.post(
+            `http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`
+        );
         setTimeout(() => {
             router.push("/orders_history");
         }, 3000);
     } catch (error) {
-        showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
+        showNotification(
+            error.response?.data?.message || "Đặt hàng thất bại!",
+            "error"
+        );
     }
     setTimeout(() => {
         notification.value.message = "";
@@ -225,11 +227,17 @@ const initializePayPalButton = () => {
                     await addOrders();
 
                     if (notification.value.type === "success") {
-                        showNotification("Thanh toán qua PayPal và đặt hàng thành công, vui lòng kiểm tra email xác nhận!", "success");
+                        showNotification(
+                            "Thanh toán qua PayPal và đặt hàng thành công, vui lòng kiểm tra email xác nhận!",
+                            "success"
+                        );
                     }
                 } catch (error) {
                     console.error("Lỗi khi xử lý đơn hàng sau thanh toán PayPal:", error);
-                    showNotification("Thanh toán thành công nhưng không thể lưu đơn hàng!", "error");
+                    showNotification(
+                        "Thanh toán thành công nhưng không thể lưu đơn hàng!",
+                        "error"
+                    );
                 }
                 setTimeout(() => {
                     notification.value.message = "";
@@ -241,6 +249,90 @@ const initializePayPalButton = () => {
             },
         })
         .render("#paypal-button-container");
+};
+
+const createPaymentVNPay = async () => {
+    errors.value = {};
+
+    if (!formData.value.address) {
+        errors.value.address = "Nếu chưa có địa chỉ vui lòng tạo địa chỉ.";
+    }
+
+    if (formData.value.description) {
+        formData.value.description = escapeHtml(formData.value.description);
+    }
+
+    if (formData.value.discountCode) {
+        formData.value.discountCode = escapeHtml(formData.value.discountCode);
+    }
+
+    if (!formData.value.payment) {
+        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
+    }
+
+    if (!formData.value.shippingMethod) {
+        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
+    }
+
+    if (Object.keys(errors.value).length > 0) {
+        return;
+    }
+    const confirmUpdate = confirm(
+        "Vui lòng kiểm tra lại thông tin trước khi thanh toán qua VNPAY?"
+    );
+    if (!confirmUpdate) return;
+
+    let trangThaiThanhToan = "Khi nhận được hàng";
+    if (formData.value.payment === "Thanh toán qua VNPAY") {
+        trangThaiThanhToan = "Đã thanh toán qua VNPAY";
+    }
+
+    if (totalPrice.value >= 2000000) {
+        formData.value.shippingMethod = "Miễn phí giao hàng";
+    }
+
+    try {
+        const tempOrder = {
+            MaKhachHang: maKhachHang,
+            SanPhamDaMua: {
+                TenSanPham: nameProducts.value,
+                MaSanPham: maSanPham.value,
+                Gia: price.value,
+                SoLuong: quantity.value,
+                LoaiSanPham: type.value,
+                HinhAnh: images.value[0],
+            },
+            DiaChiNhanHang: formData.value.address,
+            IdMaGiamGia: formData.value.discountCode,
+            HinhThucThanhToan: "Thanh toán qua VNPAY",
+            TongDon: totalPrice.value,
+            NgayDatHang: new Date(),
+            GhiChu: formData.value.description || "Không có ghi chú",
+            TrangThaiThanhToan: trangThaiThanhToan,
+            HinhThucVanChuyen: formData.value.shippingMethod,
+        };
+
+        const response = await axios.post(
+            "http://localhost:3000/api/donhang/luutamdon",
+            tempOrder
+        );
+        const maDonHang = response.data.MaDonHang;
+        const paymentResponse = await axios.post(
+            "http://localhost:3000/api/thanhtoanvnp",
+            {
+                amount: totalPrice.value,
+                orderId: maDonHang,
+                orderInfo: `Thanh toán đơn hàng ${maSanPham.value} cho ${nameCustomer.value}###${emailCustomer.value}`,
+                ipAddr: "127.0.0.1",
+            }
+        );
+        window.location.href = paymentResponse.data.paymentUrl;
+    } catch (error) {
+        showNotification(
+            error.response?.data?.message || "Không thể tạo URL thanh toán VNPAY!",
+            "error"
+        );
+    }
 };
 
 function formatCurrency(value) {
@@ -255,19 +347,22 @@ onMounted(() => {
     fetchCustomer(maKhachHang);
 });
 
-watch(() => formData.value.payment, (newPayment) => {
-    if (newPayment === 'Thanh toán qua Paypal') {
-        isPayPalReady.value = true;  // Hiển thị nút PayPal
-        isVNPayReady = false;
-        initializePayPalButton();
-    } else if (newPayment === 'Thanh toán qua VNPay') {
-        isVNPayReady.value = true;
-        isPayPalReady.value = false;  // Ẩn nút PayPal
-    } else {
-        isPayPalReady.value  = false;
-        isVNPayReady.value  = false;
+watch(
+    () => formData.value.payment,
+    (newPayment) => {
+        if (newPayment === "Thanh toán qua Paypal") {
+            isPayPalReady.value = true; // Hiển thị nút PayPal
+            isVNPayReady.value = false;
+            initializePayPalButton();
+        } else if (newPayment === "Thanh toán qua VNPAY") {
+            isVNPayReady.value = true;
+            isPayPalReady.value = false; // Ẩn nút PayPal
+        } else {
+            isPayPalReady.value = false;
+            isVNPayReady.value = false;
+        }
     }
-});
+);
 </script>
 
 <template>
@@ -316,8 +411,9 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 {{ address.DiaChi }}
                                             </option>
                                         </select>
-                                        <p class="mt-2 text-white/65 text-[14px]">Thêm địa chỉ ở phần danh mục cá nhân
-                                            nếu chưa có.</p>
+                                        <p class="mt-2 text-white/65 text-[14px]">
+                                            Thêm địa chỉ ở phần danh mục cá nhân nếu chưa có.
+                                        </p>
                                         <p v-if="errors.address" class="text-red-500 text-sm mt-2">
                                             {{ errors.address }}
                                         </p>
@@ -376,16 +472,13 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 <option class="text-[#333] cursor-pointer" value="">
                                                     Danh sách mã giảm giá của bạn
                                                 </option>
-                                                <option
-                                                    v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())"
-                                                    :key="index" :value="discountCode.IdMaGiamGia"
-                                                    class="text-[#333] cursor-pointer">Id Mã: {{
-                                                        discountCode.IdMaGiamGia }}
-                                                    / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
+                                                <option v-for="(discountCode, index) in listDiscountCodes.filter((dc) => new Date(dc.NgayHetHan) >= new Date())" :key="index" :value="discountCode.IdMaGiamGia" class="text-[#333] cursor-pointer">
+                                                    Id Mã: {{ discountCode.IdMaGiamGia }} / Tên mã:
+                                                    {{ discountCode.TenMaGiamGia }} / Giảm:
                                                     {{
                                                         discountCode.GiamTien
                                                             ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
-                                                            : `${discountCode.GiamPhanTram}%`
+                                                    : `${discountCode.GiamPhanTram}%`
                                                     }}
                                                 </option>
                                             </select>
@@ -411,8 +504,9 @@ watch(() => formData.value.payment, (newPayment) => {
                                                     value="Thanh toán qua Paypal">
                                                     Thanh toán qua Paypal
                                                 </option>
-                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua VNPay">
-                                                    Thanh toán qua VNPay</option>
+                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua VNPAY">
+                                                    Thanh toán qua VNPAY
+                                                </option>
                                             </select>
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">
                                                 {{ errors.payment }}
@@ -455,17 +549,19 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 {{ formatCurrency(totalPrice) }} VNĐ</span>
                                         </p>
                                         <button type="submit" :class="formData.payment === 'Thanh toán khi nhận hàng' ||
-                                            formData.payment === ''
-                                            ? 'block'
-                                            : 'hidden'
-                                            "
-                                            class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
+                                                formData.payment === ''
+                                                ? 'block'
+                                                : 'hidden'
+                                            " class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">
                                             Đặt hàng
                                         </button>
-                                        <button type="submit" :class="isVNPayReady ? 'block' : 'hidden'"
-                                            class="flex gap-2 items-center justify-center px-6 py-3 bg-[#4169E1] rounded-md text-white font-medium self-end w-full">Thanh
-                                            toán qua <img src="../../assets/img/vnpay.png" class="w-8 h-8"
-                                                alt=""><Span class="font-bold font-bungee">VN <span class="text-[#DC143C]">Pay</span></Span></button>
+                                        <button type="button" @click="createPaymentVNPay()" :class="isVNPayReady ? 'block' : 'hidden'"
+                                            class="flex gap-2 items-center justify-center px-6 py-3 bg-[#4169E1] rounded-md text-white font-medium self-end w-full">
+                                            Thanh toán qua
+                                            <img src="../../assets/img/vnpay.png" class="w-8 h-8" alt="" /><span
+                                                class="font-bold font-bungee">VN <span
+                                                    class="text-[#DC143C]">Pay</span></span>
+                                        </button>
                                         <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
                                         </div>
                                     </div>

@@ -379,8 +379,8 @@ watch(() => formData.value.payment, (newPayment) => {
                                                     value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</option>
                                                 <option class="text-[#333] cursor-pointer"
                                                     value="Thanh toán qua Paypal">Thanh toán qua Paypal</option>
-                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua VNPay">
-                                                    Thanh toán qua VNPay</option>
+                                                <option class="text-[#333] cursor-pointer" value="Thanh toán qua VNPAY">
+                                                    Thanh toán qua VNPAY</option>
                                             </select>
                                             <p v-if="errors.payment" class="text-red-500 text-sm mt-2">{{
                                                 errors.payment }}</p>

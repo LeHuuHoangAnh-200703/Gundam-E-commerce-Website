@@ -45,6 +45,7 @@ import AddCommunityPost from "@/views/client/addCommunityPost.vue";
 import CommentCommunityPost from "@/views/client/commentCommunityPost.vue";
 import CommunityPostManage from "@/views/admin/communityPostManage.vue";
 import YourPostLists from "@/views/client/yourPostLists.vue";
+import PaymentVNPaySuccess from "@/views/success/paymentVNPaySuccess.vue";
 
 const routes = [
     {
@@ -293,6 +294,12 @@ const routes = [
         path: "/notFound",
         name: "Not Found",
         component: notFound,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/paymentVNPaySuccess",
+        name: "Payment VNPay Success",
+        component: PaymentVNPaySuccess,
         meta: { requiresAuth: true },
     },
     {
