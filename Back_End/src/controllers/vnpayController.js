@@ -11,7 +11,7 @@ const axios = require('axios');
 const VNP_TMN_CODE = "B57MNZBD";
 const VNP_HASH_SECRET = "9AXN2O7KVV9MJS5BB4I4087IQSSJ7YQN";
 const VNP_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-const VNP_RETURN_URL = "http://localhost:5173/orders_history";
+const VNP_RETURN_URL = "http://localhost:5173/paymentVNPaySuccess";
 
 function sortObject(obj) {
     let sorted = {};
@@ -100,7 +100,7 @@ exports.handleReturnUrl = async (req, res) => {
             // Giao dịch thành công
             const order = await Order.findOne({ MaDonHang: vnpParams.vnp_TxnRef });
             if (!order) {
-                return res.redirect('/payment-fail');
+                return res.redirect('http://localhost:5173/paymentVNPaySuccess?vnp_ResponseCode=01');
             }
 
             // Cập nhật mã giảm giá
@@ -132,22 +132,15 @@ exports.handleReturnUrl = async (req, res) => {
             order.TransactionId = vnpParams.vnp_TransactionNo;
             await order.save();
 
-            // Gửi email xác nhận
-            await axios.get(`http://localhost:3000/api/donhang/guiemail?email=${encodeURIComponent(vnpParams.vnp_OrderInfo.split('###')[1])}`);
-
             // Redirect đến trang thành công
-            return res.redirect(
-                `/payment-success?transactionId=${vnpParams.vnp_TransactionNo}&amount=${vnpParams.vnp_Amount / 100}&orderInfo=${encodeURIComponent(
-                    vnpParams.vnp_OrderInfo.split('###')[0]
-                )}`
-            );
+            return res.redirect(`http://localhost:5173/paymentVNPaySuccess?vnp_ResponseCode=00&vnp_TransactionNo=${vnpParams.vnp_TransactionNo}`);
         } else {
             // Giao dịch thất bại
-            return res.redirect('/payment-fail');
+            return res.redirect('http://localhost:5173/paymentVNPaySuccess?vnp_ResponseCode=01');
         }
     } catch (error) {
         console.error('Error processing return URL:', error);
-        return res.redirect('/payment-fail');
+        return res.redirect('http://localhost:5173/paymentVNPaySuccess?vnp_ResponseCode=01');
     }
 };
 

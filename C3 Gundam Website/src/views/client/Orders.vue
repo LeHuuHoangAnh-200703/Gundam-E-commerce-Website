@@ -182,7 +182,7 @@ const addOrders = async () => {
         );
         setTimeout(() => {
             router.push("/orders_history");
-        }, 3000);
+        }, 2000);
     } catch (error) {
         showNotification(
             error.response?.data?.message || "Đặt hàng thất bại!",
@@ -191,7 +191,7 @@ const addOrders = async () => {
     }
     setTimeout(() => {
         notification.value.message = "";
-    }, 3000);
+    }, 2000);
 };
 
 const initializePayPalButton = () => {

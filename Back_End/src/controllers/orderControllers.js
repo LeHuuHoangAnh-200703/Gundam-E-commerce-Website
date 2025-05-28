@@ -8,8 +8,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: "c3gundamstore@gmail.com",
+        pass: "varzwbjducnkzmaj",
     },
 });
 exports.getAllOrders = async (req, res) => {
@@ -505,25 +505,7 @@ exports.getOrderByDayMonth = async (req, res) => {
     }
 };
 
-exports.sendEmailOrderSuccess = async (req, res) => {
-    const email = req.query.email;
-    try {
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "Đặt hàng thành công tại C3 GUNDAM STORE",
-            text: "Cám ơn bạn đã đặt hàng. Đơn hàng sẽ được giao đến bạn trong vòng 3 - 5 ngày.",
-        };
-
-        await transporter.sendMail(mailOptions);
-        return res.status(200).json(true)
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: "Lỗi khi gửi email khi đặt hàng." });
-    }
-}
-
-exports.sendEmailOrderSuccessByVNPay = async (req, res) => {
+exports.sendEmailOrder = async (req, res) => {
     const email = req.query.email;
     try {
         const mailOptions = {

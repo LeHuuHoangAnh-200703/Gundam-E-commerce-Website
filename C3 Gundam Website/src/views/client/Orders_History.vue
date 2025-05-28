@@ -81,7 +81,7 @@ const deleteOrder = async (maDonHang) => {
         
         await createNotification(`Đơn hàng của ${tenKhachHang} vừa được hủy!`);
 
-        showNotification("Hủy đơn hàng thành công!", "success");
+        showNotification("Hủy đơn hàng thành công! Liên hệ với cửa hàng để được hoàn tiền nếu thanh toán online nhé.", "success");
         listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
     } catch (error) {
         showNotification(error.response?.data?.message || "Hủy đơn hàng thất bại!", "error");
