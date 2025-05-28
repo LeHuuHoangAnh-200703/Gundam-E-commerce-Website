@@ -190,7 +190,7 @@ onMounted(() => {
                     </div>
                     <hr class="my-3">
                     <div class="overflow-y-auto max-h-[250px] flex flex-col gap-4">
-                        <div class="flex gap-4 border-b-[1px] pb-4 mb-3" v-for="(product, index) in order.SanPhamDaMua"
+                        <div class="flex gap-4 border-b-[1px] pb-4 mb-3 items-start" v-for="(product, index) in order.SanPhamDaMua"
                             :key="index">
                             <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
                             <div class="flex flex-col gap-1">
