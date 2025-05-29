@@ -221,7 +221,7 @@ onMounted(() => {
                             </div>
                         </div>
                         <div v-if="filteredOrders.length > 0"
-                            class="flex flex-col gap-8 w-full overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
+                            class="flex flex-col gap-8 overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
                             <div v-for="(order, index) in filteredOrders" :key="index"
                                 class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex flex-col gap-4">
                                 <div class="flex flex-col lg:flex-row items-center justify-center lg:justify-between">
@@ -236,7 +236,7 @@ onMounted(() => {
                                         v-for="(product, index) in order.SanPhamDaMua" :key="index">
                                         <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
                                         <div class="flex flex-col gap-1 overflow-hidden">
-                                            <div class="whitespace-nowrap text-ellipsis overflow-hidden">
+                                            <div class="whitespace-nowrap text-ellipsis overflow-hidden max-w-52 lg:max-w-[700px]">
                                                 <p
                                                     class="text-[16px] xl:text-[14px] overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                                                     {{ product.TenSanPham }}</p>
