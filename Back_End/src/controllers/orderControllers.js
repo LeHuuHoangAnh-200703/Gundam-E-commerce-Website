@@ -288,6 +288,10 @@ exports.getRevenueByMonth = async (req, res) => {
                         {
                             TrangThaiThanhToan: "Đã thanh toán qua PayPal",
                             TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
+                        },
+                        {
+                            TrangThaiThanhToan: "Đã thanh toán qua VNPay",
+                            TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
                         }
                     ],
                     NgayDatHang: {
@@ -333,6 +337,7 @@ exports.getRevenueByMonth = async (req, res) => {
     }
 };
 
+//Thống kê trạng thái đơn hàng
 exports.getOrderStatus = async (req, res) => {
     try {
         const statistics = await Order.aggregate([
@@ -349,6 +354,7 @@ exports.getOrderStatus = async (req, res) => {
     }
 }
 
+//Thống kê doanh thu theo tháng
 exports.getRevenueByDay = async (req, res) => {
     const year = req.query.year || new Date().getFullYear();
     const month = req.query.month || new Date().getMonth() + 1;
@@ -361,6 +367,10 @@ exports.getRevenueByDay = async (req, res) => {
                         { TrangThaiDon: "Đã giao thành công" },
                         {
                             TrangThaiThanhToan: "Đã thanh toán qua PayPal",
+                            TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
+                        },
+                        {
+                            TrangThaiThanhToan: "Đã thanh toán qua VNPay",
                             TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
                         }
                     ],
@@ -410,6 +420,7 @@ exports.getRevenueByDay = async (req, res) => {
     }
 };
 
+//Kiểm tra xem đã đánh giá chưa
 exports.checkOrderReviewed = async (req, res) => {
     const { maDonHang } = req.params;
     try {
@@ -424,6 +435,7 @@ exports.checkOrderReviewed = async (req, res) => {
     }
 }
 
+//Kiểm tra đơn hàng theo ngày, tháng, năm
 exports.getOrderByDayMonth = async (req, res) => {
     try {
         const year = req.query.year ? parseInt(req.query.year) : null;

@@ -17,7 +17,7 @@ import {
     LinearScale,
     ArcElement,
     PointElement,
-    LineElement
+    LineElement,
 } from "chart.js";
 
 const customers = ref([]);
@@ -25,32 +25,46 @@ const products = ref([]);
 const orders = ref([]);
 const feedbacks = ref([]);
 const notification = ref({
-    message: '',
-    type: ''
+    message: "",
+    type: "",
 });
 const listSelling = ref([]);
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
-        notification.value.message = '';
+        notification.value.message = "";
     }, 3000);
 };
 const fetchStatistical = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/thongke');
+        const response = await axios.get("http://localhost:3000/api/thongke");
         customers.value = response.data.customer;
         products.value = response.data.product;
         feedbacks.value = response.data.feedback;
         // Chuyển object `order` thành array
         const ordersArray = Object.values(response.data.order);
-        orders.value = ordersArray.filter(order => order.TrangThaiDon !== "Đã giao thành công" && order.TrangThaiDon !== 'Đơn hàng đã hủy');
+        orders.value = ordersArray.filter(
+            (order) =>
+                order.TrangThaiDon !== "Đã giao thành công" &&
+                order.TrangThaiDon !== "Đơn hàng đã hủy"
+        );
     } catch (err) {
         console.log("Error fetching: ", err);
     }
-}
+};
 
 // Đăng ký các thành phần của Chart.js
-ChartJS.register(Title, Tooltip, Legend, BarElement, PointElement, CategoryScale, LinearScale, ArcElement, LineElement);
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    PointElement,
+    CategoryScale,
+    LinearScale,
+    ArcElement,
+    LineElement
+);
 
 const chartData = ref(null);
 const selectedYear = ref(new Date().getFullYear());
@@ -62,29 +76,40 @@ const chartOptions = ref({
             labels: {
                 font: {
                     size: 12,
-                    weight: 'bold',
-                    color: '#333',
-                }
-            }
+                    weight: "bold",
+                    color: "#333",
+                },
+            },
         },
         title: {
             display: true,
             text: "Thống kê doanh thu từng tháng trong năm",
             font: {
                 size: 16,
-                weight: 'bold',
-                textTransform: 'uppercase',
+                weight: "bold",
+                textTransform: "uppercase",
             },
-            color: '#333'
-        }
-    }
+            color: "#333",
+        },
+        tooltip: {
+            callbacks: {
+                label: function (context) {
+                    const value = context.raw;
+                    const formattedValue = value
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    return `${context.dataset.label}: ${formattedValue} VNĐ`;
+                },
+            },
+        },
+    },
 });
 
 const fetchRevenueData = async (year) => {
     if (year > new Date().getFullYear()) {
         showNotification("Năm tìm kiếm không hợp lệ!", "error");
         setTimeout(() => {
-            notification.value.message = '';
+            notification.value.message = "";
         }, 3000);
         return;
     }
@@ -114,7 +139,7 @@ const fetchRevenueData = async (year) => {
 const chartDataDay = ref(null);
 const selectedYearofDay = ref(new Date().getFullYear());
 const selectedMonthOfDay = ref(new Date().getMonth() + 1);
-const totalRevenueMonth = ref('');
+const totalRevenueMonth = ref("");
 
 const chartDayOptions = ref({
     responsive: true,
@@ -135,9 +160,20 @@ const chartDayOptions = ref({
             font: {
                 size: 16,
                 weight: "bold",
-                textTransform: 'uppercase',
+                textTransform: "uppercase",
             },
             color: "#444",
+        },
+        tooltip: {
+            callbacks: {
+                label: function (context) {
+                    const value = context.raw;
+                    const formattedValue = value
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    return `${context.dataset.label}: ${formattedValue} VNĐ`;
+                },
+            },
         },
     },
 });
@@ -146,7 +182,7 @@ const fetchRevenueDay = async (year, month) => {
     if (year > new Date().getFullYear()) {
         showNotification("Năm tìm kiếm không hợp lệ!", "error");
         setTimeout(() => {
-            notification.value.message = '';
+            notification.value.message = "";
         }, 3000);
         return;
     }
@@ -173,27 +209,28 @@ const fetchRevenueDay = async (year, month) => {
     }
 };
 
-
 const orderStatusChartData = ref(null);
 const fetchOrderStatusData = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/donhang/thongke/get-order-status");
+        const response = await axios.get(
+            "http://localhost:3000/api/donhang/thongke/get-order-status"
+        );
         const data = response.data;
         orderStatusChartData.value = {
-            labels: data.map(item => item._id),
+            labels: data.map((item) => item._id),
             datasets: [
                 {
                     label: "Số lượng đơn hàng",
-                    data: data.map(item => item.count),
+                    data: data.map((item) => item.count),
                     backgroundColor: [
                         "#DA70D6",
                         "#36A2EB",
                         "#FFCE56",
                         "#4BC0C0",
-                        "rgba(5, 155, 255, 0.5)"
-                    ]
-                }
-            ]
+                        "rgba(5, 155, 255, 0.5)",
+                    ],
+                },
+            ],
         };
     } catch (err) {
         console.error("Lỗi khi lấy dữ liệu trạng thái đơn hàng:", err);
@@ -203,23 +240,25 @@ const fetchOrderStatusData = async () => {
 const feedbackStatusChartData = ref(null);
 const fetchFeedBackProducts = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/danhgia/thongke/get-feedback-products");
+        const response = await axios.get(
+            "http://localhost:3000/api/danhgia/thongke/get-feedback-products"
+        );
         const data = response.data;
         feedbackStatusChartData.value = {
-            labels: data.map(item => `${item._id} sao`),
+            labels: data.map((item) => `${item._id} sao`),
             datasets: [
                 {
                     label: "Tổng đánh giá",
-                    data: data.map(item => item.count),
+                    data: data.map((item) => item.count),
                     backgroundColor: [
                         "#6495ED",
                         "#40E0D0",
                         "#7B68EE",
                         "#EE82EE",
-                        "#FFFF00"
-                    ]
-                }
-            ]
+                        "#FFFF00",
+                    ],
+                },
+            ],
         };
     } catch (err) {
         console.error("Lỗi khi lấy dữ liệu trạng thái đơn hàng:", err);
@@ -228,17 +267,19 @@ const fetchFeedBackProducts = async () => {
 
 const getTopSellingProducts = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/sanpham/luotban/topsanpham');
-        listSelling.value = response.data.map(product => {
+        const response = await axios.get(
+            "http://localhost:3000/api/sanpham/luotban/topsanpham"
+        );
+        listSelling.value = response.data.map((product) => {
             return {
-                ...product
-            }
-        })
-        console.log(listSelling.value)
+                ...product,
+            };
+        });
+        console.log(listSelling.value);
     } catch (err) {
-        console.log('Error fetching sellings products:', err);
+        console.log("Error fetching sellings products:", err);
     }
-}
+};
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -251,7 +292,7 @@ onMounted(() => {
     fetchFeedBackProducts();
     fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
     getTopSellingProducts();
-})
+});
 </script>
 
 <template>
@@ -306,7 +347,9 @@ onMounted(() => {
                                 <i class="fa-solid fa-users text-[30px]"></i>
                                 <div class="flex flex-col items-end">
                                     <p class="text-[24px] font-bold">{{ customers.length }}</p>
-                                    <p class="text-[14px] font-semibold">Khách hàng đã tham gia</p>
+                                    <p class="text-[14px] font-semibold">
+                                        Khách hàng đã tham gia
+                                    </p>
                                 </div>
                             </div>
                             <div class="mt-6 w-full text-center bg-[#333]/30 rounded-b-md p-2">
@@ -316,27 +359,33 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
-                        <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Top sản
-                            phẩm bán chạy nhất</h3>
+                        <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
+                            Top sản phẩm bán chạy nhất
+                        </h3>
                         <div class="flex flex-col gap-4 p-4 bg-white shadow-lg rounded-md border-2">
                             <div v-for="(product, index) in listSelling" :key="index"
                                 class="flex gap-4 items-center border-b-2 pb-4">
                                 <div
                                     class="border-4 border-[#1A1D27] rounded-full w-[40px] h-[40px] flex justify-center items-center">
-                                    <p class="font-bold text-[18px] text-gray-600">{{ index + 1 }}</p>
+                                    <p class="font-bold text-[18px] text-gray-600">
+                                        {{ index + 1 }}
+                                    </p>
                                 </div>
                                 <div class="flex gap-4 items-center">
                                     <img :src="product.Images[0]" class="rounded-md w-[70px] border-2 border-[#1A1D27]"
-                                        alt="">
+                                        alt="" />
                                     <div>
                                         <div
                                             class="whitespace-nowrap text-ellipsis overflow-hidden w-[150px] lg:w-full">
                                             <p
                                                 class="font-semibold text-[16px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                                {{ product.TenSanPham }}</p>
+                                                {{ product.TenSanPham }}
+                                            </p>
                                         </div>
-                                        <p class="text-[14px] font-semibold">Đã bán: <span class="font-medium">{{
-                                            product.LuotBan }} sản phẩm</span></p>
+                                        <p class="text-[14px] font-semibold">
+                                            Đã bán:
+                                            <span class="font-medium">{{ product.LuotBan }} sản phẩm</span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -351,11 +400,14 @@ onMounted(() => {
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
                                 <input type="number" v-model="selectedYearofDay" min="2000" max="2100"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-[200px] w-full focus:ring focus:ring-[#1A1D27]"
-                                    @change="fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)"
-                                    placeholder="Nhập năm ..." />
+                                    @change="
+                                        fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)
+                                        " placeholder="Nhập năm ..." />
                                 <select v-model="selectedMonthOfDay"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-[150px] w-full focus:ring focus:ring-[#1A1D27]"
-                                    @change="fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)">
+                                    @change="
+                                        fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)
+                                        ">
                                     <option disabled value="">Chọn tháng</option>
                                     <option v-for="month in 12" :key="month" :value="month">
                                         Tháng {{ month }}
@@ -364,8 +416,12 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">
-                            <p class="text-[14px] font-semibold text-gray-600">Tổng doanh thu</p>
-                            <p class="text-[24px] font-bold">{{ formatCurrency(totalRevenueMonth.toString()) }} VNĐ</p>
+                            <p class="text-[14px] font-semibold text-gray-600">
+                                Tổng doanh thu
+                            </p>
+                            <p class="text-[24px] font-bold">
+                                {{ formatCurrency(totalRevenueMonth.toString()) }} VNĐ
+                            </p>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                             <Bar v-if="chartDataDay" :data="chartDataDay" :options="chartDayOptions" />
@@ -373,8 +429,8 @@ onMounted(() => {
                     </div>
                     <div class="flex lg:flex-row flex-col gap-4 w-full items-center">
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống
-                                kê đơn hàng
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
+                                Thống kê đơn hàng
                             </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[250px] h-[250px] m-auto">
@@ -383,9 +439,8 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="flex flex-col gap-3 w-full lg:w-1/2">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống
-                                kê đánh giá sản
-                                phẩm
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
+                                Thống kê đánh giá sản phẩm
                             </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[200px] h-[200px] m-auto">
@@ -396,8 +451,9 @@ onMounted(() => {
                     </div>
                     <div class="flex flex-col gap-3">
                         <div class="flex gap-4 items-center lg:flex-row flex-col">
-                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">Thống
-                                kê doanh thu theo năm</h3>
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
+                                Thống kê doanh thu theo năm
+                            </h3>
                             <input type="number" v-model="selectedYear" min="2000" max="2100"
                                 class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full lg:w-[200px] focus:ring focus:ring-[#1A1D27]"
                                 @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
@@ -415,7 +471,7 @@ onMounted(() => {
 
 <style scoped>
 .active-link {
-    background: #DB3F4C;
+    background: #db3f4c;
     color: white;
 }
 </style>

@@ -69,7 +69,7 @@ const loginAdmin = async () => {
         localStorage.setItem('MaAdmin', response.data.admin.MaAdmin);
         showNotification("Đăng nhập thành công!", "success");
         setTimeout(() => {
-            router.push('/admin/adminProducts');
+            router.push('/admin/statisticals');
         }, 2000);
     } catch (error) {
         showNotification(error.response?.data?.message || "Có lỗi xảy ra!", "error");

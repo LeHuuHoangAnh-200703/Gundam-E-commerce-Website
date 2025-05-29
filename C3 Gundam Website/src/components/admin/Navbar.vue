@@ -21,7 +21,7 @@ const socket = io("http://localhost:3000", {
 });
 
 const sidebarMenuMobile = [
-  { name: "Thống kê", icon: "fa-solid fa-chart-simple", path: "statisticals" },
+  { name: "Tổng quan", icon: "fa-solid fa-chart-simple", path: "statisticals" },
   { name: "Quản lý sản phẩm", icon: "fa-solid fa-igloo", path: "adminProducts" },
   { name: "Quản lý đơn hàng", icon: "fa-solid fa-bag-shopping", path: "listOrders" },
   { name: "Quản lý đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
