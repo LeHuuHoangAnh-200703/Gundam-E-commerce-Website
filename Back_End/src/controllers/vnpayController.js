@@ -1,18 +1,16 @@
-const vnpay = require('vnpay');
 const Order = require('../models/orderModels');
 const DiscountCode = require('../models/discountCodeModels');
 const Inventory = require('../models/inventoryModels');
 const Product = require('../models/productModels');
-const moment = require('moment');
 const crypto = require('crypto');
 const qs = require('qs');
-const axios = require('axios');
 
 const VNP_TMN_CODE = "B57MNZBD";
 const VNP_HASH_SECRET = "9AXN2O7KVV9MJS5BB4I4087IQSSJ7YQN";
 const VNP_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 const VNP_RETURN_URL = "http://localhost:5173/paymentVNPaySuccess";
 
+//Sắp xếp các tham số theo thứ tự chữ cái, chuẩn bị cho việc ký và tạo URL
 function sortObject(obj) {
     let sorted = {};
     let str = [];
