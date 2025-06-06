@@ -3,6 +3,7 @@ const Customer = require("../models/customersModels");
 const path = require("path");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
+const axios = require('axios');
 
 cloudinary.config({
     cloud_name: 'dwcajbc6f',
@@ -52,24 +53,34 @@ exports.getFeedBack = async (req, res) => {
     }
 };
 
-const bannedWords = [
-    "ngu",
-    "đần",
-    "ngu dốt",
-    "khốn nạn",
-    "vô học",
-    "đồ rác rưởi",
-    "thằng", "con", "mày", "đồ dốt", "đồ điên",
-    "chết tiệt", "vô dụng", "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại", "Địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc", "đm nó", "con cat", "con cac",
-    "M nó", "đồ cút", "thằng chó", "Con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "Thằng chó", "đồ chó", "đồ con chó", "Đồ mạt hạng", "đồ vô học", "đồ khốn", "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "Thằng lừa đảo", "đồ thất đức", "Lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct", "Đ mày", "dmtt", "cmnr"
-];
+// const bannedWords = [
+//     "ngu",
+//     "đần",
+//     "ngu dốt",
+//     "khốn nạn",
+//     "vô học",
+//     "đồ rác rưởi",
+//     "thằng", "con", "mày", "đồ dốt", "đồ điên",
+//     "chết tiệt", "vô dụng", "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại", "Địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc", "đm nó", "con cat", "con cac",
+//     "M nó", "đồ cút", "thằng chó", "Con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "Thằng chó", "đồ chó", "đồ con chó", "Đồ mạt hạng", "đồ vô học", "đồ khốn", "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "Thằng lừa đảo", "đồ thất đức", "Lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct", "Đ mày", "dmtt", "cmnr"
+// ];
 
-const containsBannedWords = (text) => {
-    return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
+// const containsBannedWords = (text) => {
+//     return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
+// };
+
+const checkToxicContent = async (text) => {
+    try {
+        const response = await axios.post('http://localhost:5000/predict', { sentence: text });
+        return response.data.prediction === 1;
+    } catch (error) {
+        console.error('Error calling Flask API:', error.message);
+    }
 };
 
 exports.createFeedBack = async (req, res) => {
-    if (containsBannedWords(req.body.MoTa)) {
+    const isToxic = await checkToxicContent(req.body.MoTa);
+    if (isToxic) {
         return res.status(400).json({ message: "Mô tả chứa nội dung không phù hợp!" });
     }
 
