@@ -80,9 +80,6 @@ const checkToxicContent = async (text) => {
 
 exports.createFeedBack = async (req, res) => {
     const isToxic = await checkToxicContent(req.body.MoTa);
-    if (isToxic) {
-        return res.status(400).json({ message: "Mô tả chứa nội dung không phù hợp!" });
-    }
 
     const imageUploadPromises = req.files.map(file => {
         return new Promise((resolve, reject) => {
@@ -103,7 +100,8 @@ exports.createFeedBack = async (req, res) => {
     const feedBack = new FeedBack({
         ...req.body,
         SanPhamDaDanhGia: JSON.parse(req.body.SanPhamDaDanhGia),
-        HinhAnhSanPham: imageUploadResults.map(result => result.secure_url)
+        HinhAnhSanPham: imageUploadResults.map(result => result.secure_url),
+        isToxic: isToxic
     });
     try {
         await feedBack.save();

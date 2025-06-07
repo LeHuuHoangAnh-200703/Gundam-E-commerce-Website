@@ -86,8 +86,8 @@ const fetchFeedBacks = async () => {
             NgayDang: new Date(comment.NgayDang)
         }));
 
-        const myComments = allComments.filter(comment => comment.MaKhachHang === idCustomer);
-        const otherComments = allComments.filter(comment => comment.MaKhachHang !== idCustomer);
+        const myComments = allComments.filter(comment => (comment.MaKhachHang === idCustomer && comment.isToxic === false));
+        const otherComments = allComments.filter(comment => (comment.MaKhachHang !== idCustomer && comment.isToxic === false));
 
         comments.value = [...myComments.sort((a, b) => b.NgayDang - a.NgayDang), ...otherComments.sort((a, b) => b.NgayDang - a.NgayDang)];
     } catch (err) {

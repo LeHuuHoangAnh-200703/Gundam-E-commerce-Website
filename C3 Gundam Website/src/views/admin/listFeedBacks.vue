@@ -6,6 +6,8 @@ import axios from 'axios';
 
 const comments = ref([]);
 const searchValue = ref("");
+const selectedStar = ref(6);
+const isToxic = ref(null);
 const fetchFeedBacks = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/danhgia');
@@ -36,33 +38,42 @@ const totalQuality = computed(() => {
     return average.toFixed(1);
 });
 
-const selectedStar = ref(6);
-const selected = (item) => {
-    return selectedStar.value = item;
-}
-
 const chooseFeedBackWithStar = computed(() => {
     return comments.value.filter(comment => {
-        const chooseStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
+        const matchesStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
         const matchesSearch = !searchValue.value || comment.SanPhamDaDanhGia.some(item => 
-            item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
-        )
-        const findProductId = !searchValue.value || comment.SanPhamDaDanhGia.some(item => 
+            item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase()) ||
             item.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
-        )
-        return chooseStar && ( matchesSearch || findProductId );
+        );
+        const matchesToxic = isToxic.value === null ? comment.isToxic === false : comment.isToxic === isToxic.value;
+        return matchesStar && matchesSearch && matchesToxic;
     });
-})
+});
 
 const starCounts = computed(() => {
-    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, Toxic: 0, nonToxic: 0 };
     comments.value.forEach(comment => {
-        if (comment.ChatLuong >= 1 && comment.ChatLuong <= 5) {
-            counts[comment.ChatLuong]++;
+        if (comment.isToxic === true) {
+            counts.Toxic++;
+        } else {
+            counts.nonToxic++;
+            if (comment.ChatLuong >= 1 && comment.ChatLuong <= 5) {
+                counts[comment.ChatLuong]++;
+            }
         }
     });
     return counts;
 });
+
+const selected = (item) => {
+    selectedStar.value = item;
+    isToxic.value = null;
+}
+
+const selectedToxic = (item) => {
+    isToxic.value = item;
+    selectedStar.value = 6;
+}
 
 onMounted(() => {
     fetchFeedBacks();
@@ -89,7 +100,7 @@ onMounted(() => {
                             <p class="font-semibold text-[18px] xl:text-[16px]">Tìm kiếm theo sao</p>
                             <button @click.prevent="selected(6)"
                                 class="border-2 px-5 py-3 xl:text-[12px] flex justify-between font-semibold gap-2 rounded-md hover:border-[#003171] transition-all duration-300">Tất
-                                cả đánh giá <span> ({{ comments.length }})</span></button>
+                                cả đánh giá <span> ({{ starCounts.nonToxic }})</span></button>
                             <button @click.prevent="selected(5)"
                                 class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
                                 <div class="flex gap-2 justify-start">
@@ -129,6 +140,11 @@ onMounted(() => {
                                         :class="['fa-solid fa-star', star <= 1 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
                                 </div>
                                 <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[1] }})</p>
+                            </button>
+                            <button @click.prevent="selectedToxic(true)"
+                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                <p class="font-semibold text-[14px] xl:text-[12px]">Bình luận tiêu cực</p>
+                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts.Toxic }})</p>
                             </button>
                         </div>
                     </div>

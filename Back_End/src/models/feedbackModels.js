@@ -16,6 +16,10 @@ const feedbackSchema = new mongoose.Schema({
         LoaiSanPham: String, 
         HinhAnh: String  
     }],
+    isToxic: {
+      type: Boolean,
+      default: false
+    }
 });
 
 function generateMaDanhGia() {  

@@ -7,7 +7,7 @@ from flask_cors import CORS
 logging.basicConfig(level=logging.INFO)
 
 # Đường dẫn tới mô hình
-model_dir = "D:/Gundam E-commerce Website/Back_End/flaskAPI/model/phobert-toxic-model6"
+model_dir = "D:/Gundam E-commerce Website/Back_End/flaskAPI/model/phobert-toxic-model7"
 tokenizer = AutoTokenizer.from_pretrained(model_dir)
 model = AutoModelForSequenceClassification.from_pretrained(model_dir)
 
