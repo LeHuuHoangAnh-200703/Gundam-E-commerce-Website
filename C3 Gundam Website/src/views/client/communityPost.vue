@@ -162,7 +162,7 @@ onMounted(() => {
                         {{ nameCustomer }} ơi, bạn đang nghĩ gì thế ?
                     </router-link>
                 </div>
-                <div class="flex lg:flex-row flex-col gap-6">
+                <div class="flex lg:flex-row flex-col gap-6 w-full">
                     <div class="hidden lg:flex flex-col items-start gap-6 w-[35%]">
                         <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-5">Cộng đồng
                             fan gundam của c3</p>
@@ -199,7 +199,7 @@ onMounted(() => {
                                 <p class="text-white font-medium font-sans">{{ post.NoiDung }}</p>
                             </div>
                             <div class="grid grid-cols-2 gap-1">
-                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img" class="w-full max-h-[300px] object-cover"
+                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img" class="w-full max-h-[250px] object-cover"
                                     alt="">
                             </div>
                             <div class="px-4 flex flex-col gap-2">

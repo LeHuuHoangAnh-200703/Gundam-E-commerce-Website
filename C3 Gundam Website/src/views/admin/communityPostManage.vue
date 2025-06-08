@@ -70,7 +70,7 @@ onMounted(() => {
                     <div v-if="listPost.length > 0" class="flex flex-col gap-4">
                         <div v-for="(post, index) in listPost" :key="index" class="flex flex-col gap-2 w-full">
                             <p class="font-semibold text-[14px]">Nội dung: <span class="font-medium">{{ post.NoiDung
-                                    }}</span></p>
+                            }}</span></p>
                             <p class="font-semibold text-[14px]">Loại bài đăng: <span class="font-medium">{{
                                 post.LoaiBaiDang }}</span>
                             </p>
@@ -86,17 +86,20 @@ onMounted(() => {
                                 </div>
                             </div>
                             <div class="flex gap-2 items-end justify-end">
-                                <button type="submit" @click="updateStatus(post.MaBaiDang, post.TrangThaiDang)"
-                                    class="inline-block text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
-                                        class="fa-solid fa-check"></i></button>
-                                <button type="submit" @click="deletePost(post.MaBaiDang)"
+                                <form action="" @submit="updateStatus(post.MaBaiDang, post.TrangThaiDang)">
+                                    <button type="submit"
+                                        class="inline-block text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
+                                            class="fa-solid fa-check"></i></button>
+                                </form>
+                                <form action="" @submit="deletePost(post.MaBaiDang)">
+                                    <button type="submit"
                                     class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
                                         class="fa-solid fa-trash"></i></button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                    <div v-else
-                        class="bg-white p-4 w-full flex items-center justify-center">
+                    <div v-else class="bg-white p-4 w-full flex items-center justify-center">
                         <div class="flex justify-center items-center m-auto w-full h-full">
                             <div class="flex flex-col items-center justify-center gap-3">
                                 <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại

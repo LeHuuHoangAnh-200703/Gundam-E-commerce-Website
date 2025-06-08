@@ -127,6 +127,16 @@ const formatDate = (date) => {
     return `${time}`;
 };
 
+const isSameDay = (date) => {
+    const inputDate = new Date(date);
+    const today = new Date();
+    return (
+        inputDate.getFullYear() === today.getFullYear() &&
+        inputDate.getMonth() === today.getMonth() &&
+        inputDate.getDate() === today.getDate()
+    );
+}
+
 onMounted(() => {
     fetchSuppliers();
     fetchEntryForm();
@@ -214,8 +224,8 @@ onMounted(() => {
                                             <button @click="checkQuantityEntryForms(entryForm.MaPhieuNhap)"
                                                 class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                     class="fa-solid fa-pen-to-square"></i></button>
-                                            <router-link :to="`/admin/listEntryFormInfo/${entryForm.MaPhieuNhap}`"
-                                                class="inline-block bg-[#003171] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#0c2d58] whitespace-nowrap"><i
+                                            <router-link :to="`/admin/listEntryFormInfo/${entryForm.MaPhieuNhap}`" :class="isSameDay(entryForm.NgayNhap) ? 'inline-block' : 'hidden'"
+                                                class="bg-[#003171] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#0c2d58] whitespace-nowrap"><i
                                                     class="fa-solid fa-hashtag"></i></router-link>
                                         </td>
                                     </tr>
