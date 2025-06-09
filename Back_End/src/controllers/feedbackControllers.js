@@ -104,8 +104,14 @@ exports.createFeedBack = async (req, res) => {
         isToxic: isToxic
     });
     try {
-        await feedBack.save();
-        res.status(200).json(feedBack);
+        if (isToxic) {
+            await feedBack.save();
+            return res.status(200).json({ message: "Đánh giá chứa từ ngữ không phù hợp, hệ thống sẽ tạm ẩn!" })
+        } else {
+            await feedBack.save();
+            return res.status(200).json({ message: "Cảm ơn bạn đã góp ý về sản phẩm!" });
+        }
+        
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

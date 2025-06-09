@@ -96,7 +96,7 @@ const createFeedBack = async () => {
         });
 
         const response = await axios.post('http://localhost:3000/api/danhgia', dataToSend);
-        showNotification("Cảm ơn bạn đã góp ý về sản phẩm!", "success");
+        showNotification(response.data.message, "success");
         setTimeout(() => {
             router.push('/orders_history');
         }, 3000);

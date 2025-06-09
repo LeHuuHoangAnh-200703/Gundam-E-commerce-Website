@@ -308,9 +308,11 @@ const fetchTopSellingProducts = async () => {
 
 const selectedProduct = ref('');
 const listWarehouse = ref({});
-const selectedMonthProduct = ref(new Date().getMonth() + 1);
-const selectedYearProduct = ref(new Date().getFullYear());
+const selectedMonthProduct = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+const selectedYearProduct = Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() - i).toString());
 const selectedNameProduct = ref('');
+const filterYear = ref("");
+const filterMonth = ref("");
 const fetchEnterWarehouse = async (maSanPham, year, month) => {
     if (year > new Date().getFullYear()) {
         showNotification("Năm tìm kiếm không hợp lệ!", "error");
@@ -446,24 +448,28 @@ onMounted(() => {
                         <div class="flex gap-4 items-center lg:flex-row flex-col w-full">
                             <h3
                                 class="font-bold text-[16px] lg:text-[20px] uppercase w-full lg:w-[50%] lg:text-start text-center">
-                                Thống kê nhập xuất tồn tháng {{ selectedMonthProduct }}
+                                Thống kê nhập xuất tồn tháng {{ filterMonth }}
                             </h3>
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
-                                <select v-model="selectedProduct" @change="fetchEnterWarehouse(selectedProduct, selectedMonthProduct, selectedYearProduct)"
+                                <select v-model="selectedProduct" @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
                                     <option disabled value="">Chọn sản phẩm</option>
                                     <option v-for="(product, index) in listProducts" :key="index" :value="product.MaSanPham">
                                         {{ index + 1 }}. {{ product.TenSanPham }}
                                     </option>
                                 </select>
-                                <input type="number" v-model="selectedYearProduct" min="2000" max="2100" @change="fetchEnterWarehouse(selectedProduct, selectedMonthProduct, selectedYearProduct)"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]"
-                                    placeholder="Nhập năm ..." />
-                                <select v-model="selectedMonthProduct" @change="fetchEnterWarehouse(selectedProduct, selectedMonthProduct, selectedYearProduct)"
+                                <select v-model="filterYear" @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
+                                    <option disabled value="">Chọn năm</option>
+                                    <option v-for="year in selectedYearProduct" :key="year" :value="year">
+                                        Năm {{ year }}
+                                    </option>
+                                </select>
+                                <select v-model="filterMonth" @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
                                     <option disabled value="">Chọn tháng</option>
-                                    <option v-for="month in 12" :key="month" :value="month">
-                                        tháng {{ month }}
+                                    <option v-for="month in selectedMonthProduct" :key="month" :value="month">
+                                        Tháng {{ month }}
                                     </option>
                                 </select>
                             </div>

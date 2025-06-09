@@ -243,17 +243,19 @@ exports.getFeedBackProducts = async (req, res) => {
 
 exports.getEnterWarehouse = async (req, res) => {
   const { maSanPham } = req.params;
-  const year = req.query.year || new Date().getFullYear();
-  const month = req.query.month || new Date().getMonth() + 1;
+  const year = parseInt(req.query.year) || new Date().getFullYear();
+  const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+
   try {
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
     // Thống kê nhập hàng
     const importStats = await EntryFormInfo.aggregate([
       {
         $match: {
           MaSanPham: maSanPham,
-          NgayNhap: { $gte: startDate, $lte: endDate },
+          NgayNhap: {
+            $gte: new Date(year, month - 1, 1),
+            $lte: new Date(year, month, 0, 23, 59, 59, 999)
+          },
         },
       },
       {
@@ -282,7 +284,10 @@ exports.getEnterWarehouse = async (req, res) => {
               TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
             }
           ],
-          NgayDatHang: { $gte: startDate, $lte: endDate },
+          NgayDatHang: {
+            $gte: new Date(year, month - 1, 1),
+            $lte: new Date(year, month, 0, 23, 59, 59, 999)
+          },
           'SanPhamDaMua.MaSanPham': maSanPham,
         },
       },
@@ -301,7 +306,6 @@ exports.getEnterWarehouse = async (req, res) => {
         },
       },
     ]);
-    console.log(importStats, exportStats)
 
     // Lấy tồn kho hiện tại từ Inventory
     const inventory = await Inventory.findOne({ MaSanPham: maSanPham });
