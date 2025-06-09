@@ -182,6 +182,9 @@ exports.getFeedBackProducts = async (req, res) => {
         $facet: {
           byStar: [
             {
+              $match: { isToxic: false }
+            },
+            {
               $group: {
                 _id: "$ChatLuong",
                 count: { $sum: 1 }
@@ -193,7 +196,7 @@ exports.getFeedBackProducts = async (req, res) => {
           ],
           byToxic: [
             {
-              $match: { isToxic: true } // Chỉ lấy bình luận tiêu cực
+              $match: { isToxic: true }
             },
             {
               $group: {
@@ -235,5 +238,84 @@ exports.getFeedBackProducts = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getEnterWarehouse = async (req, res) => {
+  const { maSanPham } = req.params;
+  const year = req.query.year || new Date().getFullYear();
+  const month = req.query.month || new Date().getMonth() + 1;
+  try {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    // Thống kê nhập hàng
+    const importStats = await EntryFormInfo.aggregate([
+      {
+        $match: {
+          MaSanPham: maSanPham,
+          NgayNhap: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          SoLuong: { $sum: '$SoLuong' },
+        },
+      },
+    ]);
+
+    // Thống kê xuất hàng (đơn hàng đã giao thành công)
+    const exportStats = await Order.aggregate([
+      {
+        $match: {
+          $or: [
+            {
+              TrangThaiDon: "Đã nhận được hàng"
+            },
+            { TrangThaiDon: "Đã giao thành công" },
+            {
+              TrangThaiThanhToan: "Đã thanh toán qua PayPal",
+              TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
+            },
+            {
+              TrangThaiThanhToan: "Đã thanh toán qua VNPay",
+              TrangThaiDon: { $ne: "Đơn hàng đã hủy" },
+            }
+          ],
+          NgayDatHang: { $gte: startDate, $lte: endDate },
+          'SanPhamDaMua.MaSanPham': maSanPham,
+        },
+      },
+      {
+        $unwind: '$SanPhamDaMua',
+      },
+      {
+        $match: {
+          'SanPhamDaMua.MaSanPham': maSanPham,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          SoLuong: { $sum: '$SanPhamDaMua.SoLuong' },
+        },
+      },
+    ]);
+    console.log(importStats, exportStats)
+
+    // Lấy tồn kho hiện tại từ Inventory
+    const inventory = await Inventory.findOne({ MaSanPham: maSanPham });
+
+    const result = {
+      MaSanPham: maSanPham,
+      SoLuongNhap: importStats[0]?.SoLuong || 0,
+      SoLuongBan: exportStats[0]?.SoLuong || 0,
+      SoLuongTon: inventory?.SoLuongTon || 0,
+    };
+
+    return res.status(200).json(result);
+  } catch (err) {
+    console.log(err.message)
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 };

@@ -260,33 +260,30 @@ const fetchFeedBackProducts = async () => {
         const response = await axios.get("http://localhost:3000/api/thongke/danhgiasanpham");
         const data = response.data;
 
-        // Cập nhật starCounts cho trang thống kê và quản lý đánh giá
         starCounts.value = {
             ...data.starCounts,
             Toxic: data.toxicCount
         };
 
-        // Giữ biểu đồ Pie như trong template
         feedbackStatusChartData.value = {
-            labels: Object.keys(data.starCounts).map(star => `${star} sao`),
+            labels: [
+                ...Object.keys(data.starCounts).map(star => `${star} sao`),
+                'Bình luận tiêu cực'
+            ],
             datasets: [{
                 label: "Tổng đánh giá",
-                data: Object.values(data.starCounts),
+                data: [
+                    ...Object.values(data.starCounts),
+                    data.toxicCount
+                ],
                 backgroundColor: [
                     "#6495ED",
                     "#40E0D0",
                     "#7B68EE",
                     "#EE82EE",
-                    "#FFFF00"
-                ],
-                borderColor: [
-                    "#4169E1",
-                    "#00CED1",
-                    "#6A5ACD",
-                    "#DA70D6",
-                    "#FFD700"
-                ],
-                borderWidth: 1
+                    "#FFFF00",
+                    "#DC143C"
+                ]
             }]
         };
     } catch (err) {
@@ -294,7 +291,7 @@ const fetchFeedBackProducts = async () => {
     }
 };
 
-const getTopSellingProducts = async () => {
+const fetchTopSellingProducts = async () => {
     try {
         const response = await axios.get(
             "http://localhost:3000/api/thongke/topluotban"
@@ -304,11 +301,35 @@ const getTopSellingProducts = async () => {
                 ...product,
             };
         });
-        console.log(listSelling.value);
     } catch (err) {
         console.log("Error fetching sellings products:", err);
     }
 };
+
+const selectedProduct = ref('');
+const listWarehouse = ref({});
+const selectedMonthProduct = ref(new Date().getMonth() + 1);
+const selectedYearProduct = ref(new Date().getFullYear());
+const selectedNameProduct = ref('');
+const fetchEnterWarehouse = async (maSanPham, year, month) => {
+    if (year > new Date().getFullYear()) {
+        showNotification("Năm tìm kiếm không hợp lệ!", "error");
+        setTimeout(() => {
+            notification.value.message = "";
+        }, 3000);
+        return;
+    }
+    
+    try {
+        const response = await axios.get(`http://localhost:3000/api/thongke/nhapxuatton/${maSanPham}?year=${year}&month=${month}`);
+        console.log(response.data);
+        listWarehouse.value = response.data;
+        const product = listProducts.value.find(p => p.MaSanPham === maSanPham);
+        selectedNameProduct.value = product.TenSanPham;
+    } catch (error) {
+        console.log("Error fetching enter warehouse:", error.message);
+    }
+}
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -321,7 +342,7 @@ onMounted(() => {
     fetchOrderStatusData();
     fetchFeedBackProducts();
     fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
-    getTopSellingProducts();
+    fetchTopSellingProducts();
 });
 </script>
 
@@ -425,26 +446,36 @@ onMounted(() => {
                         <div class="flex gap-4 items-center lg:flex-row flex-col w-full">
                             <h3
                                 class="font-bold text-[16px] lg:text-[20px] uppercase w-full lg:w-[50%] lg:text-start text-center">
-                                Thống kê nhập xuất tồn tháng {{ selectedMonthOfDay }}
+                                Thống kê nhập xuất tồn tháng {{ selectedMonthProduct }}
                             </h3>
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
-                                <select
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]">
+                                <select v-model="selectedProduct" @change="fetchEnterWarehouse(selectedProduct, selectedMonthProduct, selectedYearProduct)"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
                                     <option disabled value="">Chọn sản phẩm</option>
                                     <option v-for="(product, index) in listProducts" :key="index" :value="product.MaSanPham">
                                         {{ index + 1 }}. {{ product.TenSanPham }}
+                                    </option>
+                                </select>
+                                <input type="number" v-model="selectedYearProduct" min="2000" max="2100" @change="fetchEnterWarehouse(selectedProduct, selectedMonthProduct, selectedYearProduct)"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]"
+                                    placeholder="Nhập năm ..." />
+                                <select v-model="selectedMonthProduct" @change="fetchEnterWarehouse(selectedProduct, selectedMonthProduct, selectedYearProduct)"
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
+                                    <option disabled value="">Chọn tháng</option>
+                                    <option v-for="month in 12" :key="month" :value="month">
+                                        tháng {{ month }}
                                     </option>
                                 </select>
                             </div>
                         </div>
                         <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">
                             <p class="text-[14px] font-semibold text-gray-600">
-                                PG Gundam Build Metaverse God Burning Gundam 1/144 Scale Color-coded Plastic Model
+                                {{ selectedNameProduct ? selectedNameProduct : "Chọn sản phẩm cần thống kê" }}
                             </p>
-                            <div class="flex gap-8 mt-2">
-                                <p class="font-semibold text-[15px]">Số lượng nhập: 10</p>
-                                <p class="font-semibold text-[15px]">Số lượng bán ra: 10</p>
-                                <p class="font-semibold text-[15px]">Số lượng tồn kho: 10</p>
+                            <div class="flex gap-2 lg:gap-8 mt-2 lg:flex-row flex-col">
+                                <p class="font-semibold text-[15px]">Số lượng nhập vào: {{ listWarehouse.SoLuongNhap ? listWarehouse.SoLuongNhap : 0 }}</p>
+                                <p class="font-semibold text-[15px]">Số lượng bán ra: {{ listWarehouse.SoLuongBan ? listWarehouse.SoLuongBan : 0 }}</p>
+                                <p class="font-semibold text-[15px]">Số lượng tồn kho: {{ listWarehouse.SoLuongTon ? listWarehouse.SoLuongTon : 0 }}</p>
                             </div>
                         </div>
                     </div>

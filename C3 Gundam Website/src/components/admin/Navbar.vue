@@ -127,7 +127,7 @@ onUnmounted(() => {
         <img src="../../assets/img/avatar.jpg" class="w-[50px] rounded-full" alt="" />
         <div class="font-semibold flex flex-col justify-center">
           <p class="text-[14px]">{{ TenAdmin }}</p>
-          <p class="text-[12px]">
+          <p class="text-[12px] hidden lg:block">
             Chào mừng quản trị viên <span class="text-[#DB3F4C]">{{ TenAdmin }}</span> quay trở lại!
           </p>
         </div>
