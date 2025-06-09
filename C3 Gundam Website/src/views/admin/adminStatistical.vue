@@ -22,6 +22,7 @@ import {
 
 const customers = ref([]);
 const products = ref([]);
+const listProducts = ref([]);
 const orders = ref([]);
 const feedbacks = ref([]);
 const notification = ref({
@@ -35,6 +36,20 @@ const showNotification = (msg, type) => {
         notification.value.message = "";
     }, 3000);
 };
+
+const fetchListProducts = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/sanpham");
+        listProducts.value = response.data.map(product => {
+            return {
+                ...product
+            }
+        })
+        listProducts.value.sort((a, b) => b.NgayBan - a.NgayBan);
+    } catch (error) {
+        console.log("Error fetching: ", err);
+    }
+}
 const fetchStatistical = async () => {
     try {
         const response = await axios.get("http://localhost:3000/api/thongke");
@@ -115,7 +130,7 @@ const fetchRevenueData = async (year) => {
     }
     try {
         const response = await axios.get(
-            `http://localhost:3000/api/donhang/thongke/revenue-by-month?year=${year}`
+            `http://localhost:3000/api/thongke/donhangtheonam?year=${year}`
         );
 
         chartData.value = {
@@ -188,7 +203,7 @@ const fetchRevenueDay = async (year, month) => {
     }
     try {
         const response = await axios.get(
-            `http://localhost:3000/api/donhang/thongke/revenue-by-day?year=${year}&month=${month}`
+            `http://localhost:3000/api/thongke/donhangtheothang?year=${year}&month=${month}`
         );
         totalRevenueMonth.value = response.data.tongDoanhThu;
 
@@ -213,7 +228,7 @@ const orderStatusChartData = ref(null);
 const fetchOrderStatusData = async () => {
     try {
         const response = await axios.get(
-            "http://localhost:3000/api/donhang/thongke/get-order-status"
+            "http://localhost:3000/api/thongke/trangthaidonhang"
         );
         const data = response.data;
         orderStatusChartData.value = {
@@ -238,37 +253,51 @@ const fetchOrderStatusData = async () => {
 };
 
 const feedbackStatusChartData = ref(null);
+const starCounts = ref({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, Toxic: 0 });
+
 const fetchFeedBackProducts = async () => {
     try {
-        const response = await axios.get(
-            "http://localhost:3000/api/danhgia/thongke/get-feedback-products"
-        );
+        const response = await axios.get("http://localhost:3000/api/thongke/danhgiasanpham");
         const data = response.data;
+
+        // Cập nhật starCounts cho trang thống kê và quản lý đánh giá
+        starCounts.value = {
+            ...data.starCounts,
+            Toxic: data.toxicCount
+        };
+
+        // Giữ biểu đồ Pie như trong template
         feedbackStatusChartData.value = {
-            labels: data.map((item) => `${item._id} sao`),
-            datasets: [
-                {
-                    label: "Tổng đánh giá",
-                    data: data.map((item) => item.count),
-                    backgroundColor: [
-                        "#6495ED",
-                        "#40E0D0",
-                        "#7B68EE",
-                        "#EE82EE",
-                        "#FFFF00",
-                    ],
-                },
-            ],
+            labels: Object.keys(data.starCounts).map(star => `${star} sao`),
+            datasets: [{
+                label: "Tổng đánh giá",
+                data: Object.values(data.starCounts),
+                backgroundColor: [
+                    "#6495ED",
+                    "#40E0D0",
+                    "#7B68EE",
+                    "#EE82EE",
+                    "#FFFF00"
+                ],
+                borderColor: [
+                    "#4169E1",
+                    "#00CED1",
+                    "#6A5ACD",
+                    "#DA70D6",
+                    "#FFD700"
+                ],
+                borderWidth: 1
+            }]
         };
     } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu trạng thái đơn hàng:", err);
+        console.error("Lỗi khi lấy dữ liệu thống kê:", err);
     }
 };
 
 const getTopSellingProducts = async () => {
     try {
         const response = await axios.get(
-            "http://localhost:3000/api/sanpham/luotban/topsanpham"
+            "http://localhost:3000/api/thongke/topluotban"
         );
         listSelling.value = response.data.map((product) => {
             return {
@@ -286,6 +315,7 @@ function formatCurrency(value) {
 }
 
 onMounted(() => {
+    fetchListProducts();
     fetchStatistical();
     fetchRevenueData(new Date().getFullYear());
     fetchOrderStatusData();
@@ -388,6 +418,33 @@ onMounted(() => {
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-4 items-center lg:flex-row flex-col w-full">
+                            <h3
+                                class="font-bold text-[16px] lg:text-[20px] uppercase w-full lg:w-[50%] lg:text-start text-center">
+                                Thống kê nhập xuất tồn tháng {{ selectedMonthOfDay }}
+                            </h3>
+                            <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
+                                <select
+                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]">
+                                    <option disabled value="">Chọn sản phẩm</option>
+                                    <option v-for="(product, index) in listProducts" :key="index" :value="product.MaSanPham">
+                                        {{ index + 1 }}. {{ product.TenSanPham }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">
+                            <p class="text-[14px] font-semibold text-gray-600">
+                                PG Gundam Build Metaverse God Burning Gundam 1/144 Scale Color-coded Plastic Model
+                            </p>
+                            <div class="flex gap-8 mt-2">
+                                <p class="font-semibold text-[15px]">Số lượng nhập: 10</p>
+                                <p class="font-semibold text-[15px]">Số lượng bán ra: 10</p>
+                                <p class="font-semibold text-[15px]">Số lượng tồn kho: 10</p>
                             </div>
                         </div>
                     </div>

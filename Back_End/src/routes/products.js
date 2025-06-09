@@ -8,7 +8,6 @@ router.post("/", productController.upload ,productController.createProduct);
 router.put("/:maSanPham", productController.upload, productController.updatedProduct);
 router.patch("/:maSanPham", productController.updateProductStatus);
 router.get("/timkiem/ketquatimkiem", productController.findProductsWithName);
-router.get("/luotban/topsanpham", productController.getTopSellingProducts);
 router.get("/goiy/ketquatimkiem", productController.productSuggestionsWithSearch);
 
 module.exports = router;
