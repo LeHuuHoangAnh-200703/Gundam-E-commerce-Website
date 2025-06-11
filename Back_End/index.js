@@ -31,6 +31,7 @@ const locationRoutes = require("./src/routes/locations");
 const statisticalRoutes = require("./src/routes/statisticals");
 const communityPostRoutes = require("./src/routes/communityPosts");
 const vnpayRoutes = require("./src/routes/vnpay");
+const chatBotRoutes = require("./src/routes/chatbot");
 
 const Customer = require('./src/models/customersModels');
 
@@ -144,6 +145,7 @@ app.use("/api/location", locationRoutes);
 app.use("/api/thongke", statisticalRoutes);
 app.use("/api/baidang", communityPostRoutes);
 app.use("/api/thanhtoanvnp", vnpayRoutes);
+app.use("/api/chatbot", chatBotRoutes);
 
 // Cấu hình Nodemailer
 const transporter = nodemailer.createTransport({
