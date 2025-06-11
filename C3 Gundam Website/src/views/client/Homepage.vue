@@ -227,7 +227,7 @@ onMounted(() => {
             </div>
             <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <div class="hidden lg:flex flex-col gap-4 w-full col-span-1 items-start">
-                    <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-3">Loại gundam
+                    <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-3">Loại mô hình
                     </p>
                     <button v-for="(item, index) in listChoices" :key="index"
                         @click.prevent="selectTypeProducts(item.type)"
