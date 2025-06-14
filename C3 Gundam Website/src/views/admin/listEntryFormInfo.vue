@@ -15,6 +15,7 @@ const listProducts = ref([]);
 const errors = ref({});
 const idEntryForm = ref('');
 const idSupplier = ref('');
+const timeEntryForm = ref('');
 const listEntryFormInfos = ref([]);
 const formData = ref({
     idProduct: '',
@@ -40,6 +41,7 @@ const fetchEntryForm = async (idPhieuNhap) => {
         const response = await axios.get(`http://localhost:3000/api/phieunhap/${idPhieuNhap}`);
         idEntryForm.value = response.data.MaPhieuNhap;
         idSupplier.value = response.data.MaNhaCungCap;
+        timeEntryForm.value = new Date(response.data.NgayNhap);
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -147,6 +149,16 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+const isSameDay = (date) => {
+    const inputDate = new Date(date);
+    const today = new Date();
+    return (
+        inputDate.getFullYear() === today.getFullYear() &&
+        inputDate.getMonth() === today.getMonth() &&
+        inputDate.getDate() === today.getDate()
+    );
+}
+
 onMounted(() => {
     const idPN = router.currentRoute.value.params.maPN;
     fetchEntryForm(idPN);
@@ -208,7 +220,7 @@ onMounted(() => {
                                             errors.quantity }}</p>
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
-                                        <button type="submit"
+                                        <button type="submit" :class="isSameDay(timeEntryForm) ? 'block' : 'hidden'"
                                             class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Thêm
                                             chi tiết
                                             phiếu nhập</button>
