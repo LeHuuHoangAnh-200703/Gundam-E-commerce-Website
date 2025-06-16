@@ -5,6 +5,7 @@ import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from "axios";
 import { useRouter } from 'vue-router';
+import * as XLSX from 'xlsx';
 
 const router = useRouter();
 
@@ -50,7 +51,7 @@ const fetchEntryForm = async (idPhieuNhap) => {
 const fetchProducts = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/sanpham');
-        listProducts.value = response.data.filter(product => product.MaNhaCungCap === idSupplier.value 
+        listProducts.value = response.data.filter(product => product.MaNhaCungCap === idSupplier.value
             && product.TrangThai !== 'Ngừng kinh doanh'
         );
     } catch (err) {
@@ -137,6 +138,53 @@ const fetchEntryFormInfos = async () => {
     }
 }
 
+const exportToExcel = async (maPN) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/chitietphieunhap/phieunhap/${maPN}`);
+        const data = response.data;
+
+        if (!Array.isArray(data) || data.length === 0) {
+            showNotification('Không có dữ liệu để xuất!', 'error');
+            return;
+        }
+
+        // Chuyển đổi định dạng ngày và định dạng đơn giá
+        const formattedData = data.map(item => {
+            return {
+                'Mã Phiếu Nhập': item.MaPhieuNhap,
+                'Mã Sản Phẩm': item.MaSanPham,
+                'Tên Sản Phẩm': item.TenSanPham,
+                'Số Lượng': item.SoLuong,
+                'Giá Nhập': formatCurrency(item.GiaNhap),
+                'Tổng Tiền': formatCurrency(item.TongTien),
+                'Ngày Nhập': new Date(item.NgayNhap).toLocaleDateString('vi-VN')
+            };
+        });
+
+        // Tạo workbook và worksheet
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Hóa Đơn');
+
+        // Tùy chỉnh tiêu đề cột
+        worksheet['!cols'] = [
+            { wch: 15 }, // Mã Phiếu Nhập
+            { wch: 15 }, // Mã Sản Phẩm
+            { wch: 30 }, // Tên Sản Phẩm
+            { wch: 10 }, // Số Lượng
+            { wch: 15 }, // Giá Nhập
+            { wch: 15 }, // Tổng Tiền
+            { wch: 15 }  // Ngày Nhập
+        ];
+        // Xuất file Excel
+        XLSX.writeFile(workbook, `Phiếu nhập kho_${maPN}.xlsx`);
+        showNotification('Xuất phiếu nhập thành công!', 'success');
+    } catch (error) {
+        console.error('Lỗi khi xuất Excel:', error.message);
+        showNotification('Có lỗi xảy ra khi xuất Excel!', 'error');
+    }
+};
+
 const formatDate = (date) => {
     const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
     const formattedDate = date.toLocaleString('vi-VN', options);
@@ -197,7 +245,8 @@ onMounted(() => {
                                             <option v-for="(product, index) in listProducts" :key="index"
                                                 :value="product.MaSanPham" class="text-[#003171] font-semibold">{{
                                                     product.MaSanPham }} -
-                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ - Còn lại: {{ product.SoLuong }}
+                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ -
+                                                Còn lại: {{ product.SoLuong }}
                                             </option>
                                         </select>
                                         <p v-if="errors.idProduct" class="text-red-500 text-sm mt-2">{{
@@ -228,6 +277,11 @@ onMounted(() => {
                                 </div>
                             </div>
                         </form>
+                    </div>
+                    <div class="flex justify-end">
+                        <button @click="exportToExcel(idEntryForm)"
+                            class="bg-[#003171] text-white font-semibold py-3 px-5 rounded-md text-[14px]"><i
+                                class="fa-solid fa-plus mr-2"></i> Xuất phiếu nhập</button>
                     </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <div class="w-full overflow-x-auto">

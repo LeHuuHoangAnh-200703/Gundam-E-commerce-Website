@@ -15,13 +15,25 @@ exports.getEntryFormInfo = async (req, res) => {
       MaChiTietPhieuNhap: req.params.maCTPN,
     });
     if (!entryFormInfo) {
-      res.status(400).json({ message: "Chi tiết phiếu nhập không tồn tại!" });
+      return res.status(400).json({ message: "Chi tiết phiếu nhập không tồn tại!" });
     }
-    res.status(200).json(entryFormInfo);
+    return res.status(200).json(entryFormInfo);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
+
+exports.getEntryFormInFoById = async (req, res) => {
+  try {
+    const entryFormInfo = await EntryFormInfo.find({ MaPhieuNhap: req.params.maPN });
+    if (!entryFormInfo) {
+      return res.status(400).json({ message: "Chi tiết phiếu nhập không tồn tại!" });
+    }
+    return res.status(200).json(entryFormInfo);
+  } catch (error) {
+    return res.status(500).json({ message: err.message });
+  }
+}
 
 exports.createEntryFormInfo = async (req, res) => {
   const { MaSanPham, TenSanPham, GiaNhap, SoLuong } = req.body;
