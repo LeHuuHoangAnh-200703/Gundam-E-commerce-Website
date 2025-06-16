@@ -243,7 +243,7 @@ onMounted(() => {
                             :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
                             class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đánh giá</button>
                         <button @click.prevent="deleteOrder(order.MaDonHang)"
-                            :class="(order.TrangThaiDon === 'Đang chờ xác nhận' || order.TrangThaiDon === 'Đang chờ lấy hàng') ? 'block' : 'hidden'"
+                            :class="order.TrangThaiDon === 'Đang chờ xác nhận' ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Hủy đơn
                             hàng</button>
                         <button @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"

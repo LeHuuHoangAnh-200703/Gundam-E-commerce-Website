@@ -4,6 +4,11 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from 'axios';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+// Gán font cho pdfMake
+pdfMake.vfs = pdfFonts;
 
 const options = [
     {
@@ -135,6 +140,87 @@ const fetchOrderByDayMonth = async () => {
         console.log("Lỗi khi lọc đơn hàng", err);
     }
 }
+
+const exportOrderToPDF = async (order) => {
+    try {
+        // Tính thành tiền cho từng sản phẩm
+        const productsWithTotal = order.SanPhamDaMua.map(product => ({
+            ...product,
+            ThanhTien: product.SoLuong * product.Gia
+        }));
+
+        const docDefinition = {
+            content: [
+                { text: 'C3 GUNDAM STORE', style: 'header' },
+                { text: 'Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang', style: 'subheader' },
+                { text: 'Điện thoại: 079.965.8592', style: 'subheader' },
+                { text: '____________________________________________________________________________', alignment: 'center' },
+                { text: '\nHÓA ĐƠN BÁN HÀNG', style: 'title' },
+                { text: `Số: ${order.MaDonHang}`, style: 'subheader' },
+                { text: '\nTHÔNG TIN KHÁCH HÀNG & GIAO DỊCH', style: 'sectionHeader' },
+                { text: `Ngày xuất: ${formatDate(order.NgayDatHang)}`, style: 'subheader2' },
+                { text: `Khách hàng: ${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, style: 'subheader2' },
+                { text: '\nCHI TIẾT SẢN PHẨM', style: 'sectionHeader' },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['*', 'auto', 'auto', 'auto'],
+                        body: [
+                            ['Mã sản phẩm', 'Tên sản phẩm', 'Số lượng', 'Đơn giá'],
+                            ...productsWithTotal.map(product => [
+                                product.MaSanPham,
+                                product.TenSanPham || 'N/A',
+                                product.SoLuong || 0,
+                                formatCurrency(product.Gia || 0)
+                            ])
+                        ]
+                    }
+                },
+                { text: `\nPhí giao hàng: ${order.HinhThucVanChuyen}`, style: 'subheader3' },
+                { text: '_______________________________________________________________________________________________', alignment: 'center' },
+                { text: `\nTỔNG CỘNG THANH TOÁN: ${formatCurrency(order.TongDon || 0)} VND`, style: 'total' },
+                { text: '\n', margin: [0, 10] },
+                {
+                    columns: [
+                        { text: 'Người lập phiếu', alignment: 'center', margin: [0, 0, 0, 20] },
+                        { text: 'Người giao hàng', alignment: 'center', margin: [0, 0, 0, 20] },
+                        { text: 'Khách hàng', alignment: 'center', margin: [0, 0, 0, 20] }
+                    ]
+                },
+                {
+                    columns: [
+                        { text: '(Ký, ghi rõ họ tên)', alignment: 'center' },
+                        { text: '(Ký, ghi rõ họ tên)', alignment: 'center' },
+                        { text: '(Ký, ghi rõ họ tên)', alignment: 'center' }
+                    ]
+                },
+                {
+                    columns: [
+                        { text: '_________________________', alignment: 'center' },
+                        { text: '_________________________', alignment: 'center' },
+                        { text: `${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, alignment: 'center' } // Tên khách hàng
+                    ]
+                }
+            ],
+            styles: {
+                header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
+                title: { fontSize: 16, bold: true, alignment: 'center', margin: [0, 10, 0, 5] },
+                subheader: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'center' },
+                subheader2: { fontSize: 10, margin: [0, 2, 0, 2] },
+                subheader3: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'right' },
+                sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] },
+                total: { fontSize: 12, bold: true, alignment: 'right', margin: [0, 2, 0, 5] }
+            }
+        };
+
+        // Tạo và tải file PDF
+        pdfMake.createPdf(docDefinition).download(`HoaDon_${order.MaDonHang}.pdf`);
+        showNotification('Xuất hóa đơn thành công!', 'success');
+    } catch (error) {
+        console.error('Lỗi khi xuất PDF:', error.message);
+        showNotification('Lỗi khi xuất hóa đơn PDF!', 'error');
+    }
+};
 
 const filteredOrders = computed(() => {
     return listOrders.value.filter(order => {
@@ -292,7 +378,10 @@ onMounted(() => {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex justify-center lg:justify-end">
+                                <div class="flex justify-center lg:justify-end gap-4 items-center">
+                                    <button :class="(order.TrangThaiDon === 'Đơn hàng đã hủy') ? 'hidden' : 'block'"
+                                        @click="exportOrderToPDF(order)"
+                                        class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#003171] transition-all duration-300 hover:bg-[#1A1D27]">Xuất hóa đơn</button>
                                     <button :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'hidden' : 'block'"
                                         @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
                                         class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">{{
