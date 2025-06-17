@@ -33,7 +33,12 @@ const nameCustomer = ref('');
 const emailCustomer = ref('');
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
-const totalPrice = ref(0);
+const totalProductPrice = ref(0); // Giá sản phẩm gốc
+const finalProductPrice = ref(0); // Giá sản phẩm sau giảm
+const discountAmount = ref(0); // Số tiền giảm
+const totalPrice = ref(0); // Tổng giá (sản phẩm sau giảm + phí ship)
+const shippingFee = ref(0);
+const shippingDetails = ref({ baseFee: 0 });
 const isPayPalReady = ref(false); // Cờ để xác định trạng thái nút PayPal
 const isVNPayReady = ref(false);
 const notification = ref({
@@ -41,18 +46,61 @@ const notification = ref({
     type: ''
 });
 
-const shippingFee = [
-    { fee: 'Giao tiêu chuẩn (20.000đ)' },
-    { fee: 'Giao nhanh (30.000đ)' },
-    { fee: 'Ship hỏa tốc (50.000đ)' },
-]
-
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
 };
+
+// Tính phí ship
+const calculateShippingFee = async () => {
+    if (!formData.value.address) {
+        shippingFee.value = 0;
+        formData.value.shippingMethod = '';
+        return;
+    }
+    try {
+        const response = await axios.post('http://localhost:3000/api/donhang/tinhphiship', {
+            address: formData.value.address,
+            totalOrder: finalProductPrice.value,
+        });
+        shippingFee.value = response.data.shippingFee;
+        shippingDetails.value = response.data.details;
+        formData.value.shippingMethod = response.data.shippingMethod;
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Lỗi tính phí ship', 'error');
+    }
+};
+
+// Tính giá sau giảm giá
+const calculateDiscount = async () => {
+    try {
+        const response = await axios.post('http://localhost:3000/api/donhang/capnhatmagiamgia', {
+            IdMaGiamGia: formData.value.discountCode,
+            MaKhachHang: maKhachHang,
+            totalProductPrice: totalProductPrice.value,
+        });
+        if (response.data.success) {
+            finalProductPrice.value = response.data.finalPrice;
+            discountAmount.value = response.data.discountAmount; //Số tiền giảm được bao nhiêu
+        } else {
+            finalProductPrice.value = totalProductPrice.value;
+            discountAmount.value = 0; //Số tiền giảm được bao nhiêu
+        }
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Lỗi áp dụng mã giảm giá', 'error');
+    }
+};
+
+// Tính tổng giá
+watch([selectedProducts, finalProductPrice, shippingFee], () => {
+  totalProductPrice.value = selectedProducts.value.reduce((sum, product) => {
+    return sum + product.DonGia * product.SoLuong;
+  }, 0);
+  finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
+  totalPrice.value = finalProductPrice.value + shippingFee.value;
+});
 
 const fetchCustomer = async (idKhachHang) => {
     try {
@@ -84,18 +132,10 @@ const addOrders = async () => {
         errors.value.payment = "Chọn phương thức thanh toán phù hợp."
     }
 
-    let totalProductPrice = selectedProducts.value.reduce((sum, product) => {
-        return sum + product.DonGia * product.SoLuong;
-    }, 0);
-
-    if (totalProductPrice < 2000000 && !formData.value.shippingMethod) {
-        errors.value.shippingMethod = "Vui lòng chọn hình thức giao hàng.";
-    }
-
     if (Object.keys(errors.value).length > 0) {
         return;
     }
-    
+
     if (formData.value.payment !== 'Thanh toán qua Paypal') {
         const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
         if (!confirmUpdate) return;
@@ -139,7 +179,7 @@ const addOrders = async () => {
         await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`)
         setTimeout(() => {
             router.push('/orders_history');
-        }, 2000);
+        }, 0);
         localStorage.removeItem("selectedProducts");
     } catch (error) {
         showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
@@ -203,31 +243,8 @@ onMounted(() => {
     if (data) {
         selectedProducts.value = JSON.parse(data);
     }
-    calculateTotalPrice();
     fetchCustomer(maKhachHang);
 });
-
-const calculateTotalPrice = () => {
-    let costShip = 0;
-    let totalProductPrice = selectedProducts.value.reduce((sum, product) => {
-        return sum + product.DonGia * product.SoLuong;
-    }, 0);
-
-    if (totalProductPrice >= 2000000) {
-        costShip = 0;
-        formData.value.shippingMethod = "Miễn phí giao hàng";
-    } else {
-        if (formData.value.shippingMethod === "Giao tiêu chuẩn (20.000đ)") {
-            costShip = 20000;
-        } else if (formData.value.shippingMethod === "Giao nhanh (30.000đ)") {
-            costShip = 30000;
-        } else if (formData.value.shippingMethod === "Ship hỏa tốc (50.000đ)") {
-            costShip = 50000;
-        }
-    }
-
-    totalPrice.value = totalProductPrice + costShip;
-};
 
 const createPaymentVNPay = async () => {
     errors.value = {};
@@ -315,10 +332,6 @@ const createPaymentVNPay = async () => {
     }
 };
 
-watch(() => formData.value.shippingMethod, () => {
-    calculateTotalPrice();
-});
-
 watch(() => formData.value.payment, (newPayment) => {
     if (newPayment === 'Thanh toán qua Paypal') {
         isPayPalReady.value = true;  // Hiển thị nút PayPal
@@ -331,6 +344,14 @@ watch(() => formData.value.payment, (newPayment) => {
         isPayPalReady.value = false;
         isVNPayReady.value = false;
     }
+});
+
+watch(() => formData.value.address, () => {
+    calculateShippingFee();
+});
+
+watch(() => formData.value.discountCode, () => {
+  calculateDiscount();
 });
 </script>
 
@@ -466,45 +487,30 @@ watch(() => formData.value.payment, (newPayment) => {
                                                 errors.payment }}</p>
                                         </div>
                                         <div class="w-full">
-                                            <label class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">
-                                                Hình thức giao hàng:
-                                            </label>
-                                            <div v-if="selectedProducts.reduce((sum, product) => sum + product.DonGia * product.SoLuong, 0) >= 2000000"
-                                                class="p-3 rounded-lg border border-gray-500 bg-gray-800">
-                                                <span class="text-white">Miễn phí giao hàng cho đơn hàng trên 2.000.000
-                                                    VNĐ</span>
+                                            <label
+                                                class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Hình
+                                                thức giao hàng</label>
+                                            <div class="p-3 rounded-lg border border-gray-500 bg-gray-800">
+                                                <span class="text-white">{{ formData.shippingMethod || 'Đang tính phí ship...' }}</span>
                                             </div>
-                                            <div v-else class="space-y-2">
-                                                <label v-for="ship in shippingFee" :key="ship"
-                                                    class="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-gray-500 bg-gray-800 hover:bg-gray-700 transition">
-                                                    <input type="radio" name="shipping"
-                                                        v-model="formData.shippingMethod" :value="ship.fee"
-                                                        class="hidden" />
-                                                    <div :class="{
-                                                        'w-5 h-5 rounded-full border-2 flex items-center justify-center border-white': true,
-                                                        'bg-blue-500 border-blue-500':
-                                                            formData.shippingMethod === ship.fee,
-                                                    }">
-                                                        <div v-if="formData.shippingMethod === ship.fee"
-                                                            class="w-2.5 h-2.5 bg-white rounded-full"></div>
-                                                    </div>
-                                                    <span class="text-white">{{ ship.fee }}</span>
-                                                </label>
-                                            </div>
-                                            <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">
-                                                {{ errors.shippingMethod }}
-                                            </p>
+                                            <p v-if="errors.shippingMethod" class="text-red-500 text-sm mt-2">{{
+                                                errors.shippingMethod }}</p>
                                         </div>
-                                        <hr>
+                                        <hr />
+                                        <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá: <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }} VNĐ</span></p>
+                                        <p class="text-white text-[15px] text-end">Phí vận chuyển: <span
+                                                class="text-[#FFD700]">{{
+                                                    formatCurrency(shippingDetails.baseFee) }} VNĐ</span></p>
                                         <p class="text-white text-[16px] text-end">Tổng cộng: <span
-                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice) }} VNĐ</span></p>
+                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice - discountAmount) }} VNĐ</span></p>
                                         <button type="submit"
                                             :class="(formData.payment === 'Thanh toán khi nhận hàng' || formData.payment === '') ? 'block' : 'hidden'"
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">Đặt
                                             hàng</button>
-                                        <button type="button" @click="createPaymentVNPay()" :class="isVNPayReady ? 'block' : 'hidden'"
+                                        <button type="button" @click="createPaymentVNPay()"
+                                            :class="isVNPayReady ? 'block' : 'hidden'"
                                             class="flex gap-2 items-center justify-center px-6 py-3 bg-[#4169E1] rounded-md text-white font-medium self-end w-full">Thanh
-                                            toán qua <img src="../../assets/img/vnpay.png" class="w-8 h-8" alt=""><span
+                                            toán qua <img src="../../assets/img/vnpay.png" class="w-6 h-6" alt=""><span
                                                 class="font-bold font-bungee">VN <span
                                                     class="text-[#DC143C]">Pay</span></span></button>
                                         <div :class="isPayPalReady ? 'block' : 'hidden'" id="paypal-button-container">
@@ -512,7 +518,6 @@ watch(() => formData.value.payment, (newPayment) => {
                                     </div>
                                 </div>
                             </div>
-                            <!-- <button type="submit" class="px-5 py-3 bg-[#DB3F4C] rounded-md text-white font-medium">Đặt hàng</button> -->
                         </form>
                     </div>
                 </div>

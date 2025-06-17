@@ -4,6 +4,7 @@ const DiscountCode = require("../models/discountCodeModels");
 const Inventory = require("../models/inventoryModels");
 const Product = require("../models/productModels");
 const nodemailer = require("nodemailer");
+const axios = require('axios');
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -12,6 +13,140 @@ const transporter = nodemailer.createTransport({
         pass: "varzwbjducnkzmaj",
     },
 });
+
+const GHTK_TOKEN = "26SbcXtz1hJHrwFTDBNY6PZ5OEQGA0duX2lPAPg";
+const GHTK_API_URL = 'https://services.giaohangtietkiem.vn/services/shipment/fee';
+
+// Hàm trích xuất tỉnh/quận từ địa chỉ
+function extractProvinceDistrict(address) {
+    // Giả định: Địa chỉ dạng "123 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+    const parts = address.DiaChi.split(',').map(part => part.trim());
+    const province = parts[parts.length - 1]; // Tỉnh: phần cuối
+    const district = parts[parts.length - 2]; // Quận: phần áp cuối
+    return { province, district };
+}
+
+async function calculateGHTKShippingFee(province, district) {
+    try {
+        const response = await axios.post(
+            GHTK_API_URL,
+            {
+                pick_province: 'Tỉnh Hậu Giang', // Thay bằng tỉnh kho
+                pick_district: 'Thành phố Vị Thanh', // Thay bằng quận kho
+                province,
+                district,
+                weight: 500, // Trọng lượng mặc định: 500g
+                value: 1000000, // Giá trị mặc định: 1 triệu
+                transport: 'road', // Giao thường
+                deliver_option: 'none',
+            },
+            { headers: { Token: GHTK_TOKEN } }
+        );
+        return response.data.fee.options.shipMoney;
+    } catch (error) {
+        throw new Error('Lỗi GHTK API: ' + error.message);
+    }
+}
+
+exports.calculateShippingFee = async (req, res) => {
+    const { address, totalOrder } = req.body;
+
+    try {
+        // Trích xuất tỉnh/quận
+        const { province, district } = extractProvinceDistrict(address);
+        if (!province || !district) {
+            throw new Error('Địa chỉ không hợp lệ, thiếu tỉnh hoặc quận');
+        }
+
+        // Lấy phí ship từ GHTK
+        let shippingFee = await calculateGHTKShippingFee(province, district);
+
+        // Miễn phí ship cho đơn từ 2 triệu
+        if (totalOrder >= 2000000) {
+            shippingFee = 0;
+        }
+
+        res.json({
+            success: true,
+            shippingFee,
+            details: { baseFee: shippingFee },
+            shippingMethod: shippingFee === 0 ? 'Miễn phí giao hàng' : `Giao hàng (${formatCurrency(shippingFee)} VNĐ)`,
+        });
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({
+            success: false,
+            shippingFee: 40000, // Phí mặc định nếu lỗi
+            message: 'Lỗi tính phí ship, sử dụng phí mặc định 40.000 VNĐ',
+            shippingMethod: 'Giao hàng (40.000 VNĐ)',
+        });
+    }
+};
+
+exports.calculateDiscount = async (req, res) => {
+    const { IdMaGiamGia, MaKhachHang, totalProductPrice } = req.body;
+    let finalPrice = totalProductPrice;
+    try {
+        if (!IdMaGiamGia) {
+            return res.json({
+                success: true,
+                finalPrice,
+                discountAmount: 0,
+                message: 'Không áp dụng mã giảm giá',
+            });
+        }
+        const discount = await DiscountCode.findOne({ IdMaGiamGia });
+        if (!discount) {
+            return res.status(400).json({ success: false, message: "Mã giảm giá không tồn tại." });
+        }
+        const currentDay = new Date();
+        if (currentDay > discount.NgayHetHan) {
+            return res.status(400).json({ success: false, message: "Mã giảm giá đã hết hạn." });
+        }
+        if (discount.SoLanSuDung <= 0) {
+            return res.status(400).json({ success: false, message: "Mã giảm giá đã hết lượt sử dụng." });
+        }
+        if (discount.IdKhachHangSuDung?.includes(MaKhachHang)) {
+            return res.status(400).json({ success: false, message: "Bạn đã sử dụng mã giảm giá này rồi." });
+        }
+        const giaApDung = Number(discount.GiaApDung);
+        const giamTien = Number(discount.GiamTien || 0);
+        const giamPhanTram = discount.GiamPhanTram || 0;
+        if (totalProductPrice >= giaApDung) {
+            let discountAmount = 0;
+            if (giamTien > 0) {
+                discountAmount = giamTien;
+                finalPrice -= giamTien;
+            } else if (giamPhanTram > 0) {
+                discountAmount = finalPrice * (giamPhanTram / 100);
+                finalPrice -= discountAmount;
+            }
+            if (finalPrice < 0) {
+                finalPrice = 0;
+            }
+            return res.json({
+                success: true,
+                finalPrice,
+                discountAmount
+            });
+        } else {
+            return res.status(400).json({ success: false, message: "Giá trị đơn hàng không đủ để áp dụng mã giảm giá." });
+        }
+    } catch (error) {
+        console.error('Calculate Discount Error:', error.message);
+        res.status(500).json({
+            success: false,
+            finalPrice: totalProductPrice,
+            discountAmount: 0,
+            message: 'Lỗi tính giảm giá, không áp dụng mã',
+        });
+    }
+};
+
+// Hàm format tiền
+function formatCurrency(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find();
