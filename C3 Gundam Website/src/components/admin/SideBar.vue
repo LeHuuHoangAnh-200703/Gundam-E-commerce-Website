@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 const status = ref('');
 const sidebarMenu = [
     { name: "Tổng quan", icon: "fa-solid fa-chart-simple", path: "statisticals" },
@@ -8,6 +8,7 @@ const sidebarMenu = [
     { name: "Quản lý đánh giá", icon: "fa-solid fa-comments", path: "listFeedBacks" },
     { name: "Quản lý khách hàng", icon: "fa-solid fa-users", path: "customers" },
     { name: "Quản lý nhà cung cấp", icon: "fa-solid fa-user-large", path: "listSuppliers" },
+    { name: "Quản lý loại sản phẩm", icon: "fa-solid fa-table", path: "listProductType" },
     { name: "Quản lý mã giảm giá", icon: "fa-solid fa-tags", path: "discountCode" },
     { name: "Quản lý bài đăng", icon: "fa-solid fa-hashtag", path: "communityPostManage" },
     { name: "Thêm sản phẩm", icon: "fa-solid fa-cart-plus", path: "addProduct" },
@@ -33,7 +34,7 @@ onMounted(() => {
             </span>
             Gundam Store</p>
         <hr class="mb-8 mx-8">
-        <ul class="flex flex-col space-y-2 text-[12px] font-semibold px-8 text-white mb-8">
+        <ul class="flex flex-col space-y-1 text-[13px] font-semibold px-8 text-white mb-8">
             <router-link :to="sidebar.path" v-for="(sidebar, index) in sidebarMenu" :key="index" @click="saveStatus(index)"
                 :class="{ 'active-link': status === index }"
                 class="flex gap-3 items-center font-semibold cursor-pointer px-2 py-3 hover:bg-[#DB3F4C] rounded-md transition-all duration-200">

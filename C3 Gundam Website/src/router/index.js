@@ -46,6 +46,9 @@ import CommentCommunityPost from "@/views/client/commentCommunityPost.vue";
 import CommunityPostManage from "@/views/admin/communityPostManage.vue";
 import YourPostLists from "@/views/client/yourPostLists.vue";
 import PaymentVNPaySuccess from "@/views/success/paymentVNPaySuccess.vue";
+import ListProductType from "@/views/admin/listProductType.vue";
+import AddProductType from "@/views/admin/addProductType.vue";
+import EditProductType from "@/views/admin/editProductType.vue";
 
 const routes = [
     {
@@ -228,6 +231,24 @@ const routes = [
         path: "/admin/editSupplier/:maNCC",
         name: "Edit Supplier",
         component: editSupplier,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/listProductType",
+        name: "List Product Type",
+        component: ListProductType,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/addListProductType",
+        name: "Add List Product Type",
+        component: AddProductType,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/admin/editListProductType/:maLoaiSanPham",
+        name: "Edit List Product Type",
+        component: EditProductType,
         meta: { requiresAuth: true },
     },
     {

@@ -32,7 +32,7 @@ const statisticalRoutes = require("./src/routes/statisticals");
 const communityPostRoutes = require("./src/routes/communityPosts");
 const vnpayRoutes = require("./src/routes/vnpay");
 const chatBotRoutes = require("./src/routes/chatbot");
-
+const productTypeRoutes = require("./src/routes/productType");
 const Customer = require('./src/models/customersModels');
 
 dotenv.config();
@@ -146,6 +146,7 @@ app.use("/api/thongke", statisticalRoutes);
 app.use("/api/baidang", communityPostRoutes);
 app.use("/api/thanhtoanvnp", vnpayRoutes);
 app.use("/api/chatbot", chatBotRoutes);
+app.use("/api/loaisanpham", productTypeRoutes);
 
 // Cấu hình Nodemailer
 const transporter = nodemailer.createTransport({
