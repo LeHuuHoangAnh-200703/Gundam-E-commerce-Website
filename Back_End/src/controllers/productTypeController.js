@@ -50,8 +50,17 @@ exports.updateProductType = async (req, res) => {
 
         // Nếu có cập nhật loại sản phẩm, kiểm tra tên trùng (không phân biệt hoa thường)
         if (req.body.TenLoaiSanPham) {
-            const existingProductType = await Supplier.findOne({
+            const existingNameProductType = await ProductType.findOne({
                 TenLoaiSanPham: { $regex: new RegExp(`^${req.body.TenLoaiSanPham}$`, "i") },
+                MaLoaiSanPham: { $ne: req.params.maLoaiSanPham }, // Loại trừ loại sản phẩm hiện tại
+            });
+            if (existingNameProductType) {
+                return res.status(400).json({ message: "Tên loại sản phẩm đã tồn tại trong cơ sở dữ liệu." });
+            }
+        }
+
+        if (req.body.LoaiSanPham) {
+            const existingProductType = await ProductType.findOne({
                 LoaiSanPham: { $regex: new RegExp(`^${req.body.LoaiSanPham}$`, "i") },
                 MaLoaiSanPham: { $ne: req.params.maLoaiSanPham }, // Loại trừ loại sản phẩm hiện tại
             });

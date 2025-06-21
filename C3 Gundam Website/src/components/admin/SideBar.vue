@@ -29,12 +29,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] min-h-screen w-[25%] max-w-96 hidden lg:block">
+    <div class="bg-[#1A1D27] min-h-screen w-[25%] max-w-80 hidden lg:block">
         <p class="p-8 font-bold text-white text-center text-[18px] font-bungee"><span class="text-[#DB3F4C]">C3
             </span>
             Gundam Store</p>
         <hr class="mb-8 mx-8">
-        <ul class="flex flex-col space-y-1 text-[13px] font-semibold px-8 text-white mb-8">
+        <ul class="flex flex-col space-y-1 text-[14px] font-semibold px-8 text-white mb-8">
             <router-link :to="sidebar.path" v-for="(sidebar, index) in sidebarMenu" :key="index" @click="saveStatus(index)"
                 :class="{ 'active-link': status === index }"
                 class="flex gap-3 items-center font-semibold cursor-pointer px-2 py-3 hover:bg-[#DB3F4C] rounded-md transition-all duration-200">

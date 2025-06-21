@@ -321,7 +321,7 @@ const fetchEnterWarehouse = async (maSanPham, year, month) => {
         }, 3000);
         return;
     }
-    
+
     try {
         const response = await axios.get(`http://localhost:3000/api/thongke/nhapxuatton/${maSanPham}?year=${year}&month=${month}`);
         console.log(response.data);
@@ -349,12 +349,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-6 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+            </div>
+            <div class="flex-1 px-4 pb-4 overflow-y-auto">
+                <div class="flex flex-col gap-6">
                     <div class="flex gap-4 w-full lg:flex-row flex-col">
                         <div class="text-white rounded-md shadow-lg bg-[#DB3F4C] w-full lg:w-[25%]">
                             <div class="flex justify-between px-4 pt-4 w-full items-center">
@@ -451,21 +453,25 @@ onMounted(() => {
                                 Thống kê nhập xuất tồn tháng {{ filterMonth }}
                             </h3>
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
-                                <select v-model="selectedProduct" @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
+                                <select v-model="selectedProduct"
+                                    @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
                                     <option disabled value="">Chọn sản phẩm</option>
-                                    <option v-for="(product, index) in listProducts" :key="index" :value="product.MaSanPham">
+                                    <option v-for="(product, index) in listProducts" :key="index"
+                                        :value="product.MaSanPham">
                                         {{ index + 1 }}. {{ product.TenSanPham }}
                                     </option>
                                 </select>
-                                <select v-model="filterYear" @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
+                                <select v-model="filterYear"
+                                    @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
                                     <option disabled value="">Chọn năm</option>
                                     <option v-for="year in selectedYearProduct" :key="year" :value="year">
                                         Năm {{ year }}
                                     </option>
                                 </select>
-                                <select v-model="filterMonth" @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
+                                <select v-model="filterMonth"
+                                    @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
                                     class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
                                     <option disabled value="">Chọn tháng</option>
                                     <option v-for="month in selectedMonthProduct" :key="month" :value="month">
@@ -479,9 +485,12 @@ onMounted(() => {
                                 {{ selectedNameProduct ? selectedNameProduct : "Chọn sản phẩm cần thống kê" }}
                             </p>
                             <div class="flex gap-2 lg:gap-8 mt-2 lg:flex-row flex-col">
-                                <p class="font-semibold text-[15px]">Số lượng nhập vào: {{ listWarehouse.SoLuongNhap ? listWarehouse.SoLuongNhap : 0 }}</p>
-                                <p class="font-semibold text-[15px]">Số lượng bán ra: {{ listWarehouse.SoLuongBan ? listWarehouse.SoLuongBan : 0 }}</p>
-                                <p class="font-semibold text-[15px]">Số lượng tồn kho: {{ listWarehouse.SoLuongTon ? listWarehouse.SoLuongTon : 0 }}</p>
+                                <p class="font-semibold text-[15px]">Số lượng nhập vào: {{ listWarehouse.SoLuongNhap ?
+                                    listWarehouse.SoLuongNhap : 0 }}</p>
+                                <p class="font-semibold text-[15px]">Số lượng bán ra: {{ listWarehouse.SoLuongBan ?
+                                    listWarehouse.SoLuongBan : 0 }}</p>
+                                <p class="font-semibold text-[15px]">Số lượng tồn kho: {{ listWarehouse.SoLuongTon ?
+                                    listWarehouse.SoLuongTon : 0 }}</p>
                             </div>
                         </div>
                     </div>

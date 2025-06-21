@@ -1,6 +1,7 @@
 const Product = require("../models/productModels");
 const Inventory = require("../models/inventoryModels");
 const Supplier = require("../models/suppliersModels");
+const ProductType = require("../models/productTypeModels");
 const path = require("path");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -24,8 +25,9 @@ exports.getAllProducts = async (req, res) => {
       inventoryMap[inventory.MaSanPham.toString()] = inventory.SoLuongTon;
     });
 
-    // Tạo một mảng chứa các mã nhà cung cấp để tìm kiếm
+    // Tạo một mảng chứa các mã nhà cung cấp và loại sản phẩm để tìm kiếm
     const supplierIds = [...new Set(products.map(product => product.MaNhaCungCap))];
+    const productTypeIds = [...new Set(products.map(product => product.MaLoaiSanPham))];
 
     // Tìm tất cả nhà cung cấp dựa trên mã nhà cung cấp
     const suppliers = await Supplier.find({ MaNhaCungCap: { $in: supplierIds } });
@@ -34,13 +36,21 @@ exports.getAllProducts = async (req, res) => {
       supplierMap[supplier.MaNhaCungCap] = supplier.TenNhaCungCap;
     });
 
+    // Tìm tất cả nhà cung cấp dựa trên mã loại sản phẩm
+    const productTypes = await ProductType.find({ MaLoaiSanPham: { $in: productTypeIds } });
+    const productTypeMap = {};
+    productTypes.forEach(productType => {
+      productTypeMap[productType.MaLoaiSanPham] = productType.LoaiSanPham;
+    });
+
     // Kết hợp dữ liệu tồn kho với danh sách sản phẩm
     const result = products.map(product => {
       const productId = product.MaSanPham?.toString(); // Lấy mã sản phẩm để ánh xạ
       return {
-        ...product._doc, // Giữ nguyên dữ liệu sản phẩm
-        SoLuong: inventoryMap[productId] || 0, // Thêm số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
-        TenNhaCungCap: supplierMap[product.MaNhaCungCap], // Lấy tên nhà cung cấp hoặc gán "Không xác định" nếu không có
+        ...product._doc,
+        SoLuong: inventoryMap[productId] || 0,
+        TenNhaCungCap: supplierMap[product.MaNhaCungCap], 
+        LoaiSanPham: productTypeMap[product.MaLoaiSanPham]
       };
     });
 
@@ -60,11 +70,13 @@ exports.getProduct = async (req, res) => {
 
     const inventory = await Inventory.findOne({ MaSanPham: req.params.maSanPham });
     const supplier = await Supplier.findOne({ MaNhaCungCap: product.MaNhaCungCap });
+    const productType = await ProductType.findOne({ MaLoaiSanPham: product.MaLoaiSanPham });
 
     const result = {
-      ...product._doc, // Giữ nguyên thông tin sản phẩm
-      SoLuong: inventory ? inventory.SoLuongTon : 0, // Lấy số lượng tồn kho hoặc gán 0 nếu không có dữ liệu
-      TenNhaCungCap: supplier.TenNhaCungCap
+      ...product._doc,
+      SoLuong: inventory ? inventory.SoLuongTon : 0,
+      TenNhaCungCap: supplier.TenNhaCungCap,
+      LoaiSanPham: productType.LoaiSanPham
     };
 
     res.status(200).json(result);
@@ -121,7 +133,7 @@ exports.updatedProduct = async (req, res) => {
     // Cập nhật thông tin sản phẩm
     product.TenSanPham = req.body.TenSanPham || product.TenSanPham;
     product.GiaBan = req.body.GiaBan || product.GiaBan;
-    product.LoaiSanPham = req.body.LoaiSanPham || product.LoaiSanPham;
+    product.MaLoaiSanPham = req.body.MaLoaiSanPham || product.MaLoaiSanPham;
     product.MaNhaCungCap = req.body.MaNhaCungCap || product.MaNhaCungCap;
     product.MoTa = req.body.MoTa || product.MoTa;
     product.YoutubeUrl = req.body.YoutubeUrl || product.YoutubeUrl;

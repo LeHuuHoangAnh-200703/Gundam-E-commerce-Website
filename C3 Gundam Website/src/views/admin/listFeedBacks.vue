@@ -41,7 +41,7 @@ const totalQuality = computed(() => {
 const chooseFeedBackWithStar = computed(() => {
     return comments.value.filter(comment => {
         const matchesStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
-        const matchesSearch = !searchValue.value || comment.SanPhamDaDanhGia.some(item => 
+        const matchesSearch = !searchValue.value || comment.SanPhamDaDanhGia.some(item =>
             item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase()) ||
             item.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
         );
@@ -81,134 +81,140 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                    <h1 class="font-bold text-[20px] uppercase">Quản lý đánh giá</h1>
-                </div>
-                <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
-                    <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
-                        <div class="flex flex-col gap-2">
-                            <p class="text-[24px] xl:text-[20px] font-semibold"><span
-                                    class="text-[30px] xl:text-[26px]">{{ totalQuality }}</span> trên 5 <i
-                                    class="fa-solid fa-star text-[#FFD700]"></i></p>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <p class="font-semibold text-[18px] xl:text-[16px]">Tìm kiếm theo sao</p>
-                            <button @click.prevent="selected(6)"
-                                class="border-2 px-5 py-3 xl:text-[12px] flex justify-between font-semibold gap-2 rounded-md hover:border-[#003171] transition-all duration-300">Tất
-                                cả đánh giá <span> ({{ starCounts.nonToxic }})</span></button>
-                            <button @click.prevent="selected(5)"
-                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
-                                <div class="flex gap-2 justify-start">
-                                    <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
-                                        :class="['fa-solid fa-star', star <= 5 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
-                                </div>
-                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[5] }})</p>
-                            </button>
-                            <button @click.prevent="selected(4)"
-                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
-                                <div class="flex gap-2 justify-start">
-                                    <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
-                                        :class="['fa-solid fa-star', star <= 4 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
-                                </div>
-                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[4] }})</p>
-                            </button>
-                            <button @click.prevent="selected(3)"
-                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
-                                <div class="flex gap-2 justify-start">
-                                    <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
-                                        :class="['fa-solid fa-star', star <= 3 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
-                                </div>
-                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[3] }})</p>
-                            </button>
-                            <button @click.prevent="selected(2)"
-                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
-                                <div class="flex gap-2 justify-start">
-                                    <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
-                                        :class="['fa-solid fa-star', star <= 2 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
-                                </div>
-                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[2] }})</p>
-                            </button>
-                            <button @click.prevent="selected(1)"
-                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
-                                <div class="flex gap-2 justify-start">
-                                    <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
-                                        :class="['fa-solid fa-star', star <= 1 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
-                                </div>
-                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[1] }})</p>
-                            </button>
-                            <button @click.prevent="selectedToxic(true)"
-                                class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
-                                <p class="font-semibold text-[14px] xl:text-[12px]">Bình luận tiêu cực</p>
-                                <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts.Toxic }})</p>
-                            </button>
-                        </div>
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
+                    <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
+                        <h1 class="font-bold text-[20px] uppercase">Quản lý đánh giá</h1>
                     </div>
-                    <div class="flex flex-col gap-6 w-full">
-                        <div class="relative flex justify-center gap-2 w-full lg:max-w-[calc(100vw-200px)]">
-                            <input type="text" v-model="searchValue"
-                                class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
-                                placeholder="Tìm kiếm đánh giá sản phẩm..." />
-                            <i
-                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                    <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
+                        <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
+                            <div class="flex flex-col gap-2">
+                                <p class="text-[24px] xl:text-[20px] font-semibold"><span
+                                        class="text-[30px] xl:text-[26px]">{{ totalQuality }}</span> trên 5 <i
+                                        class="fa-solid fa-star text-[#FFD700]"></i></p>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-semibold text-[18px] xl:text-[16px]">Tìm kiếm theo sao</p>
+                                <button @click.prevent="selected(6)"
+                                    class="border-2 px-5 py-3 xl:text-[12px] flex justify-between font-semibold gap-2 rounded-md hover:border-[#003171] transition-all duration-300">Tất
+                                    cả đánh giá <span> ({{ starCounts.nonToxic }})</span></button>
+                                <button @click.prevent="selected(5)"
+                                    class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                    <div class="flex gap-2 justify-start">
+                                        <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
+                                            :class="['fa-solid fa-star', star <= 5 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
+                                    </div>
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[5] }})</p>
+                                </button>
+                                <button @click.prevent="selected(4)"
+                                    class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                    <div class="flex gap-2 justify-start">
+                                        <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
+                                            :class="['fa-solid fa-star', star <= 4 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
+                                    </div>
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[4] }})</p>
+                                </button>
+                                <button @click.prevent="selected(3)"
+                                    class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                    <div class="flex gap-2 justify-start">
+                                        <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
+                                            :class="['fa-solid fa-star', star <= 3 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
+                                    </div>
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[3] }})</p>
+                                </button>
+                                <button @click.prevent="selected(2)"
+                                    class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                    <div class="flex gap-2 justify-start">
+                                        <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
+                                            :class="['fa-solid fa-star', star <= 2 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
+                                    </div>
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[2] }})</p>
+                                </button>
+                                <button @click.prevent="selected(1)"
+                                    class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                    <div class="flex gap-2 justify-start">
+                                        <i v-for="star in 5" :key="star" class=" xl:text-[12px]"
+                                            :class="['fa-solid fa-star', star <= 1 ? 'text-[#FFD700]' : 'text-gray-300']"></i>
+                                    </div>
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts[1] }})</p>
+                                </button>
+                                <button @click.prevent="selectedToxic(true)"
+                                    class="border-2 px-5 py-3 flex justify-between gap-2 rounded-md hover:border-[#003171] transition-all duration-300">
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">Bình luận tiêu cực</p>
+                                    <p class="font-semibold text-[14px] xl:text-[12px]">({{ starCounts.Toxic }})</p>
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-4 w-full overflow-y-auto max-h-[calc(100vh-200px)]">
-                            <div v-if="chooseFeedBackWithStar.length > 0"
-                                class="bg-white p-4 w-full border-2 rounded-lg shadow-lg">
-                                <div v-for="(comment, index) in chooseFeedBackWithStar" :key="index"
-                                    class="flex py-4 border-b flex-col gap-2 w-full">
-                                    <div class="flex gap-4 w-full">
-                                        <img :src="`${comment.HinhAnhKhachHang ? comment.HinhAnhKhachHang : '/src/assets/img/avatar.jpg'}`"
-                                            class="w-[60px] h-[60px] xl:w-[50px] xl:h-[50px] rounded-full object-cover"
-                                            alt="">
-                                        <div class="">
-                                            <p class="text-[14px] xl:text-[12px] font-semibold">{{ comment.TenKhachHang
+                        <div class="flex flex-col gap-6 w-full">
+                            <div class="relative flex justify-center gap-2 w-full lg:max-w-[calc(100vw-200px)]">
+                                <input type="text" v-model="searchValue"
+                                    class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                                    placeholder="Tìm kiếm đánh giá sản phẩm..." />
+                                <i
+                                    class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                            </div>
+                            <div class="flex flex-col gap-4 w-full overflow-y-auto max-h-[calc(100vh-200px)]">
+                                <div v-if="chooseFeedBackWithStar.length > 0"
+                                    class="bg-white p-4 w-full border-2 rounded-lg shadow-lg">
+                                    <div v-for="(comment, index) in chooseFeedBackWithStar" :key="index"
+                                        class="flex py-4 border-b flex-col gap-2 w-full">
+                                        <div class="flex gap-4 w-full">
+                                            <img :src="`${comment.HinhAnhKhachHang ? comment.HinhAnhKhachHang : '/src/assets/img/avatar.jpg'}`"
+                                                class="w-[60px] h-[60px] xl:w-[50px] xl:h-[50px] rounded-full object-cover"
+                                                alt="">
+                                            <div class="">
+                                                <p class="text-[14px] xl:text-[12px] font-semibold">{{
+                                                    comment.TenKhachHang
+                                                    }}
+                                                </p>
+                                                <div class="flex gap-1 my-1">
+                                                    <i v-for="star in 5" :key="star" :class="{
+                                                        'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
+                                                        'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
+                                                    }"></i>
+                                                </div>
+                                                <p class="text-[12px] xl:text-[10px] font-semibold mb-1">{{
+                                                    formatDate(comment.NgayDang) }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <p class="my-4 text-justify xl:text-[14px]">{{ comment.MoTa }}</p>
+                                            <div class="flex gap-4">
+                                                <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
+                                                    :src="`${img}`" class="w-[80px] lg:w-[100px] xl:w-[80px] border-2"
+                                                    alt="">
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-wrap" v-for="(product, index) in comment.SanPhamDaDanhGia"
+                                            :key="index">
+                                            <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">{{
+                                                product.TenSanPham
                                                 }}
                                             </p>
-                                            <div class="flex gap-1 my-1">
-                                                <i v-for="star in 5" :key="star" :class="{
-                                                    'fa-solid fa-star text-[#FFD700] text-[10px]': star <= comment.ChatLuong,
-                                                    'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
-                                                }"></i>
-                                            </div>
-                                            <p class="text-[12px] xl:text-[10px] font-semibold mb-1">{{
-                                                formatDate(comment.NgayDang) }}</p>
+                                            <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{
+                                                product.MaSanPham
+                                                }}
+                                            </p>
+                                            <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{
+                                                product.LoaiSanPham }}
+                                            </p>
                                         </div>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <p class="my-4 text-justify xl:text-[14px]">{{ comment.MoTa }}</p>
-                                        <div class="flex gap-4">
-                                            <img v-for="(img, index) in comment.HinhAnhSanPham" :key="index"
-                                                :src="`${img}`" class="w-[80px] lg:w-[100px] xl:w-[80px] border-2"
-                                                alt="">
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-wrap" v-for="(product, index) in comment.SanPhamDaDanhGia"
-                                        :key="index">
-                                        <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">{{ product.TenSanPham
-                                            }}
-                                        </p>
-                                        <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{ product.MaSanPham
-                                            }}
-                                        </p>
-                                        <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{
-                                            product.LoaiSanPham }}
-                                        </p>
                                     </div>
                                 </div>
-                            </div>
-                            <div v-else
-                                class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
-                                <div class="flex justify-center items-center m-auto w-full h-full">
-                                    <div class="flex flex-col items-center justify-center gap-3">
-                                        <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
-                                            không có đánh giá nào!</p>
-                                        <img src="../../assets/img/empty_admin.png"
-                                            class="w-[350px]" alt="">
+                                <div v-else
+                                    class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
+                                    <div class="flex justify-center items-center m-auto w-full h-full">
+                                        <div class="flex flex-col items-center justify-center gap-3">
+                                            <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
+                                                không có đánh giá nào!</p>
+                                            <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -20,6 +20,7 @@ const escapeHtml = (unsafe) => {
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
 const listSuppliers = ref([]);
+const listProductType = ref([]);
 const errors = ref({});
 const formData = ref({
     idSanPham: '',
@@ -65,13 +66,26 @@ const fetchSuppliers = async () => {
     }
 };
 
+const fetchProductType = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/loaisanpham');
+        listProductType.value = response.data.map(productType => {
+            return {
+                ...productType
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching:', error);
+    }
+}
+
 const fetchProduct = async (maSanPham) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/sanpham/${maSanPham}`);
         console.log(response.data)
         formData.value.nameProduct = response.data.TenSanPham;
         formData.value.price = response.data.GiaBan;
-        formData.value.typeProduct = response.data.LoaiSanPham;
+        formData.value.typeProduct = response.data.MaLoaiSanPham;
         formData.value.supplier = response.data.MaNhaCungCap;
         formData.value.description = response.data.MoTa;
         formData.value.idSanPham = response.data.MaSanPham;
@@ -134,7 +148,7 @@ const editProduct = async () => {
         const dataToSend = new FormData();
         dataToSend.append('TenSanPham', formData.value.nameProduct);
         dataToSend.append('GiaBan', formData.value.price);
-        dataToSend.append('LoaiSanPham', formData.value.typeProduct);
+        dataToSend.append('MaLoaiSanPham', formData.value.typeProduct);
         dataToSend.append('MaNhaCungCap', formData.value.supplier);
         dataToSend.append('MoTa', formData.value.description);
         dataToSend.append('YoutubeUrl', formData.value.youtubeLink);
@@ -207,16 +221,19 @@ onMounted(() => {
     const idSanPham = router.currentRoute.value.params.maSanPham;
     fetchProduct(idSanPham);
     fetchSuppliers();
+    fetchProductType();
 })
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Chỉnh sửa sản phẩm</h1>
                     </div>
@@ -250,13 +267,7 @@ onMounted(() => {
                                                 name="" id="typeProduct">
                                                 <option value="" class="text-[#003171] font-semibold">Chọn loại sản phẩm
                                                     phù hợp</option>
-                                                <option value="RG" class="text-[#003171] font-semibold">RG</option>
-                                                <option value="MG" class="text-[#003171] font-semibold">MG</option>
-                                                <option value="PG" class="text-[#003171] font-semibold">PG</option>
-                                                <option value="mBot8+" class="text-[#003171] font-semibold">Makeblock
-                                                    mBot 8+</option>
-                                                <option value="mBot6+" class="text-[#003171] font-semibold">Makeblock
-                                                    mBot 6+</option>
+                                                <option :value="productType.MaLoaiSanPham" v-for="(productType, index) in listProductType" :key="index" class="text-[#003171] font-semibold">{{ productType.TenLoaiSanPham }}</option>
                                             </select>
                                             <p v-if="errors.typeProduct" class="text-red-500 text-sm mt-2">{{
                                                 errors.typeProduct }}</p>

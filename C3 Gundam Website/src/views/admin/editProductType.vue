@@ -22,6 +22,7 @@ const ThoiGian = new Date();
 
 const errors = ref({});
 const formData = ref({
+    idProductType: '',
     nameProductType: '',
     productType: '',
 });
@@ -42,6 +43,7 @@ const fetchProductType = async (maLoaiSanPham) => {
         const response = await axios.get(`http://localhost:3000/api/loaisanpham/${maLoaiSanPham}`);
         formData.value.nameProductType = response.data.TenLoaiSanPham;
         formData.value.productType = response.data.LoaiSanPham;
+        formData.value.idProductType = response.data.MaLoaiSanPham;
     } catch (error) {
         console.log("Error fetching: ", error);
     }
@@ -68,20 +70,20 @@ const editProductType = async () => {
 
     try {
         const dataToSend = {
-            TenLoaiSanPham: formData.value.nameProductType.toUpperCase(),
-            LoaiSanPham: formData.value.productType.toUpperCase()
+            TenLoaiSanPham: formData.value.nameProductType,
+            LoaiSanPham: formData.value.productType
         };
 
-        const response = await axios.put('http://localhost:3000/api/loaisanpham', dataToSend);
-        
+        const response = await axios.put(`http://localhost:3000/api/loaisanpham/${formData.value.idProductType}`, dataToSend);
+
         const notificationData = {
-            ThongBao: `Vừa chỉnh sửa loại sản phẩm ${formData.value.nameProductType.toUpperCase()}`,
+            ThongBao: `Vừa chỉnh sửa loại sản phẩm ${formData.value.nameProductType}`,
             NguoiChinhSua: TenAdmin,
             ThoiGian: ThoiGian,
         };
 
         await axios.post('http://localhost:3000/api/thongbao', notificationData);
-        
+
         showNotification(response.data.message, "success");
         setTimeout(() => {
             router.push('/admin/listProductType');
@@ -101,12 +103,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý loại sản phẩm</h1>
                     </div>
@@ -115,7 +119,8 @@ onMounted(() => {
                             <div class="w-full flex flex-col lg:flex-row gap-8">
                                 <div class="w-full flex flex-col gap-4">
                                     <div class="flex flex-col gap-2">
-                                        <label for="nameProductType" class="text-[15px] font-semibold">Tên loại sản phẩm</label>
+                                        <label for="nameProductType" class="text-[15px] font-semibold">Tên loại sản
+                                            phẩm</label>
                                         <input type="text" v-model="formData.nameProductType" id="nameProductType"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="HG GUNDAM THUNDERBOLT ...">
@@ -127,11 +132,13 @@ onMounted(() => {
                                         <input type="text" v-model="formData.productType" id="productType"
                                             class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                             placeholder="HG ...">
-                                        <p v-if="errors.productType" class="text-red-500 text-sm mt-2">{{ errors.productType }}</p>
+                                        <p v-if="errors.productType" class="text-red-500 text-sm mt-2">{{
+                                            errors.productType }}</p>
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
                                         <button type="submit"
-                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Chỉnh sửa
+                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">Chỉnh
+                                            sửa
                                             loại sản phẩm</button>
                                     </div>
                                 </div>

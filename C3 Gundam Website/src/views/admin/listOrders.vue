@@ -259,143 +259,159 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
-                    <h1 class="font-bold text-[20px] uppercase">Quản lý đơn hàng</h1>
-                </div>
-                <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
-                    <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
-                        <div class="flex flex-col gap-2">
-                            <p class="font-semibold text-[18px]">Điều chỉnh đơn hàng</p>
-                            <button v-for="option in options" :key="option"
-                                @click.prevent="selectTypeOrders(option.name)"
-                                class="border-2 px-5 py-3 flex xl:text-[14px] justify-start items-center gap-4 rounded-md hover:border-[#003171] hover:text-[#003171] transition-all duration-300">
-                                <i :class="option.icon"></i> {{ option.name }}
-                            </button>
-                        </div>
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
+                    <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
+                        <h1 class="font-bold text-[20px] uppercase">Quản lý đơn hàng</h1>
                     </div>
-                    <div class="flex flex-col gap-6 w-full">
-                        <div class="relative flex justify-center gap-2 w-full lg:max-w-[calc(100vw-200px)]">
-                            <input type="text" v-model="searchValue"
-                                class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
-                                placeholder="Tìm kiếm đơn hàng ..." />
-                            <i
-                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
-                        </div>
-                        <div class="flex justify-end items-center gap-4">
-                            <select v-model="filterDay" class="p-2 border-2 rounded-md font-semibold outline-none w-full">
-                                <option value="">Chọn ngày (tùy chọn)</option>
-                                <option v-for="day in days" :key="day" :value="day">{{ day }}</option>
-                            </select>
-                            <select v-model="filterMonth" class="p-2 border-2 rounded-md font-semibold outline-none w-full">
-                                <option value="">Chọn tháng (tùy chọn)</option>
-                                <option v-for="month in months" :key="month" :value="month">Tháng {{ month }}</option>
-                            </select>
-                            <select v-model="filterYear" class="p-2 border-2 rounded-md font-semibold outline-none w-full">
-                                <option value="">Chọn năm (tùy chọn)</option>
-                                <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
-                            </select>
-                            <div class="flex gap-2">
-                                <button @click="fetchOrderByDayMonth"
-                                    class="px-4 py-2 bg-[#003171] text-white rounded-md hover:bg-[#1A1D27]">Lọc</button>
-                                <button @click="resetFilter"
-                                    class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Reset</button>
+                    <div class="w-full flex lg:flex-row flex-col gap-8 items-start">
+                        <div class="flex flex-col gap-5 bg-white p-4 rounded-lg shadow-lg w-full lg:w-1/3">
+                            <div class="flex flex-col gap-2">
+                                <p class="font-semibold text-[18px]">Điều chỉnh đơn hàng</p>
+                                <button v-for="option in options" :key="option"
+                                    @click.prevent="selectTypeOrders(option.name)"
+                                    class="border-2 px-5 py-3 flex xl:text-[14px] justify-start items-center gap-4 rounded-md hover:border-[#003171] hover:text-[#003171] transition-all duration-300">
+                                    <i :class="option.icon"></i> {{ option.name }}
+                                </button>
                             </div>
                         </div>
-                        <div v-if="filteredOrders.length > 0"
-                            class="flex flex-col gap-8 overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
-                            <div v-for="(order, index) in filteredOrders" :key="index"
-                                class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex flex-col gap-4">
-                                <div class="flex flex-col lg:flex-row items-center justify-center lg:justify-between">
-                                    <p class="text-[14px] xl:text-[12px] font-semibold">Ngày đặt hàng: <span
-                                            class="text-[#003171]">{{
-                                                formatDate(order.NgayDatHang) }}</span></p>
-                                    <p class="text-[14px] xl:text-[12px] font-semibold">{{ order.TrangThaiDon }}</p>
+                        <div class="flex flex-col gap-6 w-full">
+                            <div class="relative flex justify-center gap-2 w-full lg:max-w-[calc(100vw-200px)]">
+                                <input type="text" v-model="searchValue"
+                                    class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                                    placeholder="Tìm kiếm đơn hàng ..." />
+                                <i
+                                    class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                            </div>
+                            <div class="flex justify-end items-center gap-4">
+                                <select v-model="filterDay"
+                                    class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                    <option value="">Chọn ngày (tùy chọn)</option>
+                                    <option v-for="day in days" :key="day" :value="day">{{ day }}</option>
+                                </select>
+                                <select v-model="filterMonth"
+                                    class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                    <option value="">Chọn tháng (tùy chọn)</option>
+                                    <option v-for="month in months" :key="month" :value="month">Tháng {{ month }}
+                                    </option>
+                                </select>
+                                <select v-model="filterYear"
+                                    class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                    <option value="">Chọn năm (tùy chọn)</option>
+                                    <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+                                </select>
+                                <div class="flex gap-2">
+                                    <button @click="fetchOrderByDayMonth"
+                                        class="px-4 py-2 bg-[#003171] text-white rounded-md hover:bg-[#1A1D27]">Lọc</button>
+                                    <button @click="resetFilter"
+                                        class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Reset</button>
                                 </div>
-                                <hr>
-                                <div class="overflow-y-auto max-h-[300px] flex flex-col gap-4">
-                                    <div class="flex gap-4 border-b-2 pb-4 mb-3 overflow-hidden items-start"
-                                        v-for="(product, index) in order.SanPhamDaMua" :key="index">
-                                        <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
-                                        <div class="flex flex-col gap-1 overflow-hidden">
-                                            <div class="whitespace-nowrap text-ellipsis overflow-hidden max-w-52 lg:max-w-[700px]">
-                                                <p
-                                                    class="text-[16px] xl:text-[14px] overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-                                                    {{ product.TenSanPham }}</p>
+                            </div>
+                            <div v-if="filteredOrders.length > 0"
+                                class="flex flex-col gap-8 overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
+                                <div v-for="(order, index) in filteredOrders" :key="index"
+                                    class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex flex-col gap-4">
+                                    <div
+                                        class="flex flex-col lg:flex-row items-center justify-center lg:justify-between">
+                                        <p class="text-[14px] xl:text-[12px] font-semibold">Ngày đặt hàng: <span
+                                                class="text-[#003171]">{{
+                                                    formatDate(order.NgayDatHang) }}</span></p>
+                                        <p class="text-[14px] xl:text-[12px] font-semibold">{{ order.TrangThaiDon }}</p>
+                                    </div>
+                                    <hr>
+                                    <div class="overflow-y-auto max-h-[300px] flex flex-col gap-4">
+                                        <div class="flex gap-4 border-b-2 pb-4 mb-3 overflow-hidden items-start"
+                                            v-for="(product, index) in order.SanPhamDaMua" :key="index">
+                                            <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
+                                            <div class="flex flex-col gap-1 overflow-hidden">
+                                                <div
+                                                    class="whitespace-nowrap text-ellipsis overflow-hidden max-w-52 lg:max-w-[700px]">
+                                                    <p
+                                                        class="text-[16px] xl:text-[14px] overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                                                        {{ product.TenSanPham }}</p>
+                                                </div>
+                                                <p class="text-[14px] xl:text-[12px] font-semibold">Loại sản phẩm: <span
+                                                        class="text-[#003171] font-medium">{{ product.LoaiSanPham
+                                                        }}</span>
+                                                </p>
+                                                <p class="text-[14px] xl:text-[12px] font-semibold">Đơn giá: <span
+                                                        class="text-[#003171] font-medium">{{
+                                                        formatCurrency(product.Gia) }}
+                                                        VNĐ</span></p>
+                                                <p class="text-[14px] xl:text-[12px] font-semibold">Số lượng: <span
+                                                        class="text-[#003171] font-medium">{{ product.SoLuong }}</span>
+                                                </p>
                                             </div>
-                                            <p class="text-[14px] xl:text-[12px] font-semibold">Loại sản phẩm: <span
-                                                    class="text-[#003171] font-medium">{{ product.LoaiSanPham }}</span>
-                                            </p>
-                                            <p class="text-[14px] xl:text-[12px] font-semibold">Đơn giá: <span
-                                                    class="text-[#003171] font-medium">{{ formatCurrency(product.Gia) }}
-                                                    VNĐ</span></p>
-                                            <p class="text-[14px] xl:text-[12px] font-semibold">Số lượng: <span
-                                                    class="text-[#003171] font-medium">{{ product.SoLuong }}</span></p>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="flex flex-col gap-3">
-                                    <h3 class="text-[18px] font-semibold">Thông tin khách hàng</h3>
-                                    <div class="flex flex-col lg:flex-row lg:justify-between">
-                                        <div v-for="(address, index) in order.DiaChiNhanHang" :key="index">
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Mã khách hàng: <span
-                                                    class="font-semibold">{{
-                                                        order.MaKhachHang }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Tên khách hàng: <span
-                                                    class="font-semibold">{{ address.TenNguoiNhan }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Số điện thoại: <span
-                                                    class="font-semibold">{{
-                                                        address.DienThoai }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Địa chỉ nhận hàng: <span
-                                                    class="font-semibold">{{ address.DiaChi }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Hình thức vận chuyển:
-                                                <span class="font-semibold text-[#003171]">{{ order.HinhThucVanChuyen
-                                                    }}</span>
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Trạng thái: <span
-                                                    class="font-semibold">{{
-                                                        order.TrangThaiThanhToan }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Hình thức thanh toán:
-                                                <span class="font-semibold">{{ order.HinhThucThanhToan }}</span>
-                                            </p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Mã giảm giá: <span
-                                                    class="font-semibold">{{
-                                                        order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia
-                                                    }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Ghi chú: <span
-                                                    class="font-semibold">{{
-                                                        order.GhiChu }}</span></p>
-                                            <p class="font-medium text-[14px] xl:text-[12px]">Tổng đơn: <span
-                                                    class="font-semibold text-[#003171]">{{
-                                                        formatCurrency(order.TongDon) }}
-                                                    VNĐ</span></p>
+                                    <div class="flex flex-col gap-3">
+                                        <h3 class="text-[18px] font-semibold">Thông tin khách hàng</h3>
+                                        <div class="flex flex-col lg:flex-row lg:justify-between">
+                                            <div v-for="(address, index) in order.DiaChiNhanHang" :key="index">
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Mã khách hàng: <span
+                                                        class="font-semibold">{{
+                                                            order.MaKhachHang }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Tên khách hàng: <span
+                                                        class="font-semibold">{{ address.TenNguoiNhan }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Số điện thoại: <span
+                                                        class="font-semibold">{{
+                                                            address.DienThoai }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Địa chỉ nhận hàng:
+                                                    <span class="font-semibold">{{ address.DiaChi }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Hình thức vận chuyển:
+                                                    <span class="font-semibold text-[#003171]">{{
+                                                        order.HinhThucVanChuyen
+                                                        }}</span>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Trạng thái: <span
+                                                        class="font-semibold">{{
+                                                            order.TrangThaiThanhToan }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Hình thức thanh toán:
+                                                    <span class="font-semibold">{{ order.HinhThucThanhToan }}</span>
+                                                </p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Mã giảm giá: <span
+                                                        class="font-semibold">{{
+                                                            order.IdMaGiamGia === "" ? "Không sử dụng" : order.IdMaGiamGia
+                                                        }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Ghi chú: <span
+                                                        class="font-semibold">{{
+                                                            order.GhiChu }}</span></p>
+                                                <p class="font-medium text-[14px] xl:text-[12px]">Tổng đơn: <span
+                                                        class="font-semibold text-[#003171]">{{
+                                                            formatCurrency(order.TongDon) }}
+                                                        VNĐ</span></p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="flex justify-center lg:justify-end gap-4 items-center">
-                                    <button :class="(order.TrangThaiDon === 'Đơn hàng đã hủy') ? 'hidden' : 'block'"
-                                        @click="exportOrderToPDF(order)"
-                                        class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#003171] transition-all duration-300 hover:bg-[#1A1D27]">Xuất hóa đơn</button>
-                                    <button :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'hidden' : 'block'"
-                                        @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
-                                        class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">{{
-                                            order.TrangThaiDon }}</button>
+                                    <div class="flex justify-center lg:justify-end gap-4 items-center">
+                                        <button :class="(order.TrangThaiDon === 'Đơn hàng đã hủy') ? 'hidden' : 'block'"
+                                            @click="exportOrderToPDF(order)"
+                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#003171] transition-all duration-300 hover:bg-[#1A1D27]">Xuất
+                                            hóa đơn</button>
+                                        <button
+                                            :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'hidden' : 'block'"
+                                            @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
+                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">{{
+                                                order.TrangThaiDon }}</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div v-else
-                            class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
-                            <div class="flex justify-center items-center m-auto w-full h-full">
-                                <div class="flex flex-col items-center justify-center gap-3">
-                                    <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
-                                        không có đơn hàng nào!</p>
-                                    <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
+                            <div v-else
+                                class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
+                                <div class="flex justify-center items-center m-auto w-full h-full">
+                                    <div class="flex flex-col items-center justify-center gap-3">
+                                        <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
+                                            không có đơn hàng nào!</p>
+                                        <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
+                                    </div>
                                 </div>
                             </div>
                         </div>

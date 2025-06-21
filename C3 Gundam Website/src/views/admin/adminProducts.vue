@@ -5,28 +5,9 @@ import SideBar from "@/components/admin/SideBar.vue";
 import axios from 'axios';
 
 const listProducts = ref([]);
-const selectedType = ref('All');
 const searchValue = ref('');
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
-const types = ref([
-    {
-        name: "Tất cả",
-        type: "All",
-    },
-    {
-        name: "RG",
-        type: "RG",
-    },
-    {
-        name: "MG",
-        type: "MG",
-    },
-    {
-        name: "PG",
-        type: "PG",
-    },
-]);
 
 const fetchProducts = async () => {
     try {
@@ -65,16 +46,12 @@ const updateStatus = async (maSanPham, newStatus) => {
     }
 };
 
-const selected = async (type) => {
-    return selectedType.value = type;
-}
-
 const findProducts = computed(() => {
     return listProducts.value.filter(product => {
-        const chooseType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
+        const chooseType = !searchValue.value || product.LoaiSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
         const nameProducts = !searchValue.value || product.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
         const idProduct = !searchValue.value || product.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
-        return chooseType && (nameProducts || idProduct);
+        return chooseType || nameProducts || idProduct;
     })
 })
 
@@ -88,12 +65,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-7">
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý sản phẩm</h1>
                         <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
@@ -104,14 +83,9 @@ onMounted(() => {
                                 class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
                         </div>
                     </div>
-                    <div class="flex justify-center lg:justify-end items-center flex-wrap flex-1 gap-4">
-                        <button @click.prevent="selected(item.type)"
-                            class="bg-white px-8 py-3 shadow font-semibold border-2 hover:border-[#003171] hover:text-[#003171] transition-all duration-300"
-                            v-for="(item, index) in types" :key="index">{{ item.name }}</button>
-                    </div>
                     <div class="shadow-lg border-2 border-gray-300 overflow-auto">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
-                            <thead class="bg-[#1A1D27] text-white">
+                            <thead class="bg-[#1A1D27] text-white sticky top-0 z-10">
                                 <tr>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">STT</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã sản phẩm</th>
@@ -141,7 +115,7 @@ onMounted(() => {
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham
-                                        }}</p>
+                                            }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatCurrency(product.GiaBan) }} VNĐ</td>
@@ -165,7 +139,7 @@ onMounted(() => {
                                         <p class="overflow-hidden text-ellipsis text-[12px] whitespace-nowrap">{{
                                             product.MoTa }}</p>
                                     </td>
-                                    <td class="flex justify-center items-center gap-2 py-10">
+                                    <td class="flex justify-center items-center gap-2 py-10 pr-4">
                                         <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>

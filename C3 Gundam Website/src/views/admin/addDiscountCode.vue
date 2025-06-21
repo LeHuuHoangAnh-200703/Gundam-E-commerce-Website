@@ -131,12 +131,14 @@ const addDiscountCode = async () => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center items-center">
                         <h1 class="font-bold text-[20px] uppercase">Thêm mã giảm giá</h1>
                     </div>
@@ -178,7 +180,8 @@ const addDiscountCode = async () => {
                                                 errors.applyToOrders }}</p>
                                         </div>
                                         <div class="flex flex-col gap-2 w-full">
-                                            <label for="saveCode" class="text-[15px] font-semibold">Số lần lưu mã</label>
+                                            <label for="saveCode" class="text-[15px] font-semibold">Số lần lưu
+                                                mã</label>
                                             <input type="number" v-model="formData.saveCode" id="saveCode"
                                                 class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
                                                 placeholder="Nhập số lần lưu mã ...">

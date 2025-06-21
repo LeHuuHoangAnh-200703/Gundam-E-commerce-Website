@@ -50,12 +50,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
                     <div class="flex gap-4 justify-between items-center">
                         <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                             <h1 class="font-bold text-[20px] uppercase">Quản lý kho</h1>
@@ -89,14 +91,14 @@ onMounted(() => {
                                     :key="index">
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ index + 1 }}</td>
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ inventory.MaSanPham
-                                        }}</td>
+                                    }}</td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{
                                             inventory.TenSanPham }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
-                                        (inventory.SoLuongTon > 0) ?inventory.SoLuongTon : 'Hết hàng' }}</td>
+                                        (inventory.SoLuongTon > 0) ? inventory.SoLuongTon : 'Hết hàng' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         formatCurrency(inventory.GiaNhapGanNhat) }} VNĐ</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{

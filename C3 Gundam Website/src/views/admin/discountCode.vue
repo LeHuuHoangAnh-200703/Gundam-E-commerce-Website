@@ -74,13 +74,15 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="relative bg-[#F2F2F7] w-full min-h-screen font-sans">
-        <div class="flex gap-3">
-            <SideBar />
-            <div class="relative p-4 flex flex-col gap-4 w-full overflow-auto">
+    <div class="relative bg-[#F2F2F7] w-full h-screen font-sans flex">
+        <SideBar />
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <div class="flex-shrink-0 p-4">
                 <Navbar />
-                <div class="w-full relative flex flex-col gap-4 overflow-auto max-h-[calc(100vh-100px)] pb-7">
-                    <div class="p-4 rounded-lg flex flex-col gap-6">
+            </div>
+            <div class="flex-1 px-4 py-4 overflow-y-auto">
+                <div class="flex flex-col gap-4">
+                    <div class="rounded-lg flex flex-col gap-6">
                         <div class="flex justify-between items-center">
                             <h1 class="font-bold text-[20px] uppercase">Danh sách mã giảm giá</h1>
                             <router-link to="/admin/addDiscountCode"
@@ -95,7 +97,8 @@ onMounted(() => {
                                     <p class="font-bold text-[22px]">{{ discountCode.TenMaGiamGia }}</p>
                                     <div
                                         class="w-[30px] h-[30px] rounded-full border-2 border-[#1A1D27] flex justify-center items-center">
-                                        <p class="text-[#1A1D27] text-[14px] font-bold">{{ discountCode.SoLanLuuMa }}</p>
+                                        <p class="text-[#1A1D27] text-[14px] font-bold">{{ discountCode.SoLanLuuMa }}
+                                        </p>
                                     </div>
                                 </div>
                                 <p v-if="discountCode.GiamTien" class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{

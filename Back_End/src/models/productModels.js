@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
     MaSanPham: String,
     TenSanPham: String,
     GiaBan: String,
-    LoaiSanPham: String,
+    MaLoaiSanPham: String,
     MaNhaCungCap: String,
     LuotBan: { type: Number, default: 0},
     MoTa: String,
