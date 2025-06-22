@@ -6,6 +6,7 @@ import BackToTop from '@/components/client/BackToTop.vue';
 import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -39,6 +40,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 const fetchProduct = async (idSanPham) => {
     try {
@@ -96,18 +139,25 @@ const fetchFeedBacks = async () => {
 };
 
 const deleteFeedback = async (idDanhGia) => {
-    const confirmUpdate = confirm('Bạn có chắc chắn muốn xóa đánh giá này?');
-    if (!confirmUpdate) return;
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/danhgia/${idDanhGia}`);
-        showNotification("Xóa đánh giá thành công!", "success");
-        await fetchFeedBacks();
-    } catch (err) {
-        showNotification(err.response?.data?.message || "Xóa đánh giá thất bại!", "error");
-    }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 3000);
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn xóa đánh giá này?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/danhgia/${idDanhGia}`);
+                showNotification("Xóa đánh giá thành công!", "success");
+                await fetchFeedBacks();
+            } catch (err) {
+                showNotification(err.response?.data?.message || "Xóa đánh giá thất bại!", "error");
+            }
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 3000);
+        }
+    });
 }
 
 const formatDate = (date) => {
@@ -241,11 +291,11 @@ const chooseFeedBackWithStar = computed(() => {
 
 // Tách tính năng thành 2 đoạn
 const splitSentences = computed(() => {
-  return productFeatures.value
-    .split('.')
-    .map(s => s.trim())
-    .filter(s => s)
-    .map(s => s + '.');
+    return productFeatures.value
+        .split('.')
+        .map(s => s.trim())
+        .filter(s => s)
+        .map(s => s + '.');
 });
 
 onMounted(async () => {
@@ -271,7 +321,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
         <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
             <p class="text-gray-300 font-semibold text-[15px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
-            }}</span></p>
+                    }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[45%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
@@ -386,7 +436,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                     formatCurrency(product.GiaBan)
                                         }} VNĐ</span></p>
                                 <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai
-                                }}</span>
+                                        }}</span>
                                 </p>
                             </div>
                         </div>
@@ -422,7 +472,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                     <div class="lg:w-[50%] w-full flex flex-col">
                         <p class="font-semibold text-white text-[20px]">Tính năng sản phẩm</p>
                         <span class="lg:w-[205px] w-full h-[2px] bg-white my-3"></span>
-                        <p v-for="(sentence, index) in splitSentences" :key="index" class="text-gray-300 text-justify mb-2">{{ sentence }}</p>
+                        <p v-for="(sentence, index) in splitSentences" :key="index"
+                            class="text-gray-300 text-justify mb-2">{{ sentence }}</p>
                     </div>
                 </div>
             </div>
@@ -503,5 +554,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
         <Chat />
         <ChatBot />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>

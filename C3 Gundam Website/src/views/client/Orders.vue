@@ -4,6 +4,7 @@ import Header from "@/components/client/Header.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 
@@ -57,6 +58,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = "";
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 
 // Tính phí ship
@@ -126,8 +169,8 @@ const fetchDiscountCode = async () => {
         const response = await axios.get('http://localhost:3000/api/magiamgia');
         listDiscountCodes.value = response.data.map(discountCode => ({
             ...discountCode,
-            IdKhachHangSuDung: Array.isArray(discountCode.IdKhachHangSuDung) 
-                ? discountCode.IdKhachHangSuDung 
+            IdKhachHangSuDung: Array.isArray(discountCode.IdKhachHangSuDung)
+                ? discountCode.IdKhachHangSuDung
                 : [] // Đảm bảo IdKhachHangSuDung là mảng
         }));
         return true; // Trả về true để báo hiệu thành công
@@ -154,14 +197,14 @@ const fetchCustomer = async (idKhachHang) => {
         // Lấy danh sách IdMaGiamGia từ DanhSachMaGiamGia
         const customerDiscountIds = Array.isArray(response.data.DanhSachMaGiamGia)
             ? response.data.DanhSachMaGiamGia
-                  .map(item => item.IdMaGiamGia)
-                  .filter(id => id) // Lọc các id hợp lệ
+                .map(item => item.IdMaGiamGia)
+                .filter(id => id) // Lọc các id hợp lệ
             : [];
         console.log("Danh sách IdMaGiamGia từ khách hàng:", customerDiscountIds);
 
         // Lọc mã giảm giá: chỉ giữ mã trong DanhSachMaGiamGia và chưa được khách hàng sử dụng
         discountCodeWithCustomer.value = listDiscountCodes.value
-            .filter(discountCode => 
+            .filter(discountCode =>
                 customerDiscountIds.includes(discountCode.IdMaGiamGia) && // Khớp với DanhSachMaGiamGia
                 !discountCode.IdKhachHangSuDung.includes(idKhachHang) // Chưa được khách hàng sử dụng
             )
@@ -172,8 +215,6 @@ const fetchCustomer = async (idKhachHang) => {
         console.log("Mã giảm giá chưa sử dụng của khách hàng:", discountCodeWithCustomer.value);
     } catch (err) {
         console.error("Error fetching customer:", err.response?.data || err.message);
-        // Có thể thêm thông báo lỗi cho người dùng
-        // Ví dụ: alert('Đã có lỗi xảy ra khi lấy thông tin khách hàng');
     }
 };
 
@@ -200,13 +241,6 @@ const addOrders = async () => {
         return;
     }
 
-    if (formData.value.payment !== "Thanh toán qua Paypal") {
-        const confirmUpdate = confirm(
-            "Vui lòng kiểm tra lại thông tin trước khi đặt hàng?"
-        );
-        if (!confirmUpdate) return;
-    }
-
     let trangThaiThanhToan = "Khi nhận được hàng";
     if (formData.value.payment === "Thanh toán qua Paypal") {
         trangThaiThanhToan = "Đã thanh toán qua PayPal";
@@ -216,51 +250,85 @@ const addOrders = async () => {
         formData.value.shippingMethod = "Miễn phí giao hàng";
     }
 
-    try {
-        const dataToSend = {
-            MaKhachHang: maKhachHang,
-            SanPhamDaMua: {
-                TenSanPham: nameProducts.value,
-                MaSanPham: maSanPham.value,
-                Gia: price.value,
-                SoLuong: quantity.value,
-                LoaiSanPham: type.value,
-                HinhAnh: images.value[0],
-            },
-            DiaChiNhanHang: formData.value.address,
-            IdMaGiamGia: formData.value.discountCode,
-            HinhThucThanhToan: formData.value.payment,
-            TongDon: totalPrice.value,
-            NgayDatHang: new Date(),
-            GhiChu: formData.value.description || "Không có ghi chú",
-            TrangThaiThanhToan: trangThaiThanhToan,
-            HinhThucVanChuyen: formData.value.shippingMethod,
-        };
+    const dataToSend = {
+        MaKhachHang: maKhachHang,
+        SanPhamDaMua: {
+            TenSanPham: nameProducts.value,
+            MaSanPham: maSanPham.value,
+            Gia: price.value,
+            SoLuong: quantity.value,
+            LoaiSanPham: type.value,
+            HinhAnh: images.value[0],
+        },
+        DiaChiNhanHang: formData.value.address,
+        IdMaGiamGia: formData.value.discountCode,
+        HinhThucThanhToan: formData.value.payment,
+        TongDon: totalPrice.value,
+        NgayDatHang: new Date(),
+        GhiChu: formData.value.description || "Không có ghi chú",
+        TrangThaiThanhToan: trangThaiThanhToan,
+        HinhThucVanChuyen: formData.value.shippingMethod,
+    };
 
-        const response = await axios.post(
-            "http://localhost:3000/api/donhang",
-            dataToSend
-        );
-        showNotification(
-            "Đặt hàng thành công, vui lòng kiểm tra email xác nhận!",
-            "success"
-        );
+    // Nếu thanh toán qua PayPal thì redirect trực tiếp
+    if (formData.value.payment === "Thanh toán qua Paypal") {
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/api/donhang",
+                dataToSend
+            );
+            showNotification(
+                "Đặt hàng thành công, vui lòng kiểm tra email xác nhận!",
+                "success"
+            );
 
-        await axios.post(
-            `http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`
-        );
-        setTimeout(() => {
-            router.push("/orders_history");
-        }, 0);
-    } catch (error) {
-        showNotification(
-            error.response?.data?.message || "Đặt hàng thất bại!",
-            "error"
-        );
+            await axios.post(
+                `http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`
+            );
+            setTimeout(() => {
+                router.push("/orders_history");
+            }, 0);
+        } catch (error) {
+            showNotification(
+                error.response?.data?.message || "Đặt hàng thất bại!",
+                "error"
+            );
+        }
+        return;
     }
-    setTimeout(() => {
-        notification.value.message = "";
-    }, 2000);
+
+    // Với các phương thức thanh toán khác, hiển thị dialog xác nhận
+    showConfirmDialog({
+        title: 'Xác nhận đặt hàng',
+        message: 'Vui lòng kiểm tra lại thông tin trước khi đặt hàng?',
+        type: 'info',
+        confirmText: 'Đặt hàng',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.post(
+                    "http://localhost:3000/api/donhang",
+                    dataToSend
+                );
+                showNotification(
+                    "Đặt hàng thành công, vui lòng kiểm tra email xác nhận!",
+                    "success"
+                );
+
+                await axios.post(
+                    `http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`
+                );
+                setTimeout(() => {
+                    router.push("/orders_history");
+                }, 2000);
+            } catch (error) {
+                showNotification(
+                    error.response?.data?.message || "Đặt hàng thất bại!",
+                    "error"
+                );
+            }
+        }
+    });
 };
 
 const initializePayPalButton = () => {
@@ -346,62 +414,66 @@ const createPaymentVNPay = async () => {
     if (Object.keys(errors.value).length > 0) {
         return;
     }
-    const confirmUpdate = confirm(
-        "Vui lòng kiểm tra lại thông tin trước khi thanh toán qua VNPAY?"
-    );
-    if (!confirmUpdate) return;
-
-    let trangThaiThanhToan = "Khi nhận được hàng";
-    if (formData.value.payment === "Thanh toán qua VNPAY") {
-        trangThaiThanhToan = "Đã thanh toán qua VNPAY";
-    }
-
-    if (totalPrice.value >= 2000000) {
-        formData.value.shippingMethod = "Miễn phí giao hàng";
-    }
-
-    try {
-        const tempOrder = {
-            MaKhachHang: maKhachHang,
-            SanPhamDaMua: {
-                TenSanPham: nameProducts.value,
-                MaSanPham: maSanPham.value,
-                Gia: price.value,
-                SoLuong: quantity.value,
-                LoaiSanPham: type.value,
-                HinhAnh: images.value[0],
-            },
-            DiaChiNhanHang: formData.value.address,
-            IdMaGiamGia: formData.value.discountCode,
-            HinhThucThanhToan: "Thanh toán qua VNPAY",
-            TongDon: totalPrice.value,
-            NgayDatHang: new Date(),
-            GhiChu: formData.value.description || "Không có ghi chú",
-            TrangThaiThanhToan: trangThaiThanhToan,
-            HinhThucVanChuyen: formData.value.shippingMethod,
-        };
-
-        const response = await axios.post(
-            "http://localhost:3000/api/donhang/luutamdon",
-            tempOrder
-        );
-        const maDonHang = response.data.MaDonHang;
-        const paymentResponse = await axios.post(
-            "http://localhost:3000/api/thanhtoanvnp",
-            {
-                amount: totalPrice.value,
-                orderId: maDonHang,
-                orderInfo: `Thanh toán đơn hàng ${maSanPham.value} cho ${nameCustomer.value}###${emailCustomer.value}`,
-                ipAddr: "127.0.0.1",
+    showConfirmDialog({
+        title: 'Xác nhận đặt hàng',
+        message: 'Vui lòng kiểm tra lại thông tin trước khi thanh toán qua VNPAY?',
+        type: 'info',
+        confirmText: 'Đặt hàng',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            let trangThaiThanhToan = "Khi nhận được hàng";
+            if (formData.value.payment === "Thanh toán qua VNPAY") {
+                trangThaiThanhToan = "Đã thanh toán qua VNPAY";
             }
-        );
-        window.location.href = paymentResponse.data.paymentUrl;
-    } catch (error) {
-        showNotification(
-            error.response?.data?.message || "Không thể tạo URL thanh toán VNPAY!",
-            "error"
-        );
-    }
+
+            if (totalPrice.value >= 2000000) {
+                formData.value.shippingMethod = "Miễn phí giao hàng";
+            }
+
+            try {
+                const tempOrder = {
+                    MaKhachHang: maKhachHang,
+                    SanPhamDaMua: {
+                        TenSanPham: nameProducts.value,
+                        MaSanPham: maSanPham.value,
+                        Gia: price.value,
+                        SoLuong: quantity.value,
+                        LoaiSanPham: type.value,
+                        HinhAnh: images.value[0],
+                    },
+                    DiaChiNhanHang: formData.value.address,
+                    IdMaGiamGia: formData.value.discountCode,
+                    HinhThucThanhToan: "Thanh toán qua VNPAY",
+                    TongDon: totalPrice.value,
+                    NgayDatHang: new Date(),
+                    GhiChu: formData.value.description || "Không có ghi chú",
+                    TrangThaiThanhToan: trangThaiThanhToan,
+                    HinhThucVanChuyen: formData.value.shippingMethod,
+                };
+
+                const response = await axios.post(
+                    "http://localhost:3000/api/donhang/luutamdon",
+                    tempOrder
+                );
+                const maDonHang = response.data.MaDonHang;
+                const paymentResponse = await axios.post(
+                    "http://localhost:3000/api/thanhtoanvnp",
+                    {
+                        amount: totalPrice.value,
+                        orderId: maDonHang,
+                        orderInfo: `Thanh toán đơn hàng ${maSanPham.value} cho ${nameCustomer.value}###${emailCustomer.value}`,
+                        ipAddr: "127.0.0.1",
+                    }
+                );
+                window.location.href = paymentResponse.data.paymentUrl;
+            } catch (error) {
+                showNotification(
+                    error.response?.data?.message || "Không thể tạo URL thanh toán VNPAY!",
+                    "error"
+                );
+            }
+        }
+    });
 };
 
 function formatCurrency(value) {
@@ -604,7 +676,8 @@ watch(() => formData.value.discountCode, () => {
                                         <hr />
                                         <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá:
                                             <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }}
-                                                VNĐ</span></p>
+                                                VNĐ</span>
+                                        </p>
                                         <p class="text-white text-[15px] text-end">Phí vận chuyển: <span
                                                 class="text-[#FFD700]">{{
                                                     formatCurrency(shippingDetails.baseFee) }} VNĐ</span></p>
@@ -640,5 +713,8 @@ watch(() => formData.value.discountCode, () => {
         <Footer />
         <BackToTop />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>

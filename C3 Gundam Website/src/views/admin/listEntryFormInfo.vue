@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from "axios";
 import { useRouter } from 'vue-router';
 import * as XLSX from 'xlsx';
@@ -35,6 +36,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 
 const fetchEntryForm = async (idPhieuNhap) => {
@@ -99,20 +142,28 @@ const addEntryFormInfo = async () => {
             NgayNhap: ThoiGian,
         }
 
-        const response = await axios.post('http://localhost:3000/api/chitietphieunhap', dataToSend);
-        const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi thêm?");
-        if (!confirmUpdate) return;
-        const notificationData = {
-            ThongBao: `Chi tiết phiếu nhập ${idEntryForm.value} vừa được thêm.`,
-            NguoiChinhSua: TenAdmin,
-            ThoiGian: ThoiGian,
-        };
+        showConfirmDialog({
+            title: 'Thông báo xác nhận',
+            message: 'Vui lòng xác nhận lại thông tin trước khi thêm?',
+            type: 'info',
+            confirmText: 'Xác nhận',
+            cancelText: 'Hủy bỏ',
+            onConfirm: async () => {
+                const response = await axios.post('http://localhost:3000/api/chitietphieunhap', dataToSend);
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                const notificationData = {
+                    ThongBao: `Chi tiết phiếu nhập ${idEntryForm.value} vừa được thêm.`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
 
-        showNotification("Thêm chi tiết phiếu nhập thành công!", "success");
-        fetchEntryFormInfos();
-        fetchProducts();
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+
+                showNotification("Thêm chi tiết phiếu nhập thành công!", "success");
+                fetchEntryFormInfos();
+                fetchProducts();
+            }
+        });
     } catch (error) {
         showNotification(error.response?.data?.message || "Thêm chi tiết phiếu nhập thất bại!", "error");
     }
@@ -139,50 +190,59 @@ const fetchEntryFormInfos = async () => {
 }
 
 const exportToExcel = async (maPN) => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/chitietphieunhap/phieunhap/${maPN}`);
-        const data = response.data;
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: `Bạn có muốn xuất phiếu nhập kho của ${maPN} không?`,
+        type: 'success',
+        confirmText: 'Xuất phiếu nhập',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/chitietphieunhap/phieunhap/${maPN}`);
+                const data = response.data;
 
-        if (!Array.isArray(data) || data.length === 0) {
-            showNotification('Không có dữ liệu để xuất!', 'error');
-            return;
+                if (!Array.isArray(data) || data.length === 0) {
+                    showNotification('Không có dữ liệu để xuất!', 'error');
+                    return;
+                }
+
+                // Chuyển đổi định dạng ngày và định dạng đơn giá
+                const formattedData = data.map(item => {
+                    return {
+                        'Mã Phiếu Nhập': item.MaPhieuNhap,
+                        'Mã Sản Phẩm': item.MaSanPham,
+                        'Tên Sản Phẩm': item.TenSanPham,
+                        'Số Lượng': item.SoLuong,
+                        'Giá Nhập': formatCurrency(item.GiaNhap),
+                        'Tổng Tiền': formatCurrency(item.TongTien),
+                        'Ngày Nhập': new Date(item.NgayNhap).toLocaleDateString('vi-VN')
+                    };
+                });
+
+                // Tạo workbook và worksheet
+                const worksheet = XLSX.utils.json_to_sheet(formattedData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Hóa Đơn');
+
+                // Tùy chỉnh tiêu đề cột
+                worksheet['!cols'] = [
+                    { wch: 15 }, // Mã Phiếu Nhập
+                    { wch: 15 }, // Mã Sản Phẩm
+                    { wch: 30 }, // Tên Sản Phẩm
+                    { wch: 10 }, // Số Lượng
+                    { wch: 15 }, // Giá Nhập
+                    { wch: 15 }, // Tổng Tiền
+                    { wch: 15 }  // Ngày Nhập
+                ];
+                // Xuất file Excel
+                XLSX.writeFile(workbook, `Phiếu nhập kho_${maPN}.xlsx`);
+                showNotification('Xuất phiếu nhập thành công!', 'success');
+            } catch (error) {
+                console.error('Lỗi khi xuất Excel:', error.message);
+                showNotification('Có lỗi xảy ra khi xuất Excel!', 'error');
+            }
         }
-
-        // Chuyển đổi định dạng ngày và định dạng đơn giá
-        const formattedData = data.map(item => {
-            return {
-                'Mã Phiếu Nhập': item.MaPhieuNhap,
-                'Mã Sản Phẩm': item.MaSanPham,
-                'Tên Sản Phẩm': item.TenSanPham,
-                'Số Lượng': item.SoLuong,
-                'Giá Nhập': formatCurrency(item.GiaNhap),
-                'Tổng Tiền': formatCurrency(item.TongTien),
-                'Ngày Nhập': new Date(item.NgayNhap).toLocaleDateString('vi-VN')
-            };
-        });
-
-        // Tạo workbook và worksheet
-        const worksheet = XLSX.utils.json_to_sheet(formattedData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Hóa Đơn');
-
-        // Tùy chỉnh tiêu đề cột
-        worksheet['!cols'] = [
-            { wch: 15 }, // Mã Phiếu Nhập
-            { wch: 15 }, // Mã Sản Phẩm
-            { wch: 30 }, // Tên Sản Phẩm
-            { wch: 10 }, // Số Lượng
-            { wch: 15 }, // Giá Nhập
-            { wch: 15 }, // Tổng Tiền
-            { wch: 15 }  // Ngày Nhập
-        ];
-        // Xuất file Excel
-        XLSX.writeFile(workbook, `Phiếu nhập kho_${maPN}.xlsx`);
-        showNotification('Xuất phiếu nhập thành công!', 'success');
-    } catch (error) {
-        console.error('Lỗi khi xuất Excel:', error.message);
-        showNotification('Có lỗi xảy ra khi xuất Excel!', 'error');
-    }
+    });
 };
 
 const formatDate = (date) => {
@@ -333,6 +393,9 @@ onMounted(() => {
                 <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

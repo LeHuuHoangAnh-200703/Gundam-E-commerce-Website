@@ -8,6 +8,7 @@ import ChatBot from '../../components/client/ChatBot.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import NotificationClient from '@/components/Notification/NotificationClient.vue';
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 
 const router = useRouter()
 const listAddress = ref([]);
@@ -23,6 +24,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 
 const fetchDiscountCode = async () => {
@@ -58,34 +101,51 @@ const fetchCustomer = async (idKhachHang) => {
 }
 
 const deleteLocation = async (maKhachHang, id) => {
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/khachhang/diachi/${maKhachHang}/${id}`);
-        showNotification("Xóa địa chỉ thành công!", "success");
-        setTimeout(() => {
-            router.push('/profile');
-        }, 1000);
-    } catch (err) {
-        showNotification(err.response?.data?.message || "Xóa địa chỉ thất bại!", "error");
-    }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 1000);
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn xóa địa chỉ này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/khachhang/diachi/${maKhachHang}/${id}`);
+                showNotification("Xóa địa chỉ thành công!", "success");
+                setTimeout(() => {
+                    router.push('/profile');
+                }, 1000);
+            } catch (err) {
+                showNotification(err.response?.data?.message || "Xóa địa chỉ thất bại!", "error");
+            }
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 1000);
+        }
+    });
 }
 
 const deleteDiscountCode = async (maKhachHang, idMaGiamGia) => {
-    console.log(maKhachHang, idMaGiamGia)
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/khachhang/magiamgia/${maKhachHang}/${idMaGiamGia}`);
-        showNotification("Xóa mã giảm giá thành công!", "success");
-        setTimeout(() => {
-            router.push('/profile');
-        }, 3000);
-    } catch (err) {
-        showNotification(err.response?.data?.message || "Xóa mã giảm giá thất bại!", "error");
-    }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 3000);
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn xóa mã giảm giá này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/khachhang/magiamgia/${maKhachHang}/${idMaGiamGia}`);
+                showNotification("Xóa mã giảm giá thành công!", "success");
+                setTimeout(() => {
+                    router.push('/profile');
+                }, 3000);
+            } catch (err) {
+                showNotification(err.response?.data?.message || "Xóa mã giảm giá thất bại!", "error");
+            }
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 3000);
+        }
+    });
 }
 
 function formatCurrency(value) {
@@ -191,5 +251,8 @@ onMounted(() => {
         <Chat />
         <ChatBot />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>

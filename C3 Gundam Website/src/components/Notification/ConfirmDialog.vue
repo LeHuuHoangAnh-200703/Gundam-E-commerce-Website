@@ -2,13 +2,13 @@
     <div v-if="visible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0 w-10 h-10 mx-auto rounded-full flex items-center justify-center"
+                <div class="flex items-center justify-start mb-4">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center"
                         :class="iconBgClass">
                         <i :class="iconClass"></i>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">{{ title }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
                     </div>
                 </div>
                 <div class="mb-6">
@@ -56,7 +56,7 @@ const props = defineProps({
     },
     type: {
         type: String,
-        default: 'warning', // warning, success, error, info
+        default: 'warning',
         validator: (value) => ['warning', 'success', 'error', 'info'].includes(value)
     }
 })
@@ -67,7 +67,7 @@ const emit = defineEmits(['confirm', 'cancel', 'close'])
 const iconClass = computed(() => {
     const iconMap = {
         warning: 'fas fa-exclamation-triangle text-yellow-600',
-        success: 'fas fa-check text-green-600',
+        success: 'fas fa-check text-green-700',
         error: 'fas fa-times text-red-600',
         info: 'fas fa-info text-blue-600'
     }
@@ -77,7 +77,7 @@ const iconClass = computed(() => {
 const iconBgClass = computed(() => {
     const bgMap = {
         warning: 'bg-yellow-100',
-        success: 'bg-green-100',
+        success: 'bg-green-300',
         error: 'bg-red-100',
         info: 'bg-blue-100'
     }

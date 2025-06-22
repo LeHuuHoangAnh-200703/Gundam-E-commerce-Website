@@ -62,7 +62,7 @@ const dialogState = ref({
     visible: false,
     title: '',
     message: '',
-    type: 'warning', // warning, success, error, info
+    type: 'warning',
     confirmText: 'Xác nhận',
     cancelText: 'Hủy bỏ',
     onConfirm: null,
@@ -152,7 +152,7 @@ const updatedStatus = async (maDonHang, currentStatus) => {
 
     // Sử dụng dialog với props
     showConfirmDialog({
-        title: 'Xác nhận cập nhật trạng thái',
+        title: 'Thông báo xác nhận',
         message: `Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng từ "${currentStatus}" thành "${newStatus}" không?`,
         type: 'info',
         confirmText: 'Cập nhật',
@@ -164,10 +164,8 @@ const updatedStatus = async (maDonHang, currentStatus) => {
                 });
                 await fetchOrders();
                 showNotification("Cập nhật trạng thái đơn hàng thành công!", "success");
-                console.log("Status updated successfully:", response.data);
             } catch (err) {
                 showNotification("Lỗi khi cập nhật trạng thái đơn hàng!", "error");
-                console.log("Error updating status:", err);
             }
         }
     });
@@ -201,7 +199,7 @@ const fetchOrderByDayMonth = async () => {
 const exportOrderToPDF = async (order) => {
     // Hiển thị dialog xác nhận xuất PDF
     showConfirmDialog({
-        title: 'Xuất hóa đơn PDF',
+        title: 'Thông báo xác nhận',
         message: `Bạn có muốn xuất hóa đơn cho đơn hàng ${order.MaDonHang} không?`,
         type: 'success',
         confirmText: 'Xuất hóa đơn',
@@ -219,7 +217,7 @@ const exportOrderToPDF = async (order) => {
                         { text: 'C3 GUNDAM STORE', style: 'header' },
                         { text: 'Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang', style: 'subheader' },
                         { text: 'Điện thoại: 079.965.8592', style: 'subheader' },
-                        { text: '____________________________________________________________________________', alignment: 'center' },
+                        { text: '_______________________________________________________________________________________________', alignment: 'center' },
                         { text: '\nHÓA ĐƠN BÁN HÀNG', style: 'title' },
                         { text: `Số: ${order.MaDonHang}`, style: 'subheader' },
                         { text: '\nTHÔNG TIN KHÁCH HÀNG & GIAO DỊCH', style: 'sectionHeader' },

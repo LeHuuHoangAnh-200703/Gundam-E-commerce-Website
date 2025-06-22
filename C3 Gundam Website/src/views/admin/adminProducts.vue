@@ -2,12 +2,68 @@
 import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
+import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from 'axios';
 
 const listProducts = ref([]);
 const searchValue = ref('');
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
+const notification = ref({
+    message: '',
+    type: ''
+});
+
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
 
 const fetchProducts = async () => {
     try {
@@ -24,26 +80,34 @@ const fetchProducts = async () => {
     }
 }
 
-const updateStatus = async (maSanPham, newStatus) => {
-    const confirmUpdate = confirm("Bạn có chắc chắn về việc cập nhật trạng thái này không?");
-    if (!confirmUpdate) return;
-    const nextStatus = newStatus === 'Đang bán' ? 'Ngừng kinh doanh' : 'Đang bán';
-    try {
-        const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`, {
-            TrangThai: nextStatus,
-        });
+const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn về việc cập nhật trạng thái này không?',
+        type: 'info',
+        confirmText: 'Cập nhật',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            const nextStatus = newStatus === 'Đang bán' ? 'Ngừng kinh doanh' : 'Đang bán';
+            try {
+                const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`, {
+                    TrangThai: nextStatus,
+                });
 
-        const notificationData = {
-            ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
-            NguoiChinhSua: TenAdmin,
-            ThoiGian: ThoiGian,
-        };
+                const notificationData = {
+                    ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
-
-    } catch (error) {
-        console.error('Error updating order status:', error);
-    }
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                await fetchProducts();
+                showNotification("Cập nhật trạng thái thành công!", "success");
+            } catch (error) {
+                console.error('Error updating order status:', error);
+            }
+        }
+    });
 };
 
 const findProducts = computed(() => {
@@ -143,19 +207,22 @@ onMounted(() => {
                                         <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <form @submit="updateStatus(product.MaSanPham, product.TrangThai)">
-                                            <button type="submit"
-                                                class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
-                                                    class="fa-solid fa-repeat"></i></button>
-                                        </form>
+                                        <button @click="updateStatus(product.MaSanPham, product.TrangThai, product.TenSanPham)"
+                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap">
+                                            <i class="fa-solid fa-repeat"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+                <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

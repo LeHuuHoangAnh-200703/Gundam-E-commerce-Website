@@ -4,6 +4,7 @@ import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from "axios";
 import { useRouter } from 'vue-router';
 
@@ -23,6 +24,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 
 const categoryPost = [
@@ -116,15 +159,22 @@ const likePost = async (idBaiDang) => {
 }
 
 const deletePost = async (idBaiDang) => {
-    const confirmUpdate = confirm("Bạn có chắc chắn xóa bài đăng này không?");
-    if (!confirmUpdate) return;
-    try {
-        await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
-        showNotification("Xóa bài đăng thành công!", "success");
-        await fetchCommunityPost();
-    } catch (error) {
-        console.log("Error delete post: ", error);
-    }
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn xóa bài đăng này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
+                showNotification("Xóa bài đăng thành công!", "success");
+                await fetchCommunityPost();
+            } catch (error) {
+                console.log("Error delete post: ", error);
+            }
+        }
+    });
 }
 
 const selectTypePosts = (type) => {
@@ -192,21 +242,23 @@ onMounted(() => {
                                                 formatTime(post.ThoiGianDang) }}</p>
                                         </div>
                                     </div>
-                                    <button @click="deletePost(post.MaBaiDang)" :class="post.MaKhachHang.includes(idCustomer) ? 'block' :'hidden' ">
+                                    <button @click="deletePost(post.MaBaiDang)"
+                                        :class="post.MaKhachHang.includes(idCustomer) ? 'block' : 'hidden'">
                                         <i class="fa-solid fa-trash text-white text-[18px]"></i>
                                     </button>
                                 </div>
                                 <p class="text-white font-medium font-sans">{{ post.NoiDung }}</p>
                             </div>
                             <div class="grid grid-cols-2 gap-1">
-                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img" class="w-full max-h-[250px] object-cover"
-                                    alt="">
+                                <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img"
+                                    class="w-full max-h-[250px] object-cover" alt="">
                             </div>
                             <div class="px-4 flex flex-col gap-2">
                                 <div class="flex items-center justify-between">
                                     <div class="flex gap-2 items-center">
                                         <i class="fa-solid fa-heart text-[#DC143C] text-[18px]"></i>
-                                        <p class="text-white font-medium">{{ post.MaKhachHangDaThich.length }} lượt yêu thích</p>
+                                        <p class="text-white font-medium">{{ post.MaKhachHangDaThich.length }} lượt yêu
+                                            thích</p>
                                     </div>
                                     <div class="flex gap-2 items-center">
                                         <p class="text-white font-medium">{{ post.BinhLuan.length }}</p>
@@ -216,8 +268,10 @@ onMounted(() => {
                                 <hr class="mb-2">
                                 <div class="flex items-center justify-between mb-3">
                                     <button @click="likePost(post.MaBaiDang)" class="flex gap-2 items-center">
-                                        <i :class="post.MaKhachHangDaThich.includes(idCustomer) ? 'text-[#DC143C]' : 'text-gray-500'" class="fa-solid fa-heart text-[25px]"></i>
-                                        <p class="text-white text-[16px] font-medium">{{ post.MaKhachHangDaThich.includes(idCustomer) ? 'Đã thích' : 'Thích' }}</p>
+                                        <i :class="post.MaKhachHangDaThich.includes(idCustomer) ? 'text-[#DC143C]' : 'text-gray-500'"
+                                            class="fa-solid fa-heart text-[25px]"></i>
+                                        <p class="text-white text-[16px] font-medium">{{
+                                            post.MaKhachHangDaThich.includes(idCustomer) ? 'Đã thích' : 'Thích' }}</p>
                                     </button>
                                     <router-link :to="`/commentCommunityPost/${post.MaBaiDang}`"
                                         class="flex gap-2 items-center">
@@ -241,6 +295,9 @@ onMounted(() => {
         <Footer />
         <BackToTop />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

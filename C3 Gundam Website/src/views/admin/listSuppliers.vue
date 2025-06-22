@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -22,6 +23,48 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
 const fetchSuppliers = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/nhacungcap');
@@ -36,28 +79,34 @@ const fetchSuppliers = async () => {
 };
 
 const deleteSupplier = async (maNCC, tenNCC) => {
-    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa không?");
-    if (!confirmDelete) return;
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn xóa nhà cung cấp này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
 
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
+                const notificationData = {
+                    ThongBao: `Vừa xóa nhà cung cấp ${tenNCC}`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
 
-        const notificationData = {
-            ThongBao: `Vừa xóa nhà cung cấp ${tenNCC}`,
-            NguoiChinhSua: TenAdmin,
-            ThoiGian: ThoiGian,
-        };
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
-
-        showNotification("Xóa nhà cung cấp thành công!", "success");
-        await fetchSuppliers();
-        setTimeout(() => {
-            router.push('/admin/listSuppliers');
-        }, 3000);
-    } catch (err) {
-        showNotification(err.response?.data?.message || "Xóa nhà cung cấp thất bại!", "error");
-    }
+                showNotification("Xóa nhà cung cấp thành công!", "success");
+                await fetchSuppliers();
+                setTimeout(() => {
+                    router.push('/admin/listSuppliers');
+                }, 3000);
+            } catch (err) {
+                showNotification(err.response?.data?.message || "Xóa nhà cung cấp thất bại!", "error");
+            }
+        }
+    });
 }
 
 onMounted(() => {
@@ -96,7 +145,7 @@ onMounted(() => {
                                 <tr class="border-t border-slate-500" v-for="(supplier, index) in listSuppliers"
                                     :key="index">
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ supplier.MaNhaCungCap
-                                        }}</td>
+                                    }}</td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{
@@ -125,6 +174,9 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

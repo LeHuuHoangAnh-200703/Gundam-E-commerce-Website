@@ -14,7 +14,7 @@ const fetchCustomers = async () => {
                 ...customer,
                 NgayTao: new Date(customer.NgayTao)
             }
-        })
+        }).sort((a,b) => b.TongDonHang - a.TongDonHang);
     } catch (err) {
         console.log("Error fetching: ", err.message);
     }

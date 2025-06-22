@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from "axios";
 
 const listDiscountCodes = ref([]);
@@ -19,6 +20,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 
 const fetchDiscountCode = async () => {
@@ -39,30 +82,36 @@ const fetchDiscountCode = async () => {
 }
 
 const deleteDiscountCode = async (idMaGG, tenMaGG) => {
-    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa không?");
-    if (!confirmDelete) return;
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn xóa mã giảm giá này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/magiamgia/${idMaGG}`);
 
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/magiamgia/${idMaGG}`);
+                const notificationData = {
+                    ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
 
-        const notificationData = {
-            ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
-            NguoiChinhSua: TenAdmin,
-            ThoiGian: ThoiGian,
-        };
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
-
-        showNotification("Xóa mã giảm giá thành công!", "success");
-        setTimeout(() => {
-            router.push('/admin/discountCode');
-        }, 3000);
-    } catch (err) {
-        showNotification(err.response?.data?.message || "Xóa mã mã giảm giá thất bại!", "error");
-    }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 3000);
+                showNotification("Xóa mã giảm giá thành công!", "success");
+                setTimeout(() => {
+                    router.push('/admin/discountCode');
+                }, 3000);
+            } catch (err) {
+                showNotification(err.response?.data?.message || "Xóa mã mã giảm giá thất bại!", "error");
+            }
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 3000);
+        }
+    });
 }
 
 function formatCurrency(value) {
@@ -141,6 +190,9 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

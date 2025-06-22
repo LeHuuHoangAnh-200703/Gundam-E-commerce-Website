@@ -127,16 +127,6 @@ const formatDate = (date) => {
     return `${time}`;
 };
 
-const isSameDay = (date) => {
-    const inputDate = new Date(date);
-    const today = new Date();
-    return (
-        inputDate.getFullYear() === today.getFullYear() &&
-        inputDate.getMonth() === today.getMonth() &&
-        inputDate.getDate() === today.getDate()
-    );
-}
-
 onMounted(() => {
     fetchSuppliers();
     fetchEntryForm();

@@ -2,50 +2,122 @@
 import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
+import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from 'axios';
 
 const listPost = ref([]);
 
+const notification = ref({
+    message: '',
+    type: ''
+});
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
 const fetchCommunityPost = async () => {
     try {
         const response = await axios.get("http://localhost:3000/api/baidang");
-        listPost.value = response.data.filter(post => {
-            return post.TrangThaiDang !== 'Đã duyệt'
-        }).map(post => {
+        listPost.value = response.data.map(post => {
             return {
                 ...post,
                 ThoiGianDang: new Date(post.ThoiGianDang)
             }
-        })
+        });
+        const postApproved = listPost.value.filter(post => post.TrangThaiDang === 'Đã duyệt');
+        const postWaiting = listPost.value.filter(post => post.TrangThaiDang === 'Đang chờ duyệt');
+        listPost.value = [...postWaiting.sort((a,b) => new Date(a.ThoiGianDang) - new Date(b.ThoiGianDang)),...postApproved.sort((a,b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
     } catch (error) {
         console.log('Error fetching:', error);
     }
 }
 
 const updateStatus = async (maBaiDang, newStatus) => {
-    const confirmUpdate = confirm("Bạn có chắc chắn duyệt bài đăng này không?");
-    if (!confirmUpdate) return;
-    const nextStatus = newStatus === 'Đang chờ duyệt' ? 'Đã duyệt' : 'Đang chờ duyệt';
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn duyệt bài đăng này không?',
+        type: 'success',
+        confirmText: 'Duyệt',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            const nextStatus = newStatus === 'Đang chờ duyệt' ? 'Đã duyệt' : 'Đang chờ duyệt';
 
-    try {
-        const response = await axios.patch(`http://localhost:3000/api/baidang/${maBaiDang}`, {
-            TrangThaiDang: nextStatus,
-        });
-    } catch (error) {
-        console.error('Error updating status:', error);
-    }
+            try {
+                const response = await axios.patch(`http://localhost:3000/api/baidang/${maBaiDang}`, {
+                    TrangThaiDang: nextStatus,
+                });
+                showNotification("Duyệt bài đăng thành công!", "success");
+                await fetchCommunityPost();
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+    });
 };
 
 const deletePost = async (idBaiDang) => {
-    const confirmUpdate = confirm("Bạn có chắc chắn xóa bài đăng này không?");
-    if (!confirmUpdate) return;
-    try {
-        await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
-        showNotification("Xóa bài đăng thành công!", "success");
-        await fetchCommunityPost();
-    } catch (error) {
-        console.log("Error delete post: ", error);
-    }
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn xóa bài đăng này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
+                showNotification("Xóa bài đăng thành công!", "success");
+                await fetchCommunityPost();
+            } catch (error) {
+                console.log("Error delete post: ", error);
+            }
+        }
+    });
 }
 
 const formatTime = (time) => {
@@ -69,9 +141,9 @@ onMounted(() => {
                     <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-1 pt-2">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý bài đăng</h1>
                     </div>
-                    <div class="shadow-lg border-2 rounded-md overflow-auto p-4 bg-white">
+                    <div class="overflow-auto p-4">
                         <div v-if="listPost.length > 0" class="flex flex-col gap-4">
-                            <div v-for="(post, index) in listPost" :key="index" class="flex flex-col gap-2 w-full">
+                            <div v-for="(post, index) in listPost" :key="index" class="flex flex-col gap-2 w-full bg-white p-4 rounded-md shadow-lg border-2">
                                 <p class="font-semibold text-[14px]">Nội dung: <span class="font-medium">{{ post.NoiDung
                                         }}</span></p>
                                 <p class="font-semibold text-[14px]">Loại bài đăng: <span class="font-medium">{{
@@ -86,20 +158,17 @@ onMounted(() => {
                                     <p class="font-semibold text-[14px] mb-2">Hình ảnh bài đăng: </p>
                                     <div class="flex gap-2 mb-2">
                                         <img v-for="(img, index) in post.HinhAnh" :key="index" :src="img"
-                                            class="w-[65px] lg:w-[90px] border-2" alt="">
+                                            class="w-[65px] lg:w-[90px] max-h-[65px] border-2" alt="">
                                     </div>
                                 </div>
                                 <div class="flex gap-2 items-end justify-end">
-                                    <form action="" @submit="updateStatus(post.MaBaiDang, post.TrangThaiDang)">
-                                        <button type="submit"
-                                            class="inline-block text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
-                                                class="fa-solid fa-check"></i></button>
-                                    </form>
-                                    <form action="" @submit="deletePost(post.MaBaiDang)">
-                                        <button type="submit"
-                                            class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
-                                                class="fa-solid fa-trash"></i></button>
-                                    </form>
+                                    <button type="submit" @click="updateStatus(post.MaBaiDang, post.TrangThaiDang)"
+                                        :class="post.TrangThaiDang !== 'Đã duyệt' ? 'inline-block' : 'hidden'"
+                                        class="text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
+                                            class="fa-solid fa-check"></i></button>
+                                    <button type="submit" @click="deletePost(post.MaBaiDang)"
+                                        class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
+                                            class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -114,8 +183,12 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
+                <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

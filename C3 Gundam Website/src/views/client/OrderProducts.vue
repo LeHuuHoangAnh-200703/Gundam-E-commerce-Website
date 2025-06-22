@@ -4,6 +4,7 @@ import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import NotificationClient from '@/components/Notification/NotificationClient.vue';
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -53,6 +54,48 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
 // Tính phí ship
 const calculateShippingFee = async () => {
     if (!formData.value.address) {
@@ -95,11 +138,11 @@ const calculateDiscount = async () => {
 
 // Tính tổng giá
 watch([selectedProducts, finalProductPrice, shippingFee], () => {
-  totalProductPrice.value = selectedProducts.value.reduce((sum, product) => {
-    return sum + product.DonGia * product.SoLuong;
-  }, 0);
-  finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
-  totalPrice.value = finalProductPrice.value + shippingFee.value;
+    totalProductPrice.value = selectedProducts.value.reduce((sum, product) => {
+        return sum + product.DonGia * product.SoLuong;
+    }, 0);
+    finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
+    totalPrice.value = finalProductPrice.value + shippingFee.value;
 });
 
 const fetchCustomer = async (idKhachHang) => {
@@ -129,16 +172,11 @@ const addOrders = async () => {
     }
 
     if (!formData.value.payment) {
-        errors.value.payment = "Chọn phương thức thanh toán phù hợp."
+        errors.value.payment = "Chọn phương thức thanh toán phù hợp.";
     }
 
     if (Object.keys(errors.value).length > 0) {
         return;
-    }
-
-    if (formData.value.payment !== 'Thanh toán qua Paypal') {
-        const confirmUpdate = confirm("Vui lòng kiểm tra lại thông tin trước khi đặt hàng?");
-        if (!confirmUpdate) return;
     }
 
     let trangThaiThanhToan = 'Khi nhận được hàng';
@@ -150,44 +188,68 @@ const addOrders = async () => {
         formData.value.shippingMethod = "Miễn phí giao hàng";
     }
 
-    try {
-        const sanPhamDaMua = selectedProducts.value.map(product => ({
-            TenSanPham: product.TenSanPham,
-            MaSanPham: product.MaSanPham,
-            Gia: product.DonGia,
-            SoLuong: product.SoLuong,
-            LoaiSanPham: product.LoaiSanPham,
-            HinhAnh: product.HinhAnh,
-        }));
+    const sanPhamDaMua = selectedProducts.value.map(product => ({
+        TenSanPham: product.TenSanPham,
+        MaSanPham: product.MaSanPham,
+        Gia: product.DonGia,
+        SoLuong: product.SoLuong,
+        LoaiSanPham: product.LoaiSanPham,
+        HinhAnh: product.HinhAnh,
+    }));
 
-        const dataToSend = {
-            MaKhachHang: maKhachHang,
-            DiaChiNhanHang: formData.value.address,
-            SanPhamDaMua: sanPhamDaMua,
-            IdMaGiamGia: formData.value.discountCode,
-            HinhThucThanhToan: formData.value.payment,
-            TongDon: totalPrice.value,
-            NgayDatHang: new Date(),
-            GhiChu: formData.value.description || 'Không có ghi chú',
-            TrangThaiThanhToan: trangThaiThanhToan,
-            HinhThucVanChuyen: formData.value.shippingMethod
+    const dataToSend = {
+        MaKhachHang: maKhachHang,
+        DiaChiNhanHang: formData.value.address,
+        SanPhamDaMua: sanPhamDaMua,
+        IdMaGiamGia: formData.value.discountCode,
+        HinhThucThanhToan: formData.value.payment,
+        TongDon: totalPrice.value,
+        NgayDatHang: new Date(),
+        GhiChu: formData.value.description || 'Không có ghi chú',
+        TrangThaiThanhToan: trangThaiThanhToan,
+        HinhThucVanChuyen: formData.value.shippingMethod
+    };
+
+    // Nếu thanh toán qua PayPal thì redirect trực tiếp
+    if (formData.value.payment === 'Thanh toán qua Paypal') {
+        try {
+            const response = await axios.post('http://localhost:3000/api/donhang', dataToSend);
+            showNotification("Đặt hàng thành công, vui lòng kiểm tra email xác nhận!", "success");
+
+            await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`);
+            setTimeout(() => {
+                router.push('/orders_history');
+            }, 2000);
+            localStorage.removeItem("selectedProducts");
+        } catch (error) {
+            showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
         }
-
-        const response = await axios.post('http://localhost:3000/api/donhang', dataToSend);
-        showNotification("Đặt hàng thành công, vui lòng kiểm tra email xác nhận!", "success");
-
-        await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`)
-        setTimeout(() => {
-            router.push('/orders_history');
-        }, 0);
-        localStorage.removeItem("selectedProducts");
-    } catch (error) {
-        showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
+        return;
     }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 2000);
-}
+
+    // Với các phương thức thanh toán khác, hiển thị dialog xác nhận
+    showConfirmDialog({
+        title: 'Xác nhận đặt hàng',
+        message: 'Vui lòng kiểm tra lại thông tin trước khi đặt hàng?',
+        type: 'info',
+        confirmText: 'Đặt hàng',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.post('http://localhost:3000/api/donhang', dataToSend);
+                showNotification("Đặt hàng thành công, vui lòng kiểm tra email xác nhận!", "success");
+
+                await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`);
+                setTimeout(() => {
+                    router.push('/orders_history');
+                }, 2000);
+                localStorage.removeItem("selectedProducts");
+            } catch (error) {
+                showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
+            }
+        }
+    });
+};
 
 const initializePayPalButton = () => {
     if (typeof paypal === 'undefined') {
@@ -272,64 +334,68 @@ const createPaymentVNPay = async () => {
     if (Object.keys(errors.value).length > 0) {
         return;
     }
-    const confirmUpdate = confirm(
-        "Vui lòng kiểm tra lại thông tin trước khi thanh toán qua VNPAY?"
-    );
-    if (!confirmUpdate) return;
-
-    let trangThaiThanhToan = "Khi nhận được hàng";
-    if (formData.value.payment === "Thanh toán qua VNPAY") {
-        trangThaiThanhToan = "Đã thanh toán qua VNPAY";
-    }
-
-    if (totalPrice.value >= 2000000) {
-        formData.value.shippingMethod = "Miễn phí giao hàng";
-    }
-
-    try {
-        const sanPhamDaMua = selectedProducts.value.map(product => ({
-            TenSanPham: product.TenSanPham,
-            MaSanPham: product.MaSanPham,
-            Gia: product.DonGia,
-            SoLuong: product.SoLuong,
-            LoaiSanPham: product.LoaiSanPham,
-            HinhAnh: product.HinhAnh,
-        }));
-
-        const tempOrder = {
-            MaKhachHang: maKhachHang,
-            SanPhamDaMua: sanPhamDaMua,
-            DiaChiNhanHang: formData.value.address,
-            IdMaGiamGia: formData.value.discountCode,
-            HinhThucThanhToan: "Thanh toán qua VNPAY",
-            TongDon: totalPrice.value,
-            NgayDatHang: new Date(),
-            GhiChu: formData.value.description || "Không có ghi chú",
-            TrangThaiThanhToan: trangThaiThanhToan,
-            HinhThucVanChuyen: formData.value.shippingMethod,
-        };
-
-        const response = await axios.post(
-            "http://localhost:3000/api/donhang/luutamdon",
-            tempOrder
-        );
-        const maDonHang = response.data.MaDonHang;
-        const paymentResponse = await axios.post(
-            "http://localhost:3000/api/thanhtoanvnp",
-            {
-                amount: totalPrice.value,
-                orderId: maDonHang,
-                orderInfo: `Thanh toán đơn hàng ${maDonHang} cho ${nameCustomer.value}###${emailCustomer.value}`,
-                ipAddr: "127.0.0.1",
+    showConfirmDialog({
+        title: 'Xác nhận đặt hàng',
+        message: 'Vui lòng kiểm tra lại thông tin trước khi thanh toán qua VNPAY?',
+        type: 'info',
+        confirmText: 'Đặt hàng',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            let trangThaiThanhToan = "Khi nhận được hàng";
+            if (formData.value.payment === "Thanh toán qua VNPAY") {
+                trangThaiThanhToan = "Đã thanh toán qua VNPAY";
             }
-        );
-        window.location.href = paymentResponse.data.paymentUrl;
-    } catch (error) {
-        showNotification(
-            error.response?.data?.message || "Không thể tạo URL thanh toán VNPAY!",
-            "error"
-        );
-    }
+
+            if (totalPrice.value >= 2000000) {
+                formData.value.shippingMethod = "Miễn phí giao hàng";
+            }
+
+            try {
+                const sanPhamDaMua = selectedProducts.value.map(product => ({
+                    TenSanPham: product.TenSanPham,
+                    MaSanPham: product.MaSanPham,
+                    Gia: product.DonGia,
+                    SoLuong: product.SoLuong,
+                    LoaiSanPham: product.LoaiSanPham,
+                    HinhAnh: product.HinhAnh,
+                }));
+
+                const tempOrder = {
+                    MaKhachHang: maKhachHang,
+                    SanPhamDaMua: sanPhamDaMua,
+                    DiaChiNhanHang: formData.value.address,
+                    IdMaGiamGia: formData.value.discountCode,
+                    HinhThucThanhToan: "Thanh toán qua VNPAY",
+                    TongDon: totalPrice.value,
+                    NgayDatHang: new Date(),
+                    GhiChu: formData.value.description || "Không có ghi chú",
+                    TrangThaiThanhToan: trangThaiThanhToan,
+                    HinhThucVanChuyen: formData.value.shippingMethod,
+                };
+
+                const response = await axios.post(
+                    "http://localhost:3000/api/donhang/luutamdon",
+                    tempOrder
+                );
+                const maDonHang = response.data.MaDonHang;
+                const paymentResponse = await axios.post(
+                    "http://localhost:3000/api/thanhtoanvnp",
+                    {
+                        amount: totalPrice.value,
+                        orderId: maDonHang,
+                        orderInfo: `Thanh toán đơn hàng ${maDonHang} cho ${nameCustomer.value}###${emailCustomer.value}`,
+                        ipAddr: "127.0.0.1",
+                    }
+                );
+                window.location.href = paymentResponse.data.paymentUrl;
+            } catch (error) {
+                showNotification(
+                    error.response?.data?.message || "Không thể tạo URL thanh toán VNPAY!",
+                    "error"
+                );
+            }
+        }
+    });
 };
 
 watch(() => formData.value.payment, (newPayment) => {
@@ -351,7 +417,7 @@ watch(() => formData.value.address, () => {
 });
 
 watch(() => formData.value.discountCode, () => {
-  calculateDiscount();
+    calculateDiscount();
 });
 </script>
 
@@ -497,12 +563,15 @@ watch(() => formData.value.discountCode, () => {
                                                 errors.shippingMethod }}</p>
                                         </div>
                                         <hr />
-                                        <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá: <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }} VNĐ</span></p>
+                                        <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá:
+                                            <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }}
+                                                VNĐ</span></p>
                                         <p class="text-white text-[15px] text-end">Phí vận chuyển: <span
                                                 class="text-[#FFD700]">{{
                                                     formatCurrency(shippingDetails.baseFee) }} VNĐ</span></p>
                                         <p class="text-white text-[16px] text-end">Tổng cộng: <span
-                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice - discountAmount) }} VNĐ</span></p>
+                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice - discountAmount)
+                                                }} VNĐ</span></p>
                                         <button type="submit"
                                             :class="(formData.payment === 'Thanh toán khi nhận hàng' || formData.payment === '') ? 'block' : 'hidden'"
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">Đặt
@@ -526,5 +595,8 @@ watch(() => formData.value.discountCode, () => {
         <Footer />
         <BackToTop />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>

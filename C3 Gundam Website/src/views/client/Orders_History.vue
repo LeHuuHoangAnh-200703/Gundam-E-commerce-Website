@@ -6,6 +6,7 @@ import BackToTop from '@/components/client/BackToTop.vue';
 import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -35,7 +36,7 @@ const options = [
 
 const maKhachHang = localStorage.getItem("MaKhachHang");
 const tenKhachHang = localStorage.getItem('TenKhachHang');
-const tenSanPham = ref('');
+const listOrders = ref([]);
 const notification = ref({
     message: '',
     type: ''
@@ -46,7 +47,49 @@ const showNotification = (msg, type) => {
         notification.value.message = '';
     }, 3000);
 };
-const listOrders = ref([]);
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
 const fetchOrders = async (maKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/donhang/khachhang/${maKhachHang}`);
@@ -74,21 +117,28 @@ const createNotification = async (message) => {
 
 
 const deleteOrder = async (maDonHang) => {
-    const confirmDelete = confirm("Bạn có chắc chắn muốn hủy đơn không?");
-    if (!confirmDelete) return;
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/donhang/${maDonHang}`);
-        
-        await createNotification(`Đơn hàng vừa được hủy!`);
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+        type: 'error',
+        confirmText: 'Xác nhận hủy',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/donhang/${maDonHang}`);
 
-        showNotification("Hủy đơn hàng thành công! Liên hệ với cửa hàng để được hoàn tiền nếu thanh toán online nhé.", "success");
-        listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
-    } catch (error) {
-        showNotification(error.response?.data?.message || "Hủy đơn hàng thất bại!", "error");
-    }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 3000);
+                await createNotification(`Đơn hàng vừa được hủy!`);
+
+                showNotification("Hủy đơn hàng thành công! Liên hệ với cửa hàng để được hoàn tiền nếu thanh toán online nhé.", "success");
+                listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
+            } catch (error) {
+                showNotification(error.response?.data?.message || "Hủy đơn hàng thất bại!", "error");
+            }
+            setTimeout(() => {
+                notification.value.message = '';
+            }, 3000);
+        }
+    });
 }
 
 const updatedStatus = async (maDonHang, currentStatus) => {
@@ -105,20 +155,26 @@ const updatedStatus = async (maDonHang, currentStatus) => {
 
     const newStatus = statusOrder[currentIndex + 1];
 
-    const confirmUpdate = confirm('Bạn có chắc chắn nhận được đơn hàng chưa?');
-    if (!confirmUpdate) return;
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn nhận được đơn hàng chưa, nếu đã nhận được hãy xác nhận nhé?',
+        type: 'success',
+        confirmText: 'Đã nhận được',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
+                    newStatus: newStatus,
+                });
 
-    try {
-        const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
-            newStatus: newStatus,
-        });
+                await createNotification(`Đơn hàng của ${tenKhachHang} đã được giao thành công!`);
 
-        await createNotification(`Đơn hàng của ${tenKhachHang} đã được giao thành công!`);
-
-        await fetchOrders(maKhachHang);
-    } catch (err) {
-        console.error("Error updating status:", err);
-    }
+                await fetchOrders(maKhachHang);
+            } catch (err) {
+                console.error("Error updating status:", err);
+            }
+        }
+    });
 };
 
 const checkOrderReviewed = async (idDonHang) => {
@@ -190,8 +246,8 @@ onMounted(() => {
                     </div>
                     <hr class="my-3">
                     <div class="overflow-y-auto max-h-[250px] flex flex-col gap-4">
-                        <div class="flex gap-4 border-b-[1px] pb-4 mb-3 items-start" v-for="(product, index) in order.SanPhamDaMua"
-                            :key="index">
+                        <div class="flex gap-4 border-b-[1px] pb-4 mb-3 items-start"
+                            v-for="(product, index) in order.SanPhamDaMua" :key="index">
                             <img :src="`${product.HinhAnh}`" class="w-[100px]" alt="">
                             <div class="flex flex-col gap-1">
                                 <div class="w-44 block lg:hidden whitespace-nowrap text-ellipsis overflow-hidden">
@@ -269,5 +325,8 @@ onMounted(() => {
         <Chat />
         <ChatBot />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>

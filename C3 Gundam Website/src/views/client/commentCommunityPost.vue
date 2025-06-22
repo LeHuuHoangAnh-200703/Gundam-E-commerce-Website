@@ -5,6 +5,7 @@ import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import axios from "axios";
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -30,6 +31,48 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
 };
 const fetchCommunityPost = async (idBaiDang) => {
     try {
@@ -93,14 +136,21 @@ const submitReply = async (commentId) => {
 };
 
 const deleteComment = async (commentId) => {
-    const confirmUpdate = confirm("Bạn có chắc chắn xóa bình luận này không?");
-    if (!confirmUpdate) return;
-    try {
-        await axios.delete(`http://localhost:3000/api/baidang/xoabinhluan/${idPost.value}/${commentId}`);
-        await fetchCommunityPost(idPost.value);
-    } catch (error) {
-        console.error('Lỗi khi xóa bình luận:', error);
-    }
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn xóa bình luận này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                await axios.delete(`http://localhost:3000/api/baidang/xoabinhluan/${idPost.value}/${commentId}`);
+                await fetchCommunityPost(idPost.value);
+            } catch (error) {
+                console.error('Lỗi khi xóa bình luận:', error);
+            }
+        }
+    });
 }
 
 // Thu thập tất cả trả lời cho một bình luận gốc, không phân cấp
@@ -241,7 +291,8 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div v-if="comments.length <= 0" class="flex justify-center items-center m-auto w-full rounded-md p-4">
+                    <div v-if="comments.length <= 0"
+                        class="flex justify-center items-center m-auto w-full rounded-md p-4">
                         <div class="flex flex-col items-center justify-center gap-3">
                             <p class="font-semibold text-white text-[20px] text-center">Hiện tại không có bình luận nào!
                             </p>
@@ -262,6 +313,9 @@ onMounted(() => {
         <Footer />
         <BackToTop />
         <NotificationClient :message="notification.message" :type="notification.type" />
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

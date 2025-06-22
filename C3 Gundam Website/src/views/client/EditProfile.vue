@@ -52,8 +52,7 @@ const fetchCustomer = async (idKhachHang) => {
 
 const editProfile = async () => {
     errors.value = {};
-    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-
+    
     if (formData.value.name !== '') {
         formData.value.name = escapeHtml(formData.value.name);
     }

@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -23,6 +24,48 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
 const fetchProductType = async () => {
     try {
         const response = await axios.get("http://localhost:3000/api/loaisanpham");
@@ -39,23 +82,30 @@ const fetchProductType = async () => {
 }
 
 const deleteProductType = async (maLoaiSanPham, tenLoaiSanPham) => {
-    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa loại sản phẩm không?");
-    if (!confirmDelete) return;
-    try {
-        const response = await axios.delete(`http://localhost:3000/api/loaisanpham/${maLoaiSanPham}`);
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn muốn xóa loại sản phẩm này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.delete(`http://localhost:3000/api/loaisanpham/${maLoaiSanPham}`);
 
-        const notificationData = {
-            ThongBao: `Vừa xóa loại sản phẩm ${tenLoaiSanPham}`,
-            NguoiChinhSua: TenAdmin,
-            ThoiGian: ThoiGian,
-        };
+                const notificationData = {
+                    ThongBao: `Vừa xóa loại sản phẩm ${tenLoaiSanPham}`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
-        await fetchProductType();
-        showNotification(response.data.message, "success");
-    } catch (error) {
-        console.log("Error fetching: ", error);
-    }
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                await fetchProductType();
+                showNotification(response.data.message, "success");
+            } catch (error) {
+                showNotification(error.response?.data?.message, "error");
+            }
+        }
+    });
 }
 
 const formatDate = (date) => {
@@ -100,7 +150,8 @@ onMounted(() => {
                             <tbody class="w-full">
                                 <tr class="border-t border-slate-500" v-for="(productType, index) in listProductType"
                                     :key="index">
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{ productType.MaLoaiSanPham }}</td>
+                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{
+                                        productType.MaLoaiSanPham }}</td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{
@@ -129,6 +180,9 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 
