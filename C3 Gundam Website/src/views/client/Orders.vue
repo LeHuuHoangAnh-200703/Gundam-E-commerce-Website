@@ -31,6 +31,7 @@ const nameCustomer = ref("");
 const emailCustomer = ref("");
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
+const discountCodeWithCustomer = ref([]);
 const images = ref([]);
 const nameProducts = ref("");
 const maSanPham = ref("");
@@ -100,9 +101,9 @@ const calculateDiscount = async () => {
 
 // Tính tổng giá
 watch([price, quantity, finalProductPrice, shippingFee], () => {
-  totalProductPrice.value = price.value * quantity.value;
-  finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
-  totalPrice.value = finalProductPrice.value + shippingFee.value;
+    totalProductPrice.value = price.value * quantity.value;
+    finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
+    totalPrice.value = finalProductPrice.value + shippingFee.value;
 });
 
 const fetchProduct = async (idProduct) => {
@@ -120,17 +121,59 @@ const fetchProduct = async (idProduct) => {
     }
 };
 
+const fetchDiscountCode = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/magiamgia');
+        listDiscountCodes.value = response.data.map(discountCode => ({
+            ...discountCode,
+            IdKhachHangSuDung: Array.isArray(discountCode.IdKhachHangSuDung) 
+                ? discountCode.IdKhachHangSuDung 
+                : [] // Đảm bảo IdKhachHangSuDung là mảng
+        }));
+        return true; // Trả về true để báo hiệu thành công
+    } catch (error) {
+        console.error('Error fetching discount codes:', error);
+        return false; // Trả về false để báo hiệu lỗi
+    }
+};
+
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(
-            `http://localhost:3000/api/khachhang/${idKhachHang}`
-        );
+        // Đảm bảo lấy danh sách mã giảm giá trước
+        const discountFetchSuccess = await fetchDiscountCode();
+        if (!discountFetchSuccess) {
+            throw new Error('Không thể lấy danh sách mã giảm giá');
+        }
+
+        // Lấy dữ liệu khách hàng
+        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         nameCustomer.value = response.data.TenKhachHang;
         emailCustomer.value = response.data.Email;
-        listAddress.value = response.data.DanhSachDiaChi;
-        listDiscountCodes.value = response.data.DanhSachMaGiamGia;
+        listAddress.value = response.data.DanhSachDiaChi || [];
+
+        // Lấy danh sách IdMaGiamGia từ DanhSachMaGiamGia
+        const customerDiscountIds = Array.isArray(response.data.DanhSachMaGiamGia)
+            ? response.data.DanhSachMaGiamGia
+                  .map(item => item.IdMaGiamGia)
+                  .filter(id => id) // Lọc các id hợp lệ
+            : [];
+        console.log("Danh sách IdMaGiamGia từ khách hàng:", customerDiscountIds);
+
+        // Lọc mã giảm giá: chỉ giữ mã trong DanhSachMaGiamGia và chưa được khách hàng sử dụng
+        discountCodeWithCustomer.value = listDiscountCodes.value
+            .filter(discountCode => 
+                customerDiscountIds.includes(discountCode.IdMaGiamGia) && // Khớp với DanhSachMaGiamGia
+                !discountCode.IdKhachHangSuDung.includes(idKhachHang) // Chưa được khách hàng sử dụng
+            )
+            .map(discountCode => ({
+                ...discountCode
+            }));
+
+        console.log("Mã giảm giá chưa sử dụng của khách hàng:", discountCodeWithCustomer.value);
     } catch (err) {
-        console.log("Error fetching: ", err);
+        console.error("Error fetching customer:", err.response?.data || err.message);
+        // Có thể thêm thông báo lỗi cho người dùng
+        // Ví dụ: alert('Đã có lỗi xảy ra khi lấy thông tin khách hàng');
     }
 };
 
@@ -371,6 +414,7 @@ onMounted(() => {
     quantity.value = Number(soluong) || 1;
     fetchProduct(idProduct);
     fetchCustomer(maKhachHang);
+    fetchDiscountCode();
 });
 
 watch(
@@ -395,7 +439,7 @@ watch(() => formData.value.address, () => {
 });
 
 watch(() => formData.value.discountCode, () => {
-  calculateDiscount();
+    calculateDiscount();
 });
 </script>
 
@@ -507,7 +551,7 @@ watch(() => formData.value.discountCode, () => {
                                                     Danh sách mã giảm giá của bạn
                                                 </option>
                                                 <option
-                                                    v-for="(discountCode, index) in listDiscountCodes.filter((dc) => new Date(dc.NgayHetHan) >= new Date())"
+                                                    v-for="(discountCode, index) in discountCodeWithCustomer.filter((dc) => new Date(dc.NgayHetHan) >= new Date())"
                                                     :key="index" :value="discountCode.IdMaGiamGia"
                                                     class="text-[#333] cursor-pointer">
                                                     Id Mã: {{ discountCode.IdMaGiamGia }} / Tên mã:
@@ -558,12 +602,15 @@ watch(() => formData.value.discountCode, () => {
                                             </div>
                                         </div>
                                         <hr />
-                                        <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá: <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }} VNĐ</span></p>
+                                        <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá:
+                                            <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }}
+                                                VNĐ</span></p>
                                         <p class="text-white text-[15px] text-end">Phí vận chuyển: <span
                                                 class="text-[#FFD700]">{{
                                                     formatCurrency(shippingDetails.baseFee) }} VNĐ</span></p>
                                         <p class="text-white text-[16px] text-end">Tổng cộng: <span
-                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice - discountAmount) }} VNĐ</span></p>
+                                                class="text-[#FFD700]"> {{ formatCurrency(totalPrice - discountAmount)
+                                                }} VNĐ</span></p>
                                         <button type="submit" :class="formData.payment === 'Thanh toán khi nhận hàng' ||
                                             formData.payment === ''
                                             ? 'block'

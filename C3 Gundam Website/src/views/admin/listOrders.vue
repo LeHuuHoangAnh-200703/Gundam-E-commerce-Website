@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from 'axios';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -55,15 +56,30 @@ const notification = ref({
     message: '',
     type: ''
 });
+
+// Dialog state với props
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning', // warning, success, error, info
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
 };
+
 const selectTypeOrders = (type) => {
     selectedType.value = type;
 };
+
 const fetchOrders = async () => {
     try {
         const response = await axios.get('http://localhost:3000/api/donhang');
@@ -82,9 +98,38 @@ const fetchOrders = async () => {
     }
 }
 
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+
 const updatedStatus = async (maDonHang, currentStatus) => {
-    const confirmUpdate = confirm('Bạn có chắc chắn cập nhật đơn hàng này chưa?');
-    if (!confirmUpdate) return;
     const currentIndex = options.findIndex(option => option.name === currentStatus);
     const nextIndex = currentIndex + 1;
 
@@ -105,15 +150,27 @@ const updatedStatus = async (maDonHang, currentStatus) => {
 
     const newStatus = options[nextIndex].name;
 
-    try {
-        const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
-            newStatus: newStatus,
-        });
-        await fetchOrders();
-        console.log("Status updated successfully:", response.data);
-    } catch (err) {
-        console.log("Error updating status:", err);
-    }
+    // Sử dụng dialog với props
+    showConfirmDialog({
+        title: 'Xác nhận cập nhật trạng thái',
+        message: `Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng từ "${currentStatus}" thành "${newStatus}" không?`,
+        type: 'info',
+        confirmText: 'Cập nhật',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
+                    newStatus: newStatus,
+                });
+                await fetchOrders();
+                showNotification("Cập nhật trạng thái đơn hàng thành công!", "success");
+                console.log("Status updated successfully:", response.data);
+            } catch (err) {
+                showNotification("Lỗi khi cập nhật trạng thái đơn hàng!", "error");
+                console.log("Error updating status:", err);
+            }
+        }
+    });
 };
 
 const fetchOrderByDayMonth = async () => {
@@ -142,84 +199,94 @@ const fetchOrderByDayMonth = async () => {
 }
 
 const exportOrderToPDF = async (order) => {
-    try {
-        // Tính thành tiền cho từng sản phẩm
-        const productsWithTotal = order.SanPhamDaMua.map(product => ({
-            ...product,
-            ThanhTien: product.SoLuong * product.Gia
-        }));
+    // Hiển thị dialog xác nhận xuất PDF
+    showConfirmDialog({
+        title: 'Xuất hóa đơn PDF',
+        message: `Bạn có muốn xuất hóa đơn cho đơn hàng ${order.MaDonHang} không?`,
+        type: 'success',
+        confirmText: 'Xuất hóa đơn',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                // Tính thành tiền cho từng sản phẩm
+                const productsWithTotal = order.SanPhamDaMua.map(product => ({
+                    ...product,
+                    ThanhTien: product.SoLuong * product.Gia
+                }));
 
-        const docDefinition = {
-            content: [
-                { text: 'C3 GUNDAM STORE', style: 'header' },
-                { text: 'Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang', style: 'subheader' },
-                { text: 'Điện thoại: 079.965.8592', style: 'subheader' },
-                { text: '____________________________________________________________________________', alignment: 'center' },
-                { text: '\nHÓA ĐƠN BÁN HÀNG', style: 'title' },
-                { text: `Số: ${order.MaDonHang}`, style: 'subheader' },
-                { text: '\nTHÔNG TIN KHÁCH HÀNG & GIAO DỊCH', style: 'sectionHeader' },
-                { text: `Ngày xuất: ${formatDate(order.NgayDatHang)}`, style: 'subheader2' },
-                { text: `Khách hàng: ${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, style: 'subheader2' },
-                { text: '\nCHI TIẾT SẢN PHẨM', style: 'sectionHeader' },
-                {
-                    table: {
-                        headerRows: 1,
-                        widths: ['*', 'auto', 'auto', 'auto'],
-                        body: [
-                            ['Mã sản phẩm', 'Tên sản phẩm', 'Số lượng', 'Đơn giá'],
-                            ...productsWithTotal.map(product => [
-                                product.MaSanPham,
-                                product.TenSanPham || 'N/A',
-                                product.SoLuong || 0,
-                                formatCurrency(product.Gia || 0)
-                            ])
-                        ]
+                const docDefinition = {
+                    content: [
+                        { text: 'C3 GUNDAM STORE', style: 'header' },
+                        { text: 'Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang', style: 'subheader' },
+                        { text: 'Điện thoại: 079.965.8592', style: 'subheader' },
+                        { text: '____________________________________________________________________________', alignment: 'center' },
+                        { text: '\nHÓA ĐƠN BÁN HÀNG', style: 'title' },
+                        { text: `Số: ${order.MaDonHang}`, style: 'subheader' },
+                        { text: '\nTHÔNG TIN KHÁCH HÀNG & GIAO DỊCH', style: 'sectionHeader' },
+                        { text: `Ngày xuất: ${formatDate(order.NgayDatHang)}`, style: 'subheader2' },
+                        { text: `Khách hàng: ${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, style: 'subheader2' },
+                        { text: '\nCHI TIẾT SẢN PHẨM', style: 'sectionHeader' },
+                        {
+                            table: {
+                                headerRows: 1,
+                                widths: ['*', 'auto', 'auto', 'auto'],
+                                body: [
+                                    ['Mã sản phẩm', 'Tên sản phẩm', 'Số lượng', 'Đơn giá'],
+                                    ...productsWithTotal.map(product => [
+                                        product.MaSanPham,
+                                        product.TenSanPham || 'N/A',
+                                        product.SoLuong || 0,
+                                        formatCurrency(product.Gia || 0)
+                                    ])
+                                ]
+                            }
+                        },
+                        { text: `\nPhí giao hàng: ${order.HinhThucVanChuyen}`, style: 'subheader3' },
+                        { text: '_______________________________________________________________________________________________', alignment: 'center' },
+                        { text: `\nTỔNG CỘNG THANH TOÁN: ${formatCurrency(order.TongDon || 0)} VND`, style: 'total' },
+                        { text: '\n', margin: [0, 10] },
+                        {
+                            columns: [
+                                { text: 'Người lập phiếu', alignment: 'center', margin: [0, 0, 0, 20] },
+                                { text: 'Người giao hàng', alignment: 'center', margin: [0, 0, 0, 20] },
+                                { text: 'Khách hàng', alignment: 'center', margin: [0, 0, 0, 20] }
+                            ]
+                        },
+                        {
+                            columns: [
+                                { text: '(Ký, ghi rõ họ tên)', alignment: 'center' },
+                                { text: '(Ký, ghi rõ họ tên)', alignment: 'center' },
+                                { text: '(Ký, ghi rõ họ tên)', alignment: 'center' }
+                            ]
+                        },
+                        {
+                            columns: [
+                                { text: '_________________________', alignment: 'center' },
+                                { text: '_________________________', alignment: 'center' },
+                                { text: `${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, alignment: 'center' }
+                            ]
+                        }
+                    ],
+                    styles: {
+                        header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
+                        title: { fontSize: 16, bold: true, alignment: 'center', margin: [0, 10, 0, 5] },
+                        subheader: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'center' },
+                        subheader2: { fontSize: 10, margin: [0, 2, 0, 2] },
+                        subheader3: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'right' },
+                        sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] },
+                        total: { fontSize: 12, bold: true, alignment: 'right', margin: [0, 2, 0, 5] }
                     }
-                },
-                { text: `\nPhí giao hàng: ${order.HinhThucVanChuyen}`, style: 'subheader3' },
-                { text: '_______________________________________________________________________________________________', alignment: 'center' },
-                { text: `\nTỔNG CỘNG THANH TOÁN: ${formatCurrency(order.TongDon || 0)} VND`, style: 'total' },
-                { text: '\n', margin: [0, 10] },
-                {
-                    columns: [
-                        { text: 'Người lập phiếu', alignment: 'center', margin: [0, 0, 0, 20] },
-                        { text: 'Người giao hàng', alignment: 'center', margin: [0, 0, 0, 20] },
-                        { text: 'Khách hàng', alignment: 'center', margin: [0, 0, 0, 20] }
-                    ]
-                },
-                {
-                    columns: [
-                        { text: '(Ký, ghi rõ họ tên)', alignment: 'center' },
-                        { text: '(Ký, ghi rõ họ tên)', alignment: 'center' },
-                        { text: '(Ký, ghi rõ họ tên)', alignment: 'center' }
-                    ]
-                },
-                {
-                    columns: [
-                        { text: '_________________________', alignment: 'center' },
-                        { text: '_________________________', alignment: 'center' },
-                        { text: `${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, alignment: 'center' } // Tên khách hàng
-                    ]
-                }
-            ],
-            styles: {
-                header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
-                title: { fontSize: 16, bold: true, alignment: 'center', margin: [0, 10, 0, 5] },
-                subheader: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'center' },
-                subheader2: { fontSize: 10, margin: [0, 2, 0, 2] },
-                subheader3: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'right' },
-                sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] },
-                total: { fontSize: 12, bold: true, alignment: 'right', margin: [0, 2, 0, 5] }
-            }
-        };
+                };
 
-        // Tạo và tải file PDF
-        pdfMake.createPdf(docDefinition).download(`HoaDon_${order.MaDonHang}.pdf`);
-        showNotification('Xuất hóa đơn thành công!', 'success');
-    } catch (error) {
-        console.error('Lỗi khi xuất PDF:', error.message);
-        showNotification('Lỗi khi xuất hóa đơn PDF!', 'error');
-    }
+                // Tạo và tải file PDF
+                pdfMake.createPdf(docDefinition).download(`HoaDon_${order.MaDonHang}.pdf`);
+                showNotification('Xuất hóa đơn thành công!', 'success');
+            } catch (error) {
+                console.error('Lỗi khi xuất PDF:', error.message);
+                showNotification('Lỗi khi xuất hóa đơn PDF!', 'error');
+            }
+        }
+    });
 };
 
 const filteredOrders = computed(() => {
@@ -420,6 +487,19 @@ onMounted(() => {
                 <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
+
+        <!-- Sử dụng ConfirmDialog component với props -->
+        <ConfirmDialog
+            :visible="dialogState.visible"
+            :title="dialogState.title"
+            :message="dialogState.message"
+            :type="dialogState.type"
+            :confirmText="dialogState.confirmText"
+            :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm"
+            @cancel="handleDialogCancel"
+            @close="handleDialogClose"
+        />
     </div>
 </template>
 

@@ -12,6 +12,7 @@ import NotificationClient from '@/components/Notification/NotificationClient.vue
 const router = useRouter()
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
+const discountCodeWithCustomer = ref([]);
 const maKhachHang = ref('');
 const notification = ref({
     message: '',
@@ -29,8 +30,7 @@ const fetchDiscountCode = async () => {
         const response = await axios.get('http://localhost:3000/api/magiamgia');
         listDiscountCodes.value = response.data.map(discountCode => {
             return {
-                ...discountCode,
-                SoLanSuDung: discountCode.SoLanSuDung,
+                ...discountCode
             };
         });
     } catch (error) {
@@ -42,14 +42,16 @@ const fetchCustomer = async (idKhachHang) => {
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         listAddress.value = response.data.DanhSachDiaChi;
         maKhachHang.value = response.data.MaKhachHang;
+        const customerDiscountIds = Array.isArray(response.data.DanhSachMaGiamGia)
+            ? response.data.DanhSachMaGiamGia.map(item => item.IdMaGiamGia).filter(id => id)
+            : [];
 
-        listDiscountCodes.value = response.data.DanhSachMaGiamGia.map(discountCode => {
-            const foundDiscountCode = listDiscountCodes.value.find(dc => dc.IdMaGiamGia === discountCode.IdMaGiamGia);
-            return {
-                ...discountCode,
-                SoLanSuDung: foundDiscountCode ? foundDiscountCode.SoLanSuDung : 0,
-            };
-        }).sort((a, b) => new Date(a.NgayHetHan) - new Date(b.NgayHetHan));;
+        discountCodeWithCustomer.value = listDiscountCodes.value
+            .filter(discountCode => customerDiscountIds.includes(discountCode.IdMaGiamGia))
+            .map(discountCode => ({
+                ...discountCode
+            }))
+            .sort((a, b) => new Date(b.NgayHetHan) - new Date(a.NgayHetHan));
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -107,7 +109,8 @@ onMounted(() => {
                         <div class="flex items-center justify-between">
                             <h1 class="font-bold text-[20px] uppercase text-white">Danh sách địa chỉ</h1>
                             <router-link :to="`/addInfoOrder/${maKhachHang}`"
-                                class="px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md"><i class="fa-solid fa-plus"></i> Thêm
+                                class="px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md"><i
+                                    class="fa-solid fa-plus"></i> Thêm
                                 địa chỉ</router-link>
                         </div>
                         <div v-if="listAddress.length > 0" class="px-4 pb-4 pt-2 bg-white rounded-md">
@@ -138,9 +141,9 @@ onMounted(() => {
                     </div>
                     <div class="flex flex-col gap-4">
                         <h1 class="font-bold text-[20px] uppercase text-white">Danh sách mã giảm giá</h1>
-                        <div v-if="listDiscountCodes.length > 0"
+                        <div v-if="discountCodeWithCustomer.length > 0"
                             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                            <div v-for="(discountCode, index) in listDiscountCodes" :key="index"
+                            <div v-for="(discountCode, index) in discountCodeWithCustomer" :key="index"
                                 class="flex flex-col gap-1 border-t-4 border-[#DB3F4C] bg-white p-4 shadow-lg w-full rounded-md">
                                 <div class="flex justify-between items-center">
                                     <p class="font-bold text-[20px]">{{ discountCode.TenMaGiamGia }}</p>

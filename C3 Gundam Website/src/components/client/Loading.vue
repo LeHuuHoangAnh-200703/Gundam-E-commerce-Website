@@ -21,7 +21,7 @@ const props = defineProps({
 .three-body {
     --uib-size: 35px;
     --uib-speed: 0.8s;
-    --uib-color: #5D3FD3;
+    --uib-color: #003171;
     position: relative;
     display: inline-block;
     height: var(--uib-size);

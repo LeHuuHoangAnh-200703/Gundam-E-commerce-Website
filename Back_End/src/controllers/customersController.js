@@ -281,12 +281,6 @@ exports.saveDiscountCode = async (req, res) => {
         $push: {
           DanhSachMaGiamGia: {
             IdMaGiamGia: discountCode.IdMaGiamGia,
-            TenMaGiamGia: discountCode.TenMaGiamGia,
-            GiaApDung: discountCode.GiaApDung,
-            GiamTien: discountCode.GiamTien,
-            GiamPhanTram: discountCode.GiamPhanTram,
-            SoLanSuDung: discountCode.SoLanSuDung,
-            NgayHetHan: discountCode.NgayHetHan,
           }
         },
       },
