@@ -71,7 +71,7 @@ const sendOTP = async () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:3000/api/send-otp', {
+        const response = await axios.post('http://localhost:3000/api/khachhang/send-otp', {
             email: formData.value.emailCustomer
         });
         showNotification(response.data.message, "success");
@@ -129,7 +129,7 @@ const verifyOtpAndRegister = async () => {
     }
 
     try {
-        const otpResponse = await axios.post("http://localhost:3000/api/verify-otp", {
+        const otpResponse = await axios.post("http://localhost:3000/api/khachhang/verify-otp", {
             email: formData.value.emailCustomer,
             otp: otp.value,
         });

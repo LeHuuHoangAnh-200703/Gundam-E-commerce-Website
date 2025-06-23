@@ -14,5 +14,7 @@ router.post("/logout", customersController.logout);
 router.delete("/diachi/:maKhachHang/:id", customersController.deleteLocation);
 router.post("/luuma/:maKhachHang/:IdMaGiamGia", customersController.saveDiscountCode);
 router.delete("/magiamgia/:maKhachHang/:IdMaGiamGia", customersController.deleteDiscountCode);
+router.post("/send-otp", customersController.sendOTP);
+router.post("/verify-otp", customersController.verifyOTP);
 
 module.exports = router;

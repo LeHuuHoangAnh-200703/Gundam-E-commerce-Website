@@ -1,6 +1,7 @@
 const Customer = require("../models/customersModels");
 const DiscountCode = require("../models/discountCodeModels");
 const Order = require("../models/orderModels");
+const OTP = require("../models/otpModels");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const multer = require("multer");
@@ -12,6 +13,14 @@ cloudinary.config({
   cloud_name: 'dwcajbc6f',
   api_key: '365476741985665',
   api_secret: '6gAWhCMdI8DfBAs-1ZDwwx1xM0Y'
+});
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "c3gundamstore@gmail.com",
+        pass: "varzwbjducnkzmaj",
+    },
 });
 
 const storage = multer.memoryStorage();
@@ -313,5 +322,69 @@ exports.deleteDiscountCode = async (req, res) => {
     });
   }
 };
+
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+exports.sendOTP = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Vui lòng cung cấp email" });
+
+  const otp = generateOtp();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Hết hạn sau 5 phút
+
+  try {
+    // Lưu OTP vào MongoDB
+    await OTP.findOneAndUpdate(
+      { email }, // Tìm document theo email
+      { email, otp, createdAt: new Date(), expiresAt }, // Cập nhật hoặc tạo mới
+      { upsert: true, new: true } // upsert: tạo mới nếu không tồn tại
+    );
+
+    // Gửi email chứa OTP
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Mã OTP của bạn",
+      html: `
+        <h3>Xác thực OTP</h3>
+        <p>Mã OTP của bạn là: <strong>${otp}</strong></p>
+        <p>Mã này có hiệu lực trong 5 phút.</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ message: "OTP đã được gửi tới email của bạn!" });
+  } catch (error) {
+    console.error("Lỗi khi gửi OTP:", error);
+    res.status(500).json({ error: "Lỗi khi gửi OTP" });
+  }
+}
+
+exports.verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp)
+    return res.status(400).json({ error: "Vui lòng cung cấp email và OTP" });
+
+  try {
+    const otpDoc = await OTP.findOne({ email });
+    if (!otpDoc)
+      return res.status(400).json({ error: "OTP không tồn tại hoặc đã hết hạn" });
+
+    const currentTime = new Date();
+    if (otpDoc.otp !== otp)
+      return res.status(400).json({ error: "Mã OTP không đúng" });
+    if (currentTime > otpDoc.expiresAt)
+      return res.status(400).json({ error: "Mã OTP đã hết hạn" });
+
+    // Xóa OTP sau khi xác thực thành công
+    await OTP.deleteOne({ email });
+    res.json({ message: "Xác thực OTP thành công!" });
+  } catch (error) {
+    console.error("Lỗi khi xác thực OTP:", error);
+    res.status(500).json({ error: "Lỗi khi xác thực OTP" });
+  }
+}
 
 exports.upload = upload.single("Image");

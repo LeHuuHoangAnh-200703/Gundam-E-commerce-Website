@@ -159,8 +159,9 @@ onMounted(async () => {
                                 Đăng nhập
                             </button>
                         </form>
-                        <div class="flex items-center justify-center font-semibold">
+                        <div class="flex items-center justify-between font-semibold w-full">
                             <p>Hoặc</p>
+                            <button class="text-[16px] underline text-blue-400">Quên mật khẩu?</button>
                         </div>
                         <button @click="loginWithGoogle"
                             class="w-full p-3 bg-[#4285F4] text-white rounded-md font-medium text-[14px] md:text-[16px] flex justify-center items-center gap-2 transition duration-300 ease-in-out transform hover:scale-105">

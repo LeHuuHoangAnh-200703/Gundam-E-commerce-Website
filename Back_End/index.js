@@ -9,7 +9,6 @@ const { Server } = require("socket.io");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const path = require("path");
-const nodemailer = require("nodemailer");
 const fs = require('fs');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -34,6 +33,7 @@ const vnpayRoutes = require("./src/routes/vnpay");
 const chatBotRoutes = require("./src/routes/chatbot");
 const productTypeRoutes = require("./src/routes/productType");
 const Customer = require('./src/models/customersModels');
+const OTP = require("./src/models/otpModels");
 
 dotenv.config();
 
@@ -147,78 +147,6 @@ app.use("/api/baidang", communityPostRoutes);
 app.use("/api/thanhtoanvnp", vnpayRoutes);
 app.use("/api/chatbot", chatBotRoutes);
 app.use("/api/loaisanpham", productTypeRoutes);
-
-// Cấu hình Nodemailer
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-const OTP = require("./src/models/otpModels");
-
-function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-app.post("/api/send-otp", async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: "Vui lòng cung cấp email" });
-
-  const otp = generateOtp();
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Hết hạn sau 5 phút
-
-  try {
-    // Lưu OTP vào MongoDB
-    await OTP.findOneAndUpdate(
-      { email }, // Tìm document theo email
-      { email, otp, createdAt: new Date(), expiresAt }, // Cập nhật hoặc tạo mới
-      { upsert: true, new: true } // upsert: tạo mới nếu không tồn tại
-    );
-
-    // Gửi email chứa OTP
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Mã OTP của bạn",
-      text: `Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút.`,
-    };
-
-    await transporter.sendMail(mailOptions);
-    res.json({ message: "OTP đã được gửi tới email của bạn!" });
-  } catch (error) {
-    console.error("Lỗi khi gửi OTP:", error);
-    res.status(500).json({ error: "Lỗi khi gửi OTP" });
-  }
-});
-
-// Endpoint xác thực OTP
-app.post("/api/verify-otp", async (req, res) => {
-  const { email, otp } = req.body;
-  if (!email || !otp)
-    return res.status(400).json({ error: "Vui lòng cung cấp email và OTP" });
-
-  try {
-    const otpDoc = await OTP.findOne({ email });
-    if (!otpDoc)
-      return res.status(400).json({ error: "OTP không tồn tại hoặc đã hết hạn" });
-
-    const currentTime = new Date();
-    if (otpDoc.otp !== otp)
-      return res.status(400).json({ error: "Mã OTP không đúng" });
-    if (currentTime > otpDoc.expiresAt)
-      return res.status(400).json({ error: "Mã OTP đã hết hạn" });
-
-    // Xóa OTP sau khi xác thực thành công
-    await OTP.deleteOne({ email });
-    res.json({ message: "Xác thực OTP thành công!" });
-  } catch (error) {
-    console.error("Lỗi khi xác thực OTP:", error);
-    res.status(500).json({ error: "Lỗi khi xác thực OTP" });
-  }
-});
 
 // Xóa OTP hết hạn định kỳ (mỗi 5 phút)
 setInterval(async () => {
