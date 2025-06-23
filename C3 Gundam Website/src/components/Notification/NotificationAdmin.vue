@@ -15,7 +15,7 @@ const props = defineProps({
 
 <template>
     <transition name="slide-fade" mode="out-in">
-        <div v-if="message" :class="['fixed top-4 left-1/2 right-10 transform p-4 bg-white shadow-lg border-t-4 rounded z-10 flex items-center space-x-2 w-full max-w-sm', {
+        <div v-if="message" :class="['fixed top-4 left-1/2 right-10 transform p-4 bg-white shadow-lg border-t-4 rounded z-50 flex items-center space-x-2 w-full max-w-sm', {
             'border-[#DB3F4C]': type === 'error',
             'border-[#40E0D0]': type === 'success',
         }]">

@@ -21,6 +21,16 @@ const formData = ref({
     password: '',
 });
 const showPassword = ref(false);
+const showForgotPasswordModal = ref(false);
+const forgotPasswordStep = ref('email'); // 'email', 'otp', 'password'
+const forgotPasswordData = ref({
+    email: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: '',
+});
+const forgotPasswordErrors = ref({});
+const forgotPasswordLoading = ref(false);
 
 const notification = ref({
     message: '',
@@ -36,6 +46,17 @@ const showNotification = (msg, type) => {
 const togglePassword = () => {
     showPassword.value = !showPassword.value;
 }
+
+// Mở/đóng modal quên mật khẩu
+const openForgotPasswordModal = () => {
+    showForgotPasswordModal.value = true;
+    forgotPasswordStep.value = 'email';
+    forgotPasswordData.value = { email: '', otp: '', newPassword: '', confirmPassword: '' };
+    forgotPasswordErrors.value = {};
+};
+const closeForgotPasswordModal = () => {
+    showForgotPasswordModal.value = false;
+};
 
 const login = async () => {
     errors.value = {};
@@ -85,6 +106,111 @@ const login = async () => {
 
 const loginWithGoogle = async () => {
     window.location.href = 'http://localhost:3000/auth/google';
+};
+
+const sendOTP = async () => {
+    forgotPasswordErrors.value = {};
+    const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+
+    if (!forgotPasswordData.value.email) {
+        forgotPasswordErrors.value.email = "Email không được để trống!";
+    } else if (!emailRegex.test(forgotPasswordData.value.email)) {
+        forgotPasswordErrors.value.email = "Email không hợp lệ!";
+    } else {
+        forgotPasswordData.value.email = escapeHtml(forgotPasswordData.value.email);
+    }
+
+    if (Object.keys(forgotPasswordErrors.value).length > 0) {
+        return;
+    }
+
+    forgotPasswordLoading.value = true;
+
+    try {
+        const response = await axios.post('http://localhost:3000/api/khachhang/send-otp', {
+            email: forgotPasswordData.value.email,
+        });
+        showNotification(response.data.message, 'success');
+        forgotPasswordStep.value = 'otp';
+        forgotPasswordData.value.otp = ''; // Reset OTP
+    } catch (error) {
+        showNotification(error.response?.data?.error || 'Lỗi khi gửi OTP', 'error');
+    } finally {
+        forgotPasswordLoading.value = false;
+    }
+}
+
+const verifyOTP = async () => {
+    forgotPasswordErrors.value = {};
+    if (!forgotPasswordData.value.otp) {
+        forgotPasswordErrors.value.otp = "Mã OTP không được để trống!";
+        return;
+    }
+
+    forgotPasswordLoading.value = true;
+    try {
+        const response = await axios.post('http://localhost:3000/api/khachhang/verify-otp', {
+            email: forgotPasswordData.value.email,
+            otp: forgotPasswordData.value.otp,
+        });
+        console.log('Phản hồi verifyOTP:', response.data);
+        showNotification(response.data.message, 'success');
+        forgotPasswordStep.value = 'password';
+    } catch (error) {
+        showNotification(error.response?.data?.error || 'Lỗi khi xác thực OTP', 'error');
+    } finally {
+        forgotPasswordLoading.value = false;
+    }
+};
+
+// Hàm đặt lại mật khẩu
+const resetPassword = async () => {
+    forgotPasswordErrors.value = {};
+
+    if (!forgotPasswordData.value.newPassword) {
+        forgotPasswordErrors.value.newPassword = "Mật khẩu mới không được để trống!";
+    } else if (forgotPasswordData.value.newPassword.length < 6) {
+        forgotPasswordErrors.value.newPassword = "Mật khẩu phải tối thiểu 6 ký tự!";
+    } else if (forgotPasswordData.value.newPassword !== forgotPasswordData.value.confirmPassword) {
+        forgotPasswordErrors.value.confirmPassword = "Mật khẩu xác nhận không khớp!";
+    }
+
+    if (Object.keys(forgotPasswordErrors.value).length > 0) {
+        return;
+    }
+
+    forgotPasswordLoading.value = true;
+    try {
+        const response = await axios.post('http://localhost:3000/api/khachhang/quenmatkhau', {
+            email: forgotPasswordData.value.email,
+            newPassword: forgotPasswordData.value.newPassword,
+        });
+        showNotification(response.data.message, 'success');
+        setTimeout(() => {
+            closeForgotPasswordModal();
+            router.push('/login');
+        }, 2000);
+    } catch (error) {
+        showNotification(error.response?.data?.error || 'Lỗi khi đặt lại mật khẩu', 'error');
+    } finally {
+        forgotPasswordLoading.value = false;
+    }
+};
+
+// Hàm gửi lại OTP
+const resendOTP = async () => {
+    forgotPasswordErrors.value = {};
+    forgotPasswordLoading.value = true;
+    try {
+        const response = await axios.post('http://localhost:3000/api/khachhang/send-otp', {
+            email: forgotPasswordData.value.email,
+        });
+        showNotification('OTP mới đã được gửi đến email!', 'success');
+    } catch (error) {
+        showNotification(error.response?.data?.error || 'Lỗi khi gửi lại OTP', 'error');
+    } finally {
+        forgotPasswordLoading.value = false;
+    }
 };
 
 onMounted(async () => {
@@ -161,7 +287,8 @@ onMounted(async () => {
                         </form>
                         <div class="flex items-center justify-between font-semibold w-full">
                             <p>Hoặc</p>
-                            <button class="text-[16px] underline text-blue-400">Quên mật khẩu?</button>
+                            <button @click="openForgotPasswordModal" class="text-[16px] underline text-blue-400">Quên
+                                mật khẩu?</button>
                         </div>
                         <button @click="loginWithGoogle"
                             class="w-full p-3 bg-[#4285F4] text-white rounded-md font-medium text-[14px] md:text-[16px] flex justify-center items-center gap-2 transition duration-300 ease-in-out transform hover:scale-105">
@@ -178,6 +305,84 @@ onMounted(async () => {
                         </p>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div v-if="showForgotPasswordModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div class="bg-[#242424] p-6 rounded-md w-full max-w-md text-white relative">
+                <button @click="closeForgotPasswordModal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+                <h3 class="text-[20px] font-semibold mb-4 text-center">Quên mật khẩu</h3>
+                <!-- Form nhập email -->
+                <form v-if="forgotPasswordStep === 'email'" @submit.prevent="sendOTP" class="flex flex-col gap-4">
+                    <div class="w-full">
+                        <label for="forgot-email" class="block font-medium mb-1 text-[14px]">Email</label>
+                        <input v-model="forgotPasswordData.email" type="email" id="forgot-email"
+                            placeholder="Nhập email của bạn..."
+                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] transition duration-150 ease-in-out" />
+                        <p v-if="forgotPasswordErrors.email" class="text-red-500 text-sm my-2">{{
+                            forgotPasswordErrors.email }}</p>
+                    </div>
+                    <button type="submit" :disabled="forgotPasswordLoading"
+                        class="p-3 bg-[#DB3F4C] rounded-md font-medium text-[14px] transition duration-300 ease-in-out transform hover:scale-105">
+                        Gửi OTP
+                    </button>
+                </form>
+                <!-- Form nhập OTP -->
+                <form v-if="forgotPasswordStep === 'otp'" @submit.prevent="verifyOTP" class="flex flex-col gap-4">
+                    <div class="w-full">
+                        <label for="otp" class="block font-medium mb-1 text-[14px]">Mã OTP</label>
+                        <input v-model="forgotPasswordData.otp" type="text" id="otp" placeholder="Nhập mã OTP"
+                            class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] transition duration-150 ease-in-out" />
+                        <p v-if="forgotPasswordErrors.otp" class="text-red-500 text-sm my-2">{{ forgotPasswordErrors.otp
+                            }}</p>
+                    </div>
+                    <button type="submit" :disabled="forgotPasswordLoading"
+                        class="p-3 bg-[#DB3F4C] rounded-md font-medium text-[14px] transition duration-300 ease-in-out transform hover:scale-105">
+                        Xác thực OTP
+                    </button>
+                    <p class="text-[14px] text-center">
+                        Chưa nhận được OTP?
+                        <a href="#" @click.prevent="resendOTP" class="text-blue-400 underline">Gửi lại OTP</a>
+                    </p>
+                </form>
+                <!-- Form nhập mật khẩu mới -->
+                <form v-if="forgotPasswordStep === 'password'" @submit.prevent="resetPassword"
+                    class="flex flex-col gap-4">
+                    <div class="w-full">
+                        <label for="new-password" class="block font-medium mb-1 text-[14px]">Mật khẩu mới</label>
+                        <div class="flex gap-2">
+                            <input v-model="forgotPasswordData.newPassword" :type="showPassword ? 'text' : 'password'"
+                                id="new-password" placeholder="Nhập mật khẩu mới"
+                                class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] transition duration-150 ease-in-out" />
+                            <button @click.prevent="togglePassword"
+                                class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i
+                                    :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                        </div>
+                        <p v-if="forgotPasswordErrors.newPassword" class="text-red-500 text-sm my-2">{{
+                            forgotPasswordErrors.newPassword }}</p>
+                    </div>
+                    <div class="w-full">
+                        <label for="confirm-password" class="block font-medium mb-1 text-[14px]">Xác nhận mật
+                            khẩu</label>
+                        <div class="flex gap-2">
+                            <input v-model="forgotPasswordData.confirmPassword"
+                                :type="showPassword ? 'text' : 'password'" id="confirm-password"
+                                placeholder="Xác nhận mật khẩu"
+                                class="w-full px-4 py-2 rounded-md bg-transparent outline-none border-2 focus:border-[#DB3F4C] transition duration-150 ease-in-out" />
+                            <button @click.prevent="togglePassword"
+                                class="w-[60px] bg-[#DB3F4C] rounded-md flex items-center justify-center"><i
+                                    :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
+                        </div>
+                        <p v-if="forgotPasswordErrors.confirmPassword" class="text-red-500 text-sm my-2">{{
+                            forgotPasswordErrors.confirmPassword }}</p>
+                    </div>
+                    <button type="submit" :disabled="forgotPasswordLoading"
+                        class="p-3 bg-[#DB3F4C] rounded-md font-medium text-[14px] transition duration-300 ease-in-out transform hover:scale-105">
+                        Cập nhật mật khẩu
+                    </button>
+                </form>
             </div>
         </div>
         <NotificationClient :message="notification.message" :type="notification.type" />

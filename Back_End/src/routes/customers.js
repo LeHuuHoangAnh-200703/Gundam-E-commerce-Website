@@ -16,5 +16,6 @@ router.post("/luuma/:maKhachHang/:IdMaGiamGia", customersController.saveDiscount
 router.delete("/magiamgia/:maKhachHang/:IdMaGiamGia", customersController.deleteDiscountCode);
 router.post("/send-otp", customersController.sendOTP);
 router.post("/verify-otp", customersController.verifyOTP);
+router.post("/quenmatkhau", customersController.resetPassword);
 
 module.exports = router;

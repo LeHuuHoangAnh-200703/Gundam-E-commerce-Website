@@ -16,11 +16,11 @@ cloudinary.config({
 });
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: "c3gundamstore@gmail.com",
-        pass: "varzwbjducnkzmaj",
-    },
+  service: "gmail",
+  auth: {
+    user: "c3gundamstore@gmail.com",
+    pass: "varzwbjducnkzmaj",
+  },
 });
 
 const storage = multer.memoryStorage();
@@ -380,10 +380,37 @@ exports.verifyOTP = async (req, res) => {
 
     // Xóa OTP sau khi xác thực thành công
     await OTP.deleteOne({ email });
-    res.json({ message: "Xác thực OTP thành công!" });
+    res.status(200).json({ message: "Xác thực OTP thành công!" });
   } catch (error) {
     console.error("Lỗi khi xác thực OTP:", error);
     res.status(500).json({ error: "Lỗi khi xác thực OTP" });
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    const otp = await OTP.findOne({ email: email });
+    const customer = await Customer.findOne({ Email: email });
+    if (otp) {
+      return res.status(400).json({ message: "Vui lòng xác thực OTP trước khi cập nhật." });
+    }
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: "Vui lòng cung cấp email và mật khẩu mới." });
+    }
+
+    if (!customer) {
+      return res.status(400).json({ message: "Email không tồn tại." });
+    }
+
+    customer.MatKhau = newPassword;
+    await customer.save();
+
+    res.status(200).json({ message: "Mật khẩu đã được cập nhật thành công!" });
+  } catch (error) {
+    return res.status(500).json(error.message);
   }
 }
 

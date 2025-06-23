@@ -550,20 +550,22 @@ watch(() => formData.value.discountCode, () => {
                                             class="block text-white font-medium mb-2 text-[14px] md:text-[16px]">Địa chỉ
                                             nhận hàng:
                                         </label>
-                                        <select name="" id="" v-model="formData.address"
-                                            class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
-                                            <option class="text-[#333] cursor-pointer" value="">
-                                                Chọn địa chỉ nhận hàng
-                                            </option>
-                                            <option v-for="(address, index) in listAddress" :key="index"
-                                                :value="address" class="text-[#333] cursor-pointer">
-                                                {{ address.TenNguoiNhan }} / {{ address.DienThoai }} /
-                                                {{ address.DiaChi }}
-                                            </option>
-                                        </select>
-                                        <p class="mt-2 text-white/65 text-[14px]">
-                                            Thêm địa chỉ ở phần danh mục cá nhân nếu chưa có.
-                                        </p>
+                                        <div class="flex gap-3">
+                                            <select name="" id="" v-model="formData.address"
+                                                class="w-full text-white px-4 py-2 rounded-md cursor-pointer bg-transparent outline-none border-2 focus:border-[#DB3F4C] focus:ring-[#DB3F4C] transition duration-150 ease-in-out">
+                                                <option class="text-[#333] cursor-pointer" value="">
+                                                    Chọn địa chỉ nhận hàng
+                                                </option>
+                                                <option v-for="(address, index) in listAddress" :key="index"
+                                                    :value="address" class="text-[#333] cursor-pointer">
+                                                    {{ address.TenNguoiNhan }} / {{ address.DienThoai }} /
+                                                    {{ address.DiaChi }}
+                                                </option>
+                                            </select>
+                                            <router-link :to="`/addInfoOrder/${maKhachHang}`"
+                                                class="flex items-center justify-center gap-2 px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md"><i
+                                                    class="fa-solid fa-plus"></i> Thêm </router-link>
+                                        </div>
                                         <p v-if="errors.address" class="text-red-500 text-sm mt-2">
                                             {{ errors.address }}
                                         </p>

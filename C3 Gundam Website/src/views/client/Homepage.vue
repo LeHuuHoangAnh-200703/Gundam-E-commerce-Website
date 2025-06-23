@@ -11,33 +11,6 @@ import ChatBot from '../../components/client/ChatBot.vue';
 
 const router = useRouter();
 
-const listChoices = [
-    {
-        name: "Tất cả sản phẩm",
-        type: "All",
-    },
-    {
-        name: "MG Mobile Suit Gundam",
-        type: "MG",
-    },
-    {
-        name: "PG Mobile Suit Gundam",
-        type: "PG",
-    },
-    {
-        name: "RG Mobile Suit Gundam",
-        type: "RG",
-    },
-    {
-        name: "Makeblock mBot 8+",
-        type: "mBot8+"
-    },
-    {
-        name: "Makeblock mBot 6+",
-        type: "mBot6+"
-    }
-]
-
 const arrange = ref([
     {
         name: "Bán chạy nhất",
@@ -54,6 +27,7 @@ const arrange = ref([
 ])
 
 const listProducts = ref([]);
+const listProductTypes = ref([]);
 const searchQuery = ref("");
 const selectedType = ref("All");
 
@@ -87,8 +61,21 @@ const fectchProducts = async () => {
         const productsSpecial = listProducts.value.filter(product => product.TrangThai === 'Ngừng kinh doanh');
         const productsOutOfStock = listProducts.value.filter(product => product.SoLuong <= 0);
         listProducts.value = [...productsNormal.sort((a, b) => b.NgayBan - a.NgayBan), ...productsSpecial.sort((a, b) => b.NgayBan - a.NgayBan), ...productsOutOfStock.sort((a, b) => b.NgayBan - a.NgayBan)];
-    } catch (err) {
-        console.log("error fetching: ", err);
+    } catch (error) {
+        console.log("error fetching: ", error);
+    }
+}
+
+const fetchProductType = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/loaisanpham");
+        listProductTypes.value = response.data.map(productType => {
+            return {
+                ...productType
+            }
+        })
+    } catch (error) {
+        console.log("error fetching: ", error);
     }
 }
 
@@ -167,6 +154,7 @@ function formatCurrency(value) {
 
 onMounted(() => {
     fectchProducts();
+    fetchProductType();
 })
 </script>
 
@@ -221,17 +209,23 @@ onMounted(() => {
                 </select>
                 <select v-model="selectedType" name="" id="" class="w-full mt-4 p-4 font-semibold block lg:hidden">
                     <option value="All">Loại sản phẩm</option>
-                    <option :value="item.type" v-for="item in listChoices" :key="item">{{ item.name }}</option>
+                    <option :value="productType.LoaiSanPham" v-for="(productType, index) in listProductTypes" :key="index">{{ productType.TenLoaiSanPham }}</option>
                 </select>
             </div>
             <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <div class="hidden lg:flex flex-col gap-4 w-full col-span-1 items-start">
-                    <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-3">Loại mô hình
+                    <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-3">Dòng mô hình
                     </p>
-                    <button v-for="(item, index) in listChoices" :key="index"
-                        @click.prevent="selectTypeProducts(item.type)"
+                    <button @click.prevent="selectTypeProducts('All')" class="text-white uppercase font-semibold text-[18px] group">
+                        Tất cả sản phẩm
+                        <div
+                            class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
+                        </div>
+                    </button>
+                    <button v-for="(productType, index) in listProductTypes" :key="index"
+                        @click.prevent="selectTypeProducts(productType.LoaiSanPham)"
                         class="text-white font-semibold text-[18px] group">
-                        {{ item.name }}
+                        {{ productType.TenLoaiSanPham }}
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
