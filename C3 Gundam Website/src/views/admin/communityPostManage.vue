@@ -72,7 +72,7 @@ const fetchCommunityPost = async () => {
         });
         const postApproved = listPost.value.filter(post => post.TrangThaiDang === 'Đã duyệt');
         const postWaiting = listPost.value.filter(post => post.TrangThaiDang === 'Đang chờ duyệt');
-        listPost.value = [...postWaiting.sort((a,b) => new Date(a.ThoiGianDang) - new Date(b.ThoiGianDang)),...postApproved.sort((a,b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
+        listPost.value = [...postWaiting.sort((a, b) => new Date(a.ThoiGianDang) - new Date(b.ThoiGianDang)), ...postApproved.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
     } catch (error) {
         console.log('Error fetching:', error);
     }
@@ -141,19 +141,26 @@ onMounted(() => {
                     <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-1 pt-2">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý bài đăng</h1>
                     </div>
-                    <div class="overflow-auto p-4">
+                    <div class="overflow-auto">
                         <div v-if="listPost.length > 0" class="flex flex-col gap-4">
-                            <div v-for="(post, index) in listPost" :key="index" class="flex flex-col gap-2 w-full bg-white p-4 rounded-md shadow-lg border-2">
+                            <div v-for="(post, index) in listPost" :key="index"
+                                class="flex flex-col gap-2 w-full bg-white p-4 rounded-md shadow-lg border-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex gap-2 items-center">
+                                        <img :src="post.HinhAnhKhachHang ? post.HinhAnhKhachHang : '/src/assets/img/avatar.jpg'"
+                                            class="w-[50px] h-[50px] rounded-full object-cover" alt="">
+                                        <div class="flex flex-col">
+                                            <p class="font-semibold text-[16px]">{{ post.TenKhachHang }}</p>
+                                            <p class="font-semibold text-[12px] text-gray-600">{{ formatTime(post.ThoiGianDang) }}</p>
+                                        </div>
+                                    </div>
+                                    <p :class="post.TrangThaiDang !== 'Đã duyệt' ? 'border-red-500 text-red-600' : 'border-green-500 text-green-600'" class="border-2 px-4 py-2 rounded-md font-semibold text-[14px]">{{ post.TrangThaiDang }}</p>
+                                </div>
                                 <p class="font-semibold text-[14px]">Nội dung: <span class="font-medium">{{ post.NoiDung
-                                        }}</span></p>
+                                }}</span></p>
                                 <p class="font-semibold text-[14px]">Loại bài đăng: <span class="font-medium">{{
                                     post.LoaiBaiDang }}</span>
                                 </p>
-                                <p class="font-semibold text-[14px]">Trạng thái: <span
-                                        class="font-medium text-[#DC143C]">{{
-                                            post.TrangThaiDang }}</span></p>
-                                <p class="font-semibold text-[14px]">Thời gian đăng: <span class="font-medium">{{
-                                    formatTime(post.ThoiGianDang) }}</span></p>
                                 <div class="block">
                                     <p class="font-semibold text-[14px] mb-2">Hình ảnh bài đăng: </p>
                                     <div class="flex gap-2 mb-2">
@@ -161,6 +168,7 @@ onMounted(() => {
                                             class="w-[65px] lg:w-[90px] max-h-[65px] border-2" alt="">
                                     </div>
                                 </div>
+                                <hr class="my-2">
                                 <div class="flex gap-2 items-end justify-end">
                                     <button type="submit" @click="updateStatus(post.MaBaiDang, post.TrangThaiDang)"
                                         :class="post.TrangThaiDang !== 'Đã duyệt' ? 'inline-block' : 'hidden'"
