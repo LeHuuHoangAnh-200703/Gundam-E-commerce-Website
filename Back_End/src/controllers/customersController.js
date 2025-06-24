@@ -122,7 +122,7 @@ exports.updateCustomer = async (req, res) => {
     customer.TenKhachHang = req.body.TenKhachHang || customer.TenKhachHang;
 
     if (req.body.password) {
-      customer.MatKhau = await bcrypt.hash(req.body.password, 10);
+      customer.MatKhau = req.body.password;
     }
 
     if (req.file) {
