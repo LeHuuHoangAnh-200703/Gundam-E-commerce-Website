@@ -31,6 +31,7 @@ const formData = ref({
     description: '',
     youtubeLink: '',
     productFeatures: '',
+    barcode: '',
     existingImages: [], // Lưu các hình ảnh cũ từ server
     newImages: [],      // Lưu các file hình ảnh mới thêm vào
     removedImages: [],  // Lưu các URL của hình ảnh bị xóa
@@ -91,6 +92,7 @@ const fetchProduct = async (maSanPham) => {
         formData.value.idSanPham = response.data.MaSanPham;
         formData.value.youtubeLink = response.data.YoutubeUrl;
         formData.value.productFeatures = response.data.TinhNang;
+        formData.value.barcode = response.data.BarCode;
         formData.value.existingImages = response.data.Images || [],
         formData.value.newImages = [],
         formData.value.removedImages = []
@@ -140,6 +142,12 @@ const editProduct = async () => {
         formData.value.productFeatures = escapeHtml(formData.value.productFeatures);
     }
 
+    if (!formData.value.barcode) {
+        errors.value.barcode = "Mã barcode không được để trống.";
+    } else {
+        formData.value.barcode = escapeHtml(formData.value.barcode);
+    }
+
     if (Object.keys(errors.value).length > 0) {
         return;
     }
@@ -153,6 +161,7 @@ const editProduct = async () => {
         dataToSend.append('MoTa', formData.value.description);
         dataToSend.append('YoutubeUrl', formData.value.youtubeLink);
         dataToSend.append('TinhNang', formData.value.productFeatures);
+        dataToSend.append('BarCode', formData.value.barcode);
 
         // Gửi danh sách hình ảnh cũ còn lại
         formData.value.existingImages.forEach((image, index) => {
@@ -300,13 +309,24 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <div class="lg:w-1/2 w-full flex flex-col gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label for="youtubeLink" class="text-[15px] font-semibold">Link sản phẩm</label>
-                                        <input type="text" v-model="formData.youtubeLink" id="youtubeLink"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập link sản phẩm ...">
-                                        <p v-if="errors.youtubeLink" class="text-red-500 text-sm mt-2">{{
-                                            errors.youtubeLink }}</p>
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <label for="youtubeLink" class="text-[15px] font-semibold">Link sản
+                                                phẩm</label>
+                                            <input type="text" v-model="formData.youtubeLink" id="youtubeLink"
+                                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                                placeholder="Nhập link sản phẩm ...">
+                                            <p v-if="errors.youtubeLink" class="text-red-500 text-sm mt-2">{{
+                                                errors.youtubeLink }}</p>
+                                        </div>
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <label for="barcode" class="text-[15px] font-semibold">Mã Barcode</label>
+                                            <input type="text" v-model="formData.barcode" id="barcode"
+                                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                                placeholder="Nhập mã barcode sản phẩm ...">
+                                            <p v-if="errors.barcode" class="text-red-500 text-sm mt-2">{{
+                                                errors.barcode }}</p>
+                                        </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
                                         <label for="productFeatures" class="text-[15px] font-semibold">Tính năng sản phẩm <i

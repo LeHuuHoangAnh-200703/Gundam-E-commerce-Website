@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema({
     Images: [String],
     YoutubeUrl: String,
     TinhNang: String,
+    BarCode: String,
     NgayBan: { type: Date, default: Date.now },
     TrangThai: { type: String, enum: ['Đang bán', 'Ngừng kinh doanh'], default: 'Đang bán' },
 });

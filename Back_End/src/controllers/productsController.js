@@ -138,6 +138,7 @@ exports.updatedProduct = async (req, res) => {
     product.MoTa = req.body.MoTa || product.MoTa;
     product.YoutubeUrl = req.body.YoutubeUrl || product.YoutubeUrl;
     product.TinhNang = req.body.TinhNang || product.TinhNang;
+    product.BarCode = req.body.BarCode || product.BarCode;
 
     // Lấy danh sách hình ảnh hiện tại
     const oldImages = product.Images || [];

@@ -188,7 +188,7 @@ onUnmounted(() => {
         </div>
       </div>
       <div
-        class="notification fixed top-28 w-full lg:w-auto bg-white max-h-[calc(100vh-150px)] overflow-hidden shadow-lg p-4 rounded-lg z-10"
+        class="notification fixed top-28 w-full lg:w-auto bg-white max-h-[calc(100vh-150px)] overflow-hidden shadow-lg p-4 rounded-lg z-50"
         :class="{ 'lg:right-[30%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }"
       >
         <div class="flex justify-between items-center">

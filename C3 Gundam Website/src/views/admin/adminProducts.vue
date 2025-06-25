@@ -158,6 +158,7 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đơn giá</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Loại sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Nhà cung cấp</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã barcode</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Còn lại</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đã bán</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Trạng thái</th>
@@ -188,6 +189,9 @@ onMounted(() => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         product.TenNhaCungCap }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
+                                        product.BarCode }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ (product.SoLuong > 0) ? product.SoLuong : 'Hết hàng' }}
