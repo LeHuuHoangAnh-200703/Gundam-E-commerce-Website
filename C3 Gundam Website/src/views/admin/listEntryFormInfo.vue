@@ -342,7 +342,7 @@ onMounted(() => {
                     </div>
                     <div class="flex justify-end">
                         <button @click="exportToExcel(idEntryForm)"
-                            class="bg-[#003171] text-white font-semibold py-3 px-5 rounded-md text-[14px]"><i
+                            class="bg-[#003171] text-white font-semibold py-3 px-4 rounded-md text-[14px]"><i
                                 class="fa-solid fa-plus mr-2"></i> Xuất phiếu nhập</button>
                     </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">

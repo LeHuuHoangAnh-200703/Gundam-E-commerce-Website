@@ -32,6 +32,7 @@ const communityPostRoutes = require("./src/routes/communityPosts");
 const vnpayRoutes = require("./src/routes/vnpay");
 const chatBotRoutes = require("./src/routes/chatbot");
 const productTypeRoutes = require("./src/routes/productType");
+const barcodeRoutes = require("./src/routes/barcode");
 const Customer = require('./src/models/customersModels');
 const OTP = require("./src/models/otpModels");
 
@@ -147,6 +148,7 @@ app.use("/api/baidang", communityPostRoutes);
 app.use("/api/thanhtoanvnp", vnpayRoutes);
 app.use("/api/chatbot", chatBotRoutes);
 app.use("/api/loaisanpham", productTypeRoutes);
+app.use("/api/barcode", barcodeRoutes);
 
 // Xóa OTP hết hạn định kỳ (mỗi 5 phút)
 setInterval(async () => {

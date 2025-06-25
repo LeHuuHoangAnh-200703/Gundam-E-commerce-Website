@@ -12,6 +12,7 @@
     "@primeuix/themes": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.1",
     "@syncfusion/ej2-vue-barcode-generator": "^29.2.8",
+    "@teckel/vue-barcode-reader": "^1.1.8",
     "@tiptap/pm": "^2.22.3",
     "@tiptap/starter-kit": "^2.22.3",
     "@tiptap/vue-3": "^2.22.3",
