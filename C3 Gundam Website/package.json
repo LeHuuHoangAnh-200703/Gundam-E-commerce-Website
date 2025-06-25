@@ -11,6 +11,7 @@
   "dependencies": {
     "@primeuix/themes": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.1",
+    "@syncfusion/ej2-vue-barcode-generator": "^29.2.8",
     "@tiptap/pm": "^2.22.3",
     "@tiptap/starter-kit": "^2.22.3",
     "@tiptap/vue-3": "^2.22.3",
@@ -20,6 +21,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.5.2",
+    "jsbarcode": "^3.12.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.469.0",
     "path-browserify": "^1.0.1",

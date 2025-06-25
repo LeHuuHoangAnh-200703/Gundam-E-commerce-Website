@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import JsBarcode from 'jsbarcode';
 import axios from 'axios';
 
 const listProducts = ref([]);
@@ -72,13 +73,17 @@ const fetchProducts = async () => {
             return {
                 ...product,
                 NgayBan: new Date(product.NgayBan)
-            }
+            };
         });
         listProducts.value.sort((a, b) => b.NgayBan - a.NgayBan);
+        // Tạo mã vạch sau khi danh sách sản phẩm được tải
+        nextTick(() => {
+            generateBarcodes();
+        });
     } catch (error) {
         console.error('Error fetching:', error);
     }
-}
+};
 
 const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
     showConfirmDialog({
@@ -116,16 +121,39 @@ const findProducts = computed(() => {
         const nameProducts = !searchValue.value || product.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
         const idProduct = !searchValue.value || product.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
         return chooseType || nameProducts || idProduct;
-    })
-})
+    });
+});
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+// Hàm tạo mã vạch
+const generateBarcodes = () => {
+    listProducts.value.forEach(product => {
+        const barcodeElement = document.getElementById('barcode' + product.MaSanPham);
+        if (barcodeElement && product.BarCode && product.BarCode.trim() !== '') {
+            try {
+                JsBarcode(barcodeElement, product.BarCode, {
+                    format: 'CODE128',
+                    width: 2,
+                    height: 50,
+                    displayValue: true,
+                    fontSize: 12,
+                    margin: 0
+                });
+            } catch (error) {
+                console.error('Error generating barcode for product', product.MaSanPham, error);
+            }
+        } else {
+            console.warn('Barcode element or BarCode value not found/missing for product', product.MaSanPham);
+        }
+    });
+};
+
 onMounted(() => {
     fetchProducts();
-})
+});
 </script>
 
 <template>
@@ -190,8 +218,8 @@ onMounted(() => {
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         product.TenNhaCungCap }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
-                                        product.BarCode }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                        <svg :id="'barcode' + product.MaSanPham" style="width: 150px; height: 50px;"></svg>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ (product.SoLuong > 0) ? product.SoLuong : 'Hết hàng' }}
