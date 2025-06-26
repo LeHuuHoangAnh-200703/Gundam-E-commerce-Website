@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import axios from "axios";
@@ -20,6 +20,8 @@ const TenNhaCungCap = ref("");
 const suppliers = ref([]);
 const notification = ref({ message: "", type: "" });
 const ThoiGian = new Date();
+const lastBarcode = ref(""); // Lưu barcode lần trước
+const scanCount = ref(1); // Đếm số lần quét cùng barcode
 
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type };
@@ -105,16 +107,40 @@ function formatCurrency(value) {
 }
 
 const onDecode = async (result) => {
-    barcode.value = result;
+    if (result) barcode.value = result; // Từ camera
+    if (!barcode.value) {
+        showNotification('Vui lòng quét hoặc nhập barcode!', 'error');
+        return;
+    }
     try {
-        const response = await axios.get(`http://localhost:3000/api/barcode/${result}`);
+        const response = await axios.get(`http://localhost:3000/api/barcode/${barcode.value}`);
         product.value = response.data;
-        MaNhaCungCap.value = product.value.MaNhaCungCap;
-        TenNhaCungCap.value = product.value.TenNhaCungCap;
+        MaNhaCungCap.value = product.value.MaNhaCungCap || "";
+        TenNhaCungCap.value = product.value.TenNhaCungCap || "";
+
+        // Kiểm tra nếu barcode giống lần trước, tăng số lượng quét
+        if (product.value.BarCode === lastBarcode.value) {
+            scanCount.value += 1;
+            SoLuongNhap.value = scanCount.value;
+        } else {
+            scanCount.value = 1;
+            SoLuongNhap.value = 1;
+            lastBarcode.value = product.value.BarCode;
+        }
+
         showForm.value = true;
         showScan.value = false;
+        barcode.value = ""; // Reset sau khi xử lý
     } catch (error) {
         showNotification(error.response?.data?.message || 'Không tìm thấy sản phẩm', 'error');
+        barcode.value = ""; // Reset khi lỗi
+    }
+};
+
+// Xử lý input từ máy quét
+const handleBarcodeInput = (event) => {
+    if (event.key === 'Enter' || event.type === 'input') {
+        onDecode();
     }
 };
 
@@ -133,7 +159,7 @@ const addStock = async () => {
             onConfirm: async () => {
                 const MaNhanVien = localStorage.getItem("MaAdmin");
                 await axios.post('http://localhost:3000/api/barcode', {
-                    barcode: product.value.barcode,
+                    BarCode: product.value.BarCode,
                     SoLuongNhap: SoLuongNhap.value,
                     GiaNhap: GiaNhap.value,
                     MaNhaCungCap: MaNhaCungCap.value,
@@ -157,6 +183,8 @@ const addStock = async () => {
                 GiaNhap.value = 0;
                 MaNhaCungCap.value = '';
                 TenNhaCungCap.value = '';
+                scanCount.value = 1; // Reset sau khi nhập kho
+                lastBarcode.value = ""; // Reset barcode lần trước
                 await fetchInventory();
             }
         });
@@ -250,7 +278,7 @@ onMounted(() => {
                             </tbody>
                         </table>
                     </div>
-                    <!-- Cửa sổ quét barcode -->
+                    <!-- Cửa sổ quét barcode (camera và máy quét) -->
                     <div v-if="showScan"
                         class="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
                         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -261,9 +289,22 @@ onMounted(() => {
                                     Đóng
                                 </button>
                             </div>
-                            <StreamBarcodeReader torch no-front-cameras @decode="onDecode"
-                                @loaded="() => showNotification('Camera sẵn sàng', 'success')"
-                                class="w-full h-full bg-gray-200 rounded-md" />
+                            <div class="flex flex-col gap-4">
+                                <StreamBarcodeReader torch no-front-cameras @decode="onDecode"
+                                    @loaded="() => showNotification('Camera sẵn sàng', 'success')"
+                                    class="w-full h-64 bg-gray-200 rounded-md" />
+                                <div class="flex flex-col gap-2 mt-10">
+                                    <input
+                                        v-model="barcode"
+                                        @keyup="handleBarcodeInput"
+                                        @input="handleBarcodeInput"
+                                        placeholder="Hoặc quét bằng máy quét..."
+                                        class="p-2 border rounded focus:outline-none"
+                                        autofocus
+                                    />
+                                    <p class="text-sm text-gray-500">Sử dụng camera hoặc máy quét để quét mã.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- Form nhập kho -->
@@ -275,6 +316,7 @@ onMounted(() => {
                                 <p><strong>Mã sản phẩm:</strong> {{ product.MaSanPham }}</p>
                                 <p><strong>Tên sản phẩm:</strong> {{ product.TenSanPham }}</p>
                                 <p><strong>Tồn kho hiện tại:</strong> {{ product.SoLuongTon }}</p>
+                                <p><strong>Giá Bán hiện tại:</strong> {{ formatCurrency(product.GiaBan) }} VNĐ </p>
                                 <p><strong>Giá nhập gần nhất:</strong> {{ formatCurrency(product.GiaNhapGanNhat) }} VNĐ
                                 </p>
                                 <label>Nhà cung cấp:</label>

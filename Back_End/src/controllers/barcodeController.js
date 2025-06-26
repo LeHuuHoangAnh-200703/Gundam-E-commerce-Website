@@ -8,6 +8,7 @@ exports.getProductByBarCode = async (req, res) => {
     try {
         const { barcode } = req.params;
         const product = await Product.findOne({ BarCode: barcode });
+        console.log(product)
         if (!product) {
             return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
         }
@@ -24,7 +25,8 @@ exports.getProductByBarCode = async (req, res) => {
             TenSanPham: product.TenSanPham,
             SoLuongTon: inventory ? inventory.SoLuongTon : 0,
             GiaNhapGanNhat: inventory ? inventory.GiaNhapGanNhat : 0,
-            barcode: product.BarCode,
+            BarCode: product.BarCode,
+            GiaBan: product.GiaBan,
             MaNhaCungCap,
             TenNhaCungCap,
         });
@@ -36,7 +38,7 @@ exports.getProductByBarCode = async (req, res) => {
 exports.addStock = async (req, res) => {
     try {
         const {
-            barcode,
+            BarCode,
             SoLuongNhap,
             GiaNhap,
             MaNhaCungCap,
@@ -46,7 +48,7 @@ exports.addStock = async (req, res) => {
         } = req.body;
 
         // Tìm sản phẩm
-        const product = await Product.findOne({ BarCode: barcode });
+        const product = await Product.findOne({ BarCode: BarCode });
         if (!product) {
             return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
         }
