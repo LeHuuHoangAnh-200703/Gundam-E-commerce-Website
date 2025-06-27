@@ -151,13 +151,18 @@ onMounted(() => {
                                             class="w-[50px] h-[50px] rounded-full object-cover" alt="">
                                         <div class="flex flex-col">
                                             <p class="font-semibold text-[16px]">{{ post.TenKhachHang }}</p>
-                                            <p class="font-semibold text-[12px] text-gray-600">{{ formatTime(post.ThoiGianDang) }}</p>
+                                            <p class="font-semibold text-[12px] text-gray-600">{{
+                                                formatTime(post.ThoiGianDang) }}</p>
                                         </div>
                                     </div>
-                                    <p :class="post.TrangThaiDang !== 'Đã duyệt' ? 'border-red-500 text-red-600' : 'border-green-500 text-green-600'" class="border-2 px-4 py-2 rounded-md font-semibold text-[14px]">{{ post.TrangThaiDang }}</p>
+                                    <p :class="post.TrangThaiDang !== 'Đã duyệt' ? 'border-red-500 text-red-600' : 'border-green-500 text-green-600'"
+                                        class="border-2 px-4 py-2 rounded-md font-semibold text-[14px]">{{
+                                        post.TrangThaiDang }}</p>
                                 </div>
+                                <p class="font-semibold text-[14px]">Tiêu đề: <span class="font-medium">{{ post.TieuDe
+                                        }}</span></p>
                                 <p class="font-semibold text-[14px]">Nội dung: <span class="font-medium">{{ post.NoiDung
-                                }}</span></p>
+                                        }}</span></p>
                                 <p class="font-semibold text-[14px]">Loại bài đăng: <span class="font-medium">{{
                                     post.LoaiBaiDang }}</span>
                                 </p>
@@ -170,13 +175,13 @@ onMounted(() => {
                                 </div>
                                 <hr class="my-2">
                                 <div class="flex gap-2 items-end justify-end">
+                                    <button type="submit" @click="deletePost(post.MaBaiDang)"
+                                        class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
+                                            class="fa-solid fa-trash"></i></button>
                                     <button type="submit" @click="updateStatus(post.MaBaiDang, post.TrangThaiDang)"
                                         :class="post.TrangThaiDang !== 'Đã duyệt' ? 'inline-block' : 'hidden'"
                                         class="text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
                                             class="fa-solid fa-check"></i></button>
-                                    <button type="submit" @click="deletePost(post.MaBaiDang)"
-                                        class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
-                                            class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
                         </div>

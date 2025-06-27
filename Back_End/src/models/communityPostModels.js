@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const communityPostSchema = new mongoose.Schema({
   MaBaiDang: String,
   MaKhachHang: String,
+  TieuDe: String,
   NoiDung: String,
   HinhAnh: [String],
   LoaiBaiDang: String,
@@ -15,7 +16,6 @@ const communityPostSchema = new mongoose.Schema({
       ThoiGian: { type: Date, default: Date.now },
     },
   ],
-  MaKhachHangDaThich: [String],
   TrangThaiDang:
     {
       type: String,

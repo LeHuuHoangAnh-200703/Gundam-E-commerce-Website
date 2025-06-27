@@ -6,7 +6,6 @@ router.get("/", communityPostController.getAllCommunityPost);
 router.get("/:maBaiDang", communityPostController.getCommunityPost);
 router.get("/danhsachbaidang/:maKhachHang", communityPostController.getCommunityPostById);
 router.post("/", communityPostController.upload ,communityPostController.createCommunityPost);
-router.post("/yeuthich/:maBaiDang", communityPostController.likeCommunityPost);
 router.post("/binhluan/:maBaiDang", communityPostController.commentCommunityPost);
 router.post("/traloibinhluan/:maBaiDang/:maBinhLuan", communityPostController.replyComment);
 router.delete("/xoabaidang/:maBaiDang", communityPostController.deleteCommunityPost);

@@ -18,7 +18,6 @@ const nameCustomer = ref('');
 const timePost = ref('');
 const content = ref('');
 const images = ref([]);
-const idCustomerLikePost = ref([]);
 const comments = ref([]);
 const newComment = ref('');
 
@@ -84,9 +83,7 @@ const fetchCommunityPost = async (idBaiDang) => {
         timePost.value = new Date(response.data.ThoiGianDang);
         content.value = response.data.NoiDung;
         images.value = response.data.HinhAnh;
-        idCustomerLikePost.value = response.data.MaKhachHangDaThich;
         comments.value = response.data.BinhLuan;
-        console.log(comments.value)
     } catch (error) {
         console.log(error)
     }
@@ -168,6 +165,25 @@ const replies = computed(() => (commentId) => {
     return result.sort((a, b) => new Date(a.ThoiGian) - new Date(b.ThoiGian));
 });
 
+const deletePost = async (idBaiDang) => {
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn xóa bài đăng này không?',
+        type: 'error',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
+                showNotification("Xóa bài đăng thành công!", "success");
+                await fetchCommunityPost();
+            } catch (error) {
+                console.log("Error delete post: ", error);
+            }
+        }
+    });
+}
+
 const formatTime = (time) => {
     return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
 };
@@ -194,6 +210,9 @@ onMounted(() => {
                                     <p class="text-white text-[12px] font-medium">{{ formatTime(timePost) }}</p>
                                 </div>
                             </div>
+                            <button @click="deletePost(idPost)">
+                                <i class="fa-solid fa-trash text-white text-[18px]"></i>
+                            </button>
                         </div>
                         <p class="text-white font-medium font-sans">{{ content }}</p>
                     </div>
@@ -203,10 +222,7 @@ onMounted(() => {
                     </div>
                     <div class="px-4 flex flex-col gap-2 mb-3">
                         <div class="flex items-center justify-between">
-                            <div class="flex gap-2 items-center">
-                                <i class="fa-solid fa-heart text-[#DC143C] text-[18px]"></i>
-                                <p class="text-white font-medium">{{ idCustomerLikePost.length }} lượt yêu thích</p>
-                            </div>
+                            <div></div>
                             <div class="flex gap-2 items-center">
                                 <p class="text-white font-medium">{{ comments ? comments.length : 0 }}</p>
                                 <i class="fa-solid fa-comment text-white text-[18px]"></i>

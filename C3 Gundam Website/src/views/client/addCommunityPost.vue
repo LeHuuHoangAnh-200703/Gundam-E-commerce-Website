@@ -20,6 +20,7 @@ const escapeHtml = (unsafe) => {
 
 const errors = ref({});
 const formData = ref({
+    title: '',
     content: '',
     category: '',
     image: []
@@ -45,6 +46,12 @@ const handleFileUpload = (event) => {
 const addCommunityPost = async () => {
     errors.value = {};
 
+    if (!formData.value.title) {
+        errors.value.title = "Tiêu đề không được để trống.";
+    } else {
+        formData.value.title = escapeHtml(formData.value.title);
+    }
+
     if (!formData.value.content) {
         errors.value.content = "Nội dung không được để trống.";
     } else {
@@ -61,6 +68,7 @@ const addCommunityPost = async () => {
 
     try {
         const dataToSend = new FormData();
+        dataToSend.append('TieuDe', formData.value.title);
         dataToSend.append('NoiDung', formData.value.content);
         dataToSend.append('MaKhachHang', router.currentRoute.value.params.maKhachHang);
         dataToSend.append('LoaiBaiDang', formData.value.category);
@@ -117,6 +125,13 @@ const imageUrls = computed(() => {
                             <form @submit.prevent="addCommunityPost" method="POST"
                                 class="grid gap-4 gap-y-2 text-sm grid-cols-1 md:grid-cols-5"
                                 enctype="multipart/form-data">
+                                <div class="md:col-span-5 mb-2 flex flex-col gap-2">
+                                    <label for="title" class="font-semibold text-[16px]">Tiêu đề bài đăng</label>
+                                    <input v-model="formData.title" type="text" name="title" id="title" placeholder="Nhập tiêu đề ..."
+                                        class="h-10 border font-medium mt-1 rounded px-4 w-full bg-transparent"
+                                        value="" />
+                                    <p v-if="errors.title" class="text-red-500 text-sm my-2">{{ errors.title }}</p>
+                                </div>
                                 <div class="md:col-span-5 mb-2 flex flex-col gap-2">
                                     <label for="content" class="font-semibold text-[16px]">Nội dung bài đăng</label>
                                     <input v-model="formData.content" type="text" name="content" id="content" placeholder="Nhập nội dung ..."

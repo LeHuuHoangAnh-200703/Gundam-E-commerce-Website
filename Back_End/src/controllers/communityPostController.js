@@ -151,31 +151,6 @@ exports.createCommunityPost = async (req, res) => {
   }
 }
 
-exports.likeCommunityPost = async (req, res) => {
-  const MaKhachHang = req.body.MaKhachHang;
-  try {
-    const communityPost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
-    const hasLike = communityPost.MaKhachHangDaThich.includes(MaKhachHang);
-    if (!communityPost) {
-      return res.status(400).json({ message: "Bài đăng không tồn tại!" });
-    }
-    if (hasLike) {
-      communityPost.MaKhachHangDaThich = communityPost.MaKhachHangDaThich.filter(id => id !== MaKhachHang);
-    } else {
-      communityPost.MaKhachHangDaThich.push(MaKhachHang);
-    }
-
-    await communityPost.save();
-    res.status(200).json({
-      post: {
-        ...communityPost._doc,
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}
-
 const checkToxicContent = async (text) => {
     try {
         const response = await axios.post('http://localhost:5000/predict', { sentence: text });
