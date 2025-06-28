@@ -21,6 +21,22 @@ const images = ref([]);
 const comments = ref([]);
 const newComment = ref('');
 
+// Ẩn hiện hình ảnh
+const showImageModal = ref(false);
+const selectedImage = ref('');
+
+const openImageModal = (imageSrc) => {
+    selectedImage.value = imageSrc;
+    showImageModal.value = true;
+    document.body.style.overflow = 'hidden';
+};
+
+const closeImageModal = () => {
+    showImageModal.value = false;
+    selectedImage.value = '';
+    document.body.style.overflow = 'auto';
+};
+
 const notification = ref({
     message: '',
     type: ''
@@ -218,7 +234,8 @@ onMounted(() => {
                     </div>
                     <div class="grid grid-cols-2 gap-1">
                         <img v-for="(img, index) in images" :key="index" :src="img"
-                            class="w-full max-h-[200px] object-cover" alt="">
+                            @click="openImageModal(img)"
+                            class="w-full max-h-[200px] object-cover cursor-pointer hover:opacity-80 transition-opacity" alt="">
                     </div>
                     <div class="px-4 flex flex-col gap-2 mb-3">
                         <div class="flex items-center justify-between">
@@ -323,6 +340,24 @@ onMounted(() => {
                         placeholder="Viết bình luận ..." />
                     <button @click="addComment" class="bg-gray-600 px-4 py-3 rounded-lg border-2"><i
                             class="fa-solid fa-arrow-up text-white text-[16px] font-bold"></i></button>
+                </div>
+            </div>
+        </div>
+        <div v-if="showImageModal" 
+             @click="closeImageModal"
+             class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-2 sm:p-4 md:p-6 lg:p-8">
+            <div class="relative w-full h-full max-w-[95vw] max-h-[95vh] sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[85vw] md:max-h-[85vh] lg:max-w-[80vw] lg:max-h-[80vh] xl:max-w-[70vw] xl:max-h-[70vh] flex items-center justify-center">
+                <div class="relative inline-block">
+                    <img 
+                        :src="selectedImage" 
+                        @click.stop
+                        class="lg:max-w-[70vw] lg:max-h-[70vh] max-w-full max-h-full w-auto h-auto object-contain border-4 sm:border-6 md:border-8 border-white"
+                        alt="Enlarged image">
+                    <button 
+                        @click="closeImageModal"
+                        class="absolute -top-4 -right-2 text-white hover:text-gray-300 transition-colors z-10 bg-[#DC143C] hover:bg-red-600 rounded-full w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-xmark text-xs sm:text-sm md:text-base lg:text-lg"></i>
+                    </button>
                 </div>
             </div>
         </div>
