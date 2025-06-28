@@ -25,6 +25,28 @@ const newComment = ref('');
 const showImageModal = ref(false);
 const selectedImage = ref('');
 
+// Thêm state cho việc mở rộng nội dung
+const isContentExpanded = ref(false);
+
+// Computed để kiểm tra nội dung có dài quá không
+const isContentLong = computed(() => {
+    return content.value && content.value.length > 130; // Hoặc bạn có thể dùng số ký tự khác
+});
+
+// Computed để hiển thị nội dung
+const displayContent = computed(() => {
+    if (!content.value) return '';
+    if (!isContentLong.value || isContentExpanded.value) {
+        return content.value;
+    }
+    // Cắt nội dung theo số ký tự (có thể điều chỉnh)
+    return content.value.substring(0, 130) + '...';
+});
+
+const toggleContent = () => {
+    isContentExpanded.value = !isContentExpanded.value;
+};
+
 const openImageModal = (imageSrc) => {
     selectedImage.value = imageSrc;
     showImageModal.value = true;
@@ -230,12 +252,29 @@ onMounted(() => {
                                 <i class="fa-solid fa-trash text-white text-[18px]"></i>
                             </button>
                         </div>
-                        <p class="text-white font-medium font-sans">{{ content }}</p>
+                        <div class="text-white font-medium font-sans">
+                            <p :class="[
+                                'transition-all duration-300',
+                                !isContentExpanded && isContentLong ? 'line-clamp-3' : ''
+                            ]">{{ displayContent }}</p>
+                            <button 
+                                v-if="isContentLong"
+                                @click="toggleContent"
+                                class="text-blue-400 hover:text-blue-300 text-sm mt-1 transition-colors duration-200"
+                            >
+                                {{ isContentExpanded ? 'Thu gọn' : 'Xem thêm' }}
+                            </button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-1">
-                        <img v-for="(img, index) in images" :key="index" :src="img"
-                            @click="openImageModal(img)"
-                            class="w-full max-h-[200px] object-cover cursor-pointer hover:opacity-80 transition-opacity" alt="">
+                    <div :class="[
+                        'grid gap-1',
+                        images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                    ]">
+                        <img v-for="(img, index) in images" :key="index" :src="img" @click="openImageModal(img)" :class="[
+                            'w-full object-cover cursor-pointer hover:opacity-80 transition-opacity',
+                            images.length === 1 ? 'max-h-[400px]' : 'max-h-[200px]',
+                            images.length === 3 && index === 0 ? 'col-span-2' : ''
+                        ]" alt="">
                     </div>
                     <div class="px-4 flex flex-col gap-2 mb-3">
                         <div class="flex items-center justify-between">
@@ -343,18 +382,15 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div v-if="showImageModal" 
-             @click="closeImageModal"
-             class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-2 sm:p-4 md:p-6 lg:p-8">
-            <div class="relative w-full h-full max-w-[95vw] max-h-[95vh] sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[85vw] md:max-h-[85vh] lg:max-w-[80vw] lg:max-h-[80vh] xl:max-w-[70vw] xl:max-h-[70vh] flex items-center justify-center">
+        <div v-if="showImageModal" @click="closeImageModal"
+            class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-2 sm:p-4 md:p-6 lg:p-8">
+            <div
+                class="relative w-full h-full max-w-[95vw] max-h-[95vh] sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[85vw] md:max-h-[85vh] lg:max-w-[80vw] lg:max-h-[80vh] xl:max-w-[70vw] xl:max-h-[70vh] flex items-center justify-center">
                 <div class="relative inline-block">
-                    <img 
-                        :src="selectedImage" 
-                        @click.stop
+                    <img :src="selectedImage" @click.stop
                         class="lg:max-w-[70vw] lg:max-h-[70vh] max-w-full max-h-full w-auto h-auto object-contain border-4 sm:border-6 md:border-8 border-white"
                         alt="Enlarged image">
-                    <button 
-                        @click="closeImageModal"
+                    <button @click="closeImageModal"
                         class="absolute -top-4 -right-2 text-white hover:text-gray-300 transition-colors z-10 bg-[#DC143C] hover:bg-red-600 rounded-full w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center shadow-lg">
                         <i class="fa-solid fa-xmark text-xs sm:text-sm md:text-base lg:text-lg"></i>
                     </button>

@@ -91,7 +91,7 @@ onMounted(() => {
                                         class="text-base sm:text-lg lg:text-xl font-bold text-gray-800 line-clamp-2 group-hover:text-[#DC143C] transition-colors duration-200">
                                         {{ post.TieuDe }}
                                     </h3>
-                                    <p class="font-semibold text-sm sm:text-base text-gray-700">
+                                    <p class="font-semibold text-sm text-gray-700">
                                         Tác giả: <span class="text-[#DC143C]">{{ post.TenKhachHang }}</span>
                                     </p>
                                 </div>
