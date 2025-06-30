@@ -7,7 +7,7 @@ import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from 'axios';
 
 const listPost = ref([]);
-
+const searchValue = ref('');
 const notification = ref({
     message: '',
     type: ''
@@ -120,6 +120,14 @@ const deletePost = async (idBaiDang) => {
     });
 }
 
+const findCommunityPost = computed(() => {
+    return listPost.value.filter(post => {
+        const matchesSearch = !searchValue.value ||
+        post.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase())
+        return matchesSearch;
+    });
+})
+
 const formatTime = (time) => {
     return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
 };
@@ -138,12 +146,19 @@ onMounted(() => {
             </div>
             <div class="flex-1 px-4 py-4 overflow-y-auto">
                 <div class="flex flex-col gap-4">
-                    <div class="w-full relative flex flex-col gap-4 max-h-[calc(100vh-120px)] pb-1 pt-2">
+                    <div class="w-full relative flex flex-col lg:flex-row items-center justify-between gap-4 pb-1 pt-2">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý bài đăng</h1>
+                        <div class="relative w-full max-w-md">
+                            <input type="text" v-model="searchValue"
+                                class="w-full p-3 pr-12 bg-white border border-gray-400 text-[12px] sm:text-[13px] font-semibold tracking-wider text-black rounded-md focus:outline-none focus:border-[#003171] focus:ring-1 focus:ring-[#003171]"
+                                placeholder="Tìm kiếm bài đăng ..." />
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
+                        </div>
                     </div>
                     <div class="overflow-auto">
                         <div v-if="listPost.length > 0" class="flex flex-col gap-4">
-                            <div v-for="(post, index) in listPost" :key="index"
+                            <div v-for="(post, index) in findCommunityPost" :key="index"
                                 class="flex flex-col gap-2 w-full bg-white p-4 rounded-md shadow-lg border-2">
                                 <div class="flex items-center justify-between">
                                     <div class="flex gap-2 items-center">
@@ -157,12 +172,12 @@ onMounted(() => {
                                     </div>
                                     <p :class="post.TrangThaiDang !== 'Đã duyệt' ? 'border-red-500 text-red-600' : 'border-green-500 text-green-600'"
                                         class="border-2 px-4 py-2 rounded-md font-semibold text-[14px]">{{
-                                        post.TrangThaiDang }}</p>
+                                            post.TrangThaiDang }}</p>
                                 </div>
                                 <p class="font-semibold text-[14px]">Tiêu đề: <span class="font-medium">{{ post.TieuDe
-                                        }}</span></p>
+                                }}</span></p>
                                 <p class="font-semibold text-[14px]">Nội dung: <span class="font-medium">{{ post.NoiDung
-                                        }}</span></p>
+                                }}</span></p>
                                 <p class="font-semibold text-[14px]">Loại bài đăng: <span class="font-medium">{{
                                     post.LoaiBaiDang }}</span>
                                 </p>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
@@ -11,6 +11,7 @@ const router = useRouter();
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
 const listProductType = ref([]);
+const searchValue = ref('');
 
 const notification = ref({
     message: '',
@@ -108,6 +109,14 @@ const deleteProductType = async (maLoaiSanPham, tenLoaiSanPham) => {
     });
 }
 
+const findProductTypes = computed(() => {
+    return listProductType.value.filter(productType => {
+        const matchesSearch = !searchValue.value ||
+        productType.LoaiSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
+        return matchesSearch;
+    });
+})
+
 const formatDate = (date) => {
     const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
     const formattedDate = date.toLocaleDateString('vi-VN', options);
@@ -129,12 +138,22 @@ onMounted(() => {
             </div>
             <div class="flex-1 px-4 py-4 overflow-y-auto">
                 <div class="flex flex-col gap-4">
-                    <div class="flex gap-4 justify-between items-center">
-                        <h1 class="font-bold text-[20px] uppercase">Quản lý loại sản phẩm</h1>
-                        <router-link to="/admin/addListProductType"
-                            class="bg-[#003171] text-white font-bold w-[50px] h-[50px] rounded-full flex justify-center items-center">
-                            <i class="fa-solid fa-plus"></i>
-                        </router-link>
+                    <div class="flex flex-col gap-4 lg:gap-2">
+                        <div class="flex flex-col lg:flex-row gap-4 justify-between items-center">
+                            <h1 class="font-bold text-[20px] uppercase">Quản lý loại sản phẩm</h1>
+                            <router-link to="/admin/addListProductType"
+                                class="bg-[#003171] text-white font-bold rounded py-3 px-4 flex justify-center items-center">
+                                <i class="fa-solid fa-plus"></i>
+                                <p class="text-[14px] ml-2">Thêm loại sản phẩm</p>
+                            </router-link>
+                        </div>
+                        <div class="relative w-full max-w-md">
+                            <input type="text" v-model="searchValue"
+                                class="w-full p-3 pr-12 bg-white border border-gray-400 text-[12px] sm:text-[13px] font-semibold tracking-wider text-black rounded-md focus:outline-none focus:border-[#003171] focus:ring-1 focus:ring-[#003171]"
+                                placeholder="Tìm kiếm loại sản phẩm ..." />
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
+                        </div>
                     </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
@@ -148,7 +167,7 @@ onMounted(() => {
                                 </tr>
                             </thead>
                             <tbody class="w-full">
-                                <tr class="border-t border-slate-500" v-for="(productType, index) in listProductType"
+                                <tr class="border-t border-slate-500" v-for="(productType, index) in findProductTypes"
                                     :key="index">
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{
                                         productType.MaLoaiSanPham }}</td>

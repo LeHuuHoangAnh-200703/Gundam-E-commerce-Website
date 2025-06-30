@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
@@ -7,7 +7,7 @@ import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from "axios";
 
 const listDiscountCodes = ref([]);
-
+const searchValue = ref('');
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
 
@@ -114,6 +114,14 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
     });
 }
 
+const findDiscountCode = computed(() => {
+    return listDiscountCodes.value.filter(discountCode => {
+        const matchesSearch = !searchValue.value ||
+        discountCode.TenMaGiamGia.toLowerCase().includes(searchValue.value.toLowerCase())
+        return matchesSearch;
+    });
+})
+
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -132,15 +140,25 @@ onMounted(() => {
             <div class="flex-1 px-4 py-4 overflow-y-auto">
                 <div class="flex flex-col gap-4">
                     <div class="rounded-lg flex flex-col gap-6">
-                        <div class="flex justify-between items-center">
-                            <h1 class="font-bold text-[20px] uppercase">Danh sách mã giảm giá</h1>
-                            <router-link to="/admin/addDiscountCode"
-                                class="bg-[#003171] text-white font-bold w-[50px] h-[50px] rounded-full flex justify-center items-center">
-                                <i class="fa-solid fa-plus"></i>
-                            </router-link>
+                        <div class="flex flex-col gap-4 lg:gap-2">
+                            <div class="flex flex-col lg:flex-row gap-4 justify-between items-center">
+                                <h1 class="font-bold text-[20px] uppercase">Danh sách mã giảm giá</h1>
+                                <router-link to="/admin/addDiscountCode"
+                                    class="bg-[#003171] text-white font-bold rounded py-3 px-4 flex justify-center items-center">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <p class="text-[14px] ml-2">Thêm mã giảm giá</p>
+                                </router-link>
+                            </div>
+                            <div class="relative w-full max-w-md">
+                                <input type="text" v-model="searchValue"
+                                    class="w-full p-3 pr-12 bg-white border border-gray-400 text-[12px] sm:text-[13px] font-semibold tracking-wider text-black rounded-md focus:outline-none focus:border-[#003171] focus:ring-1 focus:ring-[#003171]"
+                                    placeholder="Tìm kiếm mã giảm giá ..." />
+                                <i
+                                    class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
+                            </div>
                         </div>
                         <div v-if="listDiscountCodes.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div v-for="(discountCode, index) in listDiscountCodes" :key="index"
+                            <div v-for="(discountCode, index) in findDiscountCode" :key="index"
                                 class="flex flex-col gap-1 border-t-4 border-[#DB3F4C] bg-white p-4 shadow-lg">
                                 <div class="flex justify-between items-center">
                                     <p class="font-bold text-[22px]">{{ discountCode.TenMaGiamGia }}</p>

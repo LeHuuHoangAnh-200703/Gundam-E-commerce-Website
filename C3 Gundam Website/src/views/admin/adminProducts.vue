@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, computed, nextTick, watch } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
@@ -9,6 +9,8 @@ import axios from 'axios';
 
 const listProducts = ref([]);
 const searchValue = ref('');
+const selectedType = ref('');
+const listProductTypes = ref('');
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
 
@@ -85,6 +87,19 @@ const fetchProducts = async () => {
     }
 };
 
+const fetchProductType = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/loaisanpham");
+        listProductTypes.value = response.data.map(producttype => {
+            return {
+                ...producttype
+            }
+        })
+    } catch (error) {
+        console.error('Error fetching:', error);
+    }
+}
+
 const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
     showConfirmDialog({
         title: 'Thông báo xác nhận',
@@ -117,10 +132,11 @@ const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
 
 const findProducts = computed(() => {
     return listProducts.value.filter(product => {
-        const chooseType = !searchValue.value || product.LoaiSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
-        const nameProducts = !searchValue.value || product.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
-        const idProduct = !searchValue.value || product.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
-        return chooseType || nameProducts || idProduct;
+        const matchesType = selectedType.value === "" || selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
+        const matchesSearch = !searchValue.value || 
+            product.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase()) ||
+            product.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase());
+        return matchesType && matchesSearch;
     });
 });
 
@@ -130,10 +146,12 @@ function formatCurrency(value) {
 
 // Hàm tạo mã vạch
 const generateBarcodes = () => {
-    listProducts.value.forEach(product => {
+    findProducts.value.forEach(product => {
         const barcodeElement = document.getElementById('barcode' + product.MaSanPham);
         if (barcodeElement && product.BarCode && product.BarCode.trim() !== '') {
             try {
+                // Xóa nội dung cũ trước khi tạo mới
+                barcodeElement.innerHTML = '';
                 JsBarcode(barcodeElement, product.BarCode, {
                     format: 'CODE128',
                     width: 2,
@@ -151,8 +169,23 @@ const generateBarcodes = () => {
     });
 };
 
+// Theo dõi thay đổi của findProducts và tạo lại barcode
+watch(findProducts, () => {
+    nextTick(() => {
+        generateBarcodes();
+    });
+}, { deep: true });
+
+// Theo dõi thay đổi của searchValue và selectedType
+watch([searchValue, selectedType], () => {
+    nextTick(() => {
+        generateBarcodes();
+    });
+});
+
 onMounted(() => {
     fetchProducts();
+    fetchProductType();
 });
 </script>
 
@@ -167,12 +200,20 @@ onMounted(() => {
                 <div class="flex flex-col gap-4">
                     <div class="flex lg:flex-row flex-col gap-4 justify-center lg:justify-between items-center">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý sản phẩm</h1>
-                        <div class="relative flex justify-center flex-1 gap-2 max-w-xl">
-                            <input type="text" v-model="searchValue"
-                                class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
-                                placeholder="Tìm kiếm sản phẩm ..." />
-                            <i
-                                class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                        <div class="flex gap-4 items-center">
+                            <div class="relative flex justify-center flex-1 gap-2 max-w-xl w-[60%]">
+                                <input type="text" v-model="searchValue"
+                                    class="items-center w-full p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none"
+                                    placeholder="Tìm kiếm sản phẩm ..." />
+                                <i
+                                    class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
+                            </div>
+                            <select v-model="selectedType" name="" id="" class="w-[40%] p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none">
+                                <option value="">Tất cả</option>
+                                <option :value="productType.LoaiSanPham" v-for="productType in listProductTypes" :key="productType.MaLoaiSanPham">
+                                    {{ productType.TenLoaiSanPham }}
+                                </option>
+                            </select>
                         </div>
                     </div>
                     <div class="shadow-lg border-2 border-gray-300 overflow-auto">
@@ -208,7 +249,7 @@ onMounted(() => {
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-40">
                                         <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ product.TenSanPham
-                                            }}</p>
+                                        }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatCurrency(product.GiaBan) }} VNĐ</td>
@@ -219,7 +260,8 @@ onMounted(() => {
                                         product.TenNhaCungCap }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        <svg :id="'barcode' + product.MaSanPham" style="width: 150px; height: 50px;"></svg>
+                                        <svg :id="'barcode' + product.MaSanPham"
+                                            style="width: 150px; height: 50px;"></svg>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ (product.SoLuong > 0) ? product.SoLuong : 'Hết hàng' }}
@@ -239,7 +281,8 @@ onMounted(() => {
                                         <a :href="`/admin/editProduct/${product.MaSanPham}`"
                                             class="inline-block bg-[#00697F] text-white font-medium py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#055565] whitespace-nowrap"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-                                        <button @click="updateStatus(product.MaSanPham, product.TrangThai, product.TenSanPham)"
+                                        <button
+                                            @click="updateStatus(product.MaSanPham, product.TrangThai, product.TenSanPham)"
                                             class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap">
                                             <i class="fa-solid fa-repeat"></i>
                                         </button>
