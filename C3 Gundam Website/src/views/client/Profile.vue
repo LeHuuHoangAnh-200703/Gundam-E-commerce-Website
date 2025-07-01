@@ -45,19 +45,19 @@ onMounted(() => {
                         <div class="flex justify-between items-center flex-col mt-4 lg:flex-row gap-4 px-2 lg:px-24">
                             <div class="flex gap-6">
                                 <router-link :to="`/orders_history`"
-                                    class="px-3 py-2 sm:px-5 sm:py-2 bg-[#A0522D] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Đơn
+                                    class="px-3 py-3 sm:px-5 bg-[#A0522D] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Đơn
                                     hàng của bạn</router-link>
                                 <router-link :to="`/personalDirectory/${maKhachHang}`"
-                                    class="px-3 py-2 sm:px-5 sm:py-2 bg-[#008B8B] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">
+                                    class="px-3 py-3 sm:px-5 bg-[#008B8B] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">
                                     Danh mục cá nhân
                                 </router-link>
                             </div>
                             <div class="flex gap-6">
                                 <router-link :to="`/yourPostLists/${maKhachHang}`"
-                                    class="px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Bài
+                                    class="px-3 py-3 sm:px-5 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Bài
                                     đăng của bạn</router-link>
                                 <router-link :to="`/editProfile/${maKhachHang}`"
-                                    class="px-3 py-2 sm:px-5 sm:py-2 bg-[#DB3F4C] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Chỉnh
+                                    class="px-3 py-3 sm:px-5 bg-[#DB3F4C] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md">Chỉnh
                                     sửa hồ sơ</router-link>
                             </div>
                         </div>

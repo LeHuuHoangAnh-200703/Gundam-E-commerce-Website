@@ -57,7 +57,7 @@ onUnmounted(() => {
 
 <template>
     <button @click.prevent="chatBox"
-        class="fixed bottom-32 right-10 cursor-pointer flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
+        class="fixed bottom-24 lg:bottom-32 right-10 cursor-pointer flex justify-center items-center [box-shadow:0px_0px_10px_rgba(255,255,255,0.8)] bg-[#003171] border-2 rounded-full w-[50px] h-[50px]">
         <i class="fa-solid fa-comments text-white"></i>
         <span v-if="hasUnreadMessages"
             class="absolute top-0 right-0 w-[12px] h-[12px] bg-red-500 border-2 border-white rounded-full"></span>

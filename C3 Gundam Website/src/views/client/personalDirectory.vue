@@ -164,14 +164,19 @@ onMounted(() => {
         <Header />
         <div class="relative my-5 m-2 lg:mx-[200px] flex flex-grow">
             <div class="w-full m-4">
-                <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-8 lg:gap-4">
                     <div class="flex flex-col gap-4">
-                        <div class="flex items-center justify-between">
-                            <h1 class="font-bold text-[20px] uppercase text-white">Danh sách địa chỉ</h1>
-                            <router-link :to="`/addInfoOrder/${maKhachHang}`"
-                                class="px-3 py-2 sm:px-5 sm:py-2 bg-[#4169E1] text-sm sm:text-md rounded-md font-medium sm:font-bold text-white shadow-md"><i
-                                    class="fa-solid fa-plus"></i> Thêm
-                                địa chỉ</router-link>
+                        <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                            <h1
+                            class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
+                                Danh sách địa chỉ
+                            </h1>
+                            <div class="w-full lg:w-auto flex justify-end">
+                                <router-link :to="`/addInfoOrder/${maKhachHang}`"
+                                class="inline-block px-5 py-3 bg-[#4169E1] text-[14px] rounded-md font-bold text-white whitespace-nowrap">
+                                    <i class="fa-solid fa-plus"></i> Thêm địa chỉ
+                                </router-link>
+                            </div>
                         </div>
                         <div v-if="listAddress.length > 0" class="px-4 pb-4 pt-2 bg-white rounded-md">
                             <div v-for="(address, index) in listAddress" :key="index"
@@ -200,7 +205,9 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
-                        <h1 class="font-bold text-[20px] uppercase text-white">Danh sách mã giảm giá</h1>
+                        <h1
+                            class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
+                            Danh sách mã giảm giá</h1>
                         <div v-if="discountCodeWithCustomer.length > 0"
                             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                             <div v-for="(discountCode, index) in discountCodeWithCustomer" :key="index"

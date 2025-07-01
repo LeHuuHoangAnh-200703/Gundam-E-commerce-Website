@@ -120,7 +120,7 @@ onMounted(() => {
                     <p v-else class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
                         discountCode.GiamPhanTram }}%</p>
                     <div class="flex justify-between items-center">
-                        <div>
+                        <div class="flex flex-col gap-1">
                             <div class="flex gap-1 lg:flex-row flex-col lg:justify-between">
                                 <p class="font-semibold text-[14px]">Hạn sử dụng: {{ new
                                     Date(discountCode.NgayHetHan) < new Date() ? 'Hết hạn' :
@@ -128,8 +128,7 @@ onMounted(() => {
                             </div>
                             <p class="font-semibold text-[14px]">Áp dụng với đơn: <span class="text-[#DB3F4C]">{{
                                     formatCurrency(discountCode.GiaApDung) }} VNĐ</span></p>
-                            <p class="font-semibold text-[14px]">Mã giảm giá: <span class="text-[#DB3F4C] uppercase">{{
-                                discountCode.MaGiamGia }}</span></p>
+                            <p class="font-semibold text-[14px]">Số lần sử dụng: {{ discountCode.SoLanSuDung }}</p>
                         </div>
                         <button @click.prevent="saveDiscountCode(discountCode.IdMaGiamGia)"
                             class="w-[40px] h-[40px] border-2 border-[#1A1D27] flex justify-center items-center self-end rounded-lg hover:border-[#DB3F4C] hover:bg-[#DB3F4C] transition-all duration-300 group"><i

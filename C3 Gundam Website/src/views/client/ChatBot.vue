@@ -119,7 +119,7 @@ onMounted(() => {
                     <input type="text" v-model="message"
                         class="bg-transparent items-center w-full h-full p-1 text-[12px] lg:text-[16px] font-semibold tracking-wider text-white focus:outline-none"
                         placeholder="Bạn muốn biết gì ?" />
-                    <button type="submit" :disabled="isLoading" class="px-5 py-4 text-white rounded-lg bg-gray-600">
+                    <button type="submit" :disabled="isLoading" class="px-5 py-3 text-white rounded-lg bg-gray-600">
                         <i class="fa-solid fa-arrow-up text-[16px] font-bold"></i>
                     </button>
                 </div>

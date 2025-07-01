@@ -11,6 +11,7 @@ const avatarCustomer = ref('');
 const nameCustomer = ref('');
 const idCustomer = ref('');
 const listPost = ref([]);
+const listTopPost = ref([]);
 
 const fetchCustomer = async () => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
@@ -36,7 +37,23 @@ const fetchCommunityPost = async () => {
             }
         }).sort((a, b) => b.ThoiGianDang - a.ThoiGianDang);
     } catch (error) {
-        console.log("Error fetching: ", message.error);
+        console.log("Error fetching: ", error);
+    }
+}
+
+const fetchTopCommunityPost = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/baidang/top/topbinhluan");
+        listTopPost.value = response.data.filter(post => {
+            return post.TrangThaiDang === 'Đã duyệt'
+        }).map(post => {
+            return {
+                ...post,
+                ThoiGianDang: new Date(post.ThoiGianDang)
+            }
+        });
+    } catch (error) {
+        console.log("Error fetching: ", error);
     }
 }
 
@@ -47,6 +64,7 @@ const formatTime = (time) => {
 onMounted(() => {
     fetchCustomer();
     fetchCommunityPost();
+    fetchTopCommunityPost();
 })
 </script>
 
@@ -54,7 +72,7 @@ onMounted(() => {
     <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <div class="relative mb-5 mx-2 sm:mx-4 md:mx-8 lg:mx-[210px] xl:mx-[210px] flex flex-grow">
-            <div class="w-full overflow-y-auto flex items-center flex-col gap-4 sm:gap-6">
+            <div class="w-full overflow-y-auto flex flex-col gap-4 sm:gap-6">
                 <div class="w-full flex gap-3 sm:gap-5 items-center bg-gray-700 p-3 sm:p-4 rounded-md border-2">
                     <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14">
                         <img :src="avatarCustomer ? `${avatarCustomer}` : '/src/assets/img/avatar.jpg'"
@@ -65,6 +83,44 @@ onMounted(() => {
                         {{ nameCustomer }} ơi, bạn đang nghĩ gì thế ?
                     </router-link>
                 </div>
+                <h1
+                    class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
+                    Bài đăng được quan tâm nhiều nhất</h1>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <router-link :to="`/commentCommunityPost/${topPost.MaBaiDang}`" class="w-full flex flex-col group" v-for="topPost in listTopPost" :key="topPost.MaBaiDang">
+                        <div class="w-full flex-shrink-0">
+                            <img :src="topPost.HinhAnh[0]"
+                                class="w-full aspect-[4/3] object-cover rounded-t-md md:rounded-tl-md md:rounded-br-none"
+                                alt="">
+                        </div>
+                        <div class="flex flex-col gap-4 p-4 lg:p-6 bg-white border-b-4 border-[#DC143C] rounded-b-md">
+                            <div class="flex gap-3">
+                                <p
+                                    class="font-bold text-[#DC143C] pb-1 border-b-4 border-[#DC143C] uppercase text-[16px] self-start">
+                                    {{ topPost.LoaiBaiDang }}
+                                </p>
+                                <p
+                                    class="font-bold text-gray-600 pb-1 border-b-4 border-gray-600 text-[16px] self-start">
+                                    {{ formatTime(topPost.ThoiGianDang) }}
+                                </p>
+                            </div>
+                            <h3
+                                class="text-base sm:text-lg lg:text-xl font-bold text-gray-800 line-clamp-2 group-hover:text-[#DC143C] transition-colors duration-200">
+                                {{ topPost.TieuDe }}
+                            </h3>
+                            <p class="font-semibold text-sm text-gray-700">
+                                Tác giả: <span class="text-[#DC143C]">{{ topPost.TenKhachHang }}</span>
+                            </p>
+                            <div class="w-auto flex justify-end items-center gap-1">
+                                <p class="font-semibold text-base text-[#DC143C]">{{ topPost.BinhLuan.length }} <span class="text-gray-700">Bình
+                                        luận</span></p>
+                            </div>
+                        </div>
+                    </router-link>
+                </div>
+                <h1
+                    class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
+                    tất cả bài đăng tại cộng đồng c3 gundam</h1>
                 <div class="w-full">
                     <div v-if="listPost.length > 0" class="flex flex-col gap-4 sm:gap-6 w-full">
                         <div v-for="post in listPost" :key="post.MaBaiDang" class="w-full">
@@ -79,11 +135,11 @@ onMounted(() => {
                                     class="bg-white border-b-4 border-[#DC143C] rounded-b-md md:rounded-r-md md:rounded-bl-none flex flex-col justify-center gap-2 sm:gap-3 p-4 sm:p-6 lg:p-8 w-full">
                                     <div class="flex flex-row gap-2 xs:gap-4">
                                         <p
-                                            class="font-semibold text-[#DC143C] pb-1 border-b-2 border-[#DC143C] uppercase text-xs sm:text-sm self-start">
+                                            class="font-bold text-[#DC143C] pb-1 border-b-4 border-[#DC143C] uppercase text-xs sm:text-sm self-start">
                                             {{ post.LoaiBaiDang }}
                                         </p>
                                         <p
-                                            class="font-semibold text-gray-600 pb-1 border-b-2 border-gray-600 text-xs sm:text-sm self-start">
+                                            class="font-bold text-gray-600 pb-1 border-b-4 border-gray-600 text-xs sm:text-sm self-start">
                                             {{ formatTime(post.ThoiGianDang) }}
                                         </p>
                                     </div>

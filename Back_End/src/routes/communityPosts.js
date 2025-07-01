@@ -11,5 +11,6 @@ router.post("/traloibinhluan/:maBaiDang/:maBinhLuan", communityPostController.re
 router.delete("/xoabaidang/:maBaiDang", communityPostController.deleteCommunityPost);
 router.delete("/xoabinhluan/:maBaiDang/:maBinhLuan", communityPostController.deleteComment);
 router.patch("/:maBaiDang", communityPostController.updateStatus);
+router.get("/top/topbinhluan", communityPostController.getTopCommunityPost);
 
 module.exports = router;

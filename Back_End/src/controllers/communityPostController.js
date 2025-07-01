@@ -307,4 +307,42 @@ exports.updateStatus = async (req, res) => {
   }
 };
 
+exports.getTopCommunityPost = async (req, res) => {
+  try {
+    const topCommunityPost = await CommunityPost.aggregate([
+      {
+        $addFields: {
+          commentCount: { $size: "$BinhLuan" } // Tính số lượng bình luận
+        }
+      },
+      {
+        $sort: { commentCount: -1 } // Sắp xếp theo số bình luận giảm dần
+      },
+      {
+        $limit: 3 // Lấy 3 bài đăng top
+      }
+    ]);
+
+    const customerIds = [...new Set(topCommunityPost.map(post => post.MaKhachHang))];
+    const customers = await Customer.find({ MaKhachHang: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.MaKhachHang] = {
+        TenKhachHang: customer.TenKhachHang,
+        HinhAnhKhachHang: customer.Image
+      };
+    });
+
+    const result = topCommunityPost.map(post => ({
+      ...post,
+      TenKhachHang: customerMap[post.MaKhachHang]?.TenKhachHang || "Không xác định",
+      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null
+    }));
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi khi lấy bài đăng có nhiều bình luận nhất", error: error.message });
+  }
+}
+
 exports.upload = upload.array('HinhAnh', 4);

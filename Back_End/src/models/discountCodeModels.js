@@ -8,7 +8,6 @@ const discountCodeSchema = new mongoose.Schema({
     GiamPhanTram: Number,
     SoLanSuDung: Number,
     NgayHetHan: Date,
-    MaGiamGia: String,
     SoLanLuuMa: Number,
     IdKhachHangSuDung: [String],
     NgayTao: Date,
