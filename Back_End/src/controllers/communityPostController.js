@@ -154,9 +154,11 @@ exports.createCommunityPost = async (req, res) => {
 const checkToxicContent = async (text) => {
     try {
         const response = await axios.post('http://localhost:5000/predict', { sentence: text });
-        return response.data.prediction === 1;
+        const isToxic = response.data.prediction === 1;
+        return isToxic;
     } catch (error) {
         console.error('Error calling Flask API:', error.message);
+        return false;
     }
 };
 

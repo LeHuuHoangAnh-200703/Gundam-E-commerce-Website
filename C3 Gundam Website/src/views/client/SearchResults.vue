@@ -119,11 +119,11 @@ onMounted(() => {
                 <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan) }}
                         VNĐ</span></p>
                 <button @click.prevent="addToCart(product.MaSanPham)" v-if="product.TrangThai === 'Đang bán'"
-                    class="px-5 py-2 w-full rounded-md bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
+                    class="px-5 py-2 w-full bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
                 <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'"
-                    class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
+                    class="px-5 py-2 w-full bg-gray-600 text-white font-medium">Ngừng kinh doanh</button>
                 <button v-else-if="product.SoLuong < 0"
-                    class="px-5 py-2 w-full rounded-md bg-gray-600 text-white font-medium">Hết hàng</button>
+                    class="px-5 py-2 w-full bg-gray-600 text-white font-medium">Hết hàng</button>
             </div>
         </div>
         <div v-else class="flex flex-1 justify-center items-center m-auto w-full">

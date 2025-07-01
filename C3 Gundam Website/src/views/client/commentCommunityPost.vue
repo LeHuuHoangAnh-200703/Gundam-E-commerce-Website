@@ -145,28 +145,41 @@ const addComment = async () => {
 
 const idCustomerReplay = localStorage.getItem('MaKhachHang');
 const showReplyForm = ref({});
-const replyContent = ref('');
+const replyContent = ref({});
 
 const toggleReplyForm = (commentId) => {
     showReplyForm.value = {
         ...showReplyForm.value,
         [commentId]: !showReplyForm.value[commentId]
     };
-    replyContent.value = '';
+    // Reset content cho comment cụ thể
+    if (!showReplyForm.value[commentId]) {
+        replyContent.value[commentId] = '';
+    }
 };
 
 const submitReply = async (commentId) => {
-    if (!replyContent.value.trim()) return;
+    const content = replyContent.value[commentId];
+    if (!content || !content.trim()) {
+        showNotification("Vui lòng nhập nội dung trả lời!", "error");
+        return;
+    }
+    
     try {
-        await axios.post(`http://localhost:3000/api/baidang/traloibinhluan/${idPost.value}/${commentId}`, {
+        const response = await axios.post(`http://localhost:3000/api/baidang/traloibinhluan/${idPost.value}/${commentId}`, {
             MaKhachHang: idCustomerReplay,
-            NoiDungBinhLuan: replyContent.value
+            NoiDungBinhLuan: content
         });
-        replyContent.value = '';
+        
+        // Reset form sau khi thành công
+        replyContent.value[commentId] = '';
         showReplyForm.value[commentId] = false;
+        
         await fetchCommunityPost(idPost.value);
     } catch (error) {
         console.error('Lỗi khi gửi trả lời:', error);
+        console.error('Error response:', error.response?.data);
+        showNotification(error.response?.data?.message || "Có lỗi xảy ra khi gửi trả lời!", "error");
     }
 };
 
@@ -313,7 +326,7 @@ onMounted(() => {
                                 </div>
                             </div>
                             <div v-if="showReplyForm[comment.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
-                                <textarea v-model="replyContent"
+                                <textarea v-model="replyContent[comment.MaBinhLuan]"
                                     class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
                                     placeholder="Viết trả lời..." rows="2"></textarea>
                                 <div class="flex gap-2 justify-end">
@@ -349,7 +362,7 @@ onMounted(() => {
                                         </div>
                                     </div>
                                     <div v-if="showReplyForm[reply.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
-                                        <textarea v-model="replyContent"
+                                        <textarea v-model="replyContent[reply.MaBinhLuan]"
                                             class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
                                             placeholder="Viết trả lời..." rows="2"></textarea>
                                         <div class="flex gap-2 justify-end">
