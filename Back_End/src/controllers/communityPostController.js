@@ -151,22 +151,74 @@ exports.createCommunityPost = async (req, res) => {
   }
 }
 
+const bannedWords = [
+  "ngu", "đần", "ngu dốt", "khốn nạn", "vô học", "đồ rác rưởi",
+  "thằng", "con", "mày", "đồ dốt", "đồ điên", "chết tiệt", "vô dụng",
+  "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại",
+  "địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc",
+  "đm nó", "con cat", "con cac", "con cặc", "con cặt", "m nó", "đồ cút", "thằng chó",
+  "con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "thằng chó",
+  "đồ chó", "đồ con chó", "đồ mạt hạng", "đồ vô học", "đồ khốn",
+  "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "thằng lừa đảo", "đồ thất đức",
+  "lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct",
+  "đ mày", "dmtt", "cmnr", "súc vật", "đồ súc vật", "con súc vật", "đồ thú vật", "đồ không người",
+  "thằng súc vật", "con thú", "đồ con thú", "đồ ngu si", "đồ đần độn",
+  "đồ khờ", "đồ ngốc", "đồ si", "đồ đại ngu", "đồ bị điên",
+  "đồ phá hoại", "đồ tàn phá", "đồ hủy hoại", "đồ tệ nạn",
+  "đồ quỷ", "đồ ma", "đồ ác quỷ", "đồ quỷ dữ", "đồ tà ma",
+  "đồ chết", "đồ chết tiệt", "đồ chết dở", "đồ chết đói",
+  "đồ nghiệp", "đồ tội lỗi", "đồ phạm tội", "đồ tội phạm",
+  "hạ đẳng", "đồ hạ đẳng", "đồ kém cỏi", "đồ thua kém", "đồ dở hơi",
+  "đồ mất dạy", "đồ vô giáo dục", "đồ thô lỗ", "đồ bất lịch sự",
+  "đồ vô văn hóa", "đồ man rợ", "đồ dã man", "đồ vô ý thức",
+  "đồ bệnh hoạn", "đồ tâm thần", "đồ điên loạn", "đồ rồ dại",
+  "đồ khùng", "đồ loạn trí", "đồ mất trí", "đồ rối loạn",
+  "đánh chết", "giết chết", "xử chết", "đập chết", "phá chết",
+  "bỏ chết", "hành hạ", "tra tấn", "hủy diệt", "tiêu diệt",
+  "mẹ mày", "bố mày", "cha mày", "tổ tiên mày", "dòng họ mày",
+  "nhà mày", "gia đình mày", "cả nhà mày", "cả dòng họ mày",
+  "wtf", "stfu", "kys", "gtfo", "pos", "sob", "mf", "bs",
+  "smh", "ffs", "omfg", "jfc", "damn", "hell", "crap", "shit",
+  "bitch", "asshole", "moron", "idiot", "stupid", "dumb",
+  "thằng ranh", "con ranh", "đồ ranh con", "thằng nhãi", "con nhãi",
+  "đồ nhãi", "thằng tồi", "con tồi", "đồ tồi", "thằng xấu",
+  "con xấu", "đồ xấu", "thằng ác", "con ác", "đồ ác",
+  "đồ vô tích sự", "đồ vô tác dụng", "đồ thừa thãi", "đồ vô nghĩa",
+  "đồ phí phạm", "đồ lãng phí", "đồ hại người", "đồ phá đám",
+  "đồ quấy rầy", "đồ làm phiền", "đồ gây rối", "đồ làm loạn",
+  "xấu xí", "ghê tởm", "kinh tởm", "thảm hại", "dị hợm",
+  "biến thái", "quái vật", "đồ quái vật", "thằng quái vật",
+  "con quái vật", "đồ dị dạng", "thằng dị dạng", "con dị dạng",
+  "loz", "lol", "wtf", "omg", "fck", "fcking", "damn it",
+  "go to hell", "shut up", "get lost", "piss off", "buzz off"
+];
+
+const containsBannedWords = (text) => {
+  return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
+};
+
 const checkToxicContent = async (text) => {
-    try {
-        const response = await axios.post('http://localhost:5000/predict', { sentence: text });
-        const isToxic = response.data.prediction === 1;
-        return isToxic;
-    } catch (error) {
-        console.error('Error calling Flask API:', error.message);
-        return false;
-    }
+  try {
+    const response = await axios.post('http://localhost:5000/predict', { sentence: text });
+    const isToxic = response.data.prediction === 1;
+    return isToxic;
+  } catch (error) {
+    console.error('Error calling Flask API:', error.message);
+    return false;
+  }
 };
 
 exports.commentCommunityPost = async (req, res) => {
   const { MaKhachHang, NoiDungBinhLuan } = req.body;
 
   const isToxic = await checkToxicContent(NoiDungBinhLuan);
+  const hasBannedWords = await containsBannedWords(NoiDungBinhLuan);
+  
   if (isToxic) {
+    return res
+      .status(400)
+      .json({ message: "Bình luận chứa nội dung không phù hợp!" });
+  } else if (hasBannedWords) {
     return res
       .status(400)
       .json({ message: "Bình luận chứa nội dung không phù hợp!" });
@@ -199,7 +251,12 @@ exports.replyComment = async (req, res) => {
   const { NoiDungBinhLuan } = req.body;
 
   const isToxic = await checkToxicContent(NoiDungBinhLuan);
+  const hasBannedWords = containsBannedWords(NoiDungBinhLuan);
   if (isToxic) {
+    return res
+      .status(400)
+      .json({ message: "Bình luận chứa nội dung không phù hợp!" });
+  } else if (hasBannedWords) {
     return res
       .status(400)
       .json({ message: "Bình luận chứa nội dung không phù hợp!" });
