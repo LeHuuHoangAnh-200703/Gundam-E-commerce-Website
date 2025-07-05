@@ -6,7 +6,11 @@ import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import axios from "axios";
 import { useRouter } from 'vue-router';
-import * as XLSX from 'xlsx';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+// Gán font cho pdfMake
+pdfMake.vfs = pdfFonts;
 
 const router = useRouter();
 
@@ -189,7 +193,7 @@ const fetchEntryFormInfos = async () => {
     }
 }
 
-const exportToExcel = async (maPN) => {
+const exportToPDF = async (maPN) => {
     showConfirmDialog({
         title: 'Thông báo xác nhận',
         message: `Bạn có muốn xuất phiếu nhập kho của ${maPN} không?`,
@@ -198,6 +202,7 @@ const exportToExcel = async (maPN) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
+                // Lấy dữ liệu chi tiết phiếu nhập
                 const response = await axios.get(`http://localhost:3000/api/chitietphieunhap/phieunhap/${maPN}`);
                 const data = response.data;
 
@@ -206,43 +211,265 @@ const exportToExcel = async (maPN) => {
                     return;
                 }
 
-                // Chuyển đổi định dạng ngày và định dạng đơn giá
-                const formattedData = data.map(item => {
-                    return {
-                        'Mã Phiếu Nhập': item.MaPhieuNhap,
-                        'Mã Sản Phẩm': item.MaSanPham,
-                        'Tên Sản Phẩm': item.TenSanPham,
-                        'Số Lượng': item.SoLuong,
-                        'Giá Nhập': formatCurrency(item.GiaNhap),
-                        'Tổng Tiền': formatCurrency(item.TongTien),
-                        'Ngày Nhập': new Date(item.NgayNhap).toLocaleDateString('vi-VN')
-                    };
-                });
+                // Lấy thông tin phiếu nhập
+                const phieuNhapResponse = await axios.get(`http://localhost:3000/api/phieunhap/${maPN}`);
+                const phieuNhapInfo = phieuNhapResponse.data;
 
-                // Tạo workbook và worksheet
-                const worksheet = XLSX.utils.json_to_sheet(formattedData);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Hóa Đơn');
+                // Lấy thông tin nhà cung cấp
+                const nhaCungCapResponse = await axios.get(`http://localhost:3000/api/nhacungcap/${phieuNhapInfo.MaNhaCungCap}`);
+                const nhaCungCapInfo = nhaCungCapResponse.data;
 
-                // Tùy chỉnh tiêu đề cột
-                worksheet['!cols'] = [
-                    { wch: 15 }, // Mã Phiếu Nhập
-                    { wch: 15 }, // Mã Sản Phẩm
-                    { wch: 30 }, // Tên Sản Phẩm
-                    { wch: 10 }, // Số Lượng
-                    { wch: 15 }, // Giá Nhập
-                    { wch: 15 }, // Tổng Tiền
-                    { wch: 15 }  // Ngày Nhập
-                ];
-                // Xuất file Excel
-                XLSX.writeFile(workbook, `Phiếu nhập kho_${maPN}.xlsx`);
-                showNotification('Xuất phiếu nhập thành công!', 'success');
+                // Tính tổng tiền
+                const tongTien = data.reduce((total, item) => total + (item.SoLuong * item.GiaNhap), 0);
+
+                const docDefinition = {
+                    content: [
+                        { text: 'C3 GUNDAM STORE', style: 'header' },
+                        { text: 'Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang', style: 'subheader' },
+                        { text: 'Điện thoại: 079.965.8592', style: 'subheader' },
+                        { text: '_______________________________________________________________________________________________', alignment: 'center' },
+                        { text: '\nPHIẾU NHẬP KHO', style: 'title' },
+                        { text: `Số phiếu nhập: ${maPN}`, style: 'subheader2' },
+                        { text: `Ngày nhập kho: ${formatDateForPDF(phieuNhapInfo.NgayNhap)}`, style: 'subheader2' },
+                        { text: `Nhà cung cấp: ${nhaCungCapInfo.TenNhaCungCap || 'Không có'}`, style: 'subheader2' },
+                        { text: `Người lập phiếu: ${TenAdmin}`, style: 'subheader2' },
+                        { text: '\nCHI TIẾT SẢN PHẨM NHẬP KHO', style: 'sectionHeader' },
+                        {
+                            table: {
+                                headerRows: 1,
+                                widths: ['10%', '30%', '15%', '15%', '15%', '15%'],
+                                body: [
+                                    [
+                                        { text: 'STT', style: 'tableHeader' },
+                                        { text: 'Tên sản phẩm', style: 'tableHeader' },
+                                        { text: 'Mã SP', style: 'tableHeader' },
+                                        { text: 'Số lượng', style: 'tableHeader' },
+                                        { text: 'Giá nhập', style: 'tableHeader' },
+                                        { text: 'Thành tiền', style: 'tableHeader' }
+                                    ],
+                                    ...data.map((product, index) => [
+                                        { text: (index + 1).toString(), alignment: 'center', fontSize: 9 },
+                                        { text: product.TenSanPham || 'N/A', fontSize: 9 },
+                                        { text: product.MaSanPham || 'N/A', alignment: 'center', fontSize: 9 },
+                                        { text: (product.SoLuong || 0).toString(), alignment: 'center', fontSize: 9 },
+                                        { text: formatCurrencyForPDF(product.GiaNhap || 0), alignment: 'right', fontSize: 9 },
+                                        { text: formatCurrencyForPDF((product.SoLuong || 0) * (product.GiaNhap || 0)), alignment: 'right', fontSize: 9 }
+                                    ])
+                                ]
+                            },
+                            layout: {
+                                hLineWidth: function (i, node) {
+                                    return 1;
+                                },
+                                vLineWidth: function (i, node) {
+                                    return 1;
+                                },
+                                hLineColor: function (i, node) {
+                                    return '#cccccc';
+                                },
+                                vLineColor: function (i, node) {
+                                    return '#cccccc';
+                                }
+                            }
+                        },
+                        { text: '_______________________________________________________________________________________________', alignment: 'center' },
+                        {
+                            text: [
+                                { text: 'Tổng tiền: ', style: 'normalText' },
+                                { text: `${formatCurrencyForPDF(tongTien)}`, style: 'boldText' }
+                            ],
+                            alignment: 'right',
+                            margin: [0, 5, 0, 5]
+                        },
+                        {
+                            text: [
+                                { text: 'Bằng chữ: ', style: 'normalText' },
+                                { text: `${convertNumberToWords(tongTien)} đồng`, style: 'boldText' }
+                            ],
+                            margin: [0, 5, 0, 20]
+                        },
+                        {
+                            columns: [
+                                {
+                                    text: 'Người lập phiếu',
+                                    alignment: 'center',
+                                    margin: [0, 0, 0, 20],
+                                    width: '33,3%'
+                                },
+                                {
+                                    text: 'Người giao hàng',
+                                    alignment: 'center',
+                                    margin: [0, 0, 0, 20],
+                                    width: '33,3%'
+                                },
+                                {
+                                    text: 'Thủ kho',
+                                    alignment: 'center',
+                                    margin: [0, 0, 0, 20],
+                                    width: '33,3%'
+                                }
+                            ]
+                        },
+                        {
+                            columns: [
+                                { text: '(Ký, ghi rõ họ tên)', alignment: 'center', fontSize: 9 },
+                                { text: '(Ký, ghi rõ họ tên)', alignment: 'center', fontSize: 9 },
+                                { text: '(Ký, ghi rõ họ tên)', alignment: 'center', fontSize: 9 }
+                            ]
+                        },
+                        {
+                            columns: [
+                                { text: '_________________________', alignment: 'center' },
+                                { text: '_________________________', alignment: 'center' },
+                                { text: '_________________________', alignment: 'center' }
+                            ]
+                        }
+                    ],
+                    styles: {
+                        header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
+                        title: { fontSize: 16, bold: true, alignment: 'center', margin: [0, 10, 0, 5] },
+                        subheader: { fontSize: 10, margin: [0, 2, 0, 2], alignment: 'center' },
+                        subheader2: { fontSize: 10, margin: [0, 2, 0, 2] },
+                        sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] },
+                        total: { fontSize: 12, bold: true, alignment: 'right', margin: [0, 5, 0, 5] },
+                        tableHeader: { fontSize: 9, bold: true, alignment: 'center' },
+                        tableCell: { fontSize: 9 },
+                        normalText: { fontSize: 12, bold: false },
+                        boldText: { fontSize: 12, bold: true },
+                    },
+                    pageSize: 'A4',
+                    pageMargins: [40, 60, 40, 60]
+                };
+
+                // Tạo và tải file PDF
+                pdfMake.createPdf(docDefinition).download(`PhieuNhapKho_${maPN}.pdf`);
+                showNotification('Xuất phiếu nhập kho thành công!', 'success');
             } catch (error) {
-                console.error('Lỗi khi xuất Excel:', error.message);
-                showNotification('Có lỗi xảy ra khi xuất Excel!', 'error');
+                console.error('Lỗi khi xuất phiếu nhập kho:', error.message);
+                showNotification('Có lỗi xảy ra khi xuất phiếu nhập kho!', 'error');
             }
         }
     });
+};
+
+// Hàm format currency cho PDF
+const formatCurrencyForPDF = (amount) => {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+};
+
+// Hàm format date cho PDF
+const formatDateForPDF = (date) => {
+    return new Date(date).toLocaleDateString('vi-VN');
+};
+
+// Hàm chuyển đổi số thành chữ đơn giản
+const convertNumberToWords = (num) => {
+    if (num === 0) return "Không";
+
+    const ones = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+    const tens = ["", "", "hai mười", "ba mười", "bốn mười", "năm mười", "sáu mười", "bảy mười", "tám mười", "chín mười"];
+
+    // Hàm xử lý số có 3 chữ số
+    const convertHundreds = (n) => {
+        let result = "";
+        let hundreds = Math.floor(n / 100);
+        let remainder = n % 100;
+
+        if (hundreds > 0) {
+            result += ones[hundreds] + " trăm";
+            if (remainder > 0) result += " ";
+        }
+
+        if (remainder >= 20) {
+            let tensDigit = Math.floor(remainder / 10);
+            let onesDigit = remainder % 10;
+            result += ones[tensDigit] + " mười";
+            if (onesDigit > 0) {
+                if (onesDigit === 1) {
+                    result += " một";
+                } else if (onesDigit === 5 && tensDigit > 1) {
+                    result += " lăm";
+                } else {
+                    result += " " + ones[onesDigit];
+                }
+            }
+        } else if (remainder >= 10) {
+            let onesDigit = remainder % 10;
+            result += "mười";
+            if (onesDigit > 0) {
+                if (onesDigit === 5) {
+                    result += " lăm";
+                } else {
+                    result += " " + ones[onesDigit];
+                }
+            }
+        } else if (remainder > 0) {
+            result += ones[remainder];
+        }
+
+        return result;
+    };
+
+    // Xử lý số lớn
+    if (num < 1000) {
+        return convertHundreds(num);
+    } else if (num < 1000000) {
+        let thousands = Math.floor(num / 1000);
+        let remainder = num % 1000;
+        let result = convertHundreds(thousands) + " nghìn";
+        if (remainder > 0) {
+            result += " " + convertHundreds(remainder);
+        }
+        return result;
+    } else if (num < 1000000000) {
+        let millions = Math.floor(num / 1000000);
+        let remainder = num % 1000000;
+        let result = convertHundreds(millions) + " triệu";
+        if (remainder > 0) {
+            if (remainder >= 1000) {
+                let thousands = Math.floor(remainder / 1000);
+                let finalRemainder = remainder % 1000;
+                result += " " + convertHundreds(thousands) + " nghìn";
+                if (finalRemainder > 0) {
+                    result += " " + convertHundreds(finalRemainder);
+                }
+            } else {
+                result += " " + convertHundreds(remainder);
+            }
+        }
+        return result;
+    } else {
+        let billions = Math.floor(num / 1000000000);
+        let remainder = num % 1000000000;
+        let result = convertHundreds(billions) + " tỷ";
+        if (remainder > 0) {
+            if (remainder >= 1000000) {
+                let millions = Math.floor(remainder / 1000000);
+                let finalRemainder = remainder % 1000000;
+                result += " " + convertHundreds(millions) + " triệu";
+                if (finalRemainder >= 1000) {
+                    let thousands = Math.floor(finalRemainder / 1000);
+                    let lastRemainder = finalRemainder % 1000;
+                    result += " " + convertHundreds(thousands) + " nghìn";
+                    if (lastRemainder > 0) {
+                        result += " " + convertHundreds(lastRemainder);
+                    }
+                } else if (finalRemainder > 0) {
+                    result += " " + convertHundreds(finalRemainder);
+                }
+            } else if (remainder >= 1000) {
+                let thousands = Math.floor(remainder / 1000);
+                let finalRemainder = remainder % 1000;
+                result += " " + convertHundreds(thousands) + " nghìn";
+                if (finalRemainder > 0) {
+                    result += " " + convertHundreds(finalRemainder);
+                }
+            } else {
+                result += " " + convertHundreds(remainder);
+            }
+        }
+        return result;
+    }
 };
 
 const formatDate = (date) => {
@@ -341,7 +568,7 @@ onMounted(() => {
                         </form>
                     </div>
                     <div class="flex justify-end">
-                        <button @click="exportToExcel(idEntryForm)"
+                        <button @click="exportToPDF(idEntryForm)"
                             class="bg-[#003171] text-white font-semibold py-3 px-4 rounded-md text-[14px]"><i
                                 class="fa-solid fa-plus mr-2"></i> Xuất phiếu nhập</button>
                     </div>

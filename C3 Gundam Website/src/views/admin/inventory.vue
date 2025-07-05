@@ -373,7 +373,6 @@ onUnmounted(() => {
                         Chế độ quét toàn cục đang BẬT. Bạn có thể quét mã barcode bất kỳ lúc nào.
                         <span v-if="barcodeBuffer" class="ml-2 font-mono">{{ barcodeBuffer }}</span>
                     </div>
-                    
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">

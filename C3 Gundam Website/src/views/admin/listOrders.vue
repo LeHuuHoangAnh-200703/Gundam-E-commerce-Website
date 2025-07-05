@@ -261,7 +261,7 @@ const exportOrderToPDF = async (order) => {
                             columns: [
                                 { text: '_________________________', alignment: 'center' },
                                 { text: '_________________________', alignment: 'center' },
-                                { text: `${order.DiaChiNhanHang[0]?.TenNguoiNhan || 'Không có'}`, alignment: 'center' }
+                                { text: '_________________________', alignment: 'center' }
                             ]
                         }
                     ],
