@@ -242,7 +242,7 @@ const addOrders = async () => {
                 await axios.post(`http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`);
                 setTimeout(() => {
                     router.push('/orders_history');
-                }, 2000);
+                }, 3000);
                 localStorage.removeItem("selectedProducts");
             } catch (error) {
                 showNotification(error.response?.data?.message || "Đặt hàng thất bại!", "error");
@@ -422,7 +422,7 @@ watch(() => formData.value.discountCode, () => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div class="bbg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center flex-grow">
             <div class="w-full m-4">

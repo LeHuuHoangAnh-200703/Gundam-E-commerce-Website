@@ -103,7 +103,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header_Home />
         <h1 v-if="listProducts.length > 0" class="mb-10 mt-5 m-5 lg:mx-[210px] text-white font-bold text-[20px]">Kết quả tìm kiếm của "{{ searchQuery
             }}"</h1>

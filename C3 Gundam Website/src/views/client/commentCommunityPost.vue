@@ -246,166 +246,229 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative mb-5 m-2 lg:mx-[200px] flex lg:flex-row flex-col flex-grow gap-2">
-            <div class="flex flex-col gap-5 w-full lg:w-[50%]">
-                <div class="bg-gray-700 rounded-lg border-2 flex flex-col gap-4">
-                    <div class="pt-4 px-4 flex flex-col gap-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex gap-2">
-                                <img :src="avatarCustomer ? `${avatarCustomer}` : '/src/assets/img/avatar.jpg'"
-                                    class="w-12 h-12 lg:w-12 lg:h-12 rounded-full object-cover" alt="">
+        <div class="relative mb-8 mx-4 lg:mx-[120px] xl:mx-[200px] flex lg:flex-row flex-col flex-grow gap-6 mt-6">
+            <div class="flex flex-col gap-6 w-full lg:w-[55%]">
+                <div class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
+                    <div class="p-6 pb-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <img :src="avatarCustomer ? `${avatarCustomer}` : '/src/assets/img/avatar.jpg'"
+                                        class="w-14 h-14 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg" alt="Avatar">
+                                    <div class="absolute -bottom-0 -right-[2px] w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                                </div>
                                 <div class="flex flex-col">
-                                    <p class="text-white font-semibold text-[18px]">{{ nameCustomer }}</p>
-                                    <p class="text-white text-[12px] font-medium">{{ formatTime(timePost) }}</p>
+                                    <h3 class="text-white font-bold text-lg tracking-wide">{{ nameCustomer }}</h3>
+                                    <p class="text-gray-300 text-sm font-medium flex items-center gap-2">
+                                        <i class="fa-regular fa-clock text-blue-400"></i>
+                                        {{ formatTime(timePost) }}
+                                    </p>
                                 </div>
                             </div>
-                            <button @click="deletePost(idPost)">
-                                <i class="fa-solid fa-trash text-white text-[18px]"></i>
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button @click="deletePost(idPost)" 
+                                    class="w-12 h-12 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-all duration-200">
+                                    <i class="fa-solid fa-trash text-lg"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="text-white font-medium font-sans">
-                            <p :class="[
-                                'transition-all duration-300',
-                                !isContentExpanded && isContentLong ? 'line-clamp-3' : ''
-                            ]">{{ displayContent }}</p>
+                        <div class="text-gray-100 leading-relaxed">
+                            <p class="text-base transition-all duration-300 ease-in-out">
+                                {{ displayContent }}
+                            </p>
                             <button 
                                 v-if="isContentLong"
                                 @click="toggleContent"
-                                class="text-blue-400 hover:text-blue-300 text-sm mt-1 transition-colors duration-200"
+                                class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm mt-3 px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition-all duration-200 border border-blue-500/20"
                             >
-                                {{ isContentExpanded ? 'Thu gọn' : 'Xem thêm' }}
+                                <span>{{ isContentExpanded ? 'Thu gọn' : 'Xem thêm' }}</span>
+                                <i :class="isContentExpanded ? 'fa-chevron-up' : 'fa-chevron-down'" class="fa-solid text-xs"></i>
                             </button>
                         </div>
                     </div>
-                    <div :class="[
-                        'grid gap-1',
-                        images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
-                    ]">
-                        <img v-for="(img, index) in images" :key="index" :src="img" @click="openImageModal(img)" :class="[
-                            'w-full object-cover cursor-pointer hover:opacity-80 transition-opacity',
-                            images.length === 1 ? 'max-h-[400px]' : 'max-h-[200px]',
-                            images.length === 3 && index === 0 ? 'col-span-2' : ''
-                        ]" alt="">
+                    <div v-if="images.length > 0" class="px-6 pb-4">
+                        <div :class="[
+                            'grid gap-2 rounded-xl overflow-hidden',
+                            images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                        ]">
+                            <div v-for="(img, index) in images" :key="index" 
+                                :class="[
+                                    'relative overflow-hidden rounded-lg group/img cursor-pointer',
+                                    images.length === 3 && index === 0 ? 'col-span-2' : ''
+                                ]"
+                                @click="openImageModal(img)">
+                                <img :src="img" 
+                                    :class="[
+                                        'w-full object-cover transition-all duration-300 group-hover/img:scale-105',
+                                        images.length === 1 ? 'max-h-[450px]' : 'max-h-[220px]'
+                                    ]" 
+                                    alt="Post image">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300"></div>
+                                <div class="absolute top-3 right-3 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                    <div class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-expand text-gray-800 text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="px-4 flex flex-col gap-2 mb-3">
-                        <div class="flex items-center justify-between">
+                    <div class="px-6 pb-6">
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-600/30">
                             <div></div>
-                            <div class="flex gap-2 items-center">
-                                <p class="text-white font-medium">{{ comments ? comments.length : 0 }}</p>
-                                <i class="fa-solid fa-comment text-white text-[18px]"></i>
+                            <div class="flex items-center gap-2 text-gray-300">
+                                <span class="text-sm font-medium">{{ comments ? comments.length : 0 }}</span>
+                                <i class="fa-solid fa-comment text-blue-400"></i>
+                                <span class="text-sm">bình luận</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-700 rounded-lg border-2 w-full lg:w-[50%] flex flex-col gap-4 p-4 overflow-hidden">
-                <div class="flex flex-col gap-2 flex-grow max-h-[calc(100vh-25vh)] overflow-y-auto">
-                    <div v-for="(comment, index) in comments" :key="index"
-                        :class="comment.TraLoiCho === null ? 'flex' : 'hidden'" class="gap-2">
-                        <img :src="comment.HinhAnhKhachHang ? `${comment.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                            class="w-8 h-8 rounded-full object-cover" alt="Avatar" />
-                        <div class="flex flex-col gap-1 w-full">
-                            <div class="bg-gray-600 rounded-lg p-2">
-                                <p class="text-white text-[12px] font-semibold">{{ comment.TenKhachHang }}</p>
-                                <p class="text-white text-[14px]">{{ comment.NoiDungBinhLuan }}</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-white text-[12px]">{{ formatTime(new Date(comment.ThoiGian)) }}</p>
-                                <div class="flex gap-2">
-                                    <button @click="deleteComment(comment.MaBinhLuan)"
-                                        :class="comment.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
-                                        class="text-gray-300 text-[12px] text-end hover:text-white">
-                                        Xóa
-                                    </button>
-                                    <button @click="toggleReplyForm(comment.MaBinhLuan)"
-                                        class="text-gray-300 text-[12px] text-end hover:text-white">
-                                        Trả lời
-                                    </button>
+            <div class="w-full lg:w-[45%] flex flex-col">
+                <div class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl flex flex-col overflow-hidden">
+                    <div class="p-6 pb-4 border-b border-gray-600/30">
+                        <h2 class="text-white font-bold text-xl flex items-center gap-3">
+                            <i class="fa-solid fa-comments text-blue-400"></i>
+                            Bình luận
+                            <span class="flex items-center justify-center text-sm font-normal text-gray-400 bg-gray-600/50 w-8 h-8 rounded-full">
+                                {{ comments ? comments.length : 0 }}
+                            </span>
+                        </h2>
+                    </div>
+                    <div class="flex-1 overflow-y-auto max-h-[calc(100vh-165px)] p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                        <div v-for="(comment, index) in comments" :key="index"
+                            :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
+                            <div class="flex gap-3 group/comment">
+                                <div class="flex-shrink-0">
+                                    <img :src="comment.HinhAnhKhachHang ? `${comment.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
+                                        class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-600/50" alt="Avatar" />
                                 </div>
-                            </div>
-                            <div v-if="showReplyForm[comment.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
-                                <textarea v-model="replyContent[comment.MaBinhLuan]"
-                                    class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
-                                    placeholder="Viết trả lời..." rows="2"></textarea>
-                                <div class="flex gap-2 justify-end">
-                                    <button @click="submitReply(comment.MaBinhLuan)"
-                                        class="bg-blue-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-blue-600">Gửi</button>
-                                    <button @click="toggleReplyForm(comment.MaBinhLuan)"
-                                        class="bg-gray-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-gray-600">Hủy</button>
-                                </div>
-                            </div>
-                            <div v-for="reply in replies(comment.MaBinhLuan)" :key="reply.MaBinhLuan"
-                                class="ml-4 flex gap-2 items-start relative">
-                                <img :src="reply.HinhAnhKhachHang ? `${reply.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                                    class="w-8 h-8 rounded-full object-cover" alt="Avatar" />
-                                <div class="flex flex-col gap-1 w-full">
-                                    <div class="bg-gray-600 rounded-lg p-2">
-                                        <p class="text-white text-[12px] font-semibold">{{ reply.TenKhachHang }}</p>
-                                        <p class="text-white text-[14px]"><span class="font-semibold mr-1">{{
-                                            reply.ReplyToTenKhachHang }}</span>{{ reply.NoiDungBinhLuan }}</p>
+                                <div class="flex-1 space-y-2">
+                                    <div class="bg-gradient-to-r from-gray-700/80 to-gray-600/80 rounded-2xl p-4 shadow-md">
+                                        <h4 class="text-white text-sm font-bold mb-1">{{ comment.TenKhachHang }}</h4>
+                                        <p class="text-gray-200 text-sm leading-relaxed">{{ comment.NoiDungBinhLuan }}</p>
                                     </div>
-                                    <div class="flex justify-between items-center">
-                                        <p class="text-white text-[12px]">{{ formatTime(new Date(reply.ThoiGian)) }}
-                                        </p>
-                                        <div class="flex gap-2">
-                                            <button @click="deleteComment(reply.MaBinhLuan)"
-                                                :class="reply.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
-                                                class="text-gray-300 text-[12px] text-end hover:text-white">
-                                                Xóa
+                                    <div class="flex items-center justify-between px-2">
+                                        <span class="text-gray-400 text-xs">{{ formatTime(new Date(comment.ThoiGian)) }}</span>
+                                        <div class="flex items-center gap-3 opacity-0 group-hover/comment:opacity-100 transition-opacity duration-200">
+                                            <button @click="deleteComment(comment.MaBinhLuan)"
+                                                :class="comment.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
+                                                class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 transition-all duration-200">
+                                                <i class="fa-solid fa-trash mr-1"></i>Xóa
                                             </button>
-                                            <button @click="toggleReplyForm(reply.MaBinhLuan)"
-                                                class="text-gray-300 text-[12px] text-end hover:text-white">
-                                                Trả lời
+                                            <button @click="toggleReplyForm(comment.MaBinhLuan)"
+                                                class="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition-all duration-200">
+                                                <i class="fa-solid fa-reply mr-1"></i>Trả lời
                                             </button>
                                         </div>
                                     </div>
-                                    <div v-if="showReplyForm[reply.MaBinhLuan]" class="mt-2 ml-4 flex flex-col gap-2">
-                                        <textarea v-model="replyContent[reply.MaBinhLuan]"
-                                            class="bg-gray-600 border-2 p-2 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
-                                            placeholder="Viết trả lời..." rows="2"></textarea>
+                                    <div v-if="showReplyForm[comment.MaBinhLuan]" 
+                                        class="ml-4 mt-3 p-4 bg-gray-800/50 rounded-xl border border-gray-600/30 space-y-3">
+                                        <textarea v-model="replyContent[comment.MaBinhLuan]"
+                                            class="w-full bg-gray-700/80 border border-gray-600/50 rounded-lg p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all duration-200"
+                                            placeholder="Viết trả lời của bạn..." 
+                                            rows="2"></textarea>
                                         <div class="flex gap-2 justify-end">
-                                            <button @click="submitReply(reply.MaBinhLuan)"
-                                                class="bg-blue-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-blue-600">Gửi</button>
-                                            <button @click="toggleReplyForm(reply.MaBinhLuan)"
-                                                class="bg-gray-500 text-white px-4 py-2 rounded font-semibold text-[12px] hover:bg-gray-600">Hủy</button>
+                                            <button @click="submitReply(comment.MaBinhLuan)"
+                                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
+                                                <i class="fa-solid fa-paper-plane"></i>Gửi
+                                            </button>
+                                            <button @click="toggleReplyForm(comment.MaBinhLuan)"
+                                                class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-lg transition-colors duration-200">
+                                                Hủy
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div v-for="reply in replies(comment.MaBinhLuan)" :key="reply.MaBinhLuan"
+                                        class="ml-6 flex gap-3 group/reply">
+                                        <div class="flex-shrink-0">
+                                            <img :src="reply.HinhAnhKhachHang ? `${reply.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
+                                                class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-600/50" alt="Avatar" />
+                                        </div>
+                                        <div class="flex-1 space-y-2">
+                                            <div class="bg-gradient-to-r from-gray-600/60 to-gray-500/60 rounded-xl p-3 shadow-sm">
+                                                <h5 class="text-white text-xs font-bold mb-1">{{ reply.TenKhachHang }}</h5>
+                                                <p class="text-gray-200 text-xs leading-relaxed">
+                                                    <span v-if="reply.ReplyToTenKhachHang" class="text-blue-400 font-medium">@{{ reply.ReplyToTenKhachHang }}</span>
+                                                    {{ reply.NoiDungBinhLuan }}
+                                                </p>
+                                            </div>
+                                            <div class="flex items-center justify-between px-2">
+                                                <span class="text-gray-400 text-xs">{{ formatTime(new Date(reply.ThoiGian)) }}</span>
+                                                <div class="flex items-center gap-2 opacity-0 group-hover/reply:opacity-100 transition-opacity duration-200">
+                                                    <button @click="deleteComment(reply.MaBinhLuan)"
+                                                        :class="reply.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
+                                                        class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 transition-all duration-200">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                    <button @click="toggleReplyForm(reply.MaBinhLuan)"
+                                                        class="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition-all duration-200">
+                                                        <i class="fa-solid fa-reply"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div v-if="showReplyForm[reply.MaBinhLuan]" 
+                                                class="ml-4 mt-3 p-3 bg-gray-800/50 rounded-xl border border-gray-600/30 space-y-3">
+                                                <textarea v-model="replyContent[reply.MaBinhLuan]"
+                                                    class="w-full bg-gray-700/80 border border-gray-600/50 rounded-lg p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all duration-200"
+                                                    placeholder="Viết trả lời..." 
+                                                    rows="2"></textarea>
+                                                <div class="flex gap-2 justify-end">
+                                                    <button @click="submitReply(reply.MaBinhLuan)"
+                                                        class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200">
+                                                        Gửi
+                                                    </button>
+                                                    <button @click="toggleReplyForm(reply.MaBinhLuan)"
+                                                        class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-lg transition-colors duration-200">
+                                                        Hủy
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div v-if="comments.length <= 0"
-                        class="flex justify-center items-center m-auto w-full rounded-md p-4">
-                        <div class="flex flex-col items-center justify-center gap-3">
-                            <p class="font-semibold text-white text-[20px] text-center">Hiện tại không có bình luận nào!
-                            </p>
-                            <img src="../../assets/img/empty_client.png" class="w-[140px]" alt="">
+                        <div v-if="comments.length <= 0" class="flex flex-col items-center justify-center py-12 space-y-4">
+                            <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
+                                <i class="fa-regular fa-comments text-gray-400 text-2xl"></i>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="text-white font-semibold text-lg mb-2">Chưa có bình luận nào</h3>
+                                <p class="text-gray-400 text-sm">Hãy là người đầu tiên bình luận về bài đăng này!</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <hr class="bg-white">
-                <div class="flex gap-3">
-                    <input type="text" v-model="newComment"
-                        class="bg-gray-600 border-2 p-4 rounded-lg items-center w-full h-full text-[12px] font-semibold tracking-wider text-white focus:outline-none"
-                        placeholder="Viết bình luận ..." />
-                    <button @click="addComment" class="bg-gray-600 px-4 py-3 rounded-lg border-2"><i
-                            class="fa-solid fa-arrow-up text-white text-[16px] font-bold"></i></button>
+                    <div class="p-6 border-t border-gray-600/30 bg-gray-800/50">
+                        <div class="flex gap-3 items-end">
+                            <div class="flex-1 relative">
+                                <textarea v-model="newComment"
+                                    class="w-full bg-gray-700/80 border border-gray-600/50 rounded-xl p-4 pr-12 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all duration-200"
+                                    placeholder="Viết bình luận của bạn..."
+                                    rows="2"
+                                    @keydown.enter.prevent="addComment"></textarea>
+                                <button @click="addComment" 
+                                    class="absolute right-3 bottom-3 w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div v-if="showImageModal" @click="closeImageModal"
-            class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-2 sm:p-4 md:p-6 lg:p-8">
-            <div
-                class="relative w-full h-full max-w-[95vw] max-h-[95vh] sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[85vw] md:max-h-[85vh] lg:max-w-[80vw] lg:max-h-[80vh] xl:max-w-[70vw] xl:max-h-[70vh] flex items-center justify-center">
-                <div class="relative inline-block">
+            class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div class="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
+                <div class="relative group">
                     <img :src="selectedImage" @click.stop
                         class="lg:max-w-[70vw] lg:max-h-[70vh] max-w-full max-h-full w-auto h-auto object-contain border-4 sm:border-6 md:border-8 border-white"
                         alt="Enlarged image">
                     <button @click="closeImageModal"
-                        class="absolute -top-4 -right-2 text-white hover:text-gray-300 transition-colors z-10 bg-[#DC143C] hover:bg-red-600 rounded-full w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-xmark text-xs sm:text-sm md:text-base lg:text-lg"></i>
+                        class="absolute -top-4 -right-4 w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110">
+                        <i class="fa-solid fa-times text-lg"></i>
                     </button>
                 </div>
             </div>
@@ -419,4 +482,65 @@ onMounted(() => {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* Custom scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #374151;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #6B7280;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+}
+
+/* Custom shadow utilities */
+.shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Smooth animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Gradient text */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Hover effects */
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+/* Glass effect */
+.glass-effect {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+</style>

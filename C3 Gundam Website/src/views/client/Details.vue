@@ -317,7 +317,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
             <p class="text-gray-300 font-semibold text-[15px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
@@ -337,15 +337,14 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                 </div>
                 <div class="flex flex-col gap-4 w-full lg:w-[55%]">
                     <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
+                    <p class="text-white font-semibold text-[24px]"><span class="text-[#FFD700]">{{ formatCurrency(price) }}
+                        VNĐ</span></p>
                     <div class="flex flex-col gap-1">
-                        <p class="text-white font-medium">Mã sản phẩm: {{ idProduct }}</p>
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
                         <p class="text-white font-medium">Tình trạng: {{ (quantity > 0) ? 'Còn hàng' : 'Hết hàng' }}</p>
                         <p class="text-white font-medium">Đã bán: {{ sales || 0 }} sản phẩm</p>
                     </div>
-                    <p class="text-white font-medium">Giá bán: <span class="text-[#FFD700]">{{ formatCurrency(price) }}
-                            VNĐ</span></p>
                     <p class="text-white font-medium">Số lượng: </p>
                     <div class="flex gap-4 items-center">
                         <button @click="decreaseQuantity"
@@ -363,8 +362,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <li class="list-disc">Sản phẩm Gunpla chính hãng của Bandai, sản xuất tại Nhật Bản.</li>
                         <li class="list-disc">Sản phẩm giúp phát triển trí não và rèn luyện tính kiên nhẫn cho người
                             chơi.</li>
-                        <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán</li>
-                        <li class="list-disc">Phân phối bởi SOTSU-SUNRISE.</li>
+                        <li class="list-disc">Sản phẩm gắn với nhau bằng khớp nối, không dùng keo dán.</li>
+                        <li class="list-disc">Phân phối bởi C3 GUNDAM STORE.</li>
                     </ul>
                     <ul v-else class="flex flex-col gap-2 text-white ml-4">
                         <li class="list-disc">Sử dụng cho học sinh các trường tiểu học và trung học.</li>
@@ -461,7 +460,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                 <div class="flex justify-center items-end">
                     <p
                         class="border-x-2 border-t-2 w-[40%] lg:w-[25%] text-center inline-block px-6 py-2 text-[14px] lg:text-[20px] font-semibold text-white">
-                        Video minh họa</p>
+                        Video chi tiết</p>
                     <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
                 </div>
                 <div class="flex gap-5 my-8 lg:flex-row flex-col">
@@ -484,7 +483,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         Đánh giá</p>
                     <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
                 </div>
-                <div class="bg-[#242424] py-4 px-4 lg:px-[40px] my-6 [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
+                <div class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm py-4 px-4 lg:px-[40px] my-6 [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div class="flex lg:flex-row flex-col gap-5 items-center justify-center lg:justify-between">
                         <div class="flex flex-col gap-2">
                             <p class="text-white text-[24px]"><span class="text-[30px]">{{ totalQuality }} </span> trên
@@ -492,10 +491,10 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         </div>
                         <div class="flex gap-4 justify-center flex-wrap">
                             <button @click.prevent="selected(6)"
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Tất
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-blue-500/90 hover:text-blue-500/90 ease-out duration-300 transition-all">Tất
                                 cả</button>
                             <button v-for="(star, index) in 5" :key="index" @click.prevent="selected(star)"
-                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">{{
+                                class="px-10 py-2 border-2 bg-white font-semibold hover:border-blue-500/90 hover:text-blue-500/90 ease-out duration-300 transition-all">{{
                                     star }}
                                 sao</button>
                         </div>
@@ -542,9 +541,9 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                     </div>
                     <div class="flex justify-center items-center gap-4 mt-4">
                         <button @click="prevPage" :disabled="currentPage === 1"
-                            class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Trước</button>
+                            class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-blue-500/90 hover:text-blue-500/90 ease-out duration-300 transition-all">Trước</button>
                         <button @click="nextPage" :disabled="currentPage === totalPages"
-                            class="px-5 py-2 border-2 cursor-pointer bg-white font-semibold hover:border-[#DB3F4C] hover:text-[#DB3F4C] ease-out duration-300 transition-all">Sau</button>
+                            class="px-5 py-2 border-2 cursor-pointer bg-white font-semibold hover:border-blue-500/90 hover:text-blue-500/90 ease-out duration-300 transition-all">Sau</button>
                     </div>
                 </div>
             </div>

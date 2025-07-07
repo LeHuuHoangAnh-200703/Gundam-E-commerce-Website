@@ -159,7 +159,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header_Home @search="handleSearch" />
         <div class="w-full bg-[#DB3F4C]">
             <div
@@ -177,7 +177,7 @@ onMounted(() => {
                     </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="../../assets/img/banner.png" class="w-[350px]" alt="">
+                    <img src="../../assets/img/banner_new.png" class="w-[350px]" alt="">
                 </div>
             </div>
         </div>

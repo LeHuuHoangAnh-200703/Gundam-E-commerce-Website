@@ -166,7 +166,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-[#1A1D27] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+  <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
     <Header />
     <div class="relative mb-5 lg:mx-[200px] flex justify-center items-center flex-grow">
       <div class="w-full m-4">

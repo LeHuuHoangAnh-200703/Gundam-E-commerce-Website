@@ -273,7 +273,7 @@ const loginWithGoogle = () => {
                     <div class="hidden lg:block bg-[#DB3F4C] rounded-md p-4 lg:w-1/2">
                         <p class="text-white font-bold text-[24px]">C3 GUNDAM</p>
                         <div class="flex flex-col gap-2 items-center justify-center mt-16">
-                            <img src="https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/banner_ycqsds.png"
+                            <img src="../../assets/img/banner_new.png"
                                 class="w-[400px]" alt="banner" />
                             <p class="text-[18px] lg:text-[24px] text-white font-semibold uppercase text-center">
                                 C3 GUNDAM xin chào!
