@@ -83,6 +83,7 @@ exports.getCommunityPost = async (req, res) => {
       ...post._doc,
       TenKhachHang: customer ? customer.TenKhachHang : "Không xác định",
       HinhAnhKhachHang: customer ? customer.Image : null,
+      EmailKhachHang: customer ? customer.Email : 'Không xác định',
       BinhLuan: binhLuanWithCustomer,
     };
 
@@ -102,14 +103,16 @@ exports.getCommunityPostById = async (req, res) => {
     customers.forEach(customer => {
       customerMap[customer.MaKhachHang] = {
         TenKhachHang: customer.TenKhachHang,
-        HinhAnhKhachHang: customer.Image
+        HinhAnhKhachHang: customer.Image,
+        EmailKhachHang: customer.Email
       };
     });
 
     const communityPost = posts.map(post => ({
       ...post.toObject(),
       TenKhachHang: customerMap[post.MaKhachHang]?.TenKhachHang || "Không xác định",
-      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null
+      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null,
+      EmailKhachHang: customerMap[post.MaKhachHang]?.EmailKhachHang
     }));
     res.status(200).json(communityPost);
   } catch (error) {

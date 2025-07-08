@@ -15,6 +15,7 @@ const idCustomerLocal = localStorage.getItem('MaKhachHang');
 const idPost = ref('');
 const avatarCustomer = ref('');
 const nameCustomer = ref('');
+const emailCustomer = ref('');
 const timePost = ref('');
 const content = ref('');
 const images = ref([]);
@@ -118,6 +119,7 @@ const fetchCommunityPost = async (idBaiDang) => {
         idCustomer.value = response.data.MaKhachHang;
         avatarCustomer.value = response.data.HinhAnhKhachHang;
         nameCustomer.value = response.data.TenKhachHang;
+        emailCustomer.value = response.data.EmailKhachHang;
         timePost.value = new Date(response.data.ThoiGianDang);
         content.value = response.data.NoiDung;
         images.value = response.data.HinhAnh;
@@ -164,17 +166,17 @@ const submitReply = async (commentId) => {
         showNotification("Vui lòng nhập nội dung trả lời!", "error");
         return;
     }
-    
+
     try {
         const response = await axios.post(`http://localhost:3000/api/baidang/traloibinhluan/${idPost.value}/${commentId}`, {
             MaKhachHang: idCustomerReplay,
             NoiDungBinhLuan: content
         });
-        
+
         // Reset form sau khi thành công
         replyContent.value[commentId] = '';
         showReplyForm.value[commentId] = false;
-        
+
         await fetchCommunityPost(idPost.value);
     } catch (error) {
         console.error('Lỗi khi gửi trả lời:', error);
@@ -246,21 +248,31 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative mb-8 mx-4 lg:mx-[120px] xl:mx-[200px] flex lg:flex-row flex-col flex-grow gap-6 mt-6">
+        <div class="relative mb-8 mx-4 lg:mx-[200px] flex lg:flex-row flex-col flex-grow gap-6 mt-6 items-stretch">
             <div class="flex flex-col gap-6 w-full lg:w-[55%]">
-                <div class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
+                <div
+                    class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
                     <div class="p-6 pb-4">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-4">
                                 <div class="relative">
                                     <img :src="avatarCustomer ? `${avatarCustomer}` : '/src/assets/img/avatar.jpg'"
-                                        class="w-14 h-14 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg" alt="Avatar">
-                                    <div class="absolute -bottom-0 -right-[2px] w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                                        class="w-14 h-14 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg"
+                                        alt="Avatar">
+                                    <div
+                                        class="absolute -bottom-0 -right-[2px] w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800">
+                                    </div>
                                 </div>
-                                <div class="flex flex-col">
-                                    <h3 class="text-white font-bold text-lg tracking-wide">{{ nameCustomer }}</h3>
+                                <div class="flex flex-col gap-2 lg:gap-0">
+                                    <div class="flex gap-2 items-start lg:items-center flex-col lg:flex-row">
+                                        <h3 class="text-white font-bold text-lg tracking-wide">{{ nameCustomer }}</h3>
+                                        <p :class="emailCustomer === 'c3gundamstore@gmail.com' ? 'inline-flex' : 'hidden'"
+                                            class="items-center gap-2 text-blue-400 hover:text-blue-300 text-sm px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                                            Quản trị viên</p>
+                                    </div>
                                     <p class="text-gray-300 text-sm font-medium flex items-center gap-2">
                                         <i class="fa-regular fa-clock text-blue-400"></i>
                                         {{ formatTime(timePost) }}
@@ -268,7 +280,7 @@ onMounted(() => {
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button @click="deletePost(idPost)" 
+                                <button @click="deletePost(idPost)"
                                     class="w-12 h-12 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-all duration-200">
                                     <i class="fa-solid fa-trash text-lg"></i>
                                 </button>
@@ -278,13 +290,11 @@ onMounted(() => {
                             <p class="text-base transition-all duration-300 ease-in-out">
                                 {{ displayContent }}
                             </p>
-                            <button 
-                                v-if="isContentLong"
-                                @click="toggleContent"
-                                class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm mt-3 px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition-all duration-200 border border-blue-500/20"
-                            >
+                            <button v-if="isContentLong" @click="toggleContent"
+                                class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm mt-3 px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition-all duration-200 border border-blue-500/20">
                                 <span>{{ isContentExpanded ? 'Thu gọn' : 'Xem thêm' }}</span>
-                                <i :class="isContentExpanded ? 'fa-chevron-up' : 'fa-chevron-down'" class="fa-solid text-xs"></i>
+                                <i :class="isContentExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                    class="fa-solid text-xs"></i>
                             </button>
                         </div>
                     </div>
@@ -293,20 +303,19 @@ onMounted(() => {
                             'grid gap-2 rounded-xl overflow-hidden',
                             images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
                         ]">
-                            <div v-for="(img, index) in images" :key="index" 
-                                :class="[
-                                    'relative overflow-hidden rounded-lg group/img cursor-pointer',
-                                    images.length === 3 && index === 0 ? 'col-span-2' : ''
-                                ]"
-                                @click="openImageModal(img)">
-                                <img :src="img" 
-                                    :class="[
-                                        'w-full object-cover transition-all duration-300 group-hover/img:scale-105',
-                                        images.length === 1 ? 'max-h-[450px]' : 'max-h-[220px]'
-                                    ]" 
-                                    alt="Post image">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300"></div>
-                                <div class="absolute top-3 right-3 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                            <div v-for="(img, index) in images" :key="index" :class="[
+                                'relative overflow-hidden rounded-lg group/img cursor-pointer',
+                                images.length === 3 && index === 0 ? 'col-span-2' : ''
+                            ]" @click="openImageModal(img)">
+                                <img :src="img" :class="[
+                                    'w-full object-cover transition-all duration-300 group-hover/img:scale-105',
+                                    images.length === 1 ? 'max-h-[450px]' : 'max-h-[220px]'
+                                ]" alt="Post image">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                </div>
+                                <div
+                                    class="absolute top-3 right-3 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
                                     <div class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
                                         <i class="fa-solid fa-expand text-gray-800 text-sm"></i>
                                     </div>
@@ -327,32 +336,40 @@ onMounted(() => {
                 </div>
             </div>
             <div class="w-full lg:w-[45%] flex flex-col">
-                <div class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl flex flex-col overflow-hidden">
+                <div
+                    class="relative bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl flex flex-col overflow-hidden h-full">
                     <div class="p-6 pb-4 border-b border-gray-600/30">
                         <h2 class="text-white font-bold text-xl flex items-center gap-3">
                             <i class="fa-solid fa-comments text-blue-400"></i>
                             Bình luận
-                            <span class="flex items-center justify-center text-sm font-normal text-gray-400 bg-gray-600/50 w-8 h-8 rounded-full">
+                            <span
+                                class="flex items-center justify-center text-sm font-normal text-gray-400 bg-gray-600/50 w-8 h-8 rounded-full">
                                 {{ comments ? comments.length : 0 }}
                             </span>
                         </h2>
                     </div>
-                    <div class="flex-1 overflow-y-auto max-h-[calc(100vh-165px)] p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                    <div
+                        class="flex-1 overflow-y-auto max-h-[calc(100vh-30vh)] p-6 mb-36 lg:mb-10 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                         <div v-for="(comment, index) in comments" :key="index"
                             :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
                             <div class="flex gap-3 group/comment">
                                 <div class="flex-shrink-0">
                                     <img :src="comment.HinhAnhKhachHang ? `${comment.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                                        class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-600/50" alt="Avatar" />
+                                        class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-600/50"
+                                        alt="Avatar" />
                                 </div>
                                 <div class="flex-1 space-y-2">
-                                    <div class="bg-gradient-to-r from-gray-700/80 to-gray-600/80 rounded-2xl p-4 shadow-md">
+                                    <div
+                                        class="bg-gradient-to-r from-gray-700/80 to-gray-600/80 rounded-2xl p-4 shadow-md">
                                         <h4 class="text-white text-sm font-bold mb-1">{{ comment.TenKhachHang }}</h4>
-                                        <p class="text-gray-200 text-sm leading-relaxed">{{ comment.NoiDungBinhLuan }}</p>
+                                        <p class="text-gray-200 text-sm leading-relaxed">{{ comment.NoiDungBinhLuan }}
+                                        </p>
                                     </div>
                                     <div class="flex items-center justify-between px-2">
-                                        <span class="text-gray-400 text-xs">{{ formatTime(new Date(comment.ThoiGian)) }}</span>
-                                        <div class="flex items-center gap-3 opacity-0 group-hover/comment:opacity-100 transition-opacity duration-200">
+                                        <span class="text-gray-400 text-xs">{{ formatTime(new Date(comment.ThoiGian))
+                                            }}</span>
+                                        <div
+                                            class="flex items-center gap-3 opacity-0 group-hover/comment:opacity-100 transition-opacity duration-200">
                                             <button @click="deleteComment(comment.MaBinhLuan)"
                                                 :class="comment.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
                                                 class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 transition-all duration-200">
@@ -364,12 +381,11 @@ onMounted(() => {
                                             </button>
                                         </div>
                                     </div>
-                                    <div v-if="showReplyForm[comment.MaBinhLuan]" 
+                                    <div v-if="showReplyForm[comment.MaBinhLuan]"
                                         class="ml-4 mt-3 p-4 bg-gray-800/50 rounded-xl border border-gray-600/30 space-y-3">
                                         <textarea v-model="replyContent[comment.MaBinhLuan]"
                                             class="w-full bg-gray-700/80 border border-gray-600/50 rounded-lg p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all duration-200"
-                                            placeholder="Viết trả lời của bạn..." 
-                                            rows="2"></textarea>
+                                            placeholder="Viết trả lời của bạn..." rows="2"></textarea>
                                         <div class="flex gap-2 justify-end">
                                             <button @click="submitReply(comment.MaBinhLuan)"
                                                 class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
@@ -385,19 +401,26 @@ onMounted(() => {
                                         class="ml-6 flex gap-3 group/reply">
                                         <div class="flex-shrink-0">
                                             <img :src="reply.HinhAnhKhachHang ? `${reply.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                                                class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-600/50" alt="Avatar" />
+                                                class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-600/50"
+                                                alt="Avatar" />
                                         </div>
                                         <div class="flex-1 space-y-2">
-                                            <div class="bg-gradient-to-r from-gray-600/60 to-gray-500/60 rounded-xl p-3 shadow-sm">
-                                                <h5 class="text-white text-xs font-bold mb-1">{{ reply.TenKhachHang }}</h5>
+                                            <div
+                                                class="bg-gradient-to-r from-gray-600/60 to-gray-500/60 rounded-xl p-3 shadow-sm">
+                                                <h5 class="text-white text-xs font-bold mb-1">{{ reply.TenKhachHang }}
+                                                </h5>
                                                 <p class="text-gray-200 text-xs leading-relaxed">
-                                                    <span v-if="reply.ReplyToTenKhachHang" class="text-blue-400 font-medium">@{{ reply.ReplyToTenKhachHang }}</span>
+                                                    <span v-if="reply.ReplyToTenKhachHang"
+                                                        class="text-blue-400 font-medium">@{{ reply.ReplyToTenKhachHang
+                                                        }}</span>
                                                     {{ reply.NoiDungBinhLuan }}
                                                 </p>
                                             </div>
                                             <div class="flex items-center justify-between px-2">
-                                                <span class="text-gray-400 text-xs">{{ formatTime(new Date(reply.ThoiGian)) }}</span>
-                                                <div class="flex items-center gap-2 opacity-0 group-hover/reply:opacity-100 transition-opacity duration-200">
+                                                <span class="text-gray-400 text-xs">{{ formatTime(new
+                                                    Date(reply.ThoiGian)) }}</span>
+                                                <div
+                                                    class="flex items-center gap-2 opacity-0 group-hover/reply:opacity-100 transition-opacity duration-200">
                                                     <button @click="deleteComment(reply.MaBinhLuan)"
                                                         :class="reply.MaKhachHang.includes(idCustomerLocal) ? 'block' : 'hidden'"
                                                         class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 transition-all duration-200">
@@ -409,12 +432,11 @@ onMounted(() => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div v-if="showReplyForm[reply.MaBinhLuan]" 
+                                            <div v-if="showReplyForm[reply.MaBinhLuan]"
                                                 class="ml-4 mt-3 p-3 bg-gray-800/50 rounded-xl border border-gray-600/30 space-y-3">
                                                 <textarea v-model="replyContent[reply.MaBinhLuan]"
                                                     class="w-full bg-gray-700/80 border border-gray-600/50 rounded-lg p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all duration-200"
-                                                    placeholder="Viết trả lời..." 
-                                                    rows="2"></textarea>
+                                                    placeholder="Viết trả lời..." rows="2"></textarea>
                                                 <div class="flex gap-2 justify-end">
                                                     <button @click="submitReply(reply.MaBinhLuan)"
                                                         class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200">
@@ -431,7 +453,8 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        <div v-if="comments.length <= 0" class="flex flex-col items-center justify-center py-12 space-y-4">
+                        <div v-if="comments.length <= 0"
+                            class="flex flex-col items-center justify-center py-12 space-y-4">
                             <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
                                 <i class="fa-regular fa-comments text-gray-400 text-2xl"></i>
                             </div>
@@ -441,16 +464,15 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div class="p-6 border-t border-gray-600/30 bg-gray-800/50">
+                    <div class="absolute bottom-0 left-0 z-50 w-full p-6 border-t border-gray-600/30 bg-gray-800/50">
                         <div class="flex gap-3 items-end">
                             <div class="flex-1 relative">
                                 <textarea v-model="newComment"
                                     class="w-full bg-gray-700/80 border border-gray-600/50 rounded-xl p-4 pr-12 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all duration-200"
-                                    placeholder="Viết bình luận của bạn..."
-                                    rows="2"
+                                    placeholder="Viết bình luận của bạn..." rows="2"
                                     @keydown.enter.prevent="addComment"></textarea>
-                                <button @click="addComment" 
-                                    class="absolute right-3 bottom-3 w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center">
+                                <button @click="addComment"
+                                    class="absolute right-3 bottom-4 w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center">
                                     <i class="fa-solid fa-paper-plane text-sm"></i>
                                 </button>
                             </div>
@@ -513,6 +535,7 @@ onMounted(() => {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

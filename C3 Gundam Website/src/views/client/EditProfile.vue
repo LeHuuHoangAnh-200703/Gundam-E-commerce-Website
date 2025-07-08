@@ -120,7 +120,7 @@ onMounted(() => {
         <div class="relative my-5 m-2 lg:mx-[200px] flex justify-center items-center">
             <div class="w-full m-4">
                 <div
-                    class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
+                    class="bg-[#242424] overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div class="grid gap-8 lg:gap-5 text-sm text-white grid-cols-1 lg:grid-cols-3">
                         <div class="font-semibold">
                             <p class="text-lg">Thông tin cá nhân</p>

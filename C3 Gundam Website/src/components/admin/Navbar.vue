@@ -125,7 +125,7 @@ onUnmounted(() => {
   <div class="w-full">
     <nav class="bg-white flex p-3 justify-between shadow-md rounded-md">
       <div class="flex gap-3">
-        <img src="../../assets/img/avatar.jpg" class="w-[50px] rounded-full" alt="" />
+        <img src="../../assets/img/logoNotRMBG.png" class="w-[50px] rounded-full" alt="" />
         <div class="font-semibold flex flex-col justify-center">
           <p class="text-[14px]">{{ TenAdmin }}</p>
           <p class="text-[13px] hidden lg:block">
