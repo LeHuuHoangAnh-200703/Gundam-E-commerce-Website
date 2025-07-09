@@ -5,6 +5,15 @@ import { useRouter } from 'vue-router';
 import debounce from "lodash/debounce";
 
 const router = useRouter();
+const cartLists = ref([]);
+const emit = defineEmits();
+const searchQuery = ref("");
+const listProducts = ref([]);
+const recognition = ref(null);
+const imageCustomer = ref('');
+const nameCustomer = ref('');
+const emailCustomer = ref('');
+const idCustomer = ref('');
 const userInfo = ref({
     MaKhachHang: localStorage.getItem('MaKhachHang') || '',
 });
@@ -27,12 +36,12 @@ const logout = async () => {
     }
 };
 
-const profile = () => {
+const order = () => {
     const MaKhachHang = localStorage.getItem('MaKhachHang');
     if (!MaKhachHang) {
         router.push('/login');
     } else {
-        router.push('/profile');
+        router.push('/orders_history');
     }
 }
 
@@ -63,8 +72,13 @@ const community = () => {
     }
 }
 
-const emit = defineEmits();
-const searchQuery = ref("");
+const checkLogin = () => {
+    const MaKhachHang = localStorage.getItem('MaKhachHang');
+    if (!MaKhachHang) {
+        router.push('/login');
+    }
+}
+
 const handleSearch = () => {
     if (searchQuery.value.trim()) {
         router.push({
@@ -74,7 +88,6 @@ const handleSearch = () => {
     }
 };
 
-const cartLists = ref([]);
 const fetchCarts = async (maKhachHang) => {
     try {
         const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
@@ -88,7 +101,18 @@ const fetchCarts = async (maKhachHang) => {
     }
 }
 
-const listProducts = ref([]);
+const fetchCustomer = async (maKhachHang) => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/khachhang/${maKhachHang}`);
+        imageCustomer.value = response.data.Image;
+        nameCustomer.value = response.data.TenKhachHang;
+        emailCustomer.value = response.data.Email;
+        idCustomer.value = response.data.MaKhachHang;
+    } catch (err) {
+        console.log("Error fetching: ", err);
+    }
+}
+
 const searchProducts = async () => {
     if (!searchQuery.value.trim()) {
         listProducts.value = [];
@@ -111,8 +135,6 @@ const searchProducts = async () => {
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
-
-const recognition = ref(null);
 
 const startVoiceSearch = () => {
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
@@ -159,6 +181,8 @@ onMounted(() => {
     const openMenu = $(".open-menu");
     const closeMenu = $(".close-menu");
     const sideBar = $(".sidebar");
+    const openInfo = $(".open-info");
+    const menuUser = $(".menuUser");
 
     openMenu.click(() => {
         sideBar.animate({ left: "0" }, 400);
@@ -168,8 +192,14 @@ onMounted(() => {
         sideBar.animate({ left: "-100%" }, 400);
     })
 
+    openInfo.click(() => {
+        const isOpen = menuUser.css("right") === "20px";
+        menuUser.animate({ right: isOpen ? "-100%" : "20px" }, 400);
+    });
+
     const maKhachHang = localStorage.getItem("MaKhachHang");
     fetchCarts(maKhachHang);
+    fetchCustomer(maKhachHang);
 });
 </script>
 
@@ -186,7 +216,7 @@ onMounted(() => {
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><button @click.prevent="profile">Tài khoản</button>
+                    <li class="group"><button @click.prevent="order">Đơn hàng</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
@@ -227,6 +257,13 @@ onMounted(() => {
                     <span
                         class="absolute -top-3 -right-2 flex items-center justify-center w-[24px] h-[24px] text-[15px] bg-[#DB3F4C] text-white font-semibold rounded-full">{{
                             cartLists.length }}</span>
+                </button>
+                <button v-if="!isLoggedIn" class="open-info">
+                    <img :src="imageCustomer"
+                        class="w-10 h-10 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg" alt="">
+                </button>
+                <button v-else @click.prevent="checkLogin">
+                    <i class="fa-solid fa-user text-white text-[24px]"></i>
                 </button>
                 <button class="open-menu lg:hidden block">
                     <i class="fa-solid fa-bars text-white text-[24px]"></i>
@@ -277,12 +314,11 @@ onMounted(() => {
                 <button @click="startVoiceSearch" class="text-white text-[24px]"><i
                         class="fa-solid fa-microphone"></i></button>
             </div>
-
             <ul class="flex flex-col gap-6 text-[20px] text-white font-semibold">
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-user"></i> <button @click.prevent="profile">Tài khoản</button></li>
+                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="order">Đơn hàng</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-tags"></i> <button @click.prevent="voucher">Giảm giá</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
@@ -293,6 +329,38 @@ onMounted(() => {
                 <li v-else class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng xuất</router-link></li>
             </ul>
+        </div>
+        <div class="menuUser fixed top-20 -right-[100%] rounded-md p-6 bg-white z-50 border-2 border-blue-800/50">
+            <p class="text-[14px] font-semibold">{{ nameCustomer }}</p>
+            <p class="text-[12px] font-medium text-blue-800">{{ emailCustomer }}</p>
+            <hr class="my-2">
+            <div class="flex flex-col gap-4">
+                <router-link :to="`/profile`"
+                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
+                    <i class="fa-solid fa-user"></i> Tài khoản
+                </router-link>
+                <router-link :to="`/orders_history`"
+                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
+                    <i class="fa-solid fa-bag-shopping"></i> Đơn hàng của bạn
+                </router-link>
+                <router-link :to="`/personalDirectory/${idCustomer}`"
+                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
+                    <i class="fa-solid fa-list"></i> Danh mục cá nhân
+                </router-link>
+                <router-link :to="`/yourPostLists/${idCustomer}`"
+                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
+                    <i class="fa-solid fa-tags"></i> Bài đăng của bạn
+                </router-link>
+                <router-link :to="`/editProfile/${idCustomer}`"
+                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
+                    <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa hồ sơ
+                </router-link>
+            </div>
+            <hr class="my-2">
+            <button @click.prevent="logout"
+                class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng
+                xuất</button>
         </div>
     </header>
 </template>
