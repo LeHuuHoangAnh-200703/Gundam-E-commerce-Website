@@ -504,9 +504,9 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <div v-for="comment in chooseFeedBackWithStar" :key="comment.id"
                             class="flex py-4 border-b flex-col gap-2 w-full">
                             <div class="flex justify-between items-center">
-                                <div class="flex gap-4 w-full">
+                                <div class="flex gap-4 w-full items-center">
                                     <img :src="`${comment.HinhAnhKhachHang === 'null' ? '/src/assets/img/avatar.jpg' : comment.HinhAnhKhachHang}`"
-                                        class="w-[60px] h-[60px] rounded-full object-cover" alt="">
+                                        class="w-12 h-12 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg" alt="">
                                     <div class="">
                                         <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
                                         <div class="flex gap-1 my-1">
@@ -515,7 +515,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                                 'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
                                             }"></i>
                                         </div>
-                                        <p class="text-gray-400 text-[14px] mb-1">{{ formatDate(comment.NgayDang) }}</p>
+                                        <p class="text-gray-400 text-sm mb-1 flex items-center gap-2"><i class="fa-regular fa-clock text-blue-400"></i> {{ formatDate(comment.NgayDang) }}</p>
                                     </div>
                                 </div>
                                 <button type="submit" @click.prevent="deleteFeedback(comment.MaDanhGia)"

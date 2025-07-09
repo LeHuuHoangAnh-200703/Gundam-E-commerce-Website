@@ -177,7 +177,7 @@ onMounted(() => {
                     </p>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="../../assets/img/logoNotRMBG.png" class="w-[350px]" alt="">
+                    <img src="../../assets/img/banner_New.png" class="w-[350px]" alt="">
                 </div>
             </div>
         </div>
