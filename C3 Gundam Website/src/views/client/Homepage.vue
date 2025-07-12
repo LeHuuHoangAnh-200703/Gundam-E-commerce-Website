@@ -159,25 +159,40 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header_Home @search="handleSearch" />
         <div class="w-full bg-[#DB3F4C]">
             <div
-                class="flex lg:flex-row flex-col justify-center items-center lg:justify-between w-full p-5 lg:px-[210px]">
+                class="flex lg:flex-row flex-col gap-6 justify-center items-center lg:justify-between w-full p-5 lg:px-[210px]">
                 <div class="flex flex-col gap-3 w-full lg:w-[50%] justify-center lg:justify-start items-start">
-                    <p class="bg-[rgba(52,52,52,0.7)] text-white text-[14px] px-3 py-2 font-medium rounded-md">C3 GUNDAM
-                        STORE</p>
-                    <p class="text-white font-semibold uppercase text-[26px]">C3 GUNDAM STORE - Gắn kết đam mê, xây dựng
-                        thế giới Gundam của riêng bạn.</p>
-                    <span class="lg:w-[150px] w-full h-1 bg-white"></span>
+                    <div
+                        class="bg-black/40 backdrop-blur-sm text-white text-sm px-4 py-2 font-medium rounded-full border border-white/20 transition-all duration-300 hover:bg-black/50">
+                        <span class="text-red-300 animate-pulse">●</span> C3 GUNDAM STORE
+                    </div>
+                    <h1 class="text-white font-bold text-2xl lg:text-3xl leading-tight drop-shadow-lg">
+                        Gắn kết đam mê sở thích, <br>
+                        <span class="text-yellow-300">Hãy xây dựng thế giới Gundam</span> <br>
+                        của riêng bạn
+                    </h1>
+                    <div class="flex items-center gap-4 w-full">
+                        <div
+                            class="h-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex-1 max-w-[200px]">
+                        </div>
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                    </div>
                     <p class="text-white text-[14px] font-medium">Cửa hàng Gundam không chỉ là nơi bày bán mô hình, mà
                         còn là không gian nuôi dưỡng đam mê, nơi giấc mơ về những chiến binh cơ khí trở thành hiện thực.
                     </p>
-                    <p class="text-white text-[14px] font-semibold">Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang
-                    </p>
+                    <div class="flex items-center gap-3 text-white">
+                        <i class="fa-solid fa-location-dot text-yellow-400"></i>
+                        <span class="text-sm lg:text-base font-semibold">Đường 96 - Tân Phú - TX.Long Mỹ - Hậu
+                            Giang</span>
+                    </div>
                 </div>
                 <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="../../assets/img/banner_New.png" class="w-[350px]" alt="">
+                    <img src="../../assets/img/banner_new.png" alt="C3 Gundam Store Logo"
+                        class="w-[350px] drop-shadow-md" />
                 </div>
             </div>
         </div>
@@ -209,14 +224,16 @@ onMounted(() => {
                 </select>
                 <select v-model="selectedType" name="" id="" class="w-full mt-4 p-4 font-semibold block lg:hidden">
                     <option value="All">Loại sản phẩm</option>
-                    <option :value="productType.LoaiSanPham" v-for="(productType, index) in listProductTypes" :key="index">{{ productType.TenLoaiSanPham }}</option>
+                    <option :value="productType.LoaiSanPham" v-for="(productType, index) in listProductTypes"
+                        :key="index">{{ productType.TenLoaiSanPham }}</option>
                 </select>
             </div>
             <div class="mb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <div class="hidden lg:flex flex-col gap-4 w-full col-span-1 items-start">
                     <p class="text-white font-bold uppercase text-[20px] border-b-4 border-[#DC143C] pb-3">Dòng mô hình
                     </p>
-                    <button @click.prevent="selectTypeProducts('All')" class="text-white uppercase font-semibold text-[18px] group">
+                    <button @click.prevent="selectTypeProducts('All')"
+                        class="text-white uppercase font-semibold text-[18px] group">
                         Tất cả sản phẩm
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">

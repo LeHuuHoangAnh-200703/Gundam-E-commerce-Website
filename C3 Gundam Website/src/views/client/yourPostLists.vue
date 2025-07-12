@@ -46,7 +46,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <div class="relative mb-5 mx-2 sm:mx-4 md:mx-8 lg:mx-[210px] xl:mx-[210px] flex flex-grow">
             <div class="w-full overflow-y-auto flex flex-col gap-6 mt-6">
@@ -100,15 +101,54 @@ onMounted(() => {
                             </router-link>
                         </div>
                     </div>
-                    <div v-else class="flex justify-center items-center w-full bg-white rounded-md p-6 sm:p-8">
-                        <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 text-center">
-                            <p class="font-semibold text-[#1A1D27] text-lg sm:text-xl lg:text-2xl">
-                                Hiện tại không có bài đăng nào!
-                            </p>
-                            <div class="w-32 sm:w-40 lg:w-48">
-                                <img src="../../assets/img/empty_admin.png" class="w-full h-auto"
-                                    alt="No posts available">
+                    <div v-else
+                        class="flex justify-center items-center w-full bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-100">
+                        <div
+                            class="flex flex-col items-center justify-center gap-4 sm:gap-6 text-center max-w-md mx-auto">
+                            <div class="relative">
+                                <div
+                                    class="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg rotate-3 hover:rotate-0 transition-transform duration-300">
+                                    <svg class="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div
+                                    class="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full opacity-80 animate-bounce">
+                                </div>
+                                <div class="absolute -bottom-1 -left-2 w-3 h-3 bg-pink-400 rounded-full opacity-70">
+                                </div>
+                                <div
+                                    class="absolute top-1 -left-3 w-2 h-2 bg-green-400 rounded-full opacity-60 animate-pulse">
+                                </div>
                             </div>
+                            <div class="space-y-3">
+                                <h3 class="font-bold text-[#1A1D27] text-lg sm:text-xl lg:text-2xl">
+                                    Chưa có bài đăng nào
+                                </h3>
+                                <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+                                    Không có bài đăng nào được tạo.
+                                    Hãy bắt đầu viết bài đăng đầu tiên để chia sẻ nội dung thú vị!
+                                </p>
+                            </div>
+                            <router-link :to="`/addCommunityPost/${idCustomer}`" class="flex flex-col sm:flex-row gap-3 w-full">
+                                <div
+                                    class="flex-1 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4v16m8-8H4"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm font-medium text-indigo-700">Tạo bài đăng mới</span>
+                                    </div>
+                                </div>
+                            </router-link>
                         </div>
                     </div>
                 </div>

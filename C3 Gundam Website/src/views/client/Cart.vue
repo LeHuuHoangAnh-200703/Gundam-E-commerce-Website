@@ -149,7 +149,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Giỏ hàng của bạn</h1>
         <div v-if="carts.length > 0" class="relative mb-5 m-2 lg:mx-[200px] flex items-center flex-col flex-grow">
@@ -207,20 +208,39 @@ onMounted(() => {
                     <hr>
                     <div class="flex justify-end items-end flex-col">
                         <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span class="text-[#FFD700]">{{
-                                formatCurrency(totalPrice) }} VNĐ</span></p>
+                            formatCurrency(totalPrice) }} VNĐ</span></p>
                         <button @click.prevent="goToOrderPage" type="submit"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
                             hàng</button>
                     </div>
-
                 </div>
             </div>
         </div>
-        <div v-else class="flex justify-center items-center m-auto w-full">
-            <div class="flex flex-col items-center justify-center gap-3">
-                <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có sản phẩm
-                    nào!</p>
-                <img src="../../assets/img/empty_client.png" class="w-[150px]" alt="">
+        <div v-else class="flex justify-center items-center m-auto w-full min-h-[400px] p-8">
+            <div class="flex flex-col items-center justify-center gap-6 max-w-md mx-auto">
+                <div class="relative">
+                    <div
+                        class="w-24 h-24 lg:w-32 lg:h-32 bg-gradient-to-br from-orange-400 to-red-600 rounded-full flex items-center justify-center shadow-lg">
+                        <svg class="w-12 h-12 lg:w-16 lg:h-16 text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                    </div>
+                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full opacity-80 animate-pulse">
+                    </div>
+                    <div class="absolute -bottom-1 -left-1 w-4 h-4 bg-green-400 rounded-full opacity-60"></div>
+                    <div class="absolute top-2 -left-3 w-3 h-3 bg-blue-400 rounded-full opacity-70"></div>
+                </div>
+                <div class="text-center space-y-3">
+                    <h3 class="font-bold text-white text-xl lg:text-2xl">
+                        Chưa có sản phẩm nào
+                    </h3>
+                    <p class="text-gray-300 text-sm lg:text-base leading-relaxed">
+                        Hiện tại chưa có sản phẩm nào được thêm vào danh sách.
+                        Hãy quay lại sau để khám phá những sản phẩm mới nhất!
+                    </p>
+                </div>
             </div>
         </div>
         <Footer />

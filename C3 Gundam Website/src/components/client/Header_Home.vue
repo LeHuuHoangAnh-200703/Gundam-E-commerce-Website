@@ -330,37 +330,83 @@ onMounted(() => {
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng xuất</router-link></li>
             </ul>
         </div>
-        <div class="menuUser fixed top-20 -right-[100%] rounded-md p-6 bg-white z-50 border-2 border-blue-800/50">
-            <p class="text-[14px] font-semibold">{{ nameCustomer }}</p>
-            <p class="text-[12px] font-medium text-blue-800">{{ emailCustomer }}</p>
-            <hr class="my-2">
-            <div class="flex flex-col gap-4">
+        <div
+            class="menuUser fixed top-20 -right-[100%] rounded-md backdrop-blur-sm bg-gradient-to-br from-white to-gray-50 z-50 border border-gray-200 shadow-2xl">
+            <div class="flex gap-4 items-center bg-gradient-to-r from-[#DB3F4C] to-[#B91C1C] p-6 rounded-t-md">
+                <div class="relative">
+                    <img :src="imageCustomer" class="w-12 h-12 rounded-full object-cover ring-4 ring-white/30 shadow-lg"
+                        alt="User Avatar">
+                    <div class="absolute -bottom-1 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white">
+                    </div>
+                </div>
+                <div class="flex flex-col items-start">
+                    <p class="text-[16px] font-semibold text-white">{{ nameCustomer }}</p>
+                    <p class="text-[12px] font-medium text-white/80">{{ emailCustomer }}</p>
+                </div>
+            </div>
+            <div class="p-4 space-y-1 flex flex-col">
                 <router-link :to="`/profile`"
-                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
-                    <i class="fa-solid fa-user"></i> Tài khoản
-                </router-link>
-                <router-link :to="`/orders_history`"
-                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
-                    <i class="fa-solid fa-bag-shopping"></i> Đơn hàng của bạn
-                </router-link>
-                <router-link :to="`/personalDirectory/${idCustomer}`"
-                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
-                    <i class="fa-solid fa-list"></i> Danh mục cá nhân
-                </router-link>
-                <router-link :to="`/yourPostLists/${idCustomer}`"
-                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
-                    <i class="fa-solid fa-tags"></i> Bài đăng của bạn
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-blue-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-user text-blue-600 group-hover:text-[#DB3F4C]"></i>
+                    </div>
+                    <span class="font-medium">Thông tin cá nhân</span>
+                    <i
+                        class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                 </router-link>
                 <router-link :to="`/editProfile/${idCustomer}`"
-                    class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
-                    <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa hồ sơ
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-purple-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-pen-to-square text-purple-600 group-hover:text-[#DB3F4C]"></i>
+                    </div>
+                    <span class="font-medium">Chỉnh sửa hồ sơ</span>
+                    <i
+                        class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                 </router-link>
+                <router-link :to="`/orders_history`"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-bag-shopping text-green-600 group-hover:text-[#DB3F4C]"></i>
+                    </div>
+                    <span class="font-medium">Đơn hàng của bạn</span>
+                    <i
+                        class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </router-link>
+                <router-link :to="`/personalDirectory/${idCustomer}`"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-list text-orange-600 group-hover:text-[#DB3F4C]"></i>
+                    </div>
+                    <span class="font-medium">Danh mục cá nhân</span>
+                    <i
+                        class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </router-link>
+                <router-link :to="`/yourPostLists/${idCustomer}`"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-pink-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-tags text-pink-600 group-hover:text-[#DB3F4C]"></i>
+                    </div>
+                    <span class="font-medium">Bài đăng của bạn</span>
+                    <i
+                        class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </router-link>
+                <hr class="my-4">
+                <button @click.prevent="logout"
+                    class="group w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-300 transform hover:scale-[1.02]">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-red-100 group-hover:bg-red-200 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-right-from-bracket text-red-600"></i>
+                    </div>
+                    <span class="font-medium">Đăng xuất</span>
+                    <i
+                        class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </button>
             </div>
-            <hr class="my-2">
-            <button @click.prevent="logout"
-                class="flex gap-2 items-center text-[14px] font-semibold text-gray-700 bg-transparent hover:text-blue-800/90 transition-all duration-200">
-                <i class="fa-solid fa-right-from-bracket"></i> Đăng
-                xuất</button>
         </div>
     </header>
 </template>

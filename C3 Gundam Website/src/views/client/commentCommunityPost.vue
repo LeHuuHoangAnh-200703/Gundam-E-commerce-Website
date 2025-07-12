@@ -349,7 +349,7 @@ onMounted(() => {
                         </h2>
                     </div>
                     <div
-                        class="flex-1 overflow-y-auto max-h-[calc(100vh-30vh)] p-6 mb-36 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                        class="flex-1 overflow-y-auto max-h-[calc(100vh-35vh)] p-6 mb-36 lg:mb-28 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                         <div v-for="(comment, index) in comments" :key="index"
                             :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
                             <div class="flex gap-3 group/comment">
