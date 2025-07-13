@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import Header from '@/components/client/Header.vue';
 import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
+import EmtyState from '@/components/Notification/EmtyState.vue';
 import axios from "axios";
 import { useRouter } from 'vue-router';
 
@@ -86,7 +87,7 @@ onMounted(() => {
                 <h1
                     class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
                     Bài đăng được quan tâm nhiều nhất</h1>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-if="listPost.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <router-link :to="`/commentCommunityPost/${topPost.MaBaiDang}`" class="w-full flex flex-col group" v-for="topPost in listTopPost" :key="topPost.MaBaiDang">
                         <div class="w-full flex-shrink-0">
                             <img :src="topPost.HinhAnh[0]"
@@ -118,6 +119,8 @@ onMounted(() => {
                         </div>
                     </router-link>
                 </div>
+                <EmtyState v-else icon="fa-file-lines" title="Chưa có bài đăng nào" message="Không có bài đăng nào được tạo.
+                                    Hãy bắt đầu viết bài đăng đầu tiên để chia sẻ nội dung thú vị!" />
                 <h1
                     class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
                     tất cả bài đăng tại cộng đồng c3 gundam</h1>
@@ -154,17 +157,8 @@ onMounted(() => {
                             </router-link>
                         </div>
                     </div>
-                    <div v-else class="flex justify-center items-center w-full bg-white rounded-md p-6 sm:p-8">
-                        <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 text-center">
-                            <p class="font-semibold text-[#1A1D27] text-lg sm:text-xl lg:text-2xl">
-                                Hiện tại không có bài đăng nào!
-                            </p>
-                            <div class="w-32 sm:w-40 lg:w-48">
-                                <img src="../../assets/img/empty_admin.png" class="w-full h-auto"
-                                    alt="No posts available">
-                            </div>
-                        </div>
-                    </div>
+                    <EmtyState v-else icon="fa-file-lines" title="Chưa có bài đăng nào" message="Không có bài đăng nào được tạo.
+                                    Hãy bắt đầu viết bài đăng đầu tiên để chia sẻ nội dung thú vị!" />
                 </div>
             </div>
         </div>

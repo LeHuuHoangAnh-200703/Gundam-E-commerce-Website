@@ -4,6 +4,7 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
+import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from 'axios';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -471,13 +472,7 @@ onMounted(() => {
                             </div>
                             <div v-else
                                 class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
-                                <div class="flex justify-center items-center m-auto w-full h-full">
-                                    <div class="flex flex-col items-center justify-center gap-3">
-                                        <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
-                                            không có đơn hàng nào!</p>
-                                        <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
-                                    </div>
-                                </div>
+                                <EmtyStateAdmin icon="fa-bag-shopping" title="Chưa có đơn hàng nào" message="Hiện tại chưa có đơn hàng nào hoặc chưa có đơn nào phù hợp với trạng thái vừa chọn!" />
                             </div>
                         </div>
                     </div>
@@ -485,8 +480,6 @@ onMounted(() => {
                 <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
-
-        <!-- Sử dụng ConfirmDialog component với props -->
         <ConfirmDialog
             :visible="dialogState.visible"
             :title="dialogState.title"

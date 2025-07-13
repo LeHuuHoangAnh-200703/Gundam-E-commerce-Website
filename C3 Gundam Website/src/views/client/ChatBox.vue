@@ -166,7 +166,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+  <div
+    class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
     <Header />
     <div class="relative mb-5 lg:mx-[200px] flex justify-center items-center flex-grow">
       <div class="w-full m-4">
@@ -218,8 +219,13 @@ onUnmounted(() => {
               </div>
             </div>
             <div v-else class="flex flex-col items-center justify-center lg:mt-16 mt-40">
-              <p class="text-[20px] font-semibold text-white">Hiện tại không có tin nhắn!</p>
-              <img src="../../assets/img/empty_client.png" class="w-[120px] h-[120px]" alt="">
+              <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
+                <i class="fa-regular fa-comments text-gray-400 text-2xl"></i>
+              </div>
+              <div class="text-center mt-2">
+                <h3 class="text-white font-semibold text-lg mb-2">Chưa có tin nhắn nào</h3>
+                <p class="text-gray-400 text-sm">Hãy nhắn tin với quản trị viên thông qua khung chat này!</p>
+              </div>
             </div>
           </div>
           <div v-if="selectedFiles.length > 0" class="flex flex-wrap gap-2 mt-2 rounded-md p-2">

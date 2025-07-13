@@ -19,8 +19,9 @@ const props = defineProps({
             'border-[#DB3F4C]': type === 'error',
             'border-[#40E0D0]': type === 'success',
         }]">
+        <!-- <img src="../../assets/img/success_2.png" alt=""> -->
             <div class="flex gap-2 justify-center items-center">
-                <img :src="type === 'success' ? 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_7710_w7upkm.png' : 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_12437_ozptga.png'"
+                <img :src="type === 'success' ? '../../assets/img/success_2.png' : 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_12437_ozptga.png'"
                     class="w-[50px]" alt="">
                 <p class="text-[16px] font-semibold"
                     :class="type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{

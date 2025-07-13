@@ -7,6 +7,7 @@ import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
+import EmtyState from '@/components/Notification/EmtyState.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -532,13 +533,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             </div>
                         </div>
                     </div>
-                    <div v-else class="flex justify-center items-center m-auto w-full mt-8">
-                        <div class="flex flex-col items-center justify-center gap-3">
-                            <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại
-                                không có đánh giá nào!</p>
-                            <img src="../../assets/img/empty_client.png" class="w-[150px]" alt="">
-                        </div>
-                    </div>
+                    <EmtyState v-else icon="fa-comments" title="Chưa có đánh giá nào" message="Hãy là người đầu tiên đánh giá về sản phẩm này!" />
                     <div class="flex justify-center items-center gap-4 mt-4">
                         <button @click="prevPage" :disabled="currentPage === 1"
                             class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-blue-500/90 hover:text-blue-500/90 ease-out duration-300 transition-all">Trước</button>

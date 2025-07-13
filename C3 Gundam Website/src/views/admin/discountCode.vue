@@ -4,6 +4,7 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
+import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from "axios";
 
 const listDiscountCodes = ref([]);
@@ -157,7 +158,7 @@ onMounted(() => {
                                     class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
                             </div>
                         </div>
-                        <div v-if="listDiscountCodes.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div v-if="listDiscountCodes.length < 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <div v-for="(discountCode, index) in findDiscountCode" :key="index"
                                 class="flex flex-col gap-1 border-t-4 border-[#DB3F4C] bg-white p-4 shadow-lg">
                                 <div class="flex justify-between items-center">
@@ -196,12 +197,8 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="flex justify-center items-center m-auto w-full mt-32">
-                            <div class="flex flex-col items-center justify-center gap-3">
-                                <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại không có mã
-                                    giảm giá nào!</p>
-                                <img src="../../assets/img/empty_admin.png" class="w-[200px]" alt="">
-                            </div>
+                        <div v-else class="flex justify-center items-center m-auto w-full mt-10">
+                            <EmtyStateAdmin icon="fa-tags" title="Chưa có mã giảm giá nào" message="Hiện tại chưa có mã giảm giá nào, Hãy tiến hành tạo mã giảm giá mới tại đây!" />
                         </div>
                     </div>
                     <NotificationAdmin :message="notification.message" :type="notification.type" />

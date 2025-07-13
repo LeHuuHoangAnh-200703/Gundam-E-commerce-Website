@@ -6,6 +6,7 @@ import BackToTop from "@/components/client/BackToTop.vue";
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+import EmtyState from '@/components/Notification/EmtyState.vue';
 import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 
@@ -151,44 +152,8 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div v-else class="flex justify-center items-center m-auto w-full min-h-[400px] p-8 mt-8">
-            <div class="flex flex-col items-center justify-center gap-6 max-w-md mx-auto">
-                <div class="relative">
-                    <div
-                        class="w-24 h-24 lg:w-32 lg:h-32 bg-gradient-to-br from-orange-400 to-red-600 rounded-full flex items-center justify-center shadow-lg">
-                        <svg class="w-12 h-12 lg:w-16 lg:h-16 text-white" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full opacity-80 animate-pulse">
-                    </div>
-                    <div class="absolute -bottom-1 -left-1 w-4 h-4 bg-green-400 rounded-full opacity-60"></div>
-                    <div class="absolute top-2 -left-3 w-3 h-3 bg-blue-400 rounded-full opacity-70"></div>
-                </div>
-                <div class="text-center space-y-3">
-                    <h3 class="font-bold text-white text-xl lg:text-2xl">
-                        Chưa có mã giảm giá nào
-                    </h3>
-                    <p class="text-gray-300 text-sm lg:text-base leading-relaxed">
-                        Hiện tại chưa có mã giảm giá nào khả dụng.
-                        Hãy theo dõi để không bỏ lỡ những ưu đãi hấp dẫn sắp tới!
-                    </p>
-                </div>
-                <div
-                    class="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 rounded-lg p-4 backdrop-blur-sm">
-                    <div class="flex items-center justify-center gap-2 text-orange-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="text-sm font-medium">Mã giảm giá mới sẽ có sớm!</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <EmtyState v-else icon="fa-tags" title="Chưa có mã giảm giá nào" message="Hiện tại chưa có mã giảm giá nào khả dụng.
+                        Hãy theo dõi để không bỏ lỡ những ưu đãi hấp dẫn sắp tới!" />
         <Footer />
         <BackToTop />
         <Chat />

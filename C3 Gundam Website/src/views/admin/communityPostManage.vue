@@ -4,6 +4,7 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from 'axios';
 
 const listPost = ref([]);
@@ -200,14 +201,8 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="bg-white p-4 w-full flex items-center justify-center">
-                            <div class="flex justify-center items-center m-auto w-full h-full">
-                                <div class="flex flex-col items-center justify-center gap-3">
-                                    <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
-                                        không có bài đăng nào!</p>
-                                    <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
-                                </div>
-                            </div>
+                        <div v-else class="bg-white p-4 w-full flex items-center justify-center rounded-md border-2">
+                            <EmtyStateAdmin icon="fa-bag-shopping" title="Chưa có bài đăng nào" message="Hiện tại vẫn chưa có bài đăng nào được đăng lên cộng đồng Gundam!" />
                         </div>
                     </div>
                 </div>

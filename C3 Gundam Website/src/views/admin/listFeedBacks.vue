@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from 'axios';
 
 const comments = ref([]);
@@ -209,13 +210,7 @@ onMounted(() => {
                                 </div>
                                 <div v-else
                                     class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
-                                    <div class="flex justify-center items-center m-auto w-full h-full">
-                                        <div class="flex flex-col items-center justify-center gap-3">
-                                            <p class="font-semibold text-[18px] lg:text-[24px] text-center">Hiện tại
-                                                không có đánh giá nào!</p>
-                                            <img src="../../assets/img/empty_admin.png" class="w-[350px]" alt="">
-                                        </div>
-                                    </div>
+                                    <EmtyStateAdmin icon="fa-comments" title="Chưa có đánh giá nào" message="Hiện tại chưa có đánh giá nào hoặc chưa có đánh giá nào phù hợp với trạng thái vừa chọn!" />
                                 </div>
                             </div>
                         </div>

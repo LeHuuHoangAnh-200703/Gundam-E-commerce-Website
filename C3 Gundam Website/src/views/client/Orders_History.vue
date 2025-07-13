@@ -7,6 +7,7 @@ import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
+import EmtyState from '@/components/Notification/EmtyState.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -221,14 +222,15 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <div class="relative mb-5 m-2 lg:mx-[150px] flex items-center flex-col flex-grow">
             <div class="flex flex-col gap-4 justify-center items-center mb-4">
                 <h1 class="text-center text-white text-[28px] font-semibold mt-6 uppercase">Thông tin đơn hàng</h1>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                     <button v-for="option in options" :key="option" @click="selectTypeOrders(option.name)"
-                        class="border-2 px-10 lg:px-5 py-3 bg-white flex justify-center items-center gap-4 rounded-md hover:bg-[#008B8B] hover:text-white transition-all duration-300">
+                        class="border-2 px-10 lg:px-5 py-3 bg-white flex justify-center items-center gap-4 rounded-md hover:bg-gradient-to-r hover:from-indigo-400 hover:to-purple-600 hover:text-white transition-all duration-300">
                         <i :class="option.icon"></i> {{ option.name }}
                     </button>
                 </div>
@@ -312,13 +314,8 @@ onMounted(() => {
                         nhận được hàng.</p>
                 </div>
             </div>
-            <div v-else class="flex justify-center items-center m-auto w-full">
-                <div class="flex flex-col items-center justify-center gap-3">
-                    <p class="font-semibold text-white text-[18px] lg:text-[24px] text-center">Hiện tại không có đơn
-                        hàng nào!</p>
-                    <img src="../../assets/img/empty_client.png" class="w-[150px]" alt="">
-                </div>
-            </div>
+            <EmtyState v-else icon="fa-bag-shopping" title="Chưa có đơn hàng nào"
+                message="Hiện tại bạn vẫn chưa có đơn hàng nào, Hãy lựa chọn sản phẩm phù hợp và tiến hành đặt hàng ngay nhé!" />
         </div>
         <Footer />
         <BackToTop />

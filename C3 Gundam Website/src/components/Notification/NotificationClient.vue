@@ -20,8 +20,8 @@ const props = defineProps({
             'border-[#40E0D0]': type === 'success',
         }]">
             <div class="flex gap-2 justify-center items-center">
-                <img :src="type === 'success' ? 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_7710_w7upkm.png' : 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/rb_12437_ozptga.png'"
-                    class="w-[50px]" alt="">
+                <img :src="type === 'success' ? 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/success_2_saihnb.png' : 'https://res.cloudinary.com/dwcajbc6f/image/upload/v1739607250/error_2_cqwgmb.png'"
+                    :class="type === 'success' ? 'border-[#40E0D0]' : 'border-[#DB3F4C]'" class="w-[50px] rounded-lg p-1 border-2" alt="">
                 <p class="text-[16px] font-semibold"
                     :class="type === 'success' ? 'text-[#40E0D0]' : 'text-[#DB3F4C]'">{{
                         message }}</p>

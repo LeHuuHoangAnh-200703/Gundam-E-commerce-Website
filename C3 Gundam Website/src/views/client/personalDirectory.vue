@@ -5,6 +5,7 @@ import Footer from '@/components/client/Footer.vue';
 import BackToTop from '@/components/client/BackToTop.vue';
 import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
+import EmtyState from '@/components/Notification/EmtyState.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import NotificationClient from '@/components/Notification/NotificationClient.vue';
@@ -160,7 +161,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <div class="relative my-5 m-2 lg:mx-[200px] flex flex-grow">
             <div class="w-full m-4">
@@ -168,12 +170,12 @@ onMounted(() => {
                     <div class="flex flex-col gap-4">
                         <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                             <h1
-                            class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
+                                class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
                                 Danh sách địa chỉ
                             </h1>
                             <div class="w-full lg:w-auto flex justify-end">
                                 <router-link :to="`/addInfoOrder/${maKhachHang}`"
-                                class="inline-block px-5 py-3 bg-[#4169E1] text-[14px] rounded-md font-bold text-white whitespace-nowrap">
+                                    class="inline-block px-5 py-3 bg-[#4169E1] text-[14px] rounded-md font-bold text-white whitespace-nowrap">
                                     <i class="fa-solid fa-plus"></i> Thêm địa chỉ
                                 </router-link>
                             </div>
@@ -196,12 +198,10 @@ onMounted(() => {
                                         class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
-                        <div v-else class="flex justify-center items-center m-auto w-full bg-white rounded-md p-4">
-                            <div class="flex flex-col items-center justify-center gap-3">
-                                <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
-                                    không có địa chỉ, hãy cập nhật!</p>
-                                <img src="../../assets/img/empty_admin.png" class="w-[150px]" alt="">
-                            </div>
+                        <div v-else
+                            class="flex justify-center items-center m-auto w-full border border-gray-100 rounded-md p-4">
+                            <EmtyState icon="fa-map" title="Chưa có địa chỉ nào"
+                                message="Hãy tiến hành cập nhật địa chỉ của bạn để thuận tiện cho việc đặt hàng nhé!" />
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
@@ -241,13 +241,10 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="flex justify-center items-center m-auto w-full bg-white rounded-md p-4">
-                            <div class="flex flex-col items-center justify-center gap-3">
-                                <p class="font-semibold text-[#1A1D27] text-[18px] lg:text-[24px] text-center">Hiện tại
-                                    không có mã giảm giá
-                                    nào!</p>
-                                <img src="../../assets/img/empty_admin.png" class="w-[150px]" alt="">
-                            </div>
+                        <div v-else
+                            class="flex justify-center items-center m-auto w-full border border-gray-100 rounded-md p-4">
+                            <EmtyState icon="fa-tags" title="Chưa có mã giảm giá nào" message="Hiện tại chưa có mã giảm giá nào được lưu.
+                        Hãy truy cập trang giảm giá để săn mã giảm giá nhé!" />
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import { io } from "socket.io-client";
 import axios from "axios";
 
@@ -20,6 +21,7 @@ const socket = io("http://localhost:3000", {
     userName: adminName.value,
   },
 });
+
 
 const loadChatRooms = async () => {
   try {
@@ -269,12 +271,12 @@ onUnmounted(() => {
                     </div>
                   </div>
                   <div v-else class="flex flex-col items-center justify-center py-12 space-y-4">
-                    <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
-                      <i class="fa-regular fa-comments text-gray-400 text-2xl"></i>
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full flex items-center justify-center">
+                      <i class="fa-regular fa-comments text-white text-2xl"></i>
                     </div>
                     <div class="text-center">
-                      <h3 class="text-white font-semibold text-lg mb-2">Chưa có tin nhắn nào</h3>
-                      <p class="text-gray-400 text-sm">Hãy nhắn tin với khách hàng qua phòng chat này!</p>
+                      <h3 class="text-[#333] font-semibold text-lg mb-2">Chưa có tin nhắn nào</h3>
+                      <p class="text-[#333] text-sm">Hãy nhắn tin với khách hàng qua phòng chat này!</p>
                     </div>
                   </div>
                 </div>
@@ -306,15 +308,8 @@ onUnmounted(() => {
                 </form>
               </div>
               <div v-else
-                class="bg-white p-4 w-full h-full border-2 rounded-lg shadow-lg flex flex-col gap-4 overflow-hidden">
-                <div class="flex justify-center items-center m-auto w-full h-full">
-                  <div class="flex flex-col items-center justify-center gap-3 h-full">
-                    <p class="font-semibold text-[18px] lg:text-[24px] text-center">
-                      Vui lòng chọn một khách hàng để trò chuyện!
-                    </p>
-                    <img src="../../assets/img/empty_admin.png" class="w-[200px] lg:w-[300px]" alt="">
-                  </div>
-                </div>
+                class="bg-white p-4 w-full h-full rounded-lg shadow-lg flex flex-col gap-4 overflow-hidden">
+                <EmtyStateAdmin icon="fa-user" title="Chưa có khách hàng nào" message="Hãy chọn một khách hàng để có thể tư vấn, hỗ trợ qua khung chat này!" />
               </div>
             </div>
           </div>
