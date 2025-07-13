@@ -62,10 +62,23 @@ exports.getCustomer = async (req, res) => {
     const customer = await Customer.findOne({
       MaKhachHang: req.params.maKhachHang,
     });
+    
     if (!customer) {
       return res.status(400).json({ message: "Khách hàng không tồn tại!" });
     }
-    return res.status(200).json(customer);
+
+    // Đếm số đơn hàng của khách hàng cụ thể này
+    const orderCount = await Order.countDocuments({
+      MaKhachHang: req.params.maKhachHang
+    });
+
+    // Trả về thông tin khách hàng kèm tổng số đơn hàng
+    const customerWithOrders = {
+      ...customer.toObject(),
+      TongDonHang: orderCount
+    };
+
+    res.status(200).json(customerWithOrders);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

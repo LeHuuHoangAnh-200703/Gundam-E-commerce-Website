@@ -270,7 +270,7 @@ onMounted(() => {
                 </button>
             </div>
             <div v-if="listProducts.length"
-                class="absolute top-20 right-16 rounded-md bg-white p-6 shadow-md hidden lg:block">
+                class="absolute top-20 right-16 rounded-md bg-white p-6 shadow-md hidden lg:block z-40">
                 <div class="flex items-center justify-between">
                     <p class="font-semibold text-[20px]">Hiện có</p>
                     <button class="group" type="Button" @click.prevent="closeProductDisplay">
@@ -358,8 +358,8 @@ onMounted(() => {
                 <router-link :to="`/editProfile/${idCustomer}`"
                     class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-purple-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-pen-to-square text-purple-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-pink-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-user-edit text-pink-600 group-hover:text-[#DB3F4C]"></i>
                     </div>
                     <span class="font-medium">Chỉnh sửa hồ sơ</span>
                     <i
@@ -368,8 +368,8 @@ onMounted(() => {
                 <router-link :to="`/orders_history`"
                     class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-bag-shopping text-green-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-bag-shopping text-orange-600 group-hover:text-[#DB3F4C]"></i>
                     </div>
                     <span class="font-medium">Đơn hàng của bạn</span>
                     <i
@@ -378,8 +378,8 @@ onMounted(() => {
                 <router-link :to="`/personalDirectory/${idCustomer}`"
                     class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-list text-orange-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-folder text-green-600 group-hover:text-[#DB3F4C]"></i>
                     </div>
                     <span class="font-medium">Danh mục cá nhân</span>
                     <i
@@ -388,8 +388,8 @@ onMounted(() => {
                 <router-link :to="`/yourPostLists/${idCustomer}`"
                     class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-pink-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-tags text-pink-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-purple-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-edit text-purple-600 group-hover:text-[#DB3F4C]"></i>
                     </div>
                     <span class="font-medium">Bài đăng của bạn</span>
                     <i

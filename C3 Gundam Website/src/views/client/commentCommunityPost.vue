@@ -349,7 +349,7 @@ onMounted(() => {
                         </h2>
                     </div>
                     <div
-                        class="flex-1 overflow-y-auto max-h-[calc(100vh-35vh)] p-6 mb-36 lg:mb-28 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                        class="flex-1 overflow-y-auto max-h-[calc(100vh-30vh)] p-6 mb-35 lg:mb-32 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                         <div v-for="(comment, index) in comments" :key="index"
                             :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
                             <div class="flex gap-3 group/comment">
@@ -486,7 +486,7 @@ onMounted(() => {
             <div class="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
                 <div class="relative group">
                     <img :src="selectedImage" @click.stop
-                        class="lg:max-w-[70vw] lg:max-h-[70vh] max-w-full max-h-full w-auto h-auto object-contain border-4 sm:border-6 md:border-8 border-white"
+                        class="lg:max-w-[80vw] lg:max-h-[80vh] max-w-full max-h-full w-auto h-auto object-contain border-4 sm:border-6 md:border-8 border-white"
                         alt="Enlarged image">
                     <button @click="closeImageModal"
                         class="absolute -top-4 -right-4 w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110">
