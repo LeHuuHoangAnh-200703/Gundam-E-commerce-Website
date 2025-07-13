@@ -23,7 +23,8 @@ const fetchCustomer = async (idKhachHang) => {
         maKhachHang.value = response.data.MaKhachHang;
         image.value = response.data.Image;
         orderCount.value = response.data.TongDonHang;
-        joinDate.value = new Date(response.data.NgayTao);
+        console.log(response.data.NgayTao)
+        joinDate.value = formatDate(response.data.NgayTao);
     } catch (err) {
         console.log("Error fetching:", err);
     }
@@ -44,11 +45,35 @@ const fetchCommunityPost = async (idKhachHang) => {
     }
 }
 
-const formatDate = (date) => {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
-    const formattedDate = date.toLocaleDateString('vi-VN', options);
-
-    return formattedDate;
+const formatDate = (dateString) => {
+    try {
+        // Kiểm tra nếu dateString không tồn tại hoặc rỗng
+        if (!dateString) return 'N/A';
+        
+        // Tạo Date object từ ISO string
+        const date = new Date(dateString);
+        
+        // Kiểm tra xem Date object có hợp lệ không
+        if (isNaN(date.getTime())) {
+            console.log('Invalid date!');
+            return 'N/A';
+        }
+        
+        const options = { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric', 
+            timeZone: 'Asia/Ho_Chi_Minh' 
+        };
+        
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+        console.log('Formatted date (fallback):', formattedDate);
+        
+        return formattedDate;
+    } catch (error) {
+        console.log('Error formatting date:', error);
+        return 'N/A';
+    }
 };
 
 onMounted(() => {
@@ -99,7 +124,7 @@ onMounted(() => {
                                         <div class="text-xs text-gray-400">Bài đăng</div>
                                     </div>
                                     <div class="group">
-                                        <div class="text-xl sm:text-2xl font-bold text-white group-hover:text-teal-400 transition-colors">{{ formatDate(joinDate) }}</div>
+                                        <div class="text-xl sm:text-2xl font-bold text-white group-hover:text-teal-400 transition-colors">{{ joinDate }}</div>
                                         <div class="text-xs text-gray-400">Ngày tham gia</div>
                                     </div>
                                 </div>
