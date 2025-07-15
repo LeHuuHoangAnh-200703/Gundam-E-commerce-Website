@@ -158,7 +158,7 @@ onMounted(() => {
                                     class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
                             </div>
                         </div>
-                        <div v-if="listDiscountCodes.length < 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div v-if="listDiscountCodes.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <div v-for="(discountCode, index) in findDiscountCode" :key="index"
                                 class="flex flex-col gap-1 border-t-4 border-[#DB3F4C] bg-white p-4 shadow-lg">
                                 <div class="flex justify-between items-center">
