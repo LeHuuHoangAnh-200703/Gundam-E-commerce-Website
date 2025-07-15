@@ -158,7 +158,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="overflow-auto">
-                        <div v-if="listPost.length > 0" class="flex flex-col gap-4">
+                        <div v-if="findCommunityPost.length > 0" class="flex flex-col gap-4">
                             <div v-for="(post, index) in findCommunityPost" :key="index"
                                 class="flex flex-col gap-2 w-full bg-white p-4 rounded-md shadow-lg border-2">
                                 <div class="flex items-center justify-between">
