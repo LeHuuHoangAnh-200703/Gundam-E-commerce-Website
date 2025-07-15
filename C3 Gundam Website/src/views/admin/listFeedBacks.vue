@@ -42,10 +42,12 @@ const totalQuality = computed(() => {
 const chooseFeedBackWithStar = computed(() => {
     return comments.value.filter(comment => {
         const matchesStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
-        const matchesSearch = !searchValue.value || comment.SanPhamDaDanhGia.some(item =>
-            item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase()) ||
-            item.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
-        );
+        const matchesSearch = !searchValue.value || 
+            comment.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase()) || 
+            comment.SanPhamDaDanhGia.some(item =>
+                item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase()) ||
+                item.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
+            );
         const matchesToxic = isToxic.value === null ? comment.isToxic === false : comment.isToxic === isToxic.value;
         return matchesStar && matchesSearch && matchesToxic;
     });
@@ -210,7 +212,8 @@ onMounted(() => {
                                 </div>
                                 <div v-else
                                     class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex items-center justify-center">
-                                    <EmtyStateAdmin icon="fa-comments" title="Chưa có đánh giá nào" message="Hiện tại chưa có đánh giá nào hoặc chưa có đánh giá nào phù hợp với trạng thái vừa chọn!" />
+                                    <EmtyStateAdmin icon="fa-comments" title="Chưa có đánh giá nào"
+                                        message="Hiện tại chưa có đánh giá nào hoặc chưa có đánh giá nào phù hợp với trạng thái vừa chọn!" />
                                 </div>
                             </div>
                         </div>
