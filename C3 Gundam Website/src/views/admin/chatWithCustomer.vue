@@ -209,7 +209,7 @@ onUnmounted(() => {
                 </div>
                 <div class="flex flex-col gap-2 mt-3 overflow-y-auto flex-grow">
                   <div v-for="room in filteredRooms" :key="room.roomCode"
-                    class="flex gap-2 items-center hover:bg-gray-200 p-2 cursor-pointer border-b-2 pb-4"
+                    class="flex gap-2 items-center justify-between hover:bg-gray-200 p-2 cursor-pointer border-b-2 pb-4"
                     @click="selectRoom(room)">
                     <div class="flex gap-2 items-center">
                       <img :src="room.senderAvatar || '/src/assets/img/avatar.jpg'"

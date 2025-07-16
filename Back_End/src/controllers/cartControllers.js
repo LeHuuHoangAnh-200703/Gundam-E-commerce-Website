@@ -1,6 +1,7 @@
 const Cart = require("../models/cartModels");
 const Product = require("../models/productModels");
 const Inventory = require("../models/inventoryModels");
+const ProductType = require("../models/productTypeModels");
 
 exports.getAllCarts = async (req, res) => {
     try {
@@ -34,23 +35,34 @@ exports.getCartByID = async (req, res) => {
         const productIds = [...new Set(carts.map(cart => cart.MaSanPham))];
 
         const products = await Product.find({ MaSanPham: { $in: productIds } });
+        const productTypeIds = [...new Set(products.map(product => product.MaLoaiSanPham))];
+
+        const productTypes = await ProductType.find({ MaLoaiSanPham: { $in: productTypeIds } });
+        const productTypeMap = {};
+        productTypes.forEach(productType => {
+            productTypeMap[productType.MaLoaiSanPham] = productType.LoaiSanPham;
+        });
+
         const productMap = {};
         products.forEach(product => {
             productMap[product.MaSanPham] = {
                 TenSanPham: product.TenSanPham,
                 HinhAnh: product.Images[0],
-                LoaiSanPham: product.LoaiSanPham,
-                DonGia: product.GiaBan
+                DonGia: product.GiaBan,
+                MaLoaiSanPham: product.MaLoaiSanPham
             };
         });
 
-        const productsWithCarts = carts.map(product => ({
-            ...product.toObject(),
-            TenSanPham: productMap[product.MaSanPham]?.TenSanPham,
-            HinhAnh: productMap[product.MaSanPham]?.HinhAnh,
-            LoaiSanPham: productMap[product.MaSanPham]?.LoaiSanPham,
-            DonGia: productMap[product.MaSanPham]?.DonGia,
-        }));
+        const productsWithCarts = carts.map(cartItem => {
+            const product = productMap[cartItem.MaSanPham];
+            return {
+                ...cartItem.toObject(),
+                TenSanPham: product?.TenSanPham,
+                HinhAnh: product?.HinhAnh,
+                LoaiSanPham: productTypeMap[product?.MaLoaiSanPham],
+                DonGia: product?.DonGia,
+            };
+        });
 
         return res.status(200).json(productsWithCarts);
     } catch (err) {

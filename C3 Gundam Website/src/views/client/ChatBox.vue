@@ -177,7 +177,7 @@ onUnmounted(() => {
         <div
           class="bg-[#242424] flex flex-col min-h-[calc(100vh-30vh)] w-full gap-3 overflow-hidden px-6 py-3 rounded [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
           <div class="flex gap-3 items-center text-white">
-            <img src="../../assets/img/avatar.jpg"
+            <img src="../../assets/img/logoNew.png"
               class="w-[50px] h-[50px] rounded-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="" />
             <div class="flex flex-col">
               <p class="font-semibold text-[18px]">C3 GUNDAM STORE</p>
@@ -201,7 +201,7 @@ onUnmounted(() => {
                   <small class="text-white text-[10px]">{{ msg.ThoiGian }}</small>
                 </div>
                 <div v-if="msg.role === 'admin'" class="flex gap-2">
-                  <img src="../../assets/img/avatar.jpg" class="w-[35px] h-[35px] rounded-full" alt="" />
+                  <img src="../../assets/img/logoNew.png" class="w-[35px] h-[35px] rounded-full border-2" alt="" />
                   <div class="flex flex-col gap-1">
                     <div class="rounded-md text-[#333]">
                       <div v-if="msg.TinNhan" class="bg-gray-200 p-2 rounded-lg inline-block">

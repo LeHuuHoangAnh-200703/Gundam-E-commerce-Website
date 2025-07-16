@@ -32,6 +32,7 @@ const fetchCarts = async (maKhachHang) => {
                 isSelected: false
             }
         });
+        console.log(carts.value)
     } catch (err) {
         console.log("Error fetching: ", err);
     }
