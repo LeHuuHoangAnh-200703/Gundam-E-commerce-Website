@@ -24,12 +24,19 @@ const fetchFeedBacks = async () => {
     }
 }
 
-const formatDate = (date) => {
-    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
-    const formattedDate = date.toLocaleString('vi-VN', options);
+const formatDate = (time) => {
+    if (!time) return ''
 
-    const [time, day] = formattedDate.split(', ');
-    return `${time}`;
+    const now = new Date()
+    const postTime = new Date(time)
+    const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+    return postTime.toLocaleDateString('vi-VN')
 };
 
 const totalQuality = computed(() => {
@@ -42,8 +49,8 @@ const totalQuality = computed(() => {
 const chooseFeedBackWithStar = computed(() => {
     return comments.value.filter(comment => {
         const matchesStar = selectedStar.value === 6 || comment.ChatLuong === selectedStar.value;
-        const matchesSearch = !searchValue.value || 
-            comment.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase()) || 
+        const matchesSearch = !searchValue.value ||
+            comment.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase()) ||
             comment.SanPhamDaDanhGia.some(item =>
                 item.TenSanPham.toLowerCase().includes(searchValue.value.toLowerCase()) ||
                 item.MaSanPham.toLowerCase().includes(searchValue.value.toLowerCase())
@@ -174,7 +181,7 @@ onMounted(() => {
                                             <div class="">
                                                 <p class="text-[14px] xl:text-[12px] font-semibold">{{
                                                     comment.TenKhachHang
-                                                    }}
+                                                }}
                                                 </p>
                                                 <div class="flex gap-1 my-1">
                                                     <i v-for="star in 5" :key="star" :class="{
@@ -198,11 +205,11 @@ onMounted(() => {
                                             :key="index">
                                             <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">{{
                                                 product.TenSanPham
-                                                }}
+                                            }}
                                             </p>
                                             <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{
                                                 product.MaSanPham
-                                                }}
+                                            }}
                                             </p>
                                             <p class="text-gray-500 text-[12px] xl:text-[10px] mr-1">/ {{
                                                 product.LoaiSanPham }}

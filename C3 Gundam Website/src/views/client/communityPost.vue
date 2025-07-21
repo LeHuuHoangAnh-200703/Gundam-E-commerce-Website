@@ -59,8 +59,19 @@ const fetchTopCommunityPost = async () => {
 }
 
 const formatTime = (time) => {
-    return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
-};
+    if (!time) return ''
+
+    const now = new Date()
+    const postTime = new Date(time)
+    const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+    return postTime.toLocaleDateString('vi-VN')
+}
 
 onMounted(() => {
     fetchCustomer();
@@ -70,7 +81,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
         <div class="relative mb-5 mx-2 sm:mx-4 md:mx-8 lg:mx-[210px] xl:mx-[210px] flex flex-grow">
             <div class="w-full overflow-y-auto flex flex-col gap-4 sm:gap-6">
@@ -88,7 +100,8 @@ onMounted(() => {
                     class="font-bold self-start text-[20px] uppercase text-white text-start border-b-2 border-[#DC143C] pb-2">
                     Bài đăng được quan tâm nhiều nhất</h1>
                 <div v-if="listPost.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <router-link :to="`/commentCommunityPost/${topPost.MaBaiDang}`" class="w-full flex flex-col group" v-for="topPost in listTopPost" :key="topPost.MaBaiDang">
+                    <router-link :to="`/commentCommunityPost/${topPost.MaBaiDang}`" class="w-full flex flex-col group"
+                        v-for="topPost in listTopPost" :key="topPost.MaBaiDang">
                         <div class="w-full flex-shrink-0">
                             <img :src="topPost.HinhAnh[0]"
                                 class="w-full aspect-[4/3] object-cover rounded-t-md md:rounded-tl-md md:rounded-br-none"
@@ -113,7 +126,8 @@ onMounted(() => {
                                 Tác giả: <span class="text-[#DC143C]">{{ topPost.TenKhachHang }}</span>
                             </p>
                             <div class="w-auto flex justify-end items-center gap-1">
-                                <p class="font-semibold text-base text-[#DC143C]">{{ topPost.BinhLuan.length }} <span class="text-gray-700">Bình
+                                <p class="font-semibold text-base text-[#DC143C]">{{ topPost.BinhLuan.length }} <span
+                                        class="text-gray-700">Bình
                                         luận</span></p>
                             </div>
                         </div>

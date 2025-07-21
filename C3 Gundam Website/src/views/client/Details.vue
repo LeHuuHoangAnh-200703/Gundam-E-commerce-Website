@@ -161,12 +161,19 @@ const deleteFeedback = async (idDanhGia) => {
     });
 }
 
-const formatDate = (date) => {
-    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
-    const formattedDate = date.toLocaleString('vi-VN', options);
+const formatDate = (time) => {
+    if (!time) return ''
 
-    const [time, day] = formattedDate.split(', ');
-    return `${time}`;
+    const now = new Date()
+    const postTime = new Date(time)
+    const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+    return postTime.toLocaleDateString('vi-VN')
 };
 
 // Sản phẩm liên quan
@@ -318,11 +325,12 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth">
+    <div
+        class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth">
         <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
             <p class="text-gray-300 font-semibold text-[15px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
-                    }}</span></p>
+            }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[45%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
@@ -338,8 +346,9 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                 </div>
                 <div class="flex flex-col gap-4 w-full lg:w-[55%]">
                     <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
-                    <p class="text-white font-semibold text-[24px]"><span class="text-[#FFD700]">{{ formatCurrency(price) }}
-                        VNĐ</span></p>
+                    <p class="text-white font-semibold text-[24px]"><span class="text-[#FFD700]">{{
+                            formatCurrency(price) }}
+                            VNĐ</span></p>
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
@@ -436,7 +445,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                     formatCurrency(product.GiaBan)
                                         }} VNĐ</span></p>
                                 <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai
-                                        }}</span>
+                                }}</span>
                                 </p>
                             </div>
                         </div>
@@ -484,7 +493,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         Đánh giá</p>
                     <span class="w-[60%] lg:w-[75%] h-[2px] bg-white"></span>
                 </div>
-                <div class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm py-4 px-4 lg:px-[40px] my-6 [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
+                <div
+                    class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm py-4 px-4 lg:px-[40px] my-6 [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]">
                     <div class="flex lg:flex-row flex-col gap-5 items-center justify-center lg:justify-between">
                         <div class="flex flex-col gap-2">
                             <p class="text-white text-[24px]"><span class="text-[30px]">{{ totalQuality }} </span> trên
@@ -507,7 +517,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-4 w-full items-center">
                                     <img :src="`${comment.HinhAnhKhachHang === 'null' ? '/src/assets/img/avatar.jpg' : comment.HinhAnhKhachHang}`"
-                                        class="w-12 h-12 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg" alt="">
+                                        class="w-12 h-12 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg"
+                                        alt="">
                                     <div class="">
                                         <p class="text-white text-[14px] font-semibold">{{ comment.TenKhachHang }}</p>
                                         <div class="flex gap-1 my-1">
@@ -516,7 +527,9 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                                 'fa-solid fa-star text-[#C0C0C0] text-[10px]': star > comment.ChatLuong
                                             }"></i>
                                         </div>
-                                        <p class="text-gray-400 text-sm mb-1 flex items-center gap-2"><i class="fa-regular fa-clock text-blue-400"></i> {{ formatDate(comment.NgayDang) }}</p>
+                                        <p class="text-gray-400 text-sm mb-1 flex items-center gap-1"><i
+                                                class="fa-regular fa-clock text-blue-400"></i> {{
+                                            formatDate(comment.NgayDang) }}</p>
                                     </div>
                                 </div>
                                 <button type="submit" @click.prevent="deleteFeedback(comment.MaDanhGia)"
@@ -533,7 +546,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                             </div>
                         </div>
                     </div>
-                    <EmtyState v-else icon="fa-comments" title="Chưa có đánh giá nào" message="Hãy là người đầu tiên đánh giá về sản phẩm này!" />
+                    <EmtyState v-else icon="fa-comments" title="Chưa có đánh giá nào"
+                        message="Hãy là người đầu tiên đánh giá về sản phẩm này!" />
                     <div class="flex justify-center items-center gap-4 mt-4">
                         <button @click="prevPage" :disabled="currentPage === 1"
                             class="px-5 py-2 cursor-pointer border-2 bg-white font-semibold hover:border-blue-500/90 hover:text-blue-500/90 ease-out duration-300 transition-all">Trước</button>

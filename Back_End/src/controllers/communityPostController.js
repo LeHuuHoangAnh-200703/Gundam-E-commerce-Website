@@ -23,14 +23,16 @@ exports.getAllCommunityPost = async (req, res) => {
     customers.forEach(customer => {
       customerMap[customer.MaKhachHang] = {
         TenKhachHang: customer.TenKhachHang,
-        HinhAnhKhachHang: customer.Image
+        HinhAnhKhachHang: customer.Image,
+        Email: customer.Email
       };
     });
 
     const communityPost = posts.map(post => ({
       ...post.toObject(),
       TenKhachHang: customerMap[post.MaKhachHang]?.TenKhachHang || "Không xác định",
-      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null
+      HinhAnhKhachHang: customerMap[post.MaKhachHang]?.HinhAnhKhachHang || null,
+      EmailTacGia: customerMap[post.MaKhachHang]?.Email || null
     }));
 
     res.status(200).json(communityPost);

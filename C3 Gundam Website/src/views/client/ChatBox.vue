@@ -89,11 +89,19 @@ const sendMessage = async () => {
 
 // Format thời gian
 const formatTime = (time) => {
-  return new Date(time).toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
+  if (!time) return ''
+
+  const now = new Date()
+  const postTime = new Date(time)
+  const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+  if (diffInSeconds < 60) return 'Vừa xong'
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+  return postTime.toLocaleDateString('vi-VN')
+}
 
 // Lifecycle hooks
 onMounted(() => {

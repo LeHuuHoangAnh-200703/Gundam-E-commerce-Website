@@ -77,19 +77,19 @@ const fetchNatifications = async () => {
   }
 };
 
-const formatDate = (date) => {
-  const options = {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "Asia/Ho_Chi_Minh",
-  };
-  const formattedDate = date.toLocaleString("vi-VN", options);
-  const [time, day] = formattedDate.split(", ");
-  return `${time}`;
+const formatDate = (time) => {
+  if (!time) return ''
+
+  const now = new Date()
+  const postTime = new Date(time)
+  const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+  if (diffInSeconds < 60) return 'Vừa xong'
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+  return postTime.toLocaleDateString('vi-VN')
 };
 
 onMounted(async () => {
@@ -136,51 +136,37 @@ onUnmounted(() => {
       <div class="flex gap-3 justify-center items-center">
         <router-link to="" @click="toggleNotification" class="px-2 py-2 rounded-full group">
           <i class="fa-solid fa-bell relative transition-all duration-200 text-[20px]">
-            <span
-              v-if="hasUnreadNotifications"
-              class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"
-            ></span>
+            <span v-if="hasUnreadNotifications"
+              class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"></span>
           </i>
         </router-link>
         <router-link to="/admin/chatWithCustomer" class="px-2 py-2 rounded-full group">
           <i class="fa-solid fa-comments relative transition-all duration-200 text-[20px]">
-            <span
-              v-if="hasUnreadMessages"
-              class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"
-            ></span>
+            <span v-if="hasUnreadMessages"
+              class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"></span>
           </i>
         </router-link>
         <button @click.prevent="logout" class="px-2 py-2 rounded-full group hidden lg:block">
           <i
-            class="fa-solid fa-right-from-bracket group-hover:text-[#DB3F4C] transition-all duration-200 text-[20px]"
-          ></i>
+            class="fa-solid fa-right-from-bracket group-hover:text-[#DB3F4C] transition-all duration-200 text-[20px]"></i>
         </button>
         <button @click="toggleSideBar" class="block lg:hidden">
           <i class="fa-solid fa-bars text-[20px]"></i>
         </button>
       </div>
-      <div
-        class="fixed bottom-0 top-0 left-0 bg-[#1A1D27] w-[100%] min-h-full transition-transform duration-300 z-20"
-        :class="{ 'translate-x-full': !isSidebarVisible, 'translate-x-0': isSidebarVisible }"
-      >
+      <div class="fixed bottom-0 top-0 left-0 bg-[#1A1D27] w-[100%] min-h-full transition-transform duration-300 z-20"
+        :class="{ 'translate-x-full': !isSidebarVisible, 'translate-x-0': isSidebarVisible }">
         <div class="flex flex-col gap-4 px-5 py-5">
           <div class="flex justify-between items-center">
             <p class="font-bold text-white text-center text-[20px] font-bungee">
               <span class="text-[#DB3F4C]">C3 </span> Gundam Store
             </p>
-            <i
-              @click="toggleSideBar"
-              class="fa-regular fa-circle-xmark cursor-pointer text-white text-4xl"
-            ></i>
+            <i @click="toggleSideBar" class="fa-regular fa-circle-xmark cursor-pointer text-white text-4xl"></i>
           </div>
           <hr />
           <ul class="flex flex-col text-white">
-            <router-link
-              :to="sidebar.path"
-              v-for="(sidebar, index) in sidebarMenuMobile"
-              :key="index"
-              class="flex gap-3 items-center font-semibold cursor-pointer py-3 hover:text-[#DB3F4C] rounded-md transition-all duration-200"
-            >
+            <router-link :to="sidebar.path" v-for="(sidebar, index) in sidebarMenuMobile" :key="index"
+              class="flex gap-3 items-center font-semibold cursor-pointer py-3 hover:text-[#DB3F4C] rounded-md transition-all duration-200">
               <i :class="sidebar.icon"></i>
               {{ sidebar.name }}
             </router-link>
@@ -189,22 +175,15 @@ onUnmounted(() => {
       </div>
       <div
         class="notification fixed top-28 w-full lg:w-auto bg-white max-h-[calc(100vh-150px)] overflow-hidden shadow-lg p-4 rounded-lg z-50"
-        :class="{ 'lg:right-[30%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }"
-      >
+        :class="{ 'lg:right-[30%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }">
         <div class="flex justify-between items-center">
           <p class="font-semibold text-[18px]">Thông báo</p>
-          <i
-            @click="toggleNotification"
-            class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"
-          ></i>
+          <i @click="toggleNotification" class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"></i>
         </div>
         <hr class="mt-2" />
         <div class="flex flex-col max-h-[450px] overflow-y-auto">
-          <div
-            class="flex gap-3 items-center border-b py-2"
-            v-for="(natification, index) in listNatifications"
-            :key="index"
-          >
+          <div class="flex gap-3 items-center border-b py-2" v-for="(natification, index) in listNatifications"
+            :key="index">
             <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
               <i class="fa-regular fa-bell text-[20px]"></i>
             </div>

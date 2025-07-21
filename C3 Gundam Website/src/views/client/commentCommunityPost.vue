@@ -238,8 +238,19 @@ const deletePost = async (idBaiDang) => {
 }
 
 const formatTime = (time) => {
-    return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
-};
+    if (!time) return ''
+
+    const now = new Date()
+    const postTime = new Date(time)
+    const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+    return postTime.toLocaleDateString('vi-VN')
+}
 
 onMounted(() => {
     const idBaiDang = router.currentRoute.value.params.maBaiDang;
@@ -251,10 +262,11 @@ onMounted(() => {
     <div
         class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        <div class="relative mb-8 mx-4 lg:mx-[200px] flex lg:flex-row flex-col flex-grow gap-6 mt-6 items-stretch">
+        <div
+            class="relative mb-8 mx-4 lg:mx-[200px] flex lg:flex-row flex-col flex-grow gap-6 mt-6 items-stretch">
             <div class="flex flex-col gap-6 w-full lg:w-[55%]">
                 <div
-                    class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
+                    class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group min-h-full">
                     <div class="p-6 pb-4">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-4">
@@ -337,8 +349,8 @@ onMounted(() => {
             </div>
             <div class="w-full lg:w-[45%] flex flex-col">
                 <div
-                    class="relative bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl flex flex-col overflow-hidden h-full">
-                    <div class="p-6 pb-4 border-b border-gray-600/30">
+                    class="relative bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl flex flex-col min-h-full">
+                    <div class="p-6 pb-4 border-b border-gray-600/30 shrink-0">
                         <h2 class="text-white font-bold text-xl flex items-center gap-3">
                             <i class="fa-solid fa-comments text-blue-400"></i>
                             Bình luận
@@ -349,7 +361,7 @@ onMounted(() => {
                         </h2>
                     </div>
                     <div
-                        class="flex-1 overflow-y-auto max-h-[calc(100vh-30vh)] p-6 mb-35 lg:mb-32 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                        class="overflow-y-auto max-h-[calc(100vh-30vh)] mb-36 p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 flex-grow">
                         <div v-for="(comment, index) in comments" :key="index"
                             :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
                             <div class="flex gap-3 group/comment">
@@ -367,7 +379,7 @@ onMounted(() => {
                                     </div>
                                     <div class="flex items-center justify-between px-2">
                                         <span class="text-gray-400 text-xs">{{ formatTime(new Date(comment.ThoiGian))
-                                            }}</span>
+                                        }}</span>
                                         <div
                                             class="flex items-center gap-3 opacity-0 group-hover/comment:opacity-100 transition-opacity duration-200">
                                             <button @click="deleteComment(comment.MaBinhLuan)"
@@ -464,7 +476,7 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div class="absolute bottom-0 left-0 z-50 w-full p-6 border-t border-gray-600/30 bg-gray-800/50">
+                    <div class="absolute bottom-0 right-0 z-40 w-full p-6 rounded-b-xl border-t border-gray-600/30 bg-gray-800/50 shrink-0">
                         <div class="flex gap-3 items-end">
                             <div class="flex-1 relative">
                                 <textarea v-model="newComment"

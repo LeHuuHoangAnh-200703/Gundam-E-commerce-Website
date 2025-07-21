@@ -71,9 +71,10 @@ const fetchCommunityPost = async () => {
                 ThoiGianDang: new Date(post.ThoiGianDang)
             }
         });
+
         const postApproved = listPost.value.filter(post => post.TrangThaiDang === 'Đã duyệt');
         const postWaiting = listPost.value.filter(post => post.TrangThaiDang === 'Đang chờ duyệt');
-        listPost.value = [...postWaiting.sort((a, b) => new Date(a.ThoiGianDang) - new Date(b.ThoiGianDang)), ...postApproved.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
+        listPost.value = [...postWaiting, ...postApproved.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
     } catch (error) {
         console.log('Error fetching:', error);
     }
@@ -124,13 +125,24 @@ const deletePost = async (idBaiDang) => {
 const findCommunityPost = computed(() => {
     return listPost.value.filter(post => {
         const matchesSearch = !searchValue.value ||
-        post.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase())
+            post.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase())
         return matchesSearch;
     });
 })
 
 const formatTime = (time) => {
-    return new Date(time).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+    if (!time) return ''
+
+    const now = new Date()
+    const postTime = new Date(time)
+    const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+    return postTime.toLocaleDateString('vi-VN')
 };
 
 onMounted(() => {
@@ -166,7 +178,12 @@ onMounted(() => {
                                         <img :src="post.HinhAnhKhachHang ? post.HinhAnhKhachHang : '/src/assets/img/avatar.jpg'"
                                             class="w-[50px] h-[50px] rounded-full object-cover" alt="">
                                         <div class="flex flex-col">
-                                            <p class="font-semibold text-[16px]">{{ post.TenKhachHang }}</p>
+                                            <div class="flex gap-2 items-center">
+                                                <p class="font-semibold text-[16px]">{{ post.TenKhachHang }}</p>
+                                                <p :class="post.EmailTacGia === 'c3gundamstore@gmail.com' ? 'inline-flex' : 'hidden'"
+                                                    class="items-center gap-2 text-blue-600 text-sm px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30">
+                                                    Quản trị viên</p>
+                                            </div>
                                             <p class="font-semibold text-[12px] text-gray-600">{{
                                                 formatTime(post.ThoiGianDang) }}</p>
                                         </div>
@@ -176,9 +193,9 @@ onMounted(() => {
                                             post.TrangThaiDang }}</p>
                                 </div>
                                 <p class="font-semibold text-[14px]">Tiêu đề: <span class="font-medium">{{ post.TieuDe
-                                }}</span></p>
+                                        }}</span></p>
                                 <p class="font-semibold text-[14px]">Nội dung: <span class="font-medium">{{ post.NoiDung
-                                }}</span></p>
+                                        }}</span></p>
                                 <p class="font-semibold text-[14px]">Loại bài đăng: <span class="font-medium">{{
                                     post.LoaiBaiDang }}</span>
                                 </p>
@@ -202,7 +219,8 @@ onMounted(() => {
                             </div>
                         </div>
                         <div v-else class="bg-white p-4 w-full flex items-center justify-center rounded-md border-2">
-                            <EmtyStateAdmin icon="fa-bag-shopping" title="Chưa có bài đăng nào" message="Hiện tại vẫn chưa có bài đăng nào được đăng lên cộng đồng Gundam!" />
+                            <EmtyStateAdmin icon="fa-bag-shopping" title="Chưa có bài đăng nào"
+                                message="Hiện tại vẫn chưa có bài đăng nào được đăng lên cộng đồng Gundam!" />
                         </div>
                     </div>
                 </div>
