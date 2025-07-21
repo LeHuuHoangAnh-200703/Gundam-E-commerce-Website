@@ -208,7 +208,7 @@ onMounted(() => {
         </div>
         <div
             class="menuUser fixed top-20 -right-[100%] rounded-md backdrop-blur-sm bg-gradient-to-br from-white to-gray-50 z-50 border border-gray-200 shadow-2xl">
-            <div class="flex gap-4 items-center bg-gradient-to-r from-[#DB3F4C] to-[#B91C1C] p-6 rounded-t-md">
+            <div class="flex gap-4 items-center bg-gradient-to-r from-indigo-400 to-purple-600 p-6 rounded-t-md">
                 <div class="relative">
                     <img :src="imageCustomer" class="w-12 h-12 rounded-full object-cover ring-4 ring-white/30 shadow-lg"
                         alt="User Avatar">
@@ -222,50 +222,50 @@ onMounted(() => {
             </div>
             <div class="p-4 space-y-1 flex flex-col">
                 <router-link :to="`/profile`"
-                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-purple-600/10 hover:to-purple-600/5 hover:text-purple-600 transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-blue-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-user text-blue-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-blue-100 group-hover:bg-indigo-400/30 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-user text-blue-600 group-hover:text-purple-600"></i>
                     </div>
                     <span class="font-medium">Thông tin cá nhân</span>
                     <i
                         class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                 </router-link>
                 <router-link :to="`/editProfile/${idCustomer}`"
-                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-purple-600/10 hover:to-purple-600/5 hover:text-purple-600 transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-pink-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-user-edit text-pink-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-pink-100 group-hover:bg-indigo-400/30 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-user-edit text-pink-600 group-hover:text-purple-600"></i>
                     </div>
                     <span class="font-medium">Chỉnh sửa hồ sơ</span>
                     <i
                         class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                 </router-link>
                 <router-link :to="`/orders_history`"
-                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-purple-600/10 hover:to-purple-600/5 hover:text-purple-600 transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-bag-shopping text-orange-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-indigo-400/30 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-bag-shopping text-orange-600 group-hover:text-purple-600"></i>
                     </div>
                     <span class="font-medium">Đơn hàng của bạn</span>
                     <i
                         class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                 </router-link>
                 <router-link :to="`/personalDirectory/${idCustomer}`"
-                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-purple-600/10 hover:to-purple-600/5 hover:text-purple-600 transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-folder text-green-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-indigo-400/30 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-folder text-green-600 group-hover:text-purple-600"></i>
                     </div>
                     <span class="font-medium">Danh mục cá nhân</span>
                     <i
                         class="fa-solid fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                 </router-link>
                 <router-link :to="`/yourPostLists/${idCustomer}`"
-                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-[#DB3F4C]/10 hover:to-[#DB3F4C]/5 hover:text-[#DB3F4C] transition-all duration-300 transform hover:scale-[1.02]">
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-purple-600/10 hover:to-purple-600/5 hover:text-purple-600 transition-all duration-300 transform hover:scale-[1.02]">
                     <div
-                        class="w-10 h-10 rounded-lg bg-purple-100 group-hover:bg-[#DB3F4C]/10 flex items-center justify-center transition-all duration-300">
-                        <i class="fa-solid fa-edit text-purple-600 group-hover:text-[#DB3F4C]"></i>
+                        class="w-10 h-10 rounded-lg bg-purple-100 group-hover:bg-indigo-400/30 flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid fa-edit text-purple-600 group-hover:text-purple-600"></i>
                     </div>
                     <span class="font-medium">Bài đăng của bạn</span>
                     <i

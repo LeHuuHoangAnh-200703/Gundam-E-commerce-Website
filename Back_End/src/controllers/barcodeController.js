@@ -8,7 +8,7 @@ exports.getProductByBarCode = async (req, res) => {
     try {
         const { barcode } = req.params;
         const product = await Product.findOne({ BarCode: barcode });
-        console.log(product)
+
         if (!product) {
             return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
         }

@@ -63,7 +63,7 @@ const props = defineProps({
                             {{ message }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 opacity-80">
-                            {{ type === 'success' ? 'Thao tác thành công' : 'Có lỗi xảy ra' }}
+                            {{ type === 'success' ? 'Thao tác thành công' : 'Thao tác thất bại' }}
                         </p>
                     </div>
                 </div>

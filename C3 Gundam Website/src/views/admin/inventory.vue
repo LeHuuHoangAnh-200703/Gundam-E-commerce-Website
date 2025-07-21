@@ -129,35 +129,38 @@ const onDecode = async (result) => {
     }
     
     try {
-        const response = await axios.get(`http://localhost:3000/api/barcode/${barcodeValue}`);
-        const productData = response.data;
-        
-        // Kiểm tra nếu đang hiển thị form cho cùng một sản phẩm
+        // Kiểm tra nếu đang hiển thị form và quét cùng một sản phẩm
         if (showForm.value && product.value && product.value.BarCode === barcodeValue) {
             // Nếu đang mở form cho cùng sản phẩm, chỉ tăng số lượng
             scanCount.value += 1;
             SoLuongNhap.value = scanCount.value;
             showNotification(`Đã tăng số lượng thành ${scanCount.value}`, 'success');
-        } else {
-            // Nếu là sản phẩm khác hoặc chưa mở form
-            product.value = productData;
-            console.log(product.value);
-            MaNhaCungCap.value = product.value.MaNhaCungCap || "";
-            TenNhaCungCap.value = product.value.TenNhaCungCap || "";
-
-            // Kiểm tra nếu barcode giống lần trước (khi không có form mở)
-            if (productData.BarCode === lastBarcode.value && !showForm.value) {
-                scanCount.value += 1;
-                SoLuongNhap.value = scanCount.value;
-            } else {
-                scanCount.value = 1;
-                SoLuongNhap.value = 1;
-                lastBarcode.value = productData.BarCode;
-            }
-
-            showForm.value = true;
+            
+            // Clear input values
+            barcode.value = "";
+            scannedBarcode.value = "";
+            return; // Thoát sớm, không cần gọi API
         }
+
+        const response = await axios.get(`http://localhost:3000/api/barcode/${barcodeValue}`);
+        const productData = response.data;
         
+        // Nếu là sản phẩm khác hoặc chưa mở form
+        product.value = productData;
+        MaNhaCungCap.value = product.value.MaNhaCungCap || "";
+        TenNhaCungCap.value = product.value.TenNhaCungCap || "";
+
+        // Kiểm tra nếu barcode giống lần trước (khi không có form mở)
+        if (productData.BarCode === lastBarcode.value && !showForm.value) {
+            scanCount.value += 1;
+            SoLuongNhap.value = scanCount.value;
+        } else {
+            scanCount.value = 1;
+            SoLuongNhap.value = 1;
+            lastBarcode.value = productData.BarCode;
+        }
+
+        showForm.value = true;
         showScan.value = false;
         barcode.value = "";
         scannedBarcode.value = "";
@@ -191,8 +194,8 @@ const handleGlobalKeyPress = (event) => {
         return;
     }
     
-    // Bỏ qua nếu đang mở modal
-    if (showScan.value || showForm.value) {
+    // Bỏ qua nếu đang mở modal scanner (nhưng cho phép khi form đang mở)
+    if (showScan.value) {
         return;
     }
     
@@ -232,7 +235,7 @@ const toggleGlobalScan = () => {
     isGlobalScanEnabled.value = !isGlobalScanEnabled.value;
     showNotification(
         isGlobalScanEnabled.value ? 'Bật chế độ quét toàn cục' : 'Tắt chế độ quét toàn cục',
-        'success'
+        isGlobalScanEnabled.value ? 'success' : 'error'
     );
 };
 
@@ -284,10 +287,6 @@ const addStock = async () => {
                 GiaNhap.value = 0;
                 MaNhaCungCap.value = '';
                 TenNhaCungCap.value = '';
-                
-                // Không reset lastBarcode và scanCount ở đây để tiếp tục quét cùng sản phẩm
-                // scanCount.value = 1;
-                // lastBarcode.value = "";
                 
                 await fetchInventory();
             }
