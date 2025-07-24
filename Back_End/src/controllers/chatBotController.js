@@ -1,5 +1,4 @@
 const ChatBot = require("../models/chatBotModels");
-const Customer = require("../models/customersModels");
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI("AIzaSyD0Z8_BuXqV59QYFEoT2u2ST6QfN0PS7Rc");

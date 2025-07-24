@@ -207,9 +207,10 @@ onMounted(() => {
     <header>
         <div class="relative px-5 lg:px-10 py-4 flex justify-between items-center">
             <div class="flex gap-6">
-                <router-link to="/" class="font-bold text-white text-[24px] font-bungee"><span
-                        class="text-[#DB3F4C]">C3</span>
-                    GunDam</router-link>
+                <router-link to="/">
+                    <img src="../../assets/img/LOGO_STORE-removebg-preview.png" class="w-[200px] h-[50px] object-cover"
+                        alt="">
+                </router-link>
                 <ul class="lg:flex hidden gap-5 items-center text-white font-semibold text-[16px]">
                     <li class="group"><router-link to="/">Trang chủ</router-link>
                         <div
@@ -330,7 +331,7 @@ onMounted(() => {
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng xuất</router-link></li>
             </ul>
         </div>
-                <div
+        <div
             class="menuUser fixed top-20 -right-[100%] rounded-md backdrop-blur-sm bg-gradient-to-br from-white to-gray-50 z-50 border border-gray-200 shadow-2xl">
             <div class="flex gap-4 items-center bg-gradient-to-r from-indigo-400 to-purple-600 p-6 rounded-t-md">
                 <div class="relative">

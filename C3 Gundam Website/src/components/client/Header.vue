@@ -128,9 +128,9 @@ onMounted(() => {
 <template>
     <header>
         <div class="relative px-5 lg:px-10 py-5 flex justify-between items-center">
-            <router-link to="/" class="font-bold text-white text-[24px] font-bungee"><span
-                    class="text-[#DB3F4C]">C3</span>
-                GunDam</router-link>
+            <router-link to="/">
+                <img src="../../assets/img/LOGO_STORE-removebg-preview.png" class="w-[200px] h-[50px] object-cover" alt="">
+            </router-link>
             <ul class="lg:flex hidden gap-5 items-center text-white font-semibold text-[16px]">
                 <li class="group"><router-link to="/">Trang chủ</router-link>
                     <div
