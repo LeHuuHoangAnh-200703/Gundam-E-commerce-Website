@@ -300,7 +300,7 @@ onMounted(() => {
         <div class="sidebar fixed top-0 -left-[100%] w-full h-full bg-[#1A1D27] p-4 z-20">
             <div class="flex justify-between items-center">
                 <h1 class="font-bold text-white text-[24px] font-bungee"><span class="text-[#DB3F4C]">C3</span>
-                    GunDam</h1>
+                    GunDam Store</h1>
                 <button class="close-menu p-3 border-2 rounded-full w-[50px] h-[50px] flex items-center justify-center">
                     <i class="fa-solid fa-arrow-left text-white text-[24px]"></i>
                 </button>

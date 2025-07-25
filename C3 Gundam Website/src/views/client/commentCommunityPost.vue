@@ -271,12 +271,8 @@ onMounted(() => {
     <div
         class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative overflow-hidden min-h-screen font-sans scroll-smooth flex flex-col">
         <Header />
-        
-        <!-- Main content với chiều cao cố định -->
         <div class="flex-1 flex flex-col mx-4 lg:mx-[200px] mt-6 mb-8">
             <div class="h-full">
-                
-                <!-- Phần bài đăng - chiều cao tự động -->
                 <div class="w-full lg:w-full flex flex-col">
                     <div
                         class="bg-gradient-to-br from-gray-800/90 to-gray-700/90 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
@@ -305,7 +301,7 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <button @click="deletePost(idPost)"
+                                    <button @click="deletePost(idPost)" :class="idCustomer === idCustomerLocal ? 'block' : 'hidden'"
                                         class="w-12 h-12 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-all duration-200">
                                         <i class="fa-solid fa-trash text-lg"></i>
                                     </button>
@@ -323,8 +319,6 @@ onMounted(() => {
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Phần hình ảnh -->
                         <div v-if="images.length > 0" class="px-6 pb-4">
                             <div :class="[
                                 'grid gap-2 rounded-xl overflow-hidden',
@@ -350,8 +344,6 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Phần thống kê bình luận -->
                         <div class="px-6 pb-6">
                             <div class="flex items-center justify-between pt-4 border-t border-gray-600/30">
                                 <div></div>
@@ -367,13 +359,9 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        
-        <!-- Modal bình luận -->
         <div v-if="showComments" @click="closeCommentModal"
             class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div @click.stop class="bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fadeInUp">
-                
-                <!-- Header bình luận - cố định -->
+            <div @click.stop class="bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fadeInUp">>
                 <div class="p-6 pb-4 border-b border-gray-600/30 flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <h2 class="text-white font-bold text-xl flex items-center gap-3">
@@ -390,8 +378,6 @@ onMounted(() => {
                         </button>
                     </div>
                 </div>
-                
-                <!-- Danh sách bình luận - có thể cuộn -->
                 <div class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                     <div v-for="(comment, index) in comments" :key="index"
                         :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
@@ -424,8 +410,6 @@ onMounted(() => {
                                         </button>
                                     </div>
                                 </div>
-                                
-                                <!-- Form trả lời -->
                                 <div v-if="showReplyForm[comment.MaBinhLuan]"
                                     class="ml-4 mt-3 p-4 bg-gray-800/50 rounded-xl border border-gray-600/30 space-y-3">
                                     <textarea v-model="replyContent[comment.MaBinhLuan]"
@@ -442,8 +426,6 @@ onMounted(() => {
                                         </button>
                                     </div>
                                 </div>
-                                
-                                <!-- Replies -->
                                 <div v-for="reply in replies(comment.MaBinhLuan)" :key="reply.MaBinhLuan"
                                     class="ml-6 flex gap-3 group/reply">
                                     <div class="flex-shrink-0">
@@ -479,8 +461,6 @@ onMounted(() => {
                                                 </button>
                                             </div>
                                         </div>
-                                        
-                                        <!-- Reply form for replies -->
                                         <div v-if="showReplyForm[reply.MaBinhLuan]"
                                             class="ml-4 mt-3 p-3 bg-gray-800/50 rounded-xl border border-gray-600/30 space-y-3">
                                             <textarea v-model="replyContent[reply.MaBinhLuan]"
@@ -502,8 +482,6 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Thông báo khi chưa có bình luận -->
                     <div v-if="comments.length <= 0"
                         class="flex flex-col items-center justify-center py-12 space-y-4">
                         <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
@@ -515,8 +493,6 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                
-                <!-- Form thêm bình luận - cố định ở dưới -->
                 <div class="p-6 border-t border-gray-600/30 bg-gray-800/50 flex-shrink-0">
                     <div class="flex gap-3 items-end">
                         <div class="flex-1 relative">
@@ -533,8 +509,6 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        
-        <!-- Modal xem ảnh -->
         <div v-if="showImageModal" @click="closeImageModal"
             class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div class="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
@@ -549,7 +523,6 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        
         <Footer />
         <BackToTop />
         <NotificationClient :message="notification.message" :type="notification.type" />
@@ -560,7 +533,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Custom scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
 }
@@ -579,12 +551,10 @@ onMounted(() => {
     background: #9CA3AF;
 }
 
-/* Custom shadow utilities */
 .shadow-3xl {
     box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Smooth animations */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -617,7 +587,6 @@ onMounted(() => {
     animation: slideInRight 0.4s ease-out;
 }
 
-/* Gradient text */
 .gradient-text {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
@@ -625,12 +594,10 @@ onMounted(() => {
     background-clip: text;
 }
 
-/* Hover effects */
 .hover-lift:hover {
     transform: translateY(-2px);
 }
 
-/* Glass effect */
 .glass-effect {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);

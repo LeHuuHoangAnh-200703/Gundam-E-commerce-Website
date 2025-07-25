@@ -190,9 +190,28 @@ onMounted(() => {
                             Giang</span>
                     </div>
                 </div>
-                <div class="w-full lg:w-[50%] flex justify-end">
-                    <img src="../../assets/img/banner_new.png" alt="C3 Gundam Store Logo"
-                        class="w-[350px] drop-shadow-md" />
+                <div class="w-full lg:w-[50%] flex justify-center lg:justify-end relative">
+                    <div class="absolute inset-0 opacity-10">
+                        <div class="w-full h-full bg-gradient-to-br from-white/5 to-transparent"></div>
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-2xl blur-2xl -z-10 scale-110">
+                        </div>
+                        <div class="relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                            <img src="../../assets/img/WELCOME.png" alt="C3 Gundam Store Logo"
+                                class="w-[300px] lg:w-[320px] rounded-xl drop-shadow-xl transition-all duration-300 hover:scale-105" />
+                        </div>
+                        <div class="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400/80 rounded-full animate-pulse"></div>
+                        <div class="absolute -bottom-4 -left-4 w-6 h-6 bg-orange-400/80 rounded-full animate-pulse"
+                            style="animation-delay: 1s;"></div>
+                        <div
+                            class="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-yellow-400/40 rounded-tr-2xl">
+                        </div>
+                        <div
+                            class="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-orange-400/40 rounded-bl-2xl">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,3 +309,10 @@ onMounted(() => {
         <NotificationClient :message="notification.message" :type="notification.type" />
     </div>
 </template>
+
+<style scoped>
+/* Minimal CSS cho hiệu ứng nhẹ */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+</style>

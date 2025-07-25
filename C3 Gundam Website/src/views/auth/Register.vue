@@ -272,9 +272,28 @@ const loginWithGoogle = () => {
                     </div>
                     <div class="hidden lg:block bg-[#DB3F4C] rounded-md p-4 lg:w-1/2">
                         <p class="text-white font-bold text-[24px]">C3 GUNDAM</p>
-                        <div class="flex flex-col gap-2 items-center justify-center mt-16">
-                            <img src="../../assets/img/banner_new.png"
-                                class="w-[400px]" alt="banner" />
+                        <div class="flex flex-col gap-2 items-center justify-center">
+                            <div class="relative my-2">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-2xl blur-2xl -z-10 scale-110">
+                                </div>
+                                <div
+                                    class="relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                                    <img src="../../assets/img/Register.png" alt="C3 Gundam Store Logo"
+                                        class="w-[300px] lg:w-[320px] rounded-xl drop-shadow-xl transition-all duration-300 hover:scale-105" />
+                                </div>
+                                <div
+                                    class="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400/80 rounded-full animate-pulse">
+                                </div>
+                                <div class="absolute -bottom-4 -left-4 w-6 h-6 bg-orange-400/80 rounded-full animate-pulse"
+                                    style="animation-delay: 1s;"></div>
+                                <div
+                                    class="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-yellow-400/40 rounded-tr-2xl">
+                                </div>
+                                <div
+                                    class="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-orange-400/40 rounded-bl-2xl">
+                                </div>
+                            </div>
                             <p class="text-[18px] lg:text-[24px] text-white font-semibold uppercase text-center">
                                 C3 GUNDAM xin chào!
                             </p>
