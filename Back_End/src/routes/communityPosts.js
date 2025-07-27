@@ -12,5 +12,7 @@ router.delete("/xoabaidang/:maBaiDang", communityPostController.deleteCommunityP
 router.delete("/xoabinhluan/:maBaiDang/:maBinhLuan", communityPostController.deleteComment);
 router.patch("/:maBaiDang", communityPostController.updateStatus);
 router.get("/top/topbinhluan", communityPostController.getTopCommunityPost);
+router.put("/baocao/:maBaiDang", communityPostController.report);
+router.patch("/anbaidang/:maBaiDang", communityPostController.hiddenPost);
 
 module.exports = router;

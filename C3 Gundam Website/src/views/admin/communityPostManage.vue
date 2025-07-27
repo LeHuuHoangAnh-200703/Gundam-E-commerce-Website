@@ -9,6 +9,7 @@ import axios from 'axios';
 
 const listPost = ref([]);
 const searchValue = ref('');
+const selectedType = ref('');
 const notification = ref({
     message: '',
     type: ''
@@ -72,9 +73,16 @@ const fetchCommunityPost = async () => {
             }
         });
 
-        const postApproved = listPost.value.filter(post => post.TrangThaiDang === 'Đã duyệt');
         const postWaiting = listPost.value.filter(post => post.TrangThaiDang === 'Đang chờ duyệt');
-        listPost.value = [...postWaiting, ...postApproved.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
+        const postNeedAction = listPost.value.filter(post => 
+            post.LyDoBaoCao && post.LyDoBaoCao.length > 0 && post.TrangThaiDang !== 'Đã ẩn'
+        );
+        const postApproved = listPost.value.filter(post => 
+            post.TrangThaiDang === 'Đã duyệt' && 
+            (!post.LyDoBaoCao || post.LyDoBaoCao.length === 0)
+        );
+        const postHidden = listPost.value.filter(post => post.TrangThaiDang === 'Đã ẩn');
+        listPost.value = [...postWaiting, ...postNeedAction.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang)), ...postApproved.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang)), ...postHidden.sort((a, b) => new Date(b.ThoiGianDang) - new Date(a.ThoiGianDang))]
     } catch (error) {
         console.log('Error fetching:', error);
     }
@@ -125,10 +133,64 @@ const deletePost = async (idBaiDang) => {
 const findCommunityPost = computed(() => {
     return listPost.value.filter(post => {
         const matchesSearch = !searchValue.value ||
-            post.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase())
-        return matchesSearch;
+            post.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase());
+
+        let actualStatus = post.TrangThaiDang;
+
+        // Nếu bài đăng có lý do báo cáo và không phải "Đã ẩn" thì được coi là "Cần xử lý"
+        if (post.LyDoBaoCao && post.LyDoBaoCao.length > 0 && post.TrangThaiDang !== 'Đã ẩn') {
+            actualStatus = 'Cần xử lý';
+        }
+        const matchesStatus = !selectedType.value || actualStatus === selectedType.value;
+
+        return matchesSearch && matchesStatus;
     });
-})
+});
+
+// Thêm function để hiển thị trạng thái trong template
+const getPostStatus = (post) => {
+    if (post.LyDoBaoCao && post.LyDoBaoCao.length > 0 && post.TrangThaiDang !== 'Đã ẩn') {
+        return 'Cần xử lý';
+    }
+    return post.TrangThaiDang;
+};
+
+// Thêm function để lấy class CSS cho trạng thái
+const getStatusClass = (post) => {
+    const status = getPostStatus(post);
+    switch (status) {
+        case 'Đã duyệt':
+            return 'border-green-500 text-green-600';
+        case 'Cần xử lý':
+            return 'border-orange-500 text-orange-600';
+        case 'Đã ẩn':
+            return 'border-gray-500 text-gray-600';
+        default:
+            return 'border-red-500 text-red-600';
+    }
+};
+
+const restoreHiddenPost = async (maBaiDang, TrangThai) => {
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn cập nhật trạng thái bài đăng này không?',
+        type: 'error',
+        confirmText: 'Cập nhật',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            const nextStatus = TrangThai === 'Đã duyệt' ? 'Đã ẩn' : 'Đã duyệt';
+            try {
+                await axios.patch(`http://localhost:3000/api/baidang/anbaidang/${maBaiDang}`,{
+                    TrangThai: nextStatus,
+                });
+                showNotification("Cập nhật trạng thái bài đăng thành công!", "success");
+                await fetchCommunityPost();
+            } catch (error) {
+                console.log("Error delete post: ", error);
+            }
+        }
+    });
+}
 
 const formatTime = (time) => {
     if (!time) return ''
@@ -161,12 +223,30 @@ onMounted(() => {
                 <div class="flex flex-col gap-4">
                     <div class="w-full relative flex flex-col lg:flex-row items-center justify-between gap-4 pb-1 pt-2">
                         <h1 class="font-bold text-[20px] uppercase">Quản lý bài đăng</h1>
-                        <div class="relative w-full max-w-md">
-                            <input type="text" v-model="searchValue"
-                                class="w-full p-3 pr-12 bg-white border border-gray-400 text-[12px] sm:text-[13px] font-semibold tracking-wider text-black rounded-md focus:outline-none focus:border-[#003171] focus:ring-1 focus:ring-[#003171]"
-                                placeholder="Tìm kiếm bài đăng ..." />
-                            <i
-                                class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
+                        <div class="flex gap-4 items-center">
+                            <div class="relative w-full max-w-md">
+                                <input type="text" v-model="searchValue"
+                                    class="w-full p-3 pr-12 bg-white border border-gray-400 text-[12px] sm:text-[13px] font-semibold tracking-wider text-black rounded-md focus:outline-none focus:border-[#003171] focus:ring-1 focus:ring-[#003171]"
+                                    placeholder="Tìm kiếm bài đăng ..." />
+                                <i
+                                    class="fa-solid fa-magnifying-glass absolute top-1/2 transform -translate-y-1/2 right-3 text-[20px] sm:text-[22px] text-[#003171]"></i>
+                            </div>
+                            <select v-model="selectedType" name="" id=""
+                                class="w-[40%] p-3 bg-white border pr-10 border-gray-400 text-[12px] font-semibold tracking-wider text-black rounded-md focus:outline-none">
+                                <option value="">Tất cả</option>
+                                <option value="Đang chờ duyệt">
+                                    Đang chờ duyệt
+                                </option>
+                                <option value="Đã duyệt">
+                                    Đã duyệt
+                                </option>
+                                <option value="Cần xử lý">
+                                    Cần xử lý
+                                </option>
+                                <option value="Đã ẩn">
+                                    Đã ẩn
+                                </option>
+                            </select>
                         </div>
                     </div>
                     <div class="overflow-auto">
@@ -188,9 +268,10 @@ onMounted(() => {
                                                 formatTime(post.ThoiGianDang) }}</p>
                                         </div>
                                     </div>
-                                    <p :class="post.TrangThaiDang !== 'Đã duyệt' ? 'border-red-500 text-red-600' : 'border-green-500 text-green-600'"
+                                    <p :class="getStatusClass(post)"
                                         class="border-2 px-4 py-2 rounded-md font-semibold text-[14px]">{{
-                                            post.TrangThaiDang }}</p>
+                                            (post.TrangThaiDang !== 'Đã ẩn' && post.LyDoBaoCao.length > 0) ? "Cần xử lý" :
+                                        post.TrangThaiDang }}</p>
                                 </div>
                                 <p class="font-semibold text-[14px]">Tiêu đề: <span class="font-medium">{{ post.TieuDe
                                         }}</span></p>
@@ -206,15 +287,29 @@ onMounted(() => {
                                             class="w-[65px] lg:w-[90px] max-h-[65px] border-2" alt="">
                                     </div>
                                 </div>
+                                <p class="font-semibold text-[14px]" v-if="post.LyDoBaoCao.length > 0">Lý do báo cáo:
+                                    <span class="font-medium" v-for="(reason, index) in post.LyDoBaoCao"
+                                        :key="index">[{{ reason
+                                        }}]</span></p>
                                 <hr class="my-2">
                                 <div class="flex gap-2 items-end justify-end">
                                     <button type="submit" @click="deletePost(post.MaBaiDang)"
                                         class="inline-block text-white font-medium bg-[#DC143C] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#A52A2A] whitespace-nowrap"><i
                                             class="fa-solid fa-trash"></i></button>
                                     <button type="submit" @click="updateStatus(post.MaBaiDang, post.TrangThaiDang)"
-                                        :class="post.TrangThaiDang !== 'Đã duyệt' ? 'inline-block' : 'hidden'"
+                                        :class="(post.TrangThaiDang !== 'Đã duyệt' && post.TrangThaiDang !== 'Đã ẩn') ? 'inline-block' : 'hidden'"
                                         class="text-white font-medium bg-[#008B8B] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#008080] whitespace-nowrap"><i
                                             class="fa-solid fa-check"></i></button>
+                                    <button type="submit" @click="restoreHiddenPost(post.MaBaiDang, post.TrangThaiDang)"
+                                        v-if="post.TrangThaiDang === 'Đã ẩn'"
+                                        class="text-white font-medium bg-[#28a745] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#218838] whitespace-nowrap">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="submit" @click="restoreHiddenPost(post.MaBaiDang, post.TrangThaiDang)"
+                                        v-else-if="post.TrangThaiDang === 'Đã duyệt' && (post.LyDoBaoCao && post.LyDoBaoCao.length > 0)"
+                                        class="text-white font-medium bg-[#ffc107] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#e0a800] whitespace-nowrap">
+                                        <i class="fa-solid fa-eye-slash"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>

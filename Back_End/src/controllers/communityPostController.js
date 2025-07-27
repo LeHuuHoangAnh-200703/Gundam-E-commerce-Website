@@ -218,7 +218,7 @@ exports.commentCommunityPost = async (req, res) => {
 
   const isToxic = await checkToxicContent(NoiDungBinhLuan);
   const hasBannedWords = await containsBannedWords(NoiDungBinhLuan);
-  
+
   if (isToxic) {
     return res
       .status(400)
@@ -406,6 +406,45 @@ exports.getTopCommunityPost = async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({ message: "Lỗi khi lấy bài đăng có nhiều bình luận nhất", error: error.message });
+  }
+}
+
+exports.report = async (req, res) => {
+  const { MaKhachHang, LyDoBaoCao } = req.body;
+  try {
+    const communitypost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
+    if (!communitypost) {
+      return res.status(400).json({ message: "Bài đăng không tồn tại!" });
+    }
+
+    if (communitypost.IdKhachHangDaBaoCao?.includes(MaKhachHang)) {
+      return res.status(400).json({ message: "Bạn đã báo cáo bài đăng này rồi." });
+    }
+
+    communitypost.IdKhachHangDaBaoCao = [...(communitypost.IdKhachHangDaBaoCao || []), MaKhachHang];
+    // Sử dụng Set để tự động loại bỏ trùng lặp
+    const uniqueReasons = [...new Set([...(communitypost.LyDoBaoCao || []), LyDoBaoCao])];
+    communitypost.LyDoBaoCao = uniqueReasons;
+    
+    await communitypost.save();
+    return res.status(200).json({ message: "Báo cáo bài đăng thành công!" });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi khi báo cáo", error: error.message });
+  }
+}
+
+exports.hiddenPost = async (req, res) => {
+  const { TrangThai } = req.body;
+  try {
+    const communitypost = await CommunityPost.findOne({ MaBaiDang: req.params.maBaiDang });
+    if (!communitypost) {
+      return res.status(400).json({ message: "Bài đăng không tồn tại." });
+    }
+    communitypost.TrangThaiDang = TrangThai;
+    await communitypost.save();
+    return res.status(200).json({ message: "Ẩn bài đăng thành công." });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi khi ẩn bài", error: error.message });
   }
 }
 

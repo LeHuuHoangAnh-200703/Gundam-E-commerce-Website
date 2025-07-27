@@ -227,6 +227,7 @@ exports.findProductsWithName = async (req, res) => {
   }
 }
 
+//Gợi ý sản phẩm lúc tìm kiếm
 exports.productSuggestionsWithSearch = async (req, res) => {
   const { tenSanPham } = req.query;
 

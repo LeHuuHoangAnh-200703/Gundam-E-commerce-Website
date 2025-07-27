@@ -19,9 +19,11 @@ const communityPostSchema = new mongoose.Schema({
   TrangThaiDang:
     {
       type: String,
-      enum: ["Đang chờ duyệt", "Đã duyệt"],
+      enum: ["Đang chờ duyệt", "Đã duyệt", "Đã ẩn"],
       default: "Đang chờ duyệt",
     },
+  IdKhachHangDaBaoCao: [String],
+  LyDoBaoCao: [String],
   ThoiGianDang: { type: Date, default: Date.now },
 });
 

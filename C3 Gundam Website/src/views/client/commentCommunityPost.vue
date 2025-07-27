@@ -9,7 +9,29 @@ import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-
+const listReport = [
+    {
+        title: "Thông tin sản phẩm sai lệch.",
+        value: "Thông tin sản phẩm sai lệch."
+    },
+    {
+        title: "Spam/đăng quá nhiều lần bài đăng trùng lặp.",
+        value: "Spam/đăng quá nhiều lần bài đăng trùng lặp."
+    },
+    {
+        title: "Nội dung vi phạm quy định cộng đồng.",
+        value: "Nội dung vi phạm quy định cộng đồng."
+    },
+    {
+        title: "Ngôn từ thô tục/không lịch sự.",
+        value: "Ngôn từ thô tục/không lịch sự."
+    },
+    {
+        title: "Thông tin gây hiểu lầm.",
+        value: "Thông tin gây hiểu lầm."
+    },
+]
+const reportingReason = ref('');
 const idCustomer = ref('');
 const idCustomerLocal = localStorage.getItem('MaKhachHang');
 const idPost = ref('');
@@ -22,6 +44,7 @@ const images = ref([]);
 const comments = ref([]);
 const newComment = ref('');
 const showComments = ref(false);
+const showReport = ref(false);
 
 // Ẩn hiện hình ảnh
 const showImageModal = ref(false);
@@ -53,8 +76,8 @@ const toggleCommentSection = () => {
     showComments.value = !showComments.value;
 }
 
-const closeCommentModal = () => {
-    showComments.value = false;
+const toggleReport = () => {
+    showReport.value = !showReport.value;
 }
 
 const openImageModal = (imageSrc) => {
@@ -246,6 +269,32 @@ const deletePost = async (idBaiDang) => {
     });
 }
 
+const reportPost = async (maBaiDang) => {
+    if (reportingReason.value === '') {
+        return showNotification("Vui lòng chọn lý do báo cáo.", "error");
+    }
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn báo cáo bài đăng này không?',
+        type: 'info',
+        confirmText: 'Báo cáo',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            try {
+                const response = await axios.put(`http://localhost:3000/api/baidang/baocao/${maBaiDang}`, {
+                    MaKhachHang: idCustomerLocal,
+                    LyDoBaoCao: reportingReason.value
+                });
+                showNotification("Báo cáo bài đăng thành công!", "success");
+                reportingReason.value = '';
+                showReport.value = false;
+            } catch (error) {
+                showNotification(error.response.data.message, "error");
+            }
+        }
+    });
+}
+
 const formatTime = (time) => {
     if (!time) return ''
 
@@ -289,7 +338,8 @@ onMounted(() => {
                                     </div>
                                     <div class="flex flex-col gap-2 lg:gap-0">
                                         <div class="flex gap-2 items-start lg:items-center flex-col lg:flex-row">
-                                            <h3 class="text-white font-bold text-lg tracking-wide">{{ nameCustomer }}</h3>
+                                            <h3 class="text-white font-bold text-lg tracking-wide">{{ nameCustomer }}
+                                            </h3>
                                             <p :class="emailCustomer === 'c3gundamstore@gmail.com' ? 'inline-flex' : 'hidden'"
                                                 class="items-center gap-2 text-blue-400 hover:text-blue-300 text-sm px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
                                                 Quản trị viên</p>
@@ -301,9 +351,15 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <button @click="deletePost(idPost)" :class="idCustomer === idCustomerLocal ? 'block' : 'hidden'"
+                                    <button @click="deletePost(idPost)"
+                                        :class="idCustomer === idCustomerLocal ? 'block' : 'hidden'"
                                         class="w-12 h-12 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-all duration-200">
                                         <i class="fa-solid fa-trash text-lg"></i>
+                                    </button>
+                                    <button @click="toggleReport"
+                                        :class="idCustomer !== idCustomerLocal ? 'block' : 'hidden'"
+                                        class="w-12 h-12 rounded-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 hover:text-yellow-300 transition-all duration-200">
+                                        <i class="fa-solid fa-exclamation"></i>
                                     </button>
                                 </div>
                             </div>
@@ -347,7 +403,7 @@ onMounted(() => {
                         <div class="px-6 pb-6">
                             <div class="flex items-center justify-between pt-4 border-t border-gray-600/30">
                                 <div></div>
-                                <button @click="toggleCommentSection" 
+                                <button @click="toggleCommentSection"
                                     class="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-blue-500/10">
                                     <span class="text-sm font-medium">{{ comments ? comments.length : 0 }}</span>
                                     <i class="fa-solid fa-comment text-blue-400"></i>
@@ -359,9 +415,10 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div v-if="showComments" @click="closeCommentModal"
+        <div v-if="showComments" @click="toggleCommentSection"
             class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div @click.stop class="bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fadeInUp">>
+            <div @click.stop
+                class="bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fadeInUp">
                 <div class="p-6 pb-4 border-b border-gray-600/30 flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <h2 class="text-white font-bold text-xl flex items-center gap-3">
@@ -372,24 +429,23 @@ onMounted(() => {
                                 {{ comments ? comments.length : 0 }}
                             </span>
                         </h2>
-                        <button @click="closeCommentModal"
+                        <button @click="toggleCommentSection"
                             class="w-10 h-10 rounded-full bg-gray-600/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200 flex items-center justify-center">
                             <i class="fa-solid fa-times text-lg"></i>
                         </button>
                     </div>
                 </div>
-                <div class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <div
+                    class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                     <div v-for="(comment, index) in comments" :key="index"
                         :class="comment.TraLoiCho === null ? 'block' : 'hidden'">
                         <div class="flex gap-3 group/comment">
                             <div class="flex-shrink-0">
                                 <img :src="comment.HinhAnhKhachHang ? `${comment.HinhAnhKhachHang}` : '/src/assets/img/avatar.jpg'"
-                                    class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-600/50"
-                                    alt="Avatar" />
+                                    class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-600/50" alt="Avatar" />
                             </div>
                             <div class="flex-1 space-y-2">
-                                <div
-                                    class="bg-gradient-to-r from-gray-700/80 to-gray-600/80 rounded-2xl p-4 shadow-md">
+                                <div class="bg-gradient-to-r from-gray-700/80 to-gray-600/80 rounded-2xl p-4 shadow-md">
                                     <h4 class="text-white text-sm font-bold mb-1">{{ comment.TenKhachHang }}</h4>
                                     <p class="text-gray-200 text-sm leading-relaxed">{{ comment.NoiDungBinhLuan }}
                                     </p>
@@ -482,8 +538,7 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div v-if="comments.length <= 0"
-                        class="flex flex-col items-center justify-center py-12 space-y-4">
+                    <div v-if="comments.length <= 0" class="flex flex-col items-center justify-center py-12 space-y-4">
                         <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
                             <i class="fa-regular fa-comments text-gray-400 text-2xl"></i>
                         </div>
@@ -505,6 +560,43 @@ onMounted(() => {
                                 <i class="fa-solid fa-paper-plane text-sm"></i>
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="showReport" @click="toggleReport"
+            class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div @click.stop
+                class="bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fadeInUp">
+                <div class="p-6 pb-4 border-b border-gray-600/30 flex-shrink-0">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-white font-bold text-xl flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 hover:text-yellow-300 transition-all duration-200">
+                                <i class="fa-solid fa-exclamation text-yellow-500"></i>
+                            </div>
+                            Báo cáo bài đăng
+                        </h2>
+                        <button @click="toggleReport"
+                            class="w-10 h-10 rounded-full bg-gray-600/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200 flex items-center justify-center">
+                            <i class="fa-solid fa-times text-lg"></i>
+                        </button>
+                    </div>
+                    <hr class="my-4">
+                    <div class="flex flex-col items-start gap-2">
+                        <p class="text-white text-[20px] font-semibold">Lý do báo cáo: </p>
+                        <div class="flex gap-2 items-center" v-for="(report, index) in listReport" :key="index">
+                            <input type="radio" class="cursor-pointer" :id="report.value" :value="report.value"
+                                v-model="reportingReason">
+                            <label :for="report.value" class="text-white font-medium text-[18px] cursor-pointer">{{
+                                report.title }}</label>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div></div>
+                        <button @click="reportPost(idPost)"
+                            class="px-4 py-3 rounded-md text-white bg-blue-600/50 shadow-sm hover:bg-blue-600/30 transition-all duration-200">Gửi
+                            báo cáo</button>
                     </div>
                 </div>
             </div>
