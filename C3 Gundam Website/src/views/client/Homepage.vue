@@ -23,6 +23,10 @@ const arrange = ref([
     {
         name: "Giá cao đến thấp",
         type: "HighPrice"
+    },
+    {
+        name: "Sản phẩm giảm giá",
+        type: "Sale"
     }
 ])
 
@@ -124,6 +128,10 @@ const filteredProducts = computed(() => {
         return products.slice().sort((a, b) => Number(b.GiaBan) - Number(a.GiaBan));
     }
 
+    if (selectedType.value === "Sale") {
+        return products.filter(product => product.GiaSale > 0);
+    }
+
     return products.filter(product => {
         const matchesType = selectedType.value === "All" || product.LoaiSanPham === selectedType.value;
         return matchesType;
@@ -150,6 +158,10 @@ const goToPage = (page) => {
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 onMounted(() => {
@@ -225,12 +237,6 @@ onMounted(() => {
                     BANDAI NAMCO.</p>
             </div>
             <div class="w-full my-4 lg:grid grid-cols-4 gap-4 items-center">
-                <div
-                    class="hidden lg:flex bg-gradient-to-b text-center flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-4">
-                    <p class="font-semibold text-white text-[20px] uppercase">Gundam Bandai</p>
-                    <span class="lg:w-[100px] w-full h-[2px] bg-white"></span>
-                    <p class="text-[14px] text-white font-medium">> Sắp xếp theo</p>
-                </div>
                 <button v-for="item in arrange" :key="item" @click.prevent="selectTypeProducts(item.type)"
                     class="hidden lg:flex bg-gradient-to-b text-center flex-col gap-2 lg:text-start from-[rgba(219,63,76,0.7)] to-[#1A1D27] p-[17.5px]">
                     <p class="text-white font-semibold text-[18px] uppercase">{{ item.name }}</p>
@@ -281,9 +287,14 @@ onMounted(() => {
                                 {{
                                     product.TenSanPham }}</p>
                         </router-link>
-                        <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{
-                            formatCurrency(product.GiaBan) }}
-                                VNĐ</span></p>
+                        <p class="text-[#FFD700] text-[16px] font-semibold flex justify-center gap-4 items-center w-full">
+                            <span v-if="product.GiaSale > 0" class="text-[18px]">{{
+                                formatCurrencySale(product.GiaSale) }}
+                                <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
+                            <span :class="{ 'line-through text-white': product.GiaSale }">{{
+                                formatCurrency(product.GiaBan) }}
+                                <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
+                        </p>
                         <button @click.prevent="addToCart(product.MaSanPham)"
                             v-if="(product.TrangThai === 'Đang bán' && product.SoLuong > 0)"
                             class="px-5 py-2 w-full bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
@@ -313,6 +324,6 @@ onMounted(() => {
 <style scoped>
 /* Minimal CSS cho hiệu ứng nhẹ */
 .hover\:scale-105:hover {
-  transform: scale(1.05);
+    transform: scale(1.05);
 }
 </style>

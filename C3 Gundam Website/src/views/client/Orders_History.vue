@@ -262,7 +262,7 @@ onMounted(() => {
                                 <p class="text-[14px] text-white font-medium">Loại sản phẩm: {{ product.LoaiSanPham }}
                                 </p>
                                 <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">{{
-                                    formatCurrency(product.Gia) }} VNĐ</span></p>
+                                    formatCurrency(product.Gia) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                 <p class="text-[14px] text-white font-medium">Số lượng: <span class="text-[#FFD700]">{{
                                     product.SoLuong }}</span></p>
                             </div>
@@ -294,7 +294,7 @@ onMounted(() => {
                         <p class="text-[14px] text-center lg:text-start">Lưu ý: <span class="text-[#FFD700]">Đơn hàng
                                 chỉ được hủy khi chưa được chuyển đi</span></p>
                         <p class="text-[14px] text-center lg:text-start">Tổng đơn: <span class="text-[#FFD700]">{{
-                            formatCurrency(order.TongDon) }} VNĐ</span></p>
+                            formatCurrency(order.TongDon) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                     </div>
                     <div class="flex gap-3 justify-end">
                         <router-link :to="`/feedback/${order.MaDonHang}`"

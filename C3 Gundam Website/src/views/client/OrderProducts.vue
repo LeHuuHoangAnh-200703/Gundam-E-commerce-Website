@@ -504,7 +504,7 @@ watch(() => formData.value.discountCode, () => {
 
                                                     <p class="text-white text-[14px]">Giá: <span
                                                             class="text-[#FFD700]">{{ formatCurrency(product.DonGia) }}
-                                                            VNĐ</span></p>
+                                                            <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                                     <p class="text-white text-[14px]">Số lượng: <span
                                                             class="text-[#FFD700]">{{ product.SoLuong }}</span></p>
                                                 </div>
@@ -529,7 +529,7 @@ watch(() => formData.value.discountCode, () => {
                                                     / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
                                                     {{
                                                         discountCode.GiamTien
-                                                            ? `${formatCurrency(discountCode.GiamTien)} VNĐ`
+                                                            ? `${formatCurrency(discountCode.GiamTien)} đ`
                                                             : `${discountCode.GiamPhanTram}%`
                                                     }}
                                                 </option>
@@ -570,14 +570,14 @@ watch(() => formData.value.discountCode, () => {
                                         <hr />
                                         <p class="text-white text-[15px] text-end" v-if="discountAmount > 0">Giảm giá:
                                             <span class="text-[#FFD700]">-{{ formatCurrency(discountAmount) }}
-                                                VNĐ</span>
+                                                <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
                                         </p>
                                         <p class="text-white text-[15px] text-end">Phí vận chuyển: <span
                                                 class="text-[#FFD700]">{{
-                                                    formatCurrency(shippingDetails.baseFee) }} VNĐ</span></p>
+                                                    formatCurrency(shippingDetails.baseFee) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                         <p class="text-white text-[16px] text-end">Tổng cộng: <span
                                                 class="text-[#FFD700]"> {{ formatCurrency(totalPrice - discountAmount)
-                                                }} VNĐ</span></p>
+                                                }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                         <button type="submit"
                                             :class="(formData.payment === 'Thanh toán khi nhận hàng' || formData.payment === '') ? 'block' : 'hidden'"
                                             class="px-6 py-3 bg-[#DB3F4C] rounded-md text-white font-medium self-end w-full">Đặt

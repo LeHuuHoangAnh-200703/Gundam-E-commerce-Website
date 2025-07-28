@@ -19,6 +19,7 @@ const relatedProducts = ref([]);
 const idCustomer = localStorage.getItem('MaKhachHang');
 const nameProduct = ref('');
 const price = ref('');
+const priceSale = ref('');
 const typeProduct = ref('');
 const supplier = ref('');
 const idProduct = ref('');
@@ -99,6 +100,7 @@ const fetchProduct = async (idSanPham) => {
         sales.value = response.data.LuotBan;
         youtubeLink.value = response.data.YoutubeUrl;
         productFeatures.value = response.data.TinhNang;
+        priceSale.value = response.data.GiaSale;
         if (images.value.length > 0) {
             selectedImage.value = images.value[0];
         }
@@ -258,6 +260,10 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 function decreaseQuantity() {
     if (orderQuantity.value > 1) {
         return orderQuantity.value--;
@@ -330,7 +336,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
         <Header />
         <div class="relative my-5 m-5 lg:mx-[210px]">
             <p class="text-gray-300 font-semibold text-[15px]">Trang chủ > <span class="text-[#DB3F4C]">{{ nameProduct
-            }}</span></p>
+                    }}</span></p>
             <div class="flex lg:flex-row flex-col gap-16 my-12">
                 <div class="flex flex-col gap-3 w-full lg:w-[45%]">
                     <div class="overflow-hidden px-4 py-2 flex justify-center items-center relative">
@@ -346,9 +352,14 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                 </div>
                 <div class="flex flex-col gap-4 w-full lg:w-[55%]">
                     <p class="text-white text-[20px] font-medium">{{ nameProduct }}</p>
-                    <p class="text-white font-semibold text-[24px]"><span class="text-[#FFD700]">{{
+                    <div class="flex justify-start gap-4 items-center text-[#FFD700]">
+                        <p v-if="priceSale > 0" class="font-semibold text-[30px]">{{
+                            formatCurrencySale(priceSale) }}
+                                <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
+                        <p class="font-semibold text-[24px]" :class="{ 'line-through text-white': priceSale }">{{
                             formatCurrency(price) }}
-                            VNĐ</span></p>
+                                <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
+                    </div>
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
@@ -385,8 +396,8 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
                         class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>{{
-                            formatCurrency(price) }}
-                                VNĐ</span></p>
+                            priceSale > 0 ? formatCurrencySale(priceSale) : formatCurrency(price) }}
+                                <span class="text-[14px] relative -top-[2px] underline lowercase">đ</span></span></p>
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
                     </router-link>
                     <router-link to="" v-else-if="status === 'Ngừng kinh doanh'" @click.prevent="handleDisabledClick"
@@ -441,11 +452,16 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                         {{ product.TenSanPham }}
                                     </router-link>
                                 </div>
-                                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{
+                                <p class="text-[#FFD700] text-[14px] flex gap-2 items-center justify-center">
+                                    <span v-if="product.GiaSale > 0" class="text-[15px]">{{
+                                    formatCurrencySale(product.GiaSale)
+                                        }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
+                                    <span :class="{ 'line-through text-white': product.GiaSale > 0 }">{{
                                     formatCurrency(product.GiaBan)
-                                        }} VNĐ</span></p>
+                                        }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
+                                </p>
                                 <p class="text-white text-[14px]">Tình trạng: <span class="">{{ product.TrangThai
-                                }}</span>
+                                        }}</span>
                                 </p>
                             </div>
                         </div>
@@ -529,7 +545,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                                         </div>
                                         <p class="text-gray-400 text-sm mb-1 flex items-center gap-1"><i
                                                 class="fa-regular fa-clock text-blue-400"></i> {{
-                                            formatDate(comment.NgayDang) }}</p>
+                                                    formatDate(comment.NgayDang) }}</p>
                                     </div>
                                 </div>
                                 <button type="submit" @click.prevent="deleteFeedback(comment.MaDanhGia)"

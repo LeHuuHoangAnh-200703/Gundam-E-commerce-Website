@@ -26,6 +26,7 @@ const errors = ref({});
 const formData = ref({
     nameProduct: '',
     price: '',
+    priceSale: '',
     typeProduct: '',
     supplier: '',
     description: '',
@@ -93,6 +94,14 @@ const addProduct = async () => {
         errors.value.price = "Giá bán không được âm.";
     }
 
+    if (formData.value.price) {
+        if (formData.value.priceSale > formData.value.price) {
+            errors.value.priceSale = "Giá sale phải nhỏ hơn giá bán.";
+        } else if (formData.value.priceSale < 0) {
+            errors.value.priceSale = "Giá sale không được âm.";
+        }
+    }
+
     if (!formData.value.typeProduct) {
         errors.value.typeProduct = "Loại sản phẩm không được để trống.";
     }
@@ -143,6 +152,7 @@ const addProduct = async () => {
         dataToSend.append('YoutubeUrl', formData.value.youtubeLink);
         dataToSend.append('TinhNang', formData.value.productFeatures);
         dataToSend.append('BarCode', formData.value.barcode);
+        dataToSend.append('GiaSale', formData.value.priceSale);
 
         formData.value.images.forEach(image => {
             dataToSend.append('Images', image);
@@ -212,14 +222,25 @@ onMounted(() => {
                                         <p v-if="errors.nameProduct" class="text-red-500 text-sm mt-2">{{
                                             errors.nameProduct }}</p>
                                     </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="price" class="text-[15px] font-semibold">Giá bán sản
-                                            phẩm</label>
-                                        <input type="number" v-model="formData.price" id="price"
-                                            class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                            placeholder="Nhập giá bán sản phẩm ...">
-                                        <p v-if="errors.price" class="text-red-500 text-sm mt-2">{{
-                                            errors.price }}</p>
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <label for="price" class="text-[15px] font-semibold">Giá bán sản
+                                                phẩm</label>
+                                            <input type="number" v-model="formData.price" id="price"
+                                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                                placeholder="Nhập giá bán sản phẩm ...">
+                                            <p v-if="errors.price" class="text-red-500 text-sm mt-2">{{
+                                                errors.price }}</p>
+                                        </div>
+                                        <div class="flex flex-col gap-2 w-full">
+                                            <label for="price" class="text-[15px] font-semibold">Giá sale sản
+                                                phẩm</label>
+                                            <input type="number" v-model="formData.priceSale" id="priceSale"
+                                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
+                                                placeholder="Nhập giá sale sản phẩm ...">
+                                            <p v-if="errors.priceSale" class="text-red-500 text-sm mt-2">{{
+                                                errors.priceSale }}</p>
+                                        </div>
                                     </div>
                                     <div class="flex gap-4">
                                         <div class="flex flex-col gap-2 w-full">

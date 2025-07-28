@@ -32,7 +32,8 @@ const fetchCarts = async (maKhachHang) => {
                 isSelected: false
             }
         });
-        console.log(carts.value)
+        const products = carts.value.filter(cart => cart.TrangThai !== 'Ngừng kinh doanh');
+        carts.value = [...products];
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -136,11 +137,16 @@ const totalPrice = computed(() => {
     return carts.value
         .filter(cart => cart.isSelected)
         .reduce((sum, cart) => {
-            return sum + cart.DonGia * cart.SoLuong;
+            const price = cart.GiaSale > 0 ? cart.GiaSale : cart.DonGia;
+            return sum + price * cart.SoLuong;
         }, 0);
 });
 
 function formatCurrency(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatCurrencySale(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -198,7 +204,7 @@ onMounted(() => {
                         </div>
                         <div class="flex gap-5 justify-between items-center">
                             <p class="text-[14px] text-white font-medium">Đơn giá: <span class="text-[#FFD700]">{{
-                                formatCurrency(cart.DonGia * cart.SoLuong) }} VNĐ</span></p>
+                                cart.GiaSale > 0 ? formatCurrencySale(cart.GiaSale * cart.SoLuong) : formatCurrency(cart.DonGia * cart.SoLuong) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                             <form @click="deleteCart(cart.MaGioHang)">
                                 <button type="submit"
                                     class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">
@@ -210,7 +216,7 @@ onMounted(() => {
                     <hr>
                     <div class="flex justify-end items-end flex-col">
                         <p class="text-[16px] text-white font-medium my-3">Tổng đơn: <span class="text-[#FFD700]">{{
-                            formatCurrency(totalPrice) }} VNĐ</span></p>
+                            formatCurrency(totalPrice) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                         <button @click.prevent="goToOrderPage" type="submit"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto">Đặt
                             hàng</button>

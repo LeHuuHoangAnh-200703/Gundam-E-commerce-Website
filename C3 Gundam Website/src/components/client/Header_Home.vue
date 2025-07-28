@@ -96,6 +96,8 @@ const fetchCarts = async (maKhachHang) => {
                 ...cart
             }
         });
+        const products = cartLists.value.filter(cart => cart.TrangThai !== 'Ngừng kinh doanh');
+        cartLists.value = [...products];
     } catch (err) {
         console.log("Error fetching: ", err);
     }

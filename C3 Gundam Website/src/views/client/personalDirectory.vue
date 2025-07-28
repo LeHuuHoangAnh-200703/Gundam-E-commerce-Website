@@ -220,7 +220,7 @@ onMounted(() => {
                                     </button>
                                 </div>
                                 <p v-if="discountCode.GiamTien" class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
-                                    formatCurrency(discountCode.GiamTien) }} VNĐ</p>
+                                    formatCurrency(discountCode.GiamTien) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
                                 <p v-else class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
                                     discountCode.GiamPhanTram }}%</p>
                                 <div class="flex justify-between items-center">
@@ -232,7 +232,7 @@ onMounted(() => {
                                         </div>
                                         <p class="font-semibold text-[14px]">Áp dụng với đơn: <span
                                                 class="text-[#DB3F4C]">{{
-                                                    formatCurrency(discountCode.GiaApDung) }} VNĐ</span></p>
+                                                    formatCurrency(discountCode.GiaApDung) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                     </div>
                                     <div
                                         class="w-[35px] h-[35px] border-2 border-[#1A1D27] flex items-center justify-center self-end rounded-lg">

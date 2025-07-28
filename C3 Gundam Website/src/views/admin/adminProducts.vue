@@ -144,6 +144,10 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 // Hàm tạo mã vạch
 const generateBarcodes = () => {
     findProducts.value.forEach(product => {
@@ -224,7 +228,8 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ảnh sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tên sản phẩm</th>
-                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đơn giá</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Giá bán</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Giá sale</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Loại sản phẩm</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Nhà cung cấp</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Mã barcode</th>
@@ -253,6 +258,8 @@ onMounted(() => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatCurrency(product.GiaBan) }} VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                        {{ formatCurrencySale(product.GiaSale) }} VNĐ</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         product.LoaiSanPham }}
                                     </td>

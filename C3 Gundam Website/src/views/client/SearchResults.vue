@@ -72,6 +72,10 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 const currentPage = ref(1);
 const itemsPerPage = ref(16); // 4 dòng × 4 cột = 16 sản phẩm
 const totalPages = computed(() => Math.ceil(listProducts.value.length / itemsPerPage.value));
@@ -117,10 +121,20 @@ onMounted(() => {
                         alt="">
                 </router-link>
                 <router-link :to="`/details/${product.MaSanPham}`"
-                    class="text-white text-[14px] text-center flex-grow hover:text-[#DB3F4C] transition-all duration-300">{{
-                        product.TenSanPham }}</router-link>
-                <p class="text-white text-[14px]">Giá: <span class="text-[#FFD700]">{{ formatCurrency(product.GiaBan) }}
-                        VNĐ</span></p>
+                    class="py-2 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-64 group">
+                    <p
+                        class="text-white overflow-hidden text-ellipsis whitespace-nowrap text-[14px] text-center flex-grow group-hover:text-[#DB3F4C] transition-all duration-300">
+                        {{
+                            product.TenSanPham }}</p>
+                </router-link>
+                <p class="text-[#FFD700] text-[16px] font-semibold flex justify-center gap-4 items-center w-full">
+                    <span v-if="product.GiaSale > 0" class="text-[18px]">{{
+                        formatCurrencySale(product.GiaSale) }}
+                        <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
+                    <span :class="{ 'line-through text-white': product.GiaSale }">{{
+                        formatCurrency(product.GiaBan) }}
+                        <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
+                </p>
                 <button @click.prevent="addToCart(product.MaSanPham)" v-if="product.TrangThai === 'Đang bán'"
                     class="px-5 py-2 w-full bg-[#DB3F4C] text-white font-medium">Thêm giỏ hàng</button>
                 <button v-else-if="product.TrangThai === 'Ngừng kinh doanh'"

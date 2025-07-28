@@ -49,7 +49,9 @@ exports.getCartByID = async (req, res) => {
                 TenSanPham: product.TenSanPham,
                 HinhAnh: product.Images[0],
                 DonGia: product.GiaBan,
-                MaLoaiSanPham: product.MaLoaiSanPham
+                MaLoaiSanPham: product.MaLoaiSanPham,
+                TrangThai: product.TrangThai,
+                GiaSale: product.GiaSale
             };
         });
 
@@ -61,6 +63,8 @@ exports.getCartByID = async (req, res) => {
                 HinhAnh: product?.HinhAnh,
                 LoaiSanPham: productTypeMap[product?.MaLoaiSanPham],
                 DonGia: product?.DonGia,
+                TrangThai: product?.TrangThai,
+                GiaSale: product?.GiaSale
             };
         });
 
