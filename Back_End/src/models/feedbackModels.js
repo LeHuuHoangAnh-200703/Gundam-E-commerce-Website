@@ -7,12 +7,10 @@ const feedbackSchema = new mongoose.Schema({
     MaDonHang: String,
     MoTa: String,
     HinhAnhSanPham: [String],
-    NgayDang: Date,
+    NgayDang: { type: Date, default: Date.now },
     SanPhamDaDanhGia: [{  
         TenSanPham: String,  
-        MaSanPham: String,  
-        Gia: Number,  
-        SoLuong: Number, 
+        MaSanPham: String, 
         LoaiSanPham: String, 
         HinhAnh: String  
     }],

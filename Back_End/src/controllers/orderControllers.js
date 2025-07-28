@@ -409,20 +409,20 @@ exports.updatedStatus = async (req, res) => {
     }
 };
 
-//Kiểm tra xem đã đánh giá chưa
-exports.checkOrderReviewed = async (req, res) => {
-    const { maDonHang } = req.params;
-    try {
-        const idDonHang = await Feedback.findOne({ MaDonHang: maDonHang });
-        if (idDonHang) {
-            return res.status(200).json({ results: true });
-        } else {
-            return res.status(200).json({ results: false });
-        }
-    } catch (err) {
-        return res.status(500).json({ message: "Có lỗi xảy ra." });
-    }
-}
+// //Kiểm tra xem đã đánh giá chưa
+// exports.checkOrderReviewed = async (req, res) => {
+//     const { maDonHang } = req.params;
+//     try {
+//         const idDonHang = await Feedback.findOne({ MaDonHang: maDonHang });
+//         if (idDonHang) {
+//             return res.status(200).json({ results: true });
+//         } else {
+//             return res.status(200).json({ results: false });
+//         }
+//     } catch (err) {
+//         return res.status(500).json({ message: "Có lỗi xảy ra." });
+//     }
+// }
 
 //Kiểm tra đơn hàng theo ngày, tháng, năm
 exports.getOrderByDayMonth = async (req, res) => {

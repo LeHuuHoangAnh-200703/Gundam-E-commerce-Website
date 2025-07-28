@@ -291,6 +291,8 @@ onMounted(() => {
                                     <span class="font-medium" v-for="(reason, index) in post.LyDoBaoCao"
                                         :key="index">[{{ reason
                                         }}]</span></p>
+                                <p class="font-semibold text-[14px]" v-if="post.LyDoBaoCao.length > 0">Số lượt báo cáo:
+                                    <span class="font-medium">{{ post.IdKhachHangDaBaoCao.length }}</span></p>
                                 <hr class="my-2">
                                 <div class="flex gap-2 items-end justify-end">
                                     <button type="submit" @click="deletePost(post.MaBaiDang)"

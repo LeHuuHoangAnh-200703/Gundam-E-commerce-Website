@@ -10,7 +10,7 @@ router.put("/:maDonHang", orderController.updatedOrder);
 router.delete("/:maDonHang",orderController.deleteOrder);
 router.get("/khachhang/:maKhachHang", orderController.getOrderById);
 router.patch("/trangthai/:maDonHang", orderController.updatedStatus);;
-router.get("/kiemtradanhgia/:maDonHang", orderController.checkOrderReviewed);
+// router.get("/kiemtradanhgia/:maDonHang", orderController.checkOrderReviewed);
 router.get("/locdonhang/ngaythangnam", orderController.getOrderByDayMonth);
 router.post("/guiemail", orderController.sendEmailOrder);
 router.post("/tinhphiship", orderController.calculateShippingFee);

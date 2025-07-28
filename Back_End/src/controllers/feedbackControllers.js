@@ -1,5 +1,6 @@
 const FeedBack = require("../models/feedbackModels");
 const Customer = require("../models/customersModels");
+const Order = require("../models/orderModels");
 const path = require("path");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -146,44 +147,92 @@ const checkToxicContent = async (text) => {
 };
 
 exports.createFeedBack = async (req, res) => {
-    const text = req.body.MoTa;
-    let isToxic = await checkToxicContent(text);
-    if (!isToxic) {
-        isToxic = containsBannedWords(text);
-    }
-    const imageUploadPromises = req.files.map(file => {
-        return new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream({
-                folder: 'feedbacks',
-            },
-                (error, result) => {
-                    if (error) {
-                        return reject(error);
-                    }
-                    resolve(result);
-                });
-            stream.end(file.buffer); // Kết thúc stream với buffer
-        });
-    });
-    const imageUploadResults = await Promise.all(imageUploadPromises);
+    const { 
+        maDonHang, 
+        maSanPham, 
+        maKhachHang, 
+        chatLuong, 
+        moTa, 
+        tenSanPham,
+        loaiSanPham,
+        hinhAnhSanPham,
+    } = req.body;
 
-    const feedBack = new FeedBack({
-        ...req.body,
-        SanPhamDaDanhGia: JSON.parse(req.body.SanPhamDaDanhGia),
-        HinhAnhSanPham: imageUploadResults.map(result => result.secure_url),
-        isToxic: isToxic
-    });
     try {
-        if (isToxic) {
-            await feedBack.save();
-            return res.status(200).json({ message: "Đánh giá chứa từ ngữ không phù hợp, hệ thống sẽ tạm ẩn!" })
-        } else {
-            await feedBack.save();
-            return res.status(200).json({ message: "Cảm ơn bạn đã góp ý về sản phẩm!" });
+        // Kiểm tra xem sản phẩm đã được đánh giá chưa
+        const existingReview = await FeedBack.findOne({ 
+            MaDonHang: maDonHang,
+            'SanPhamDaDanhGia.MaSanPham': maSanPham 
+        });
+
+        if (existingReview) {
+            return res.status(400).json({ 
+                message: "Sản phẩm này đã được đánh giá rồi!" 
+            });
         }
-        
+
+        // Kiểm tra toxic content
+        let isToxic = false;
+        if (moTa && moTa.trim()) {
+            isToxic = await checkToxicContent(moTa);
+            if (!isToxic) {
+                isToxic = containsBannedWords(moTa);
+            }
+        }
+
+        // Xử lý upload hình ảnh
+        let uploadedImages = [];
+        if (req.files && req.files.length > 0) {
+            const imageUploadPromises = req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({
+                        folder: 'feedbacks',
+                    }, (error, result) => {
+                        if (error) {
+                            return reject(error);
+                        }
+                        resolve(result);
+                    });
+                    stream.end(file.buffer);
+                });
+            });
+            
+            const imageUploadResults = await Promise.all(imageUploadPromises);
+            uploadedImages = imageUploadResults.map(result => result.secure_url);
+        }
+
+        const newReview = new FeedBack({
+            MaKhachHang: maKhachHang,
+            MaDonHang: maDonHang,
+            ChatLuong: parseInt(chatLuong),
+            MoTa: moTa || '',
+            HinhAnhSanPham: uploadedImages,
+            SanPhamDaDanhGia: [{
+                TenSanPham: tenSanPham,
+                MaSanPham: maSanPham,
+                LoaiSanPham: loaiSanPham,
+                HinhAnh: hinhAnhSanPham
+            }],
+            isToxic: isToxic
+        });
+
+        await newReview.save();
+
+        if (isToxic) {
+            return res.status(200).json({ 
+                message: "Đánh giá chứa từ ngữ không phù hợp, hệ thống sẽ tạm ẩn!" 
+            });
+        } else {
+            return res.status(200).json({ 
+                message: "Cảm ơn bạn đã góp ý về sản phẩm!",
+                review: newReview 
+            });
+        }
+
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ 
+            message: "Có lỗi xảy ra khi đánh giá sản phẩm." 
+        });
     }
 };
 
@@ -216,6 +265,57 @@ exports.deleteFeedBack = async (req, res) => {
         res.status(200).json({ message: "Mã đánh giá đã được xóa." });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+};
+
+// Kiểm tra trạng thái đánh giá của đơn hàng
+exports.getOrderReviewStatus = async (req, res) => {
+    const { maDonHang } = req.params;
+    try {
+        const donHang = await Order.findOne({ MaDonHang: maDonHang });
+        if (!donHang) {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng." });
+        }
+
+        // Lấy tất cả đánh giá của đơn hàng
+        const reviews = await FeedBack.find({ MaDonHang: maDonHang });
+        const reviewedProductIds = reviews.map(review => review.SanPhamDaDanhGia[0]?.MaSanPham).filter(Boolean);
+
+        // Phân loại sản phẩm
+        const productsWithReviewStatus = donHang.SanPhamDaMua.map(product => {
+            const isReviewed = reviewedProductIds.includes(product.MaSanPham);
+            const review = isReviewed ? reviews.find(r => r.SanPhamDaDanhGia[0]?.MaSanPham === product.MaSanPham) : null;
+            
+            return {
+                maSanPham: product.MaSanPham,
+                tenSanPham: product.TenSanPham,
+                hinhAnh: product.HinhAnh,
+                loaiSanPham: product.LoaiSanPham,
+                isReviewed: isReviewed,
+                review: review ? {
+                    chatLuong: review.ChatLuong,
+                    moTa: review.MoTa,
+                    ngayDang: review.NgayDang
+                } : null
+            };
+        });
+
+        const reviewedCount = reviewedProductIds.length;
+        const totalProducts = donHang.SanPhamDaMua.length;
+        const isFullyReviewed = reviewedCount === totalProducts;
+
+        return res.status(200).json({
+            maDonHang: maDonHang,
+            totalProducts: totalProducts,
+            reviewedCount: reviewedCount,
+            isFullyReviewed: isFullyReviewed,
+            products: productsWithReviewStatus,
+            reviewProgress: `${reviewedCount}/${totalProducts}`
+        });
+
+    } catch (err) {
+        console.error("Lỗi lấy trạng thái đánh giá:", err);
+        return res.status(500).json({ message: "Có lỗi xảy ra." });
     }
 };
 

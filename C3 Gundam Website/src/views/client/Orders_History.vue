@@ -178,22 +178,22 @@ const updatedStatus = async (maDonHang, currentStatus) => {
     });
 };
 
-const checkOrderReviewed = async (idDonHang) => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/donhang/kiemtradanhgia/${idDonHang}`)
-        if (response.data.results) {
-            showNotification("Bạn đã đánh giá đơn hàng này rồi.", "error");
-            setTimeout(() => {
-                notification.value.message = '';
-            }, 3000);
-            return;
-        } else {
-            router.push(`/feedback/${idDonHang}`)
-        }
-    } catch (err) {
-        console.log("Error fetching orderReviewed:", err);
-    }
-}
+// const checkOrderReviewed = async (idDonHang) => {
+//     try {
+//         const response = await axios.get(`http://localhost:3000/api/donhang/kiemtradanhgia/${idDonHang}`)
+//         if (response.data.results) {
+//             showNotification("Bạn đã đánh giá đơn hàng này rồi.", "error");
+//             setTimeout(() => {
+//                 notification.value.message = '';
+//             }, 3000);
+//             return;
+//         } else {
+//             router.push(`/feedback/${idDonHang}`)
+//         }
+//     } catch (err) {
+//         console.log("Error fetching orderReviewed:", err);
+//     }
+// }
 
 const selectedType = ref("");
 const selectTypeOrders = (type) => {
@@ -297,9 +297,9 @@ onMounted(() => {
                             formatCurrency(order.TongDon) }} VNĐ</span></p>
                     </div>
                     <div class="flex gap-3 justify-end">
-                        <button @click="checkOrderReviewed(order.MaDonHang)"
+                        <router-link :to="`/feedback/${order.MaDonHang}`"
                             :class="(order.TrangThaiDon === 'Đã nhận được hàng' || order.TrangThaiDon === 'Đã giao thành công') ? 'block' : 'hidden'"
-                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đánh giá</button>
+                            class="bg-[#4169E1] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đánh giá</router-link>
                         <button @click.prevent="deleteOrder(order.MaDonHang)"
                             :class="order.TrangThaiDon === 'Đang chờ xác nhận' ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Hủy đơn
