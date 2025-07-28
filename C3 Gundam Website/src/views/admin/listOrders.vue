@@ -409,7 +409,7 @@ onMounted(() => {
                                                 <p class="text-[14px] xl:text-[12px] font-semibold">Đơn giá: <span
                                                         class="text-[#003171] font-medium">{{
                                                         formatCurrency(product.Gia) }}
-                                                        VNĐ</span></p>
+                                                        <span class="text-[12px] relative -top-[2px] underline">đ</span></span></p>
                                                 <p class="text-[14px] xl:text-[12px] font-semibold">Số lượng: <span
                                                         class="text-[#003171] font-medium">{{ product.SoLuong }}</span>
                                                 </p>
@@ -453,7 +453,7 @@ onMounted(() => {
                                                 <p class="font-medium text-[14px] xl:text-[12px]">Tổng đơn: <span
                                                         class="font-semibold text-[#003171]">{{
                                                             formatCurrency(order.TongDon) }}
-                                                        VNĐ</span></p>
+                                                        <span class="text-[12px] relative -top-[2px] underline">đ</span></span></p>
                                             </div>
                                         </div>
                                     </div>

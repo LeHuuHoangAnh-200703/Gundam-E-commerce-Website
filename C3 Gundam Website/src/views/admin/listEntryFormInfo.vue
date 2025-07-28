@@ -354,7 +354,7 @@ const exportToPDF = async (maPN) => {
 
 // Hàm format currency cho PDF
 const formatCurrencyForPDF = (amount) => {
-    return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
 };
 
 // Hàm format date cho PDF
@@ -534,7 +534,7 @@ onMounted(() => {
                                             <option v-for="(product, index) in listProducts" :key="index"
                                                 :value="product.MaSanPham" class="text-[#003171] font-semibold">{{
                                                     product.MaSanPham }} -
-                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} VNĐ -
+                                                {{ product.TenSanPham }} - {{ formatCurrency(product.GiaBan) }} <span class="text-[14px] relative -top-[2px] underline">đ</span> -
                                                 Còn lại: {{ product.SoLuong }}
                                             </option>
                                         </select>
@@ -604,10 +604,10 @@ onMounted(() => {
                                             {{ entryFormInfo.SoLuong }}</td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                            {{ formatCurrency(entryFormInfo.GiaNhap) }} VNĐ</td>
+                                            {{ formatCurrency(entryFormInfo.GiaNhap) }} <span class="text-[12px] relative -top-[2px] underline">đ</span></td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                            {{ formatCurrency(entryFormInfo.TongTien) }} VNĐ</td>
+                                            {{ formatCurrency(entryFormInfo.TongTien) }} <span class="text-[12px] relative -top-[2px] underline">đ</span></td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                             {{ formatDate(entryFormInfo.NgayNhap) }}</td>

@@ -396,7 +396,7 @@ onUnmounted(() => {
                                         {{ (inventory.SoLuongTon > 0) ? inventory.SoLuongTon : 'Hết hàng' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatCurrency(inventory.GiaNhapGanNhat) }} VNĐ
+                                        {{ formatCurrency(inventory.GiaNhapGanNhat) }} <span class="text-[12px] relative -top-[2px] underline">đ</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         {{ formatDate(inventory.NgayCapNhat) }}
@@ -481,8 +481,8 @@ onUnmounted(() => {
                                     <p><strong>Mã sản phẩm:</strong> {{ product.MaSanPham }}</p>
                                     <p><strong>Tên sản phẩm:</strong> {{ product.TenSanPham }}</p>
                                     <p><strong>Tồn kho hiện tại:</strong> {{ product.SoLuongTon }}</p>
-                                    <p><strong>Giá Bán hiện tại:</strong> {{ formatCurrency(product.GiaBan) }} VNĐ</p>
-                                    <p><strong>Giá nhập gần nhất:</strong> {{ formatCurrency(product.GiaNhapGanNhat) }} VNĐ</p>
+                                    <p><strong>Giá Bán hiện tại:</strong> {{ formatCurrency(product.GiaBan) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
+                                    <p><strong>Giá nhập gần nhất:</strong> {{ formatCurrency(product.GiaNhapGanNhat) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">

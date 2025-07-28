@@ -323,3 +323,104 @@ exports.getEnterWarehouse = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+//Tính lợi nhuận [Tổng doanh thu của đơn đó (tổng đơn) - (giá nhập gần nhất x số lượng sản phẩm đó bán ra trong đơn hàng đó)], sau khi tính tổng lợi nhuận của từng đơn xong cộng lại là ra lợi nhuận
+exports.getMonthlyProfit = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+
+    // Xây dựng điều kiện lọc theo tháng/năm
+    let matchCondition = {
+      $and: [
+        { TrangThaiDon: { $ne: 'Đơn hàng đã hủy' } },
+        {
+          $or: [
+            { TrangThaiDon: "Đã nhận được hàng" },
+            { TrangThaiDon: "Đã giao thành công" },
+            {
+              TrangThaiThanhToan: "Đã thanh toán qua PayPal",
+              TrangThaiDon: { $ne: "Đơn hàng đã hủy" }
+            },
+            {
+              TrangThaiThanhToan: "Đã thanh toán qua VNPay",
+              TrangThaiDon: { $ne: "Đơn hàng đã hủy" }
+            }
+          ]
+        }
+      ]
+    };
+
+    if (year && month) {
+      // Lọc theo tháng/năm cụ thể
+      matchCondition.NgayDatHang = {
+        $gte: new Date(year, month - 1, 1), // Ngày đầu tháng
+        $lte: new Date(year, month, 0, 23, 59, 59, 999) // Ngày cuối tháng
+      };
+    } else if (year) {
+      // Lọc theo năm
+      matchCondition.NgayDatHang = {
+        $gte: new Date(year, 0, 1),
+        $lte: new Date(year, 11, 31, 23, 59, 59, 999)
+      };
+    } else {
+      // Mặc định lấy tháng hiện tại
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+
+      matchCondition.NgayDatHang = {
+        $gte: new Date(currentYear, currentMonth, 1),
+        $lte: new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999)
+      };
+    }
+
+    // Lấy tất cả đơn hàng trong khoảng thời gian
+    const orders = await Order.find(matchCondition);
+
+    let totalRevenue = 0; // Tổng doanh thu
+    let totalCost = 0;    // Tổng giá vốn
+    let totalProfit = 0;  // Tổng lợi nhuận
+    let orderCount = 0;   // Số đơn hàng
+
+    for (const order of orders) {
+      let orderCost = 0;
+      let orderRevenue = order.TongDon;
+      console.log(orderRevenue)
+
+      // Tính giá vốn cho từng sản phẩm trong đơn hàng
+      for (const sanPham of order.SanPhamDaMua) {
+        const inventory = await Inventory.findOne({ MaSanPham: sanPham.MaSanPham });
+
+        if (inventory && inventory.GiaNhapGanNhat) {
+          orderCost += inventory.GiaNhapGanNhat * sanPham.SoLuong;
+        }
+      }
+
+      totalRevenue += orderRevenue;
+      totalCost += orderCost;
+      orderCount++;
+    }
+
+    totalProfit = totalRevenue - totalCost;
+    const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(2) : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        thangNam: year && month ? `${month}/${year}` : (year ? `Năm ${year}` : 'Tháng hiện tại'),
+        soDonHang: orderCount,
+        tongDoanhThu: totalRevenue,
+        tongGiaVon: totalCost,
+        loiNhuan: totalProfit,
+        tyLeLoiNhuan: `${profitMargin}%`
+      }
+    });
+
+  } catch (error) {
+    console.error('Lỗi tính lợi nhuận:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi tính lợi nhuận'
+    });
+  }
+};

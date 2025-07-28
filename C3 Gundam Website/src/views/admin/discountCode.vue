@@ -170,7 +170,7 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <p v-if="discountCode.GiamTien" class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
-                                    formatCurrency(discountCode.GiamTien) }} VNĐ</p>
+                                    formatCurrency(discountCode.GiamTien) }} <span class="text-[20px] relative -top-[2px] underline">đ</span></p>
                                 <p v-else class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
                                     discountCode.GiamPhanTram }}%</p>
                                 <div class="flex lg:flex-row flex-col lg:justify-between">
@@ -183,7 +183,7 @@ onMounted(() => {
                                 </div>
                                 <p class="font-semibold text-[14px]">Áp dụng với đơn: <span class="text-[#DB3F4C]">{{
                                     formatCurrency(discountCode.GiaApDung) }}
-                                        VNĐ</span></p>
+                                        <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                 <div class="flex justify-end gap-4 mt-3">
                                     <router-link :to="`/admin/editDiscountCode/${discountCode.IdMaGiamGia}`"
                                         class="bg-[#00697F] text-white px-4 py-3 rounded-md transition-all duration-300 hover:bg-[#055565]"><i

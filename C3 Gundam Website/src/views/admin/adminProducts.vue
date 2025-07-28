@@ -257,9 +257,9 @@ onMounted(() => {
                                         }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatCurrency(product.GiaBan) }} VNĐ</td>
+                                        {{ formatCurrency(product.GiaBan) }} <span class="text-[12px] relative -top-[2px] underline">đ</span></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
-                                        {{ formatCurrencySale(product.GiaSale) }} VNĐ</td>
+                                        {{ formatCurrencySale(product.GiaSale) }} <span class="text-[12px] relative -top-[2px] underline">đ</span></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">{{
                                         product.LoaiSanPham }}
                                     </td>

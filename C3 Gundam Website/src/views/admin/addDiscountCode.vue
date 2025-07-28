@@ -166,14 +166,14 @@ const addDiscountCode = async () => {
                                                 <option value="" class="text-[#003171] font-semibold">
                                                     Chọn giá áp dụng phù hợp</option>
                                                 <option value="6000000" class="text-[#003171] font-semibold">
-                                                    6.000.000 VNĐ</option>
+                                                    6.000.000 <span class="text-[14px] relative -top-[2px] underline">đ</span></option>
                                                 <option value="3000000" class="text-[#003171] font-semibold">3.000.000
-                                                    VNĐ
+                                                    <span class="text-[14px] relative -top-[2px] underline">đ</span>
                                                 </option>
                                                 <option value="1500000" class="text-[#003171] font-semibold">1.500.000
-                                                    VNĐ
+                                                    <span class="text-[14px] relative -top-[2px] underline">đ</span>
                                                 </option>
-                                                <option value="500000" class="text-[#003171] font-semibold">500.000 VNĐ
+                                                <option value="500000" class="text-[#003171] font-semibold">500.000 <span class="text-[14px] relative -top-[2px] underline">đ</span>
                                                 </option>
                                             </select>
                                             <p v-if="errors.applyToOrders" class="text-red-500 text-sm mt-2">{{

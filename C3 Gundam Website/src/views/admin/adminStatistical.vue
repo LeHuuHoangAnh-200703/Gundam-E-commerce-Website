@@ -25,6 +25,14 @@ const products = ref([]);
 const listProducts = ref([]);
 const orders = ref([]);
 const feedbacks = ref([]);
+const monthlyProfit = ref({
+    loiNhuan: 0,
+    loiNhuanFormatted: "0",
+    doanhThuFormatted: "0",
+    tyLeLoiNhuan: "0%",
+    soDonHang: 0
+});
+
 const notification = ref({
     message: "",
     type: "",
@@ -113,7 +121,7 @@ const chartOptions = ref({
                     const formattedValue = value
                         .toString()
                         .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    return `${context.dataset.label}: ${formattedValue} VNĐ`;
+                    return `${context.dataset.label}: ${formattedValue} đ`;
                 },
             },
         },
@@ -186,12 +194,40 @@ const chartDayOptions = ref({
                     const formattedValue = value
                         .toString()
                         .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    return `${context.dataset.label}: ${formattedValue} VNĐ`;
+                    return `${context.dataset.label}: ${formattedValue} đ`;
                 },
             },
         },
     },
 });
+
+//function fetch lợi nhuận
+const fetchMonthlyProfit = async (year, month) => {
+    try {
+        let url = "http://localhost:3000/api/thongke/loinhuan";
+
+        if (year && month) {
+            url += `?year=${year}&month=${month}`;
+        } else if (year) {
+            url += `?year=${year}`;
+        }
+
+        const response = await axios.get(url);
+
+        if (response.data.success) {
+            monthlyProfit.value = response.data.data;
+        }
+    } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu lợi nhuận:", error);
+        monthlyProfit.value = {
+            loiNhuan: 0,
+            loiNhuanFormatted: "0",
+            doanhThuFormatted: "0",
+            tyLeLoiNhuan: "0%",
+            soDonHang: 0
+        };
+    }
+};
 
 const fetchRevenueDay = async (year, month) => {
     if (year > new Date().getFullYear()) {
@@ -219,6 +255,7 @@ const fetchRevenueDay = async (year, month) => {
                 },
             ],
         };
+        await fetchMonthlyProfit(year, month);
     } catch (err) {
         console.error("Lỗi khi lấy dữ liệu doanh thu theo ngày:", err);
     }
@@ -337,6 +374,10 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 onMounted(() => {
     fetchListProducts();
     fetchStatistical();
@@ -345,6 +386,7 @@ onMounted(() => {
     fetchFeedBackProducts();
     fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
     fetchTopSellingProducts();
+    fetchMonthlyProfit();
 });
 </script>
 
@@ -519,12 +561,26 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">
-                            <p class="text-[14px] font-semibold text-gray-600">
-                                Tổng doanh thu
-                            </p>
-                            <p class="text-[24px] font-bold">
-                                {{ formatCurrency(totalRevenueMonth.toString()) }} VNĐ
-                            </p>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng doanh thu</p>
+                                    <p class="text-[24px] font-bold">
+                                        {{ formatCurrency(totalRevenueMonth.toString()) }}
+                                        <span class="text-[24px] relative -top-[2px] underline">đ</span>
+                                    </p>
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng đơn hàng: <span class="text-[16px] text-green-700">{{ monthlyProfit.soDonHang }}</span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng lợi nhuận</p>
+                                    <p class="text-[24px] font-bold text-green-700">
+                                        {{ formatCurrencySale(monthlyProfit.loiNhuan) }}
+                                        <span class="text-[24px] relative -top-[2px] underline">đ</span>
+                                    </p>
+                                    <p class="text-[12px] text-gray-500">
+                                        Tỷ lệ: {{ monthlyProfit.tyLeLoiNhuan }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                             <Bar v-if="chartDataDay" :data="chartDataDay" :options="chartDayOptions" />

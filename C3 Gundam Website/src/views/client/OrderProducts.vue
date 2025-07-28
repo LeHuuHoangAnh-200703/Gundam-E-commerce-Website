@@ -139,7 +139,8 @@ const calculateDiscount = async () => {
 // Tính tổng giá
 watch([selectedProducts, finalProductPrice, shippingFee], () => {
     totalProductPrice.value = selectedProducts.value.reduce((sum, product) => {
-        return sum + product.DonGia * product.SoLuong;
+        const price = (product.GiaSale && product.GiaSale > 0) ? product.GiaSale : product.DonGia;
+        return sum + price * product.SoLuong;
     }, 0);
     finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
     totalPrice.value = finalProductPrice.value + shippingFee.value;
@@ -191,7 +192,7 @@ const addOrders = async () => {
     const sanPhamDaMua = selectedProducts.value.map(product => ({
         TenSanPham: product.TenSanPham,
         MaSanPham: product.MaSanPham,
-        Gia: product.DonGia,
+        Gia: (product.GiaSale && product.GiaSale > 0) ? product.GiaSale : product.DonGia,
         SoLuong: product.SoLuong,
         LoaiSanPham: product.LoaiSanPham,
         HinhAnh: product.HinhAnh,
@@ -300,6 +301,10 @@ function formatCurrency(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 onMounted(() => {
     const data = localStorage.getItem('selectedProducts');
     if (data) {
@@ -354,7 +359,7 @@ const createPaymentVNPay = async () => {
                 const sanPhamDaMua = selectedProducts.value.map(product => ({
                     TenSanPham: product.TenSanPham,
                     MaSanPham: product.MaSanPham,
-                    Gia: product.DonGia,
+                    Gia: (product.GiaSale && product.GiaSale > 0) ? product.GiaSale : product.DonGia,
                     SoLuong: product.SoLuong,
                     LoaiSanPham: product.LoaiSanPham,
                     HinhAnh: product.HinhAnh,
@@ -503,7 +508,7 @@ watch(() => formData.value.discountCode, () => {
                                                             class="text-[#FFD700]">{{ product.MaSanPham }}</span></p>
 
                                                     <p class="text-white text-[14px]">Giá: <span
-                                                            class="text-[#FFD700]">{{ formatCurrency(product.DonGia) }}
+                                                            class="text-[#FFD700]">{{ (product.GiaSale && product.GiaSale > 0) ? formatCurrencySale(product.GiaSale) : formatCurrency(product.DonGia) }}
                                                             <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
                                                     <p class="text-white text-[14px]">Số lượng: <span
                                                             class="text-[#FFD700]">{{ product.SoLuong }}</span></p>

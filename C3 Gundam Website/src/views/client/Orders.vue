@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import Header from "@/components/client/Header.vue";
 import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
@@ -38,6 +38,7 @@ const nameProducts = ref("");
 const maSanPham = ref("");
 const type = ref("");
 const price = ref(0);
+const priceSale = ref(0);
 const quantity = ref(1);
 const totalProductPrice = ref(0); // Giá sản phẩm gốc
 const finalProductPrice = ref(0); // Giá sản phẩm sau giảm
@@ -102,6 +103,11 @@ const handleDialogClose = () => {
     dialogState.value.visible = false;
 };
 
+//Lấy giá
+const currentPrice = computed(() => {
+    return priceSale.value > 0 ? priceSale.value : price.value;
+});
+
 // Tính phí ship
 const calculateShippingFee = async () => {
     if (!formData.value.address) {
@@ -112,7 +118,7 @@ const calculateShippingFee = async () => {
     try {
         const response = await axios.post('http://localhost:3000/api/donhang/tinhphiship', {
             address: formData.value.address,
-            ttotalOrder: finalProductPrice.value,
+            totalOrder: finalProductPrice.value,
         });
         shippingFee.value = response.data.shippingFee;
         shippingDetails.value = response.data.details;
@@ -143,8 +149,8 @@ const calculateDiscount = async () => {
 };
 
 // Tính tổng giá
-watch([price, quantity, finalProductPrice, shippingFee], () => {
-    totalProductPrice.value = price.value * quantity.value;
+watch([currentPrice, quantity, finalProductPrice, shippingFee], () => {
+    totalProductPrice.value = currentPrice.value * quantity.value;
     finalProductPrice.value = totalProductPrice.value; // Mặc định nếu chưa có giảm giá
     totalPrice.value = finalProductPrice.value + shippingFee.value;
 });
@@ -158,6 +164,7 @@ const fetchProduct = async (idProduct) => {
         nameProducts.value = response.data.TenSanPham;
         maSanPham.value = response.data.MaSanPham;
         price.value = Number(response.data.GiaBan);
+        priceSale.value = Number(response.data.GiaSale);
         type.value = response.data.LoaiSanPham;
     } catch (err) {
         console.log("error fetching:", err);
@@ -173,10 +180,10 @@ const fetchDiscountCode = async () => {
                 ? discountCode.IdKhachHangSuDung
                 : [] // Đảm bảo IdKhachHangSuDung là mảng
         }));
-        return true; // Trả về true để báo hiệu thành công
+        return true;
     } catch (error) {
         console.error('Error fetching discount codes:', error);
-        return false; // Trả về false để báo hiệu lỗi
+        return false;
     }
 };
 
@@ -255,7 +262,7 @@ const addOrders = async () => {
         SanPhamDaMua: {
             TenSanPham: nameProducts.value,
             MaSanPham: maSanPham.value,
-            Gia: price.value,
+            Gia: currentPrice.value,
             SoLuong: quantity.value,
             LoaiSanPham: type.value,
             HinhAnh: images.value[0],
@@ -436,7 +443,7 @@ const createPaymentVNPay = async () => {
                     SanPhamDaMua: {
                         TenSanPham: nameProducts.value,
                         MaSanPham: maSanPham.value,
-                        Gia: price.value,
+                        Gia: currentPrice,
                         SoLuong: quantity.value,
                         LoaiSanPham: type.value,
                         HinhAnh: images.value[0],
@@ -477,6 +484,10 @@ const createPaymentVNPay = async () => {
 };
 
 function formatCurrency(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatCurrencySale(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -603,7 +614,7 @@ watch(() => formData.value.discountCode, () => {
                                                     </p>
                                                     <p class="text-white text-[14px]">
                                                         Giá:
-                                                        <span class="text-[#FFD700]">{{ formatCurrency(price) }}
+                                                        <span class="text-[#FFD700]">{{ priceSale > 0 ? formatCurrencySale(priceSale) : formatCurrency(price) }}
                                                             <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
                                                     </p>
                                                     <p class="text-white text-[14px]">
