@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
+import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from "axios";
 import { Bar } from "vue-chartjs";
@@ -19,6 +20,10 @@ import {
     PointElement,
     LineElement,
 } from "chart.js";
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+pdfMake.vfs = pdfFonts;
 
 const customers = ref([]);
 const products = ref([]);
@@ -34,16 +39,60 @@ const monthlyProfit = ref({
 });
 
 const notification = ref({
-    message: "",
-    type: "",
+    message: '',
+    type: ''
 });
-const listSelling = ref([]);
+
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
-        notification.value.message = "";
+        notification.value.message = '';
     }, 3000);
 };
+
+// Dialog state với props
+const dialogState = ref({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy bỏ',
+    onConfirm: null,
+    onCancel: null
+});
+
+const showConfirmDialog = (config) => {
+    dialogState.value = {
+        visible: true,
+        title: config.title || 'Xác nhận',
+        message: config.message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+        type: config.type || 'warning',
+        confirmText: config.confirmText || 'Xác nhận',
+        cancelText: config.cancelText || 'Hủy bỏ',
+        onConfirm: config.onConfirm,
+        onCancel: config.onCancel
+    };
+};
+
+const handleDialogConfirm = () => {
+    if (dialogState.value.onConfirm) {
+        dialogState.value.onConfirm();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogCancel = () => {
+    if (dialogState.value.onCancel) {
+        dialogState.value.onCancel();
+    }
+    dialogState.value.visible = false;
+};
+
+const handleDialogClose = () => {
+    dialogState.value.visible = false;
+};
+const listSelling = ref([]);
 
 const fetchListProducts = async () => {
     try {
@@ -338,6 +387,7 @@ const fetchTopSellingProducts = async () => {
                 ...product,
             };
         });
+        console.log(listSelling.value)
     } catch (err) {
         console.log("Error fetching sellings products:", err);
     }
@@ -368,15 +418,365 @@ const fetchEnterWarehouse = async (maSanPham, year, month) => {
     } catch (error) {
         console.log("Error fetching enter warehouse:", error.message);
     }
-}
+};
+
+const exportTopProductPDF = () => {
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có muốn xuất báo cáo TOP sản phẩm mua nhiều nhất không?',
+        type: 'info',
+        confirmText: 'Xuất báo cáo',
+        cancelText: 'Hủy bỏ',
+        onConfirm: () => {
+            try {
+                // Tạo nội dung sản phẩm dạng card layout
+                const productContent = listSelling.value.map((product, index) => {
+                    const rank = index + 1;
+                    const rankColor = rank <= 3 ? '#FFD700' : '#E0E0E0'; // Vàng cho top 3, xám cho còn lại
+                    
+                    return [
+                        // Header của mỗi sản phẩm
+                        {
+                            columns: [
+                                {
+                                    width: 60,
+                                    stack: [
+                                        {
+                                            text: `#${rank}`,
+                                            style: 'rankNumber',
+                                            background: rankColor,
+                                            color: rank <= 3 ? '#000' : '#666',
+                                            alignment: 'center',
+                                            margin: [0, 5, 0, 5]
+                                        }
+                                    ]
+                                },
+                                {
+                                    width: '*',
+                                    stack: [
+                                        {
+                                            text: product.TenSanPham,
+                                            style: 'productName',
+                                            margin: [10, 0, 0, 2]
+                                        },
+                                        {
+                                            text: `Mã: ${product.MaSanPham}`,
+                                            style: 'productCode',
+                                            margin: [10, 0, 0, 5]
+                                        }
+                                    ]
+                                }
+                            ],
+                            margin: [0, 5, 0, 0]
+                        },
+                        // Thông tin chi tiết sản phẩm
+                        {
+                            columns: [
+                                {
+                                    width: '50%',
+                                    stack: [
+                                        {
+                                            columns: [
+                                                { text: 'Giá bán:', style: 'labelText', width: 60 },
+                                                { 
+                                                    text: `${formatCurrency(product.GiaBan)} đ`, 
+                                                    style: 'priceText',
+                                                    width: '*'
+                                                }
+                                            ],
+                                            margin: [20, 2, 0, 2]
+                                        },
+                                        {
+                                            columns: [
+                                                { text: 'Giá Sale:', style: 'labelText', width: 60 },
+                                                { 
+                                                    text: (product.GiaSale && product.GiaSale > 0) ? `${formatCurrencySale(product.GiaSale)} đ` : 'Không có',
+                                                    style: (product.GiaSale && product.GiaSale > 0) ? 'salePriceText' : 'noSaleText',
+                                                    width: '*'
+                                                }
+                                            ],
+                                            margin: [20, 2, 0, 2]
+                                        }
+                                    ]
+                                },
+                                {
+                                    width: '50%',
+                                    stack: [
+                                        {
+                                            columns: [
+                                                { text: 'Tình trạng:', style: 'labelText', width: 70 },
+                                                { 
+                                                    text: product.TrangThai,
+                                                    style: product.TrangThai === 'Đang bán' ? 'statusAvailable' : 'statusUnavailable',
+                                                    width: '*'
+                                                }
+                                            ],
+                                            margin: [20, 2, 0, 2]
+                                        },
+                                        {
+                                            columns: [
+                                                { text: 'Lượt bán:', style: 'labelText', width: 70 },
+                                                { 
+                                                    text: `${product.LuotBan} sản phẩm`,
+                                                    style: 'soldCountText',
+                                                    width: '*'
+                                                }
+                                            ],
+                                            margin: [20, 2, 0, 2]
+                                        }
+                                    ]
+                                }
+                            ],
+                            margin: [0, 5, 0, 10]
+                        },
+                        // Đường phân cách
+                        {
+                            canvas: [
+                                {
+                                    type: 'line',
+                                    x1: 0, y1: 0,
+                                    x2: 515, y2: 0,
+                                    lineWidth: 1,
+                                    lineColor: '#E0E0E0'
+                                }
+                            ],
+                            margin: [0, 5, 0, 15]
+                        }
+                    ];
+                }).flat(); // Flatten array để có danh sách phẳng các elements
+
+                const docDefinition = {
+                    pageSize: 'A4',
+                    pageMargins: [40, 60, 40, 60],
+                    content: [
+                        // Header
+                        {
+                            stack: [
+                                { text: 'QUẢN LÝ SẢN PHẨM', style: 'header' },
+                                { text: 'Hệ thống bán hàng C3 GUNDAM STORE', style: 'subheader' },
+                                { text: 'Địa chỉ: Đường 96 - Tân Phú - TX.Long Mỹ - Hậu Giang', style: 'subheader' },
+                                {
+                                    canvas: [
+                                        {
+                                            type: 'line',
+                                            x1: 0, y1: 0,
+                                            x2: 515, y2: 0,
+                                            lineWidth: 2,
+                                            lineColor: '#333'
+                                        }
+                                    ],
+                                    margin: [0, 10, 0, 10]
+                                }
+                            ],
+                            margin: [0, 0, 0, 20]
+                        },
+                        
+                        // Title
+                        { 
+                            text: 'BÁO CÁO TOP SẢN PHẨM ĐƯỢC MUA NHIỀU NHẤT', 
+                            style: 'title',
+                            margin: [0, 0, 0, 5]
+                        },
+                        { 
+                            text: `Ngày xuất: ${formatDate(new Date())}`, 
+                            style: 'dateInfo',
+                            margin: [0, 0, 0, 20]
+                        },
+
+                        // Thống kê tổng quan
+                        {
+                            columns: [
+                                {
+                                    width: '50%',
+                                    stack: [
+                                        { text: 'TỔNG SẢN PHẨM', style: 'statLabel' },
+                                        { text: listSelling.value.length.toString(), style: 'statNumber' }
+                                    ],
+                                    alignment: 'center'
+                                },
+                                {
+                                    width: '50%',
+                                    stack: [
+                                        { text: 'TỔNG LƯỢT BÁN', style: 'statLabel' },
+                                        { 
+                                            text: listSelling.value.reduce((sum, p) => sum + p.LuotBan, 0).toString(), 
+                                            style: 'statNumber' 
+                                        }
+                                    ],
+                                    alignment: 'center'
+                                }
+                            ],
+                            margin: [0, 0, 0, 25]
+                        },
+
+                        // Tiêu đề danh sách
+                        { 
+                            text: 'DANH SÁCH CHI TIẾT', 
+                            style: 'sectionHeader',
+                            margin: [0, 0, 0, 15]
+                        },
+
+                        // Nội dung sản phẩm
+                        ...productContent,
+
+                        // Footer
+                        {
+                            stack: [
+                                {
+                                    canvas: [
+                                        {
+                                            type: 'line',
+                                            x1: 0, y1: 0,
+                                            x2: 515, y2: 0,
+                                            lineWidth: 1,
+                                            lineColor: '#333'
+                                        }
+                                    ],
+                                    margin: [0, 20, 0, 10]
+                                },
+                                { 
+                                    text: 'Ghi chú: Danh sách được sắp xếp theo số lượng bán từ cao xuống thấp', 
+                                    style: 'note',
+                                    margin: [0, 0, 0, 5]
+                                },
+                                { 
+                                    text: `Thời gian xuất báo cáo: ${new Date().toLocaleString('vi-VN')}`, 
+                                    style: 'footer'
+                                }
+                            ]
+                        }
+                    ],
+                    styles: {
+                        header: { 
+                            fontSize: 20, 
+                            bold: true, 
+                            alignment: 'center',
+                            color: '#333'
+                        },
+                        subheader: { 
+                            fontSize: 11, 
+                            alignment: 'center',
+                            color: '#666',
+                            margin: [0, 2, 0, 2]
+                        },
+                        title: { 
+                            fontSize: 18, 
+                            bold: true, 
+                            alignment: 'center',
+                            color: '#2c3e50'
+                        },
+                        dateInfo: { 
+                            fontSize: 12, 
+                            alignment: 'center',
+                            color: '#7f8c8d'
+                        },
+                        sectionHeader: { 
+                            fontSize: 14, 
+                            bold: true,
+                            color: '#34495e',
+                            background: '#ecf0f1',
+                            margin: [0, 5, 0, 5]
+                        },
+                        statLabel: {
+                            fontSize: 10,
+                            color: '#7f8c8d',
+                            bold: true
+                        },
+                        statNumber: {
+                            fontSize: 16,
+                            color: '#2c3e50',
+                            bold: true,
+                            margin: [0, 2, 0, 0]
+                        },
+                        rankNumber: {
+                            fontSize: 16,
+                            bold: true,
+                            border: [1, 1, 1, 1],
+                            borderColor: '#bdc3c7'
+                        },
+                        productName: {
+                            fontSize: 13,
+                            bold: true,
+                            color: '#2c3e50'
+                        },
+                        productCode: {
+                            fontSize: 10,
+                            color: '#7f8c8d',
+                            italics: true
+                        },
+                        labelText: {
+                            fontSize: 10,
+                            color: '#7f8c8d',
+                            bold: true
+                        },
+                        priceText: {
+                            fontSize: 11,
+                            color: '#27ae60',
+                            bold: true
+                        },
+                        salePriceText: {
+                            fontSize: 11,
+                            color: '#e74c3c',
+                            bold: true
+                        },
+                        noSaleText: {
+                            fontSize: 10,
+                            color: '#95a5a6',
+                            italics: true
+                        },
+                        statusAvailable: {
+                            fontSize: 10,
+                            color: '#27ae60',
+                            bold: true
+                        },
+                        statusUnavailable: {
+                            fontSize: 10,
+                            color: '#e74c3c',
+                            bold: true
+                        },
+                        soldCountText: {
+                            fontSize: 11,
+                            color: '#3498db',
+                            bold: true
+                        },
+                        note: { 
+                            fontSize: 9, 
+                            italics: true,
+                            color: '#7f8c8d'
+                        },
+                        footer: { 
+                            fontSize: 9, 
+                            alignment: 'right',
+                            color: '#95a5a6'
+                        }
+                    }
+                };
+
+                const fileName = `BaoCao_TopSanPham_${new Date().toISOString().split('T')[0]}.pdf`;
+                pdfMake.createPdf(docDefinition).download(fileName);
+                showNotification('Xuất báo cáo TOP sản phẩm thành công!', 'success');
+            } catch (error) {
+                console.error('Lỗi khi xuất PDF:', error);
+                showNotification('Lỗi khi xuất báo cáo PDF!', 'error');
+            }
+        }
+    });
+};
 
 function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
+};
 
 function formatCurrencySale(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
+};
+
+const formatDate = (date) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
+    const formattedDate = date.toLocaleDateString('vi-VN', options);
+
+    return formattedDate;
+};
 
 onMounted(() => {
     fetchListProducts();
@@ -456,9 +856,14 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
-                        <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
-                            Top sản phẩm bán chạy nhất
-                        </h3>
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
+                                Top sản phẩm bán chạy nhất
+                            </h3>
+                            <button @click="exportTopProductPDF"
+                                class="bg-[#003171] text-white px-3 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2">
+                                Xuất Top Sản Phẩm</button>
+                        </div>
                         <div class="flex flex-col gap-4 p-4 bg-white shadow-lg rounded-md border-2">
                             <div v-for="(product, index) in listSelling" :key="index"
                                 class="flex gap-4 items-center border-b-2 pb-4">
@@ -568,7 +973,8 @@ onMounted(() => {
                                         {{ formatCurrency(totalRevenueMonth.toString()) }}
                                         <span class="text-[24px] relative -top-[2px] underline">đ</span>
                                     </p>
-                                    <p class="text-[14px] font-semibold text-gray-600">Tổng đơn hàng: <span class="text-[16px] text-green-700">{{ monthlyProfit.soDonHang }}</span></p>
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng đơn hàng: <span
+                                            class="text-[16px] text-green-700">{{ monthlyProfit.soDonHang }}</span></p>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[14px] font-semibold text-gray-600">Tổng lợi nhuận</p>
@@ -625,6 +1031,9 @@ onMounted(() => {
                 <NotificationAdmin :message="notification.message" :type="notification.type" />
             </div>
         </div>
+        <ConfirmDialog :visible="dialogState.visible" :title="dialogState.title" :message="dialogState.message"
+            :type="dialogState.type" :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            @confirm="handleDialogConfirm" @cancel="handleDialogCancel" @close="handleDialogClose" />
     </div>
 </template>
 

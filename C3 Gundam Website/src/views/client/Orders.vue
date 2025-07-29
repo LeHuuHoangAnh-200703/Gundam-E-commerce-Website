@@ -443,7 +443,7 @@ const createPaymentVNPay = async () => {
                     SanPhamDaMua: {
                         TenSanPham: nameProducts.value,
                         MaSanPham: maSanPham.value,
-                        Gia: currentPrice,
+                        Gia: currentPrice.value,
                         SoLuong: quantity.value,
                         LoaiSanPham: type.value,
                         HinhAnh: images.value[0],

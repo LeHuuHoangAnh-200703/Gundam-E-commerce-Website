@@ -197,7 +197,7 @@ const exportToPDF = async (maPN) => {
     showConfirmDialog({
         title: 'Thông báo xác nhận',
         message: `Bạn có muốn xuất phiếu nhập kho của ${maPN} không?`,
-        type: 'success',
+        type: 'info',
         confirmText: 'Xuất phiếu nhập',
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {

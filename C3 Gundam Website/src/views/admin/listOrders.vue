@@ -202,7 +202,7 @@ const exportOrderToPDF = async (order) => {
     showConfirmDialog({
         title: 'Thông báo xác nhận',
         message: `Bạn có muốn xuất hóa đơn cho đơn hàng ${order.MaDonHang} không?`,
-        type: 'success',
+        type: 'info',
         confirmText: 'Xuất hóa đơn',
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
