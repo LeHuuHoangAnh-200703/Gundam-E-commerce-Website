@@ -385,7 +385,6 @@ exports.getMonthlyProfit = async (req, res) => {
     for (const order of orders) {
       let orderCost = 0;
       let orderRevenue = order.TongDon;
-      console.log(orderRevenue)
 
       // Tính giá vốn cho từng sản phẩm trong đơn hàng
       for (const sanPham of order.SanPhamDaMua) {

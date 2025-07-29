@@ -862,7 +862,7 @@ onMounted(() => {
                             </h3>
                             <button @click="exportTopProductPDF"
                                 class="bg-[#003171] text-white px-3 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2">
-                                Xuất Top Sản Phẩm</button>
+                                Xuất File Top Sản Phẩm</button>
                         </div>
                         <div class="flex flex-col gap-4 p-4 bg-white shadow-lg rounded-md border-2">
                             <div v-for="(product, index) in listSelling" :key="index"

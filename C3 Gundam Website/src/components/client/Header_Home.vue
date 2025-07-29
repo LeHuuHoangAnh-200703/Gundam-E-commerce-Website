@@ -138,6 +138,10 @@ function formatCurrency(value) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function formatCurrencySale(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 const startVoiceSearch = () => {
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
         alert("Trình duyệt không hỗ trợ tìm kiếm bằng giọng nói!");
@@ -292,8 +296,8 @@ onMounted(() => {
                                     class="font-semibold text-[12px] overflow-hidden text-ellipsis whitespace-nowrap group-hover:text-[#DB3F4C] transition-all duration-300">
                                     {{ product.TenSanPham }}</p>
                             </div>
-                            <p class="text-[12px] font-semibold">Giá: <span class="text-[#DB3F4C]">{{
-                                formatCurrency(product.GiaBan) }} VNĐ</span></p>
+                            <p class="text-[12px] font-semibold text-[#DB3F4C]">{{
+                                (product.GiaSale && product.GiaSale > 0) ? formatCurrencySale(product.GiaSale) : formatCurrency(product.GiaBan) }} <span class="text-[12px] relative -top-[1px] underline">đ</span></p>
                         </div>
                     </router-link>
                 </div>

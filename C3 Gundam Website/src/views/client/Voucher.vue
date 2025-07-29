@@ -151,7 +151,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <p v-if="discountCode.GiamTien" class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
-                        formatCurrency(discountCode.GiamTien) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
+                        formatCurrency(discountCode.GiamTien) }} <span class="text-[16px] relative -top-[2px] underline">đ</span></p>
                     <p v-else class="font-semibold text-[#DB3F4C] text-[20px]">Giảm {{
                         discountCode.GiamPhanTram }}%</p>
                     <div class="flex justify-between items-center">

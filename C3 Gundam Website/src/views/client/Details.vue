@@ -355,10 +355,10 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                     <div class="flex justify-start gap-4 items-center text-[#FFD700]">
                         <p v-if="priceSale > 0" class="font-semibold text-[30px]">{{
                             formatCurrencySale(priceSale) }}
-                                <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
+                                <span class="text-[20px] relative -top-[2px] underline">đ</span></p>
                         <p class="font-semibold text-[24px]" :class="{ 'line-through text-white': priceSale }">{{
                             formatCurrency(price) }}
-                                <span class="text-[14px] relative -top-[2px] underline">đ</span></p>
+                                <span class="text-[20px] relative -top-[2px] underline">đ</span></p>
                     </div>
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
@@ -397,7 +397,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         class="bg-[#DB3F4C] px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058]">
                         <p class="text-[16px] lg:text-[18px] uppercase font-semibold">Mua ngay với giá <span>{{
                             priceSale > 0 ? formatCurrencySale(priceSale) : formatCurrency(price) }}
-                                <span class="text-[14px] relative -top-[2px] underline lowercase">đ</span></span></p>
+                                <span class="text-[16px] relative -top-[2px] underline lowercase">đ</span></span></p>
                         <p class="text-[12px] lg:text-[14px]">Đặt mua giao hàng tận nơi</p>
                     </router-link>
                     <router-link to="" v-else-if="status === 'Ngừng kinh doanh'" @click.prevent="handleDisabledClick"
