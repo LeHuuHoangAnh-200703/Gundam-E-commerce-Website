@@ -114,6 +114,10 @@ const selectTypeProducts = (type) => {
     }
 };
 
+const getActualPrice = (product) => {
+    return product.GiaSale > 0 ? product.GiaSale : product.GiaBan;
+};
+
 const filteredProducts = computed(() => {
     const products = listProducts.value;
     if (selectedType.value === "BestSeller") {
@@ -121,11 +125,19 @@ const filteredProducts = computed(() => {
     }
 
     if (selectedType.value === "LowPrice") {
-        return products.slice().sort((a, b) => Number(a.GiaBan) - Number(b.GiaBan));
+        return products.slice().sort((a, b) => {
+            const priceA = Number(getActualPrice(a));
+            const priceB = Number(getActualPrice(b));
+            return priceA - priceB;
+        });
     }
 
     if (selectedType.value === "HighPrice") {
-        return products.slice().sort((a, b) => Number(b.GiaBan) - Number(a.GiaBan));
+        return products.slice().sort((a, b) => {
+            const priceA = Number(getActualPrice(a));
+            const priceB = Number(getActualPrice(b));
+            return priceB - priceA;
+        });
     }
 
     if (selectedType.value === "Sale") {
@@ -287,7 +299,8 @@ onMounted(() => {
                                 {{
                                     product.TenSanPham }}</p>
                         </router-link>
-                        <p class="text-[#FFD700] text-[16px] font-semibold flex justify-center gap-4 items-center w-full">
+                        <p
+                            class="text-[#FFD700] text-[16px] font-semibold flex justify-center gap-4 items-center w-full">
                             <span v-if="product.GiaSale > 0" class="text-[18px]">{{
                                 formatCurrencySale(product.GiaSale) }}
                                 <span class="text-[14px] relative -top-[2px] underline">đ</span></span>
