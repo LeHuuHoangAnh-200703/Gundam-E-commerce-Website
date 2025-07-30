@@ -196,7 +196,7 @@ onUnmounted(() => {
           <div class="flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-40vh)]">
             <div v-if="messages.length > 0">
               <div v-for="(msg, index) in messages" :key="index">
-                <div class="flex flex-col gap-1" :class="{ 'items-end': msg.role === 'user' }"
+                <div class="flex flex-col gap-1 mb-2" :class="{ 'items-end': msg.role === 'user' }"
                   v-if="msg.role === 'user'">
                   <div class="self-end">
                     <div v-if="msg.TinNhan" class="bg-[#4169E1] p-2 rounded-t-lg rounded-l-lg inline-block">
