@@ -287,13 +287,13 @@ onMounted(() => {
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 col-span-3">
                     <div v-for="(product, index) in paginatedProducts" :key="index"
-                        class="flex flex-col gap-3 items-center">
+                        class="flex flex-col gap-3 items-center group">
                         <router-link :to="`/details/${product.MaSanPham}`">
                             <img :src="`${product.Images[0]}`"
                                 class="w-full [box-shadow:0px_0px_6px_rgba(255,255,255,0.8)]" alt="">
                         </router-link>
                         <router-link :to="`/details/${product.MaSanPham}`"
-                            class="py-2 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-64 group">
+                            class="py-2 whitespace-nowrap text-[12px] text-ellipsis overflow-hidden max-w-64">
                             <p
                                 class="text-white overflow-hidden text-ellipsis whitespace-nowrap text-[14px] text-center flex-grow group-hover:text-[#DB3F4C] transition-all duration-300">
                                 {{
