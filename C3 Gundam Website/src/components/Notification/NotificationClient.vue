@@ -67,7 +67,7 @@ const props = defineProps({
                         </p>
                     </div>
                 </div>
-                <div v-if="showProgress"
+                <!-- <div v-if="showProgress"
                     class="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
                     <div :class="[
                         'h-full bg-gradient-to-r transition-all duration-100 ease-linear',
@@ -76,7 +76,7 @@ const props = defineProps({
                             'from-emerald-500 to-teal-500': type === 'success',
                         }
                     ]" :style="{ width: progressWidth + '%' }"></div>
-                </div>
+                </div> -->
             </div>
         </div>
     </transition>

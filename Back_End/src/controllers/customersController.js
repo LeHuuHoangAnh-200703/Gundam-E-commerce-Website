@@ -31,6 +31,11 @@ exports.getAllCustomers = async (req, res) => {
 
     const orders = await Order.aggregate([
       {
+        $match: {
+          TrangThaiDon: { $ne: "Đơn hàng đã hủy" }
+        }
+      },
+      {
         $group: {
           _id: "$MaKhachHang",
           TongDonHang: { $sum: 1 },
@@ -69,7 +74,8 @@ exports.getCustomer = async (req, res) => {
 
     // Đếm số đơn hàng của khách hàng cụ thể này
     const orderCount = await Order.countDocuments({
-      MaKhachHang: req.params.maKhachHang
+      MaKhachHang: req.params.maKhachHang,
+      TrangThaiDon: { $ne: "Đơn hàng đã hủy" }
     });
 
     // Trả về thông tin khách hàng kèm tổng số đơn hàng
