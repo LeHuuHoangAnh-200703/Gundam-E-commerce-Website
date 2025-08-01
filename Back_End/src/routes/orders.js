@@ -7,7 +7,7 @@ router.get("/:maDonHang", orderController.getOrder);
 router.post("/", orderController.createOrder);
 router.post("/luutamdon", orderController.createTempOrder);
 router.put("/:maDonHang", orderController.updatedOrder);
-router.delete("/:maDonHang",orderController.deleteOrder);
+router.patch("/:maDonHang",orderController.cancelOrder);
 router.get("/khachhang/:maKhachHang", orderController.getOrderById);
 router.patch("/trangthai/:maDonHang", orderController.updatedStatus);;
 // router.get("/kiemtradanhgia/:maDonHang", orderController.checkOrderReviewed);

@@ -356,7 +356,7 @@ exports.updatedOrder = async (req, res) => {
     }
 };
 
-exports.deleteOrder = async (req, res) => {
+exports.cancelOrder = async (req, res) => {
     const { maDonHang } = req.params;
     try {
         const order = await Order.findOneAndUpdate(

@@ -126,12 +126,12 @@ const deleteOrder = async (maDonHang) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/donhang/${maDonHang}`);
+                const response = await axios.patch(`http://localhost:3000/api/donhang/${maDonHang}`);
 
                 await createNotification(`Đơn hàng vừa được hủy!`);
 
                 showNotification("Hủy đơn hàng thành công! Liên hệ với cửa hàng để được hoàn tiền nếu thanh toán online nhé.", "success");
-                listOrders.value = listOrders.value.filter(order => order.MaDonHang !== maDonHang);
+                await fetchOrders(maKhachHang);
             } catch (error) {
                 showNotification(error.response?.data?.message || "Hủy đơn hàng thất bại!", "error");
             }
