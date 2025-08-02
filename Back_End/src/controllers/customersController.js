@@ -43,16 +43,36 @@ exports.getAllCustomers = async (req, res) => {
       },
     ]);
 
+    const cancelledOrders = await Order.aggregate([
+      {
+        $match: {
+          TrangThaiDon: "Đơn hàng đã hủy"
+        }
+      },
+      {
+        $group: {
+          _id: "$MaKhachHang",
+          TongDonHangDaHuy: { $sum: 1 },
+        },
+      },
+    ]);
+
     // Ánh xạ lại orders thành object để truy vấn nhanh hơn
     const orderMap = {};
     orders.forEach(order => {
       orderMap[order._id] = order.TongDonHang;
     });
 
+    const cancelledOrderMap = {};
+    cancelledOrders.forEach(order => {
+      cancelledOrderMap[order._id] = order.TongDonHangDaHuy;
+    });
+
     const customersWithOrders = customers.map(customer => {
       return {
         ...customer.toObject(),
         TongDonHang: orderMap[customer.MaKhachHang] || 0,
+        TongDonHangDaHuy: cancelledOrderMap[customer.MaKhachHang] || 0,
       };
     });
 
@@ -67,7 +87,7 @@ exports.getCustomer = async (req, res) => {
     const customer = await Customer.findOne({
       MaKhachHang: req.params.maKhachHang,
     });
-    
+
     if (!customer) {
       return res.status(400).json({ message: "Khách hàng không tồn tại!" });
     }
@@ -205,6 +225,10 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Mật khẩu không đúng." });
     }
+
+    if (customer.TinhTrangTaiKhoan === 'Vô hiệu hóa') {
+      return res.status(400).json({ message: "Tài khoản đã bị vô hiệu hóa, không thể đăng nhập." });
+    }
     customer.TrangThai = 1;
     await customer.save();
     return res.status(200).json({
@@ -226,6 +250,10 @@ exports.loginGoogle = async (req, res) => {
   const { maKhachHang } = req.query;
   try {
     const customer = await Customer.findOne({ MaKhachHang: maKhachHang });
+
+    if (customer.TinhTrangTaiKhoan === 'Vô hiệu hóa') {
+      return res.status(400).json({ message: "Tài khoản đã bị vô hiệu hóa, không thể đăng nhập." });
+    }
 
     customer.TrangThai = 1;
     await customer.save();
@@ -432,5 +460,60 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json(error.message);
   }
 }
+
+exports.hiddenAccount = async (req, res) => {
+  const { TrangThai } = req.body;
+  try {
+    const customer = await Customer.findOne({ MaKhachHang: req.params.maKhachHang });
+    if (!customer) {
+      return res.status(400).json({ message: "Tài khoản không tồn tại." });
+    }
+    customer.TinhTrangTaiKhoan = TrangThai;
+    await customer.save();
+    return res.status(200).json({ message: "Vô hiệu hóa tài khoản thành công." });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi khi vô hiệu hóa.", error: error.message });
+  }
+}
+
+exports.sendEmail = async (req, res) => {
+  const email = req.query.email;
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Thông báo quan trọng từ C3 GUNDAM STORE",
+      html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #d32f2f;">Thông báo tạm khóa tài khoản</h2>
+                    
+                    <p>Kính gửi Quý khách hàng,</p>
+                    
+                    <p>Chúng tôi rất tiếc phải thông báo rằng tài khoản của bạn tại <strong>C3 GUNDAM STORE</strong> đã bị tạm khóa do phát hiện hành vi hủy đơn hàng quá nhiều lần.</p>
+                    
+                    <p><strong>Lý do:</strong> Việc hủy đơn hàng liên tục ảnh hưởng đến quy trình vận hành và dịch vụ của chúng tôi.</p>
+                    
+                    <p><strong>Để khôi phục tài khoản:</strong></p>
+                    <ul>
+                        <li>Vui lòng liên hệ bộ phận chăm sóc khách hàng</li>
+                        <li>Email: c3gundamstore@gmail.com</li>
+                        <li>Hotline: 079-965-8592</li>
+                    </ul>
+                    
+                    <p>Chúng tôi mong muốn tiếp tục phục vụ bạn trong tương lai.</p>
+                    
+                    <p>Trân trọng,<br>
+                    <strong>Đội ngũ C3 GUNDAM STORE</strong></p>
+                </div>
+            `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ success: true, message: "Email đã được gửi thành công" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Lỗi khi gửi email thông báo." });
+  }
+};
 
 exports.upload = upload.single("Image");

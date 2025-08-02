@@ -27,6 +27,7 @@ const customerSchema = new mongoose.Schema({
       MaGiamGia: String,
     },
   ],
+  TinhTrangTaiKhoan: { type: String, enum: ['Đang sử dụng' ,'Vô hiệu hóa'], default: 'Đang sử dụng' },
   TrangThai: { type: Number, default: 0 },
   provider: String, // Thêm: 'google' hoặc null cho đăng nhập thường
   providerId: String, // Thêm: ID từ Google

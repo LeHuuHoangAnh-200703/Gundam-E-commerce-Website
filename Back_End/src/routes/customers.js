@@ -17,5 +17,7 @@ router.delete("/magiamgia/:maKhachHang/:IdMaGiamGia", customersController.delete
 router.post("/send-otp", customersController.sendOTP);
 router.post("/verify-otp", customersController.verifyOTP);
 router.post("/quenmatkhau", customersController.resetPassword);
+router.patch("/tinhtrangtaikhoan/:maKhachHang", customersController.hiddenAccount);
+router.post("/guimail", customersController.sendEmail);
 
 module.exports = router;

@@ -513,13 +513,35 @@ exports.sendEmailOrder = async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: "Đặt hàng thành công tại C3 GUNDAM STORE",
-            text: "Cám ơn bạn đã đặt hàng. Đơn hàng sẽ được giao đến bạn trong vòng 3 - 5 ngày.",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #4CAF50; text-align: center;">✅ Đặt hàng thành công!</h2>
+                    
+                    <p>Kính chào Quý khách,</p>
+                    
+                    <p>Cảm ơn bạn đã đặt hàng tại <strong>C3 GUNDAM STORE</strong>.</p>
+                    
+                    <p>Đơn hàng của bạn đã được xác nhận và sẽ được giao trong vòng <strong>3-5 ngày làm việc</strong>.</p>
+                    
+                    <p>Chúng tôi sẽ thông báo khi đơn hàng được vận chuyển.</p>
+                    
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+                    
+                    <p style="color: #666; font-size: 14px;">
+                        Liên hệ hỗ trợ: c3gundamstore@gmail.com | Hotline: 079-965-8592
+                    </p>
+                    
+                    <p style="text-align: center; color: #999; font-size: 12px;">
+                        Cảm ơn bạn đã tin tưởng C3 GUNDAM STORE!
+                    </p>
+                </div>
+            `,
         };
 
         await transporter.sendMail(mailOptions);
-        return res.status(200).json(true)
+        return res.status(200).json({ success: true, message: "Email đã được gửi thành công" });
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: "Lỗi khi gửi email khi đặt hàng." });
+        console.log(error);
+        return res.status(500).json({ message: "Lỗi khi gửi email xác nhận đặt hàng." });
     }
-}
+};

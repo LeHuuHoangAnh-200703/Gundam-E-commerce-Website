@@ -81,6 +81,47 @@ const fetchCustomers = async () => {
     }
 }
 
+const toggleAccount = async (newStatus, maKhachHang, email) => {
+    showConfirmDialog({
+        title: 'Thông báo xác nhận',
+        message: 'Bạn có chắc chắn về việc cập nhật trạng thái này không?',
+        type: 'info',
+        confirmText: 'Cập nhật',
+        cancelText: 'Hủy bỏ',
+        onConfirm: async () => {
+            const nextStatus = newStatus === 'Đang sử dụng' ? 'Vô hiệu hóa' : 'Đang sử dụng';
+            try {
+                const response = await axios.patch(`http://localhost:3000/api/khachhang/tinhtrangtaikhoan/${maKhachHang}`, {
+                    TrangThai: nextStatus,
+                });
+
+                if (newStatus === 'Đang sử dụng' && nextStatus === 'Vô hiệu hóa') {
+                    try {
+                        await axios.post(`http://localhost:3000/api/khachhang/guimail?email=${email}`);
+                    } catch (emailError) {
+                        console.error('Lỗi khi gửi email:', emailError);
+                    }
+                }
+
+                const TenAdmin = localStorage.getItem("TenAdmin");
+                const ThoiGian = new Date();
+
+                const notificationData = {
+                    ThongBao: `Vừa cập nhật trạng thái ${maKhachHang} từ ${newStatus} sang ${nextStatus}`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
+
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                await fetchCustomers();
+                showNotification("Cập nhật trạng thái thành công!", "success");
+            } catch (error) {
+                console.error('Error updating order status:', error);
+            }
+        }
+    });
+};
+
 const findNameCustomers = computed(() => {
     if (!searchValue.value) {
         return listCustomers.value;
@@ -110,7 +151,7 @@ const exportTop3CustomersPDF = () => {
                     const rank = index + 1;
                     const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']; // Vàng, Bạc, Đồng
                     const rankColor = rankColors[index] || '#E0E0E0';
-                    
+
                     return [
                         // Card container cho mỗi khách hàng
                         {
@@ -169,7 +210,7 @@ const exportTop3CustomersPDF = () => {
                                     ],
                                     margin: [0, 0, 0, 10]
                                 },
-                                
+
                                 // Thông tin chi tiết khách hàng
                                 {
                                     columns: [
@@ -179,7 +220,7 @@ const exportTop3CustomersPDF = () => {
                                                 {
                                                     columns: [
                                                         { text: 'Email:', style: 'labelWithIcon', width: 60 },
-                                                        { 
+                                                        {
                                                             text: customer.Email,
                                                             style: 'infoText',
                                                             width: '*'
@@ -190,7 +231,7 @@ const exportTop3CustomersPDF = () => {
                                                 {
                                                     columns: [
                                                         { text: 'Tham gia:', style: 'labelWithIcon', width: 60 },
-                                                        { 
+                                                        {
                                                             text: formatDate(customer.NgayTao),
                                                             style: 'dateText',
                                                             width: '*'
@@ -206,11 +247,11 @@ const exportTop3CustomersPDF = () => {
                                                 {
                                                     columns: [
                                                         { text: 'Loại KH:', style: 'labelWithIcon', width: 60 },
-                                                        { 
-                                                            text: customer.TongDonHang >= 10 ? 'VIP' : 
-                                                                  customer.TongDonHang >= 5 ? 'Thân thiết' : 'Thường',
-                                                            style: customer.TongDonHang >= 10 ? 'vipText' : 
-                                                                   customer.TongDonHang >= 5 ? 'loyalText' : 'normalText',
+                                                        {
+                                                            text: customer.TongDonHang >= 10 ? 'VIP' :
+                                                                customer.TongDonHang >= 5 ? 'Thân thiết' : 'Thường',
+                                                            style: customer.TongDonHang >= 10 ? 'vipText' :
+                                                                customer.TongDonHang >= 5 ? 'loyalText' : 'normalText',
                                                             width: '*'
                                                         }
                                                     ],
@@ -219,7 +260,7 @@ const exportTop3CustomersPDF = () => {
                                                 {
                                                     columns: [
                                                         { text: 'Hạng:', style: 'labelWithIcon', width: 60 },
-                                                        { 
+                                                        {
                                                             text: `${rank}/${top3Customers.value.length}`,
                                                             style: 'rankText',
                                                             width: '*'
@@ -237,7 +278,7 @@ const exportTop3CustomersPDF = () => {
                             background: rank <= 3 ? '#FAFAFA' : '#F8F8F8',
                             margin: [0, 5, 0, 5]
                         },
-                        
+
                         // Đường phân cách
                         {
                             canvas: [
@@ -283,15 +324,15 @@ const exportTop3CustomersPDF = () => {
                             ],
                             margin: [0, 0, 0, 20]
                         },
-                        
+
                         // Title
-                        { 
-                            text: 'BÁO CÁO TOP 3 KHÁCH HÀNG MUA NHIỀU NHẤT', 
+                        {
+                            text: 'BÁO CÁO TOP 3 KHÁCH HÀNG MUA NHIỀU NHẤT',
                             style: 'title',
                             margin: [0, 0, 0, 5]
                         },
-                        { 
-                            text: `Ngày xuất: ${formatDate(new Date())}`, 
+                        {
+                            text: `Ngày xuất: ${formatDate(new Date())}`,
                             style: 'dateInfo',
                             margin: [0, 0, 0, 20]
                         },
@@ -319,8 +360,8 @@ const exportTop3CustomersPDF = () => {
                                     width: '33.3%',
                                     stack: [
                                         { text: 'KHÁCH VIP', style: 'statLabel' },
-                                        { 
-                                            text: top3Customers.value.filter(c => c.TongDonHang >= 10).length.toString(), 
+                                        {
+                                            text: top3Customers.value.filter(c => c.TongDonHang >= 10).length.toString(),
                                             style: 'statNumber',
                                             color: '#f39c12'
                                         }
@@ -332,8 +373,8 @@ const exportTop3CustomersPDF = () => {
                         },
 
                         // Tiêu đề danh sách
-                        { 
-                            text: 'BẢNG XẾP HẠNG KHÁCH HÀNG XUẤT SẮC', 
+                        {
+                            text: 'BẢNG XẾP HẠNG KHÁCH HÀNG XUẤT SẮC',
                             style: 'sectionHeader',
                             margin: [0, 0, 0, 15]
                         },
@@ -344,16 +385,16 @@ const exportTop3CustomersPDF = () => {
                         // Phân tích và nhận xét
                         {
                             stack: [
-                                { 
-                                    text: 'PHÂN TÍCH & NHẬN XÉT', 
+                                {
+                                    text: 'PHÂN TÍCH & NHẬN XÉT',
                                     style: 'analysisHeader',
                                     margin: [0, 20, 0, 10]
                                 },
                                 {
                                     ul: [
                                         `Khách hàng số 1: ${top3Customers.value[0]?.TenKhachHang} với ${top3Customers.value[0]?.TongDonHang} đơn hàng`,
-                                        `Tổng đơn hàng của TOP 3: ${totalOrders} đơn (${Math.round(totalOrders/listCustomers.value.length*100)}% tổng khách hàng)`,
-                                        top3Customers.value.filter(c => c.TongDonHang >= 10).length > 0 ? 
+                                        `Tổng đơn hàng của TOP 3: ${totalOrders} đơn (${Math.round(totalOrders / listCustomers.value.length * 100)}% tổng khách hàng)`,
+                                        top3Customers.value.filter(c => c.TongDonHang >= 10).length > 0 ?
                                             `Có ${top3Customers.value.filter(c => c.TongDonHang >= 10).length} khách hàng VIP (≥10 đơn)` :
                                             'Chưa có khách hàng đạt mức VIP (≥10 đơn)'
                                     ],
@@ -377,44 +418,44 @@ const exportTop3CustomersPDF = () => {
                                     ],
                                     margin: [0, 20, 0, 10]
                                 },
-                                { 
-                                    text: 'Ghi chú: Danh sách được sắp xếp theo số lượng đơn hàng từ cao xuống thấp', 
+                                {
+                                    text: 'Ghi chú: Danh sách được sắp xếp theo số lượng đơn hàng từ cao xuống thấp',
                                     style: 'note',
                                     margin: [0, 0, 0, 5]
                                 },
-                                { 
-                                    text: `Thời gian xuất báo cáo: ${new Date().toLocaleString('vi-VN')}`, 
+                                {
+                                    text: `Thời gian xuất báo cáo: ${new Date().toLocaleString('vi-VN')}`,
                                     style: 'footer'
                                 }
                             ]
                         }
                     ],
                     styles: {
-                        header: { 
-                            fontSize: 20, 
-                            bold: true, 
+                        header: {
+                            fontSize: 20,
+                            bold: true,
                             alignment: 'center',
                             color: '#333'
                         },
-                        subheader: { 
-                            fontSize: 11, 
+                        subheader: {
+                            fontSize: 11,
                             alignment: 'center',
                             color: '#666',
                             margin: [0, 2, 0, 2]
                         },
-                        title: { 
-                            fontSize: 18, 
-                            bold: true, 
+                        title: {
+                            fontSize: 18,
+                            bold: true,
                             alignment: 'center',
                             color: '#2c3e50'
                         },
-                        dateInfo: { 
-                            fontSize: 12, 
+                        dateInfo: {
+                            fontSize: 12,
                             alignment: 'center',
                             color: '#7f8c8d'
                         },
-                        sectionHeader: { 
-                            fontSize: 16, 
+                        sectionHeader: {
+                            fontSize: 16,
                             bold: true,
                             color: '#34495e',
                             alignment: 'center',
@@ -511,13 +552,13 @@ const exportTop3CustomersPDF = () => {
                             color: '#2c3e50',
                             margin: [15, 0, 0, 0]
                         },
-                        note: { 
-                            fontSize: 9, 
+                        note: {
+                            fontSize: 9,
                             italics: true,
                             color: '#7f8c8d'
                         },
-                        footer: { 
-                            fontSize: 9, 
+                        footer: {
+                            fontSize: 9,
                             alignment: 'right',
                             color: '#95a5a6'
                         }
@@ -595,6 +636,9 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Email</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày tham gia</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tổng đơn hàng</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đơn đã hủy</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tình trạng</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                                 </tr>
                             </thead>
                             <tbody class="w-full">
@@ -621,6 +665,20 @@ onMounted(() => {
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
                                         :class="getNameClass(index)">
                                         {{ customer.TongDonHang }} đơn hàng
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
+                                        :class="getNameClass(index)">
+                                        {{ customer.TongDonHangDaHuy }} đơn hàng
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
+                                        :class="getNameClass(index)">
+                                        {{ customer.TinhTrangTaiKhoan }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
+                                        :class="getNameClass(index)">
+                                        <button @click="toggleAccount(customer.TinhTrangTaiKhoan, customer.MaKhachHang, customer.Email)"
+                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
+                                                class="fa-solid fa-repeat"></i></button>
                                     </td>
                                 </tr>
                             </tbody>
