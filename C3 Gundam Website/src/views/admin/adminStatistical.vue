@@ -6,8 +6,8 @@ import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import axios from "axios";
 import { Bar } from "vue-chartjs";
-import { Pie } from "vue-chartjs";
 import { Line } from "vue-chartjs";
+import { Doughnut } from "vue-chartjs";
 import {
     Chart as ChartJS,
     Title,
@@ -324,10 +324,10 @@ const fetchOrderStatusData = async () => {
                     label: "Số lượng đơn hàng",
                     data: data.map((item) => item.count),
                     backgroundColor: [
-                        "#DA70D6",
-                        "#36A2EB",
-                        "#FFCE56",
-                        "#4BC0C0",
+                        "#113F67",
+                        "#34699A",
+                        "#58A0C8",
+                        "#FDF5AA",
                         "rgba(5, 155, 255, 0.5)",
                     ],
                 },
@@ -363,12 +363,12 @@ const fetchFeedBackProducts = async () => {
                     data.toxicCount
                 ],
                 backgroundColor: [
-                    "#6495ED",
-                    "#40E0D0",
-                    "#7B68EE",
-                    "#EE82EE",
-                    "#FFFF00",
-                    "#DC143C"
+                    "#58A0C8",
+                    "#273F4F",
+                    "#447D9B",
+                    "#D7D7D7",
+                    "#0F828C",
+                    "#78B9B5"
                 ]
             }]
         };
@@ -856,7 +856,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center lg:flex-row flex-col gap-4">
                             <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
                                 Top sản phẩm bán chạy nhất
                             </h3>
@@ -999,7 +999,7 @@ onMounted(() => {
                             </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[250px] h-[250px] m-auto">
-                                    <Pie v-if="orderStatusChartData" :data="orderStatusChartData" />
+                                    <Doughnut v-if="orderStatusChartData" :data="orderStatusChartData" />
                                 </div>
                             </div>
                         </div>
@@ -1009,7 +1009,7 @@ onMounted(() => {
                             </h3>
                             <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                                 <div class="lg:w-[350px] lg:h-[350px] w-[200px] h-[200px] m-auto">
-                                    <Pie v-if="feedbackStatusChartData" :data="feedbackStatusChartData" />
+                                    <Doughnut v-if="feedbackStatusChartData" :data="feedbackStatusChartData" />
                                 </div>
                             </div>
                         </div>
