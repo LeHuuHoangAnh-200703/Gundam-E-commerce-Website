@@ -197,7 +197,7 @@ onMounted(() => {
                             <button @click="decreaseQuantity(cart)"
                                 class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">-</button>
                             <input id="quantity" name="total_amount" value="1" style="appearance: textfield;"
-                                type="number" min="1" v-model="cart.SoLuong"
+                                type="number" min="1" v-model="cart.SoLuong" readonly
                                 class="text-lg bg-transparent border-gray-600 text-white border-2 rounded-md font-semibold h-10 w-16 text-center" />
                             <button @click="increaseQuantity(cart)"
                                 class="w-[40px] h-[40px] bg-[#333] rounded-full text-white font-bold hover:bg-[#DB3F4C]">+</button>
