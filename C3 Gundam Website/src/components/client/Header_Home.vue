@@ -14,10 +14,14 @@ const imageCustomer = ref('');
 const nameCustomer = ref('');
 const emailCustomer = ref('');
 const idCustomer = ref('');
+const categories = ref([]);
+const showCategories = ref(false);
+
 const userInfo = ref({
     MaKhachHang: localStorage.getItem('MaKhachHang') || '',
 });
 const isLoggedIn = ref(!userInfo.value.MaKhachHang);
+
 const logout = async () => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
     try {
@@ -36,13 +40,31 @@ const logout = async () => {
     }
 };
 
-const order = () => {
-    const MaKhachHang = localStorage.getItem('MaKhachHang');
-    if (!MaKhachHang) {
-        router.push('/login');
-    } else {
-        router.push('/orders_history');
+const category = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/loaisanpham');
+        categories.value = response.data;
+        showCategories.value = !showCategories.value;
+    } catch (error) {
+        console.error("Lỗi khi lấy danh mục:", error);
     }
+}
+
+const goToCategory = (categoryId, categoryName, categoryType) => {
+    router.push({
+        path: '/seachResults',
+        query: { 
+            categoryId: categoryId,
+            categoryName: categoryName,
+            categoryType: categoryType
+        }
+    });
+    showCategories.value = false;
+}
+
+// Hàm để ẩn dropdown danh mục
+const hideCategories = () => {
+    showCategories.value = false;
 }
 
 const carts = () => {
@@ -203,6 +225,13 @@ onMounted(() => {
         menuUser.animate({ right: isOpen ? "-100%" : "20px" }, 400);
     });
 
+    // Ẩn dropdown khi click bên ngoài
+    $(document).click((e) => {
+        if (!$(e.target).closest('.category-dropdown, .category-button').length) {
+            showCategories.value = false;
+        }
+    });
+
     const maKhachHang = localStorage.getItem("MaKhachHang");
     fetchCarts(maKhachHang);
     fetchCustomer(maKhachHang);
@@ -223,9 +252,25 @@ onMounted(() => {
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
                         </div>
                     </li>
-                    <li class="group"><button @click.prevent="order">Đơn hàng</button>
+                    <li class="group relative">
+                        <button @click.prevent="category" class="category-button">Danh mục</button>
                         <div
                             class="h-[2px] bg-[#DB3F4C] scale-x-0 group-hover:scale-100 rounded-full transition-all ease-out origin-left duration-500">
+                        </div>
+                        <div v-if="showCategories" 
+                             class="category-dropdown absolute top-8 left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border z-50 max-h-80 overflow-y-auto">
+                            <div class="py-2">
+                                <div class="px-4 py-2 text-sm font-semibold text-gray-700 border-b">
+                                    Danh mục sản phẩm
+                                </div>
+                                <button 
+                                    v-for="category in categories" 
+                                    :key="category.MaLoaiSanPham"
+                                    @click="goToCategory(category.MaLoaiSanPham, category.TenLoaiSanPham, category.LoaiSanPham)"
+                                    class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#DB3F4C] transition-colors duration-200 flex items-center gap-3">
+                                    {{ category.TenLoaiSanPham }}
+                                </button>
+                            </div>
                         </div>
                     </li>
                     <li class="group"><button @click.prevent="voucher" to="/voucher">Giảm giá</button>
@@ -325,7 +370,7 @@ onMounted(() => {
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-house"></i> <router-link to="/">Trang chủ</router-link></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-bag-shopping"></i> <button @click.prevent="order">Đơn hàng</button></li>
+                        class="fa-solid fa-list"></i> <button @click.prevent="category">Danh mục</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-tags"></i> <button @click.prevent="voucher">Giảm giá</button></li>
                 <li class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
@@ -334,8 +379,20 @@ onMounted(() => {
                     class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
                         class="fa-solid fa-globe"></i> <router-link to="/login">Đăng nhập</router-link></li>
                 <li v-else class="group flex gap-3 items-center hover:text-[#DB3F4C] transition-all duration-300"><i
-                        class="fa-solid fa-globe"></i> <router-link to="/login">Đăng xuất</router-link></li>
+                        class="fa-solid fa-globe"></i> <button @click.prevent="logout">Đăng xuất</button></li>
             </ul>
+            <div v-if="showCategories" class="mt-6 bg-[#2A2F3A] rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-3 text-[18px]">Danh mục sản phẩm</h3>
+                <div class="flex flex-col gap-2">
+                    <button 
+                        v-for="category in categories" 
+                        :key="category.MaLoaiSanPham"
+                        @click="goToCategory(category.MaLoaiSanPham, category.TenLoaiSanPham, category.LoaiSanPham)"
+                        class="text-left py-2 text-white hover:text-[#DB3F4C] hover:bg-[#3A3F4A] rounded transition-all duration-200">
+                        {{ category.TenLoaiSanPham }}
+                    </button>
+                </div>
+            </div>
         </div>
         <div
             class="menuUser fixed top-20 -right-[100%] rounded-md backdrop-blur-sm bg-gradient-to-br from-white to-gray-50 z-50 border border-gray-200 shadow-2xl">

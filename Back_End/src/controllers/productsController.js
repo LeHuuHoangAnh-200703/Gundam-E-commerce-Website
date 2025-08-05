@@ -221,8 +221,28 @@ exports.findProductsWithName = async (req, res) => {
         TenSanPham: { $regex: keyword, $options: 'i' }
       }))
     };
+    
     const products = await Product.find(query);
-    return res.status(200).json(products);
+    
+    // Lấy dữ liệu inventory và supplier, productType giống như getAllProducts
+    const inventories = await Inventory.find();
+    
+    // Tạo Map để ánh xạ Mã Sản Phẩm -> Số lượng tồn kho
+    const inventoryMap = {};
+    inventories.forEach(inventory => {
+      inventoryMap[inventory.MaSanPham.toString()] = inventory.SoLuongTon;
+    });
+
+    // Kết hợp dữ liệu tồn kho với danh sách sản phẩm
+    const result = products.map(product => {
+      const productId = product.MaSanPham?.toString();
+      return {
+        ...product._doc,
+        SoLuong: inventoryMap[productId] || 0,
+      };
+    });
+
+    return res.status(200).json(result);
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }
