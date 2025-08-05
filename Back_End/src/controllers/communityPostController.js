@@ -157,73 +157,123 @@ exports.createCommunityPost = async (req, res) => {
 }
 
 const bannedWords = [
-  "ngu", "đần", "ngu dốt", "khốn nạn", "vô học", "đồ rác rưởi",
-  "thằng", "con", "mày", "đồ dốt", "đồ điên", "chết tiệt", "vô dụng",
-  "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại",
-  "địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc",
-  "đm nó", "con cat", "con cac", "con cặc", "con cặt", "m nó", "đồ cút", "thằng chó",
-  "con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "thằng chó",
-  "đồ chó", "đồ con chó", "đồ mạt hạng", "đồ vô học", "đồ khốn",
-  "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "thằng lừa đảo", "đồ thất đức",
-  "lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct",
-  "đ mày", "dmtt", "cmnr", "súc vật", "đồ súc vật", "con súc vật", "đồ thú vật", "đồ không người",
-  "thằng súc vật", "con thú", "đồ con thú", "đồ ngu si", "đồ đần độn",
-  "đồ khờ", "đồ ngốc", "đồ si", "đồ đại ngu", "đồ bị điên",
-  "đồ phá hoại", "đồ tàn phá", "đồ hủy hoại", "đồ tệ nạn",
-  "đồ quỷ", "đồ ma", "đồ ác quỷ", "đồ quỷ dữ", "đồ tà ma",
-  "đồ chết", "đồ chết tiệt", "đồ chết dở", "đồ chết đói",
-  "đồ nghiệp", "đồ tội lỗi", "đồ phạm tội", "đồ tội phạm",
-  "hạ đẳng", "đồ hạ đẳng", "đồ kém cỏi", "đồ thua kém", "đồ dở hơi",
-  "đồ mất dạy", "đồ vô giáo dục", "đồ thô lỗ", "đồ bất lịch sự",
-  "đồ vô văn hóa", "đồ man rợ", "đồ dã man", "đồ vô ý thức",
-  "đồ bệnh hoạn", "đồ tâm thần", "đồ điên loạn", "đồ rồ dại",
-  "đồ khùng", "đồ loạn trí", "đồ mất trí", "đồ rối loạn",
-  "đánh chết", "giết chết", "xử chết", "đập chết", "phá chết",
-  "bỏ chết", "hành hạ", "tra tấn", "hủy diệt", "tiêu diệt",
-  "mẹ mày", "bố mày", "cha mày", "tổ tiên mày", "dòng họ mày",
-  "nhà mày", "gia đình mày", "cả nhà mày", "cả dòng họ mày",
-  "wtf", "stfu", "kys", "gtfo", "pos", "sob", "mf", "bs",
-  "smh", "ffs", "omfg", "jfc", "damn", "hell", "crap", "shit",
-  "bitch", "asshole", "moron", "idiot", "stupid", "dumb",
-  "thằng ranh", "con ranh", "đồ ranh con", "thằng nhãi", "con nhãi",
-  "đồ nhãi", "thằng tồi", "con tồi", "đồ tồi", "thằng xấu",
-  "con xấu", "đồ xấu", "thằng ác", "con ác", "đồ ác",
-  "đồ vô tích sự", "đồ vô tác dụng", "đồ thừa thãi", "đồ vô nghĩa",
-  "đồ phí phạm", "đồ lãng phí", "đồ hại người", "đồ phá đám",
-  "đồ quấy rầy", "đồ làm phiền", "đồ gây rối", "đồ làm loạn",
-  "xấu xí", "ghê tởm", "kinh tởm", "thảm hại", "dị hợm",
-  "biến thái", "quái vật", "đồ quái vật", "thằng quái vật",
-  "con quái vật", "đồ dị dạng", "thằng dị dạng", "con dị dạng",
-  "loz", "lol", "wtf", "omg", "fck", "fcking", "damn it",
-  "go to hell", "shut up", "get lost", "piss off", "buzz off"
+    "ngu", "đần", "ngu dốt", "khốn nạn", "vô học", "đồ rác rưởi",
+    "thằng", "con", "mày", "đồ dốt", "đồ điên", "chết tiệt", "vô dụng",
+    "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại",
+    "địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc",
+    "đm nó", "con cat", "con cac", "con cặc", "con cặt", "m nó", "đồ cút", "thằng chó",
+    "con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "thằng chó",
+    "đồ chó", "đồ con chó", "đồ mạt hạng", "đồ vô học", "đồ khốn",
+    "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "thằng lừa đảo", "đồ thất đức",
+    "lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct",
+    "đ mày", "dmtt", "cmnr", "súc vật", "đồ súc vật", "con súc vật", "đồ thú vật", "đồ không người",
+    "thằng súc vật", "con thú", "đồ con thú", "đồ ngu si", "đồ đần độn",
+    "đồ khờ", "đồ ngốc", "đồ si", "đồ đại ngu", "đồ bị điên",
+    "đồ phá hoại", "đồ tàn phá", "đồ hủy hoại", "đồ tệ nạn",
+    "đồ quỷ", "đồ ma", "đồ ác quỷ", "đồ quỷ dữ", "đồ tà ma",
+    "đồ chết", "đồ chết tiệt", "đồ chết dở", "đồ chết đói",
+    "đồ nghiệp", "đồ tội lỗi", "đồ phạm tội", "đồ tội phạm",
+    "hạ đẳng", "đồ hạ đẳng", "đồ kém cỏi", "đồ thua kém", "đồ dở hơi",
+    "đồ mất dạy", "đồ vô giáo dục", "đồ thô lỗ", "đồ bất lịch sự",
+    "đồ vô văn hóa", "đồ man rợ", "đồ dã man", "đồ vô ý thức",
+    "đồ bệnh hoạn", "đồ tâm thần", "đồ điên loạn", "đồ rồ dại",
+    "đồ khùng", "đồ loạn trí", "đồ mất trí", "đồ rối loạn",
+    "đánh chết", "giết chết", "xử chết", "đập chết", "phá chết",
+    "bỏ chết", "hành hạ", "tra tấn", "hủy diệt", "tiêu diệt",
+    "mẹ mày", "bố mày", "cha mày", "tổ tiên mày", "dòng họ mày",
+    "nhà mày", "gia đình mày", "cả nhà mày", "cả dòng họ mày",
+    "wtf", "stfu", "kys", "gtfo", "pos", "sob", "mf", "bs",
+    "smh", "ffs", "omfg", "jfc", "damn", "hell", "crap", "shit",
+    "bitch", "asshole", "moron", "idiot", "stupid", "dumb",
+    "thằng ranh", "con ranh", "đồ ranh con", "thằng nhãi", "con nhãi",
+    "đồ nhãi", "thằng tồi", "con tồi", "đồ tồi", "thằng xấu",
+    "con xấu", "đồ xấu", "thằng ác", "con ác", "đồ ác",
+    "đồ vô tích sự", "đồ vô tác dụng", "đồ thừa thãi", "đồ vô nghĩa",
+    "đồ phí phạm", "đồ lãng phí", "đồ hại người", "đồ phá đám",
+    "đồ quấy rầy", "đồ làm phiền", "đồ gây rối", "đồ làm loạn",
+    "xấu xí", "ghê tởm", "kinh tởm", "thảm hại", "dị hợm",
+    "biến thái", "quái vật", "đồ quái vật", "thằng quái vật",
+    "con quái vật", "đồ dị dạng", "thằng dị dạng", "con dị dạng",
+    "loz", "wtf", "omg", "fck", "fcking", "damn it",
+    "go to hell", "shut up", "get lost", "piss off", "buzz off",
+    "rác", "rác rưởi", "đồ rác", "cực rác", "rác nhất", "rác thối",
+    "bãi rác", "như rác", "rác vãi", "rác vl", "rác vcl", "rác cc",
+    "shit product", "garbage", "trash", "waste of money", "piece of shit",
+    "crap quality", "fucking terrible", "damn awful", "bullshit",
+    "tồi tệ", "tồi tàn", "tồi bét", "tồi nhất", "cực tồi", "tồi vãi",
+    "tồi vl", "tồi vcl", "tồi cc", "tồi như", "tồi thế", "tồi quá",
+    "tệ hại", "tệ nhất", "cực tệ", "tệ vãi", "tệ vl", "tệ vcl",
+    "tệ cc", "tệ như", "tệ thế", "tệ quá", "tệ bạc", "tệ khủng",
+    "kém chất lượng", "chất lượng tệ", "chất lượng rác", "chất lượng thảm",
+    "chất lượng như", "chất lượng đéo", "chất lượng vl", "chất lượng cc",
+    "lừa đảo", "lừa khách", "lừa tiền", "lừa gạt", "lừa bịp",
+    "gian lận", "gian thương", "gian dối", "gian khổ", "gian manh",
+    "lừa đảo khách hàng", "lừa đảo tiền", "lừa đảo người mua",
+    "scam", "fraud", "fake", "counterfeit", "ripoff", "con",
+    "cheat", "cheater", "cheating", "dishonest", "deceptive",
+    "shop rác", "shop lừa đảo", "shop tệ", "shop đểu", "shop khốn",
+    "shop như", "shop vl", "shop cc", "shop vcl", "shop đm",
+    "seller rác", "seller lừa đảo", "seller tệ", "seller đểu",
+    "bán hàng rác", "bán hàng lừa đảo", "bán hàng tệ", "bán hàng như",
+    "chủ shop rác", "chủ shop lừa đảo", "chủ shop tệ", "chủ shop như",
+    "admin rác", "admin lừa đảo", "admin tệ", "admin như",
+    "đừng mua", "đừng tin", "đừng đặt", "đừng order", "đừng chọn",
+    "không nên mua", "không nên tin", "không nên đặt", "không nên order",
+    "tránh xa", "tránh mua", "tránh đặt", "tránh tin", "tránh shop",
+    "don't buy", "don't trust", "don't order", "avoid", "stay away",
+    "thua xa", "thua kém", "thua hết", "thua hoàn toàn", "thua đau",
+    "kém xa", "kém hơn", "kém nhiều", "kém hoàn toàn", "kém thảm",
+    "không bằng", "không đáng", "không xứng", "không tốt bằng",
+    "worse than", "inferior", "substandard", "below average", "pathetic",
+    "dịch vụ rác", "dịch vụ đéo",
+    "dịch vụ vl", "dịch vụ cc", "dịch vụ vcl", "dịch vụ đm",
+    "service rác", "service tệ", "service như", "service đéo",
+    "terrible service", "awful service", "shit service", "crap service",
+    "không xứng 1 sao", "thậm chí không có sao",
+    "zero stars", "negative stars", "doesn't deserve any stars",
+    "tẩy chay", "boycott", "blacklist", "đưa vào danh sách đen",
+    "không nên ủng hộ", "không nên tin tưởng", "không nên giao dịch",
+    "địt mẹ", "đm", "cc", "óc chó", "khốn nạn", "chó má", "cứt", "lồn",
+    "đĩ", "đéo", "vl", "vcl", "đù má", "ngu", "đần", "đít",
+    "cặc", "con mẹ", "thằng chó", "con đĩ", "mẹ kiếp", "đồ đểu", "súc vật",
+    "bố mày", "mẹ mày", "con khốn", "thằng khốn", "đồ điên", "mặt lồn",
+    "đụ má", "đụ mẹ", "con chó", "thằng điên", "mẹ nó", "đồ ngu", "mày chết",
+    "cút đi", "đồ dơ", "mặt chó", "láo toét", "đồ hãm", "con mặt lồn",
+    "thằng mặt cặc", "mẹ mày chết", "đồ rẻ rách", "thằng lồn", "con lồn",
+    "đồ thối", "mày tiêu", "câm mồm", "đồ mất dạy", "thằng mất dạy",
+    "con điên", "đồ khốn kiếp", "mặt đít", "đồ bẩn", "thằng hãm lồn",
+    "con cave", "đồ rác rưởi", "mày cút", "đồ bã đậu", "thằng đĩ đực",
+    "con đĩ mẹ", "mày ngu vl", "đồ con hoang", "thằng đéo ra gì",
+    "mặt mẹ mày", "đồ tởm", "cút mẹ mày đi", "đồ đần độn", "mày đéo xứng",
+    "thằng óc lợn", "con óc lợn", "đồ đê tiện", "mày chết đi", "đồ thất đức",
+    "thằng mặt thớt", "con mẹ nó", "đồ lừa đảo", "mày điên à", "đồ bần tiện",
+    "giả", "đểu", "dỏm", "cũ", "chẳng đẹp", "như rác", "như đồ chơi trẻ con", "vô dụng",
+    "như nhựa tái chế", "tệ hại", "lừa đảo", "như đồ nhái", "phế phẩm",
+    "hỏng", "chẳng ra gì", "quá tệ", "như đồ Trung Quốc", "như kẹo", "gây thất vọng"
 ];
 
 const containsBannedWords = (text) => {
   return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
 };
 
-const checkToxicContent = async (text) => {
-  try {
-    const response = await axios.post('http://localhost:5000/predict', { sentence: text });
-    const isToxic = response.data.prediction === 1;
-    return isToxic;
-  } catch (error) {
-    console.error('Error calling Flask API:', error.message);
-    return false;
-  }
-};
+// const checkToxicContent = async (text) => {
+//   try {
+//     const response = await axios.post('http://localhost:5000/predict', { sentence: text });
+//     const isToxic = response.data.prediction === 1;
+//     return isToxic;
+//   } catch (error) {
+//     console.error('Error calling Flask API:', error.message);
+//     return false;
+//   }
+// };
 
 exports.commentCommunityPost = async (req, res) => {
   const { MaKhachHang, NoiDungBinhLuan } = req.body;
 
-  const isToxic = await checkToxicContent(NoiDungBinhLuan);
-  const hasBannedWords = await containsBannedWords(NoiDungBinhLuan);
+  const isToxic = containsBannedWords(NoiDungBinhLuan);
+  // const hasBannedWords = await containsBannedWords(NoiDungBinhLuan);
 
   if (isToxic) {
-    return res
-      .status(400)
-      .json({ message: "Bình luận chứa nội dung không phù hợp!" });
-  } else if (hasBannedWords) {
     return res
       .status(400)
       .json({ message: "Bình luận chứa nội dung không phù hợp!" });
@@ -255,13 +305,9 @@ exports.commentCommunityPost = async (req, res) => {
 exports.replyComment = async (req, res) => {
   const { NoiDungBinhLuan } = req.body;
 
-  const isToxic = await checkToxicContent(NoiDungBinhLuan);
-  const hasBannedWords = containsBannedWords(NoiDungBinhLuan);
+  const isToxic = containsBannedWords(NoiDungBinhLuan);
+  // const hasBannedWords = containsBannedWords(NoiDungBinhLuan);
   if (isToxic) {
-    return res
-      .status(400)
-      .json({ message: "Bình luận chứa nội dung không phù hợp!" });
-  } else if (hasBannedWords) {
     return res
       .status(400)
       .json({ message: "Bình luận chứa nội dung không phù hợp!" });

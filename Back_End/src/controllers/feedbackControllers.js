@@ -56,14 +56,14 @@ exports.getFeedBack = async (req, res) => {
 
 const bannedWords = [
     "ngu", "đần", "ngu dốt", "khốn nạn", "vô học", "đồ rác rưởi",
-    "thằng", "con", "mày", "đồ dốt", "đồ điên", "chết tiệt", "vô dụng", 
+    "thằng", "con", "mày", "đồ dốt", "đồ điên", "chết tiệt", "vô dụng",
     "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại",
-    "địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc", 
-    "đm nó", "con cat", "con cac","con cặc", "con cặt" , "m nó", "đồ cút", "thằng chó", 
-    "con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "thằng chó", 
-    "đồ chó", "đồ con chó", "đồ mạt hạng", "đồ vô học", "đồ khốn", 
-    "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "thằng lừa đảo", "đồ thất đức", 
-    "lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct", 
+    "địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc",
+    "đm nó", "con cat", "con cac", "con cặc", "con cặt", "m nó", "đồ cút", "thằng chó",
+    "con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "thằng chó",
+    "đồ chó", "đồ con chó", "đồ mạt hạng", "đồ vô học", "đồ khốn",
+    "đồ tồi tệ", "đồ bẩn thỉu", "óc chó", "thằng lừa đảo", "đồ thất đức",
+    "lìn", "ln", "đụ", "đm mày", "đệch", "vãi cả chưởng", "đồ như ct",
     "đ mày", "dmtt", "cmnr", "súc vật", "đồ súc vật", "con súc vật", "đồ thú vật", "đồ không người",
     "thằng súc vật", "con thú", "đồ con thú", "đồ ngu si", "đồ đần độn",
     "đồ khờ", "đồ ngốc", "đồ si", "đồ đại ngu", "đồ bị điên",
@@ -130,29 +130,46 @@ const bannedWords = [
     "không xứng 1 sao", "thậm chí không có sao",
     "zero stars", "negative stars", "doesn't deserve any stars",
     "tẩy chay", "boycott", "blacklist", "đưa vào danh sách đen",
-    "không nên ủng hộ", "không nên tin tưởng", "không nên giao dịch"
-  ];
+    "không nên ủng hộ", "không nên tin tưởng", "không nên giao dịch",
+    "địt mẹ", "đm", "cc", "óc chó", "khốn nạn", "chó má", "cứt", "lồn",
+    "đĩ", "đéo", "vl", "vcl", "đù má", "ngu", "đần", "đít",
+    "cặc", "con mẹ", "thằng chó", "con đĩ", "mẹ kiếp", "đồ đểu", "súc vật",
+    "bố mày", "mẹ mày", "con khốn", "thằng khốn", "đồ điên", "mặt lồn",
+    "đụ má", "đụ mẹ", "con chó", "thằng điên", "mẹ nó", "đồ ngu", "mày chết",
+    "cút đi", "đồ dơ", "mặt chó", "láo toét", "đồ hãm", "con mặt lồn",
+    "thằng mặt cặc", "mẹ mày chết", "đồ rẻ rách", "thằng lồn", "con lồn",
+    "đồ thối", "mày tiêu", "câm mồm", "đồ mất dạy", "thằng mất dạy",
+    "con điên", "đồ khốn kiếp", "mặt đít", "đồ bẩn", "thằng hãm lồn",
+    "con cave", "đồ rác rưởi", "mày cút", "đồ bã đậu", "thằng đĩ đực",
+    "con đĩ mẹ", "mày ngu vl", "đồ con hoang", "thằng đéo ra gì",
+    "mặt mẹ mày", "đồ tởm", "cút mẹ mày đi", "đồ đần độn", "mày đéo xứng",
+    "thằng óc lợn", "con óc lợn", "đồ đê tiện", "mày chết đi", "đồ thất đức",
+    "thằng mặt thớt", "con mẹ nó", "đồ lừa đảo", "mày điên à", "đồ bần tiện",
+    "giả", "đểu", "dỏm", "cũ", "chẳng đẹp", "như rác", "như đồ chơi trẻ con", "vô dụng",
+    "như nhựa tái chế", "tệ hại", "lừa đảo", "như đồ nhái", "phế phẩm",
+    "hỏng", "chẳng ra gì", "quá tệ", "như đồ Trung Quốc", "như kẹo", "gây thất vọng"
+];
 
 const containsBannedWords = (text) => {
     return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
 };
 
-const checkToxicContent = async (text) => {
-    try {
-        const response = await axios.post('http://localhost:5000/predict', { sentence: text });
-        return response.data.prediction === 1;
-    } catch (error) {
-        console.error('Error calling Flask API:', error.message);
-    }
-};
+// const checkToxicContent = async (text) => {
+//     try {
+//         const response = await axios.post('http://localhost:5000/predict', { sentence: text });
+//         return response.data.prediction === 1;
+//     } catch (error) {
+//         console.error('Error calling Flask API:', error.message);
+//     }
+// };
 
 exports.createFeedBack = async (req, res) => {
-    const { 
-        maDonHang, 
-        maSanPham, 
-        maKhachHang, 
-        chatLuong, 
-        moTa, 
+    const {
+        maDonHang,
+        maSanPham,
+        maKhachHang,
+        chatLuong,
+        moTa,
         tenSanPham,
         loaiSanPham,
         hinhAnhSanPham,
@@ -160,24 +177,24 @@ exports.createFeedBack = async (req, res) => {
 
     try {
         // Kiểm tra xem sản phẩm đã được đánh giá chưa
-        const existingReview = await FeedBack.findOne({ 
+        const existingReview = await FeedBack.findOne({
             MaDonHang: maDonHang,
-            'SanPhamDaDanhGia.MaSanPham': maSanPham 
+            'SanPhamDaDanhGia.MaSanPham': maSanPham
         });
 
         if (existingReview) {
-            return res.status(400).json({ 
-                message: "Sản phẩm này đã được đánh giá rồi!" 
+            return res.status(400).json({
+                message: "Sản phẩm này đã được đánh giá rồi!"
             });
         }
 
         // Kiểm tra toxic content
         let isToxic = false;
         if (moTa && moTa.trim()) {
-            isToxic = await checkToxicContent(moTa);
-            if (!isToxic) {
-                isToxic = containsBannedWords(moTa);
-            }
+            isToxic = containsBannedWords(moTa);
+            // if (!isToxic) {
+            //     isToxic = containsBannedWords(moTa);
+            // }
         }
 
         // Xử lý upload hình ảnh
@@ -196,7 +213,7 @@ exports.createFeedBack = async (req, res) => {
                     stream.end(file.buffer);
                 });
             });
-            
+
             const imageUploadResults = await Promise.all(imageUploadPromises);
             uploadedImages = imageUploadResults.map(result => result.secure_url);
         }
@@ -219,19 +236,19 @@ exports.createFeedBack = async (req, res) => {
         await newReview.save();
 
         if (isToxic) {
-            return res.status(200).json({ 
-                message: "Đánh giá chứa từ ngữ không phù hợp, hệ thống sẽ tạm ẩn!" 
+            return res.status(200).json({
+                message: "Đánh giá chứa từ ngữ không phù hợp, hệ thống sẽ tạm ẩn!"
             });
         } else {
-            return res.status(200).json({ 
+            return res.status(200).json({
                 message: "Cảm ơn bạn đã góp ý về sản phẩm!",
-                review: newReview 
+                review: newReview
             });
         }
 
     } catch (err) {
-        return res.status(500).json({ 
-            message: "Có lỗi xảy ra khi đánh giá sản phẩm." 
+        return res.status(500).json({
+            message: "Có lỗi xảy ra khi đánh giá sản phẩm."
         });
     }
 };
@@ -285,7 +302,7 @@ exports.getOrderReviewStatus = async (req, res) => {
         const productsWithReviewStatus = donHang.SanPhamDaMua.map(product => {
             const isReviewed = reviewedProductIds.includes(product.MaSanPham);
             const review = isReviewed ? reviews.find(r => r.SanPhamDaDanhGia[0]?.MaSanPham === product.MaSanPham) : null;
-            
+
             return {
                 maSanPham: product.MaSanPham,
                 tenSanPham: product.TenSanPham,
