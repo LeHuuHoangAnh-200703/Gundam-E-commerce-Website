@@ -344,13 +344,13 @@ onUnmounted(() => {
                                     class="fa-solid fa-magnifying-glass absolute top-2 lg:top-3 right-3 text-[22px] text-[#003171]"></i>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 w-full lg:w-auto">
-                            <button @click="toggleGlobalScan"
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full lg:w-auto">
+                            <!-- <button @click="toggleGlobalScan"
                                 :class="isGlobalScanEnabled ? 'bg-green-600' : 'bg-gray-600'"
                                 class="text-white font-bold rounded py-3 px-4 flex justify-center items-center">
                                 <i class="fa-solid fa-globe"></i>
                                 <p class="text-[14px] ml-2">{{ isGlobalScanEnabled ? 'Quét ON' : 'Quét OFF' }}</p>
-                            </button>
+                            </button> -->
                             <router-link to="/admin/listEntryForms"
                                 class="bg-[#003171] text-white font-bold rounded py-3 px-4 flex justify-center items-center">
                                 <i class="fa-solid fa-plus"></i>
@@ -367,11 +367,11 @@ onUnmounted(() => {
                             </button>
                         </div>
                     </div>
-                    <div v-if="isGlobalScanEnabled" class="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded">
+                    <!-- <div v-if="isGlobalScanEnabled" class="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded">
                         <i class="fa-solid fa-info-circle mr-2"></i>
                         Chế độ quét toàn cục đang BẬT. Bạn có thể quét mã barcode bất kỳ lúc nào.
                         <span v-if="barcodeBuffer" class="ml-2 font-mono">{{ barcodeBuffer }}</span>
-                    </div>
+                    </div> -->
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
                             <thead class="bg-[#1A1D27] text-white">

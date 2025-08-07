@@ -163,7 +163,6 @@ onMounted(() => {
                             </div>
                             <p class="font-semibold text-[14px]">Áp dụng với đơn: <span class="text-[#DB3F4C]">{{
                                 formatCurrency(discountCode.GiaApDung) }} <span class="text-[14px] relative -top-[2px] underline">đ</span></span></p>
-                            <p class="font-semibold text-[14px]">Số lần sử dụng: {{ discountCode.SoLanSuDung }}</p>
                         </div>
                         <button @click.prevent="saveDiscountCode(discountCode.IdMaGiamGia)"
                             class="w-[40px] h-[40px] border-2 border-[#1A1D27] flex justify-center items-center self-end rounded-lg hover:border-[#DB3F4C] hover:bg-[#DB3F4C] transition-all duration-300 group"><i

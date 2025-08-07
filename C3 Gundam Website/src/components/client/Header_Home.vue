@@ -311,7 +311,7 @@ onMounted(() => {
                             cartLists.length }}</span>
                 </button>
                 <button v-if="!isLoggedIn" class="open-info">
-                    <img :src="imageCustomer"
+                    <img :src="!imageCustomer ? '/src/assets/img/avatar.jpg' : imageCustomer"
                         class="w-10 h-10 rounded-full object-cover ring-4 ring-blue-500/20 shadow-lg" alt="">
                 </button>
                 <button v-else @click.prevent="checkLogin">
