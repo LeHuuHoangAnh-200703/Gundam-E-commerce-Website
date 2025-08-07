@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
@@ -38,6 +38,10 @@ const formData = ref({
     removedImages: [],  // Lưu các URL của hình ảnh bị xóa
 });
 
+const barcodeBuffer = ref("");
+const barcodeTimeout = ref(null);
+const isGlobalScanEnabled = ref(true);
+
 const notification = ref({
     message: '',
     type: ''
@@ -47,6 +51,45 @@ const showNotification = (msg, type) => {
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const onDecode = (barcodeValue) => {
+    if (!barcodeValue) {
+        return;
+    }
+    
+    formData.value.barcode = barcodeValue;
+    
+    if (errors.value.barcode) {
+        delete errors.value.barcode;
+    }
+};
+
+const handleGlobalKeyPress = (event) => {
+    if (!isGlobalScanEnabled.value) return;
+    
+    if (event.target.tagName === 'INPUT' || 
+        event.target.tagName === 'TEXTAREA' || 
+        event.target.tagName === 'SELECT') {
+        return;
+    }
+    
+    if (event.key === 'Enter') {
+        if (barcodeBuffer.value.trim()) {
+            onDecode(barcodeBuffer.value);
+            barcodeBuffer.value = "";
+        }
+        return;
+    }
+    
+    if (event.key.length === 1) {
+        barcodeBuffer.value += event.key;
+        
+        clearTimeout(barcodeTimeout.value);
+        barcodeTimeout.value = setTimeout(() => {
+            barcodeBuffer.value = "";
+        }, 100);
+    }
 };
 
 const handleFileUpload = (event) => {
@@ -241,7 +284,20 @@ onMounted(() => {
     fetchProduct(idSanPham);
     fetchSuppliers();
     fetchProductType();
+    
+    // Thêm event listener cho quét toàn cục
+    document.addEventListener('keypress', handleGlobalKeyPress);
 })
+
+onUnmounted(() => {
+    // Xóa event listener
+    document.removeEventListener('keypress', handleGlobalKeyPress);
+    
+    // Clear timeout nếu có
+    if (barcodeTimeout.value) {
+        clearTimeout(barcodeTimeout.value);
+    }
+});
 </script>
 
 <template>

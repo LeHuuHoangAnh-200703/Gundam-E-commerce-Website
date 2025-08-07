@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick, onUnmounted } from "vue";
 import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -36,15 +37,59 @@ const formData = ref({
     barcode: ''
 });
 
+const barcodeBuffer = ref("");
+const barcodeTimeout = ref(null);
+const isGlobalScanEnabled = ref(true);
+
 const notification = ref({
     message: '',
     type: ''
 });
+
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
         notification.value.message = '';
     }, 3000);
+};
+
+const onDecode = (barcodeValue) => {
+    if (!barcodeValue) {
+        return;
+    }
+    
+    formData.value.barcode = barcodeValue;
+    
+    if (errors.value.barcode) {
+        delete errors.value.barcode;
+    }
+};
+
+const handleGlobalKeyPress = (event) => {
+    if (!isGlobalScanEnabled.value) return;
+    
+    if (event.target.tagName === 'INPUT' || 
+        event.target.tagName === 'TEXTAREA' || 
+        event.target.tagName === 'SELECT') {
+        return;
+    }
+    
+    if (event.key === 'Enter') {
+        if (barcodeBuffer.value.trim()) {
+            onDecode(barcodeBuffer.value);
+            barcodeBuffer.value = "";
+        }
+        return;
+    }
+    
+    if (event.key.length === 1) {
+        barcodeBuffer.value += event.key;
+        
+        clearTimeout(barcodeTimeout.value);
+        barcodeTimeout.value = setTimeout(() => {
+            barcodeBuffer.value = "";
+        }, 100);
+    }
 };
 
 const fetchSuppliers = async () => {
@@ -157,7 +202,7 @@ const addProduct = async () => {
         formData.value.images.forEach(image => {
             dataToSend.append('Images', image);
         });
-        console.log(dataToSend)
+
         const response = await axios.post('http://localhost:3000/api/sanpham', dataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -177,11 +222,8 @@ const addProduct = async () => {
             router.push('/admin/adminProducts');
         }, 3000);
     } catch (err) {
-        showNotification(err.response?.data?.message || "Thêm sản phẩm thất bại!", "success");
+        showNotification(err.response?.data?.message || "Thêm sản phẩm thất bại!", "error");
     }
-    setTimeout(() => {
-        notification.value.message = '';
-    }, 3000);
 }
 
 const imageUrls = computed(() => {
@@ -195,7 +237,20 @@ const removeImage = (index) => {
 onMounted(() => {
     fetchSuppliers();
     fetchProductType();
-})
+    
+    // Thêm event listener cho quét toàn cục
+    document.addEventListener('keypress', handleGlobalKeyPress);
+});
+
+onUnmounted(() => {
+    // Xóa event listener
+    document.removeEventListener('keypress', handleGlobalKeyPress);
+    
+    // Clear timeout nếu có
+    if (barcodeTimeout.value) {
+        clearTimeout(barcodeTimeout.value);
+    }
+});
 </script>
 
 <template>
@@ -301,7 +356,7 @@ onMounted(() => {
                                             <label for="barcode" class="text-[15px] font-semibold">Mã Barcode</label>
                                             <input type="text" v-model="formData.barcode" id="barcode"
                                                 class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full focus:ring focus:ring-[#1A1D27]"
-                                                placeholder="Nhập mã barcode sản phẩm ...">
+                                                placeholder="Nhập mã barcode ...">
                                             <p v-if="errors.barcode" class="text-red-500 text-sm mt-2">{{
                                                 errors.barcode }}</p>
                                         </div>
@@ -344,7 +399,7 @@ onMounted(() => {
                                         </label>
                                         <p v-if="errors.images" class="text-red-500 text-sm mt-2">{{ errors.images }}
                                         </p>
-                                        <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 1 hình ảnh. Hãy chú ý đến
+                                        <p class="text-gray-500 text-sm">Bạn cần thêm ít nhất 4 hình ảnh. Hãy chú ý đến
                                             chất lượng của các bức ảnh bạn thêm, tuân thủ các tiêu chuẩn về màu nền.</p>
                                     </div>
                                     <div class="flex justify-center lg:justify-end">
