@@ -9,6 +9,5 @@ router.get("/trangthaidonhang", statisticalController.getOrderStatus);
 router.get("/topluotban", statisticalController.getTopSellingProducts);
 router.get("/danhgiasanpham", statisticalController.getFeedBackProducts);
 router.get("/nhapxuatton/:maSanPham", statisticalController.getEnterWarehouse);
-router.get("/loinhuan", statisticalController.getMonthlyProfit);
 
 module.exports = router;

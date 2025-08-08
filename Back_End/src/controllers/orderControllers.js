@@ -391,38 +391,61 @@ exports.cancelOrder = async (req, res) => {
 exports.updatedStatus = async (req, res) => {
     const { maDonHang } = req.params;
     const { newStatus } = req.body;
+    
     try {
+        // Lấy thông tin đơn hàng hiện tại
+        const currentOrder = await Order.findOne({ MaDonHang: maDonHang });
+        
+        if (!currentOrder) {
+            return res.status(404).json({ message: 'Đơn hàng không tìm thấy.' });
+        }
+
+        // Lưu trạng thái cũ
+        const oldStatus = currentOrder.TrangThaiDon;
+
+        // Cập nhật trạng thái đơn hàng
         const updatedOrder = await Order.findOneAndUpdate(
             { MaDonHang: maDonHang },
             { TrangThaiDon: newStatus },
             { new: true }
         );
 
-        if (!updatedOrder) {
-            return res.status(404).json({ message: 'Đơn hàng không tìm thấy.' });
+        // Nếu trạng thái mới là "Đã trả hàng", cộng lại số lượng vào kho
+        if (newStatus === 'Đã trả hàng' && oldStatus !== 'Đã trả hàng') {
+            for (const sp of updatedOrder.SanPhamDaMua) {
+                // Cộng lại số lượng vào kho
+                const inventory = await Inventory.findOne({ MaSanPham: sp.MaSanPham });
+                if (inventory) {
+                    inventory.SoLuongTon += sp.SoLuong;
+                    await inventory.save();
+                }
+
+                // Trừ số lượt bán của sản phẩm
+                const product = await Product.findOne({ MaSanPham: sp.MaSanPham });
+                if (product) {
+                    product.LuotBan = Math.max(0, (product.LuotBan || 0) - sp.SoLuong);
+                    await product.save();
+                }
+            }
+            
+            console.log(`Đã cộng lại số lượng vào kho cho đơn hàng ${maDonHang}`);
         }
 
-        res.status(200).json(updatedOrder);
+        res.status(200).json({
+            success: true,
+            order: updatedOrder,
+            message: `Cập nhật trạng thái đơn hàng thành công.`
+        });
+
     } catch (error) {
         console.error("Error updating order status: ", error);
-        res.status(500).json({ message: 'Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.',
+            error: error.message 
+        });
     }
 };
-
-// //Kiểm tra xem đã đánh giá chưa
-// exports.checkOrderReviewed = async (req, res) => {
-//     const { maDonHang } = req.params;
-//     try {
-//         const idDonHang = await Feedback.findOne({ MaDonHang: maDonHang });
-//         if (idDonHang) {
-//             return res.status(200).json({ results: true });
-//         } else {
-//             return res.status(200).json({ results: false });
-//         }
-//     } catch (err) {
-//         return res.status(500).json({ message: "Có lỗi xảy ra." });
-//     }
-// }
 
 //Kiểm tra đơn hàng theo ngày, tháng, năm
 exports.getOrderByDayMonth = async (req, res) => {

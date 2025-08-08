@@ -118,7 +118,8 @@ const fetchStatistical = async () => {
         orders.value = ordersArray.filter(
             (order) =>
                 order.TrangThaiDon !== "Đã giao thành công" &&
-                order.TrangThaiDon !== "Đơn hàng đã hủy"
+                order.TrangThaiDon !== "Đơn hàng đã hủy" &&
+                order.TrangThaiDon !== "Đã trả hàng"
         );
     } catch (err) {
         console.log("Error fetching: ", err);
@@ -177,6 +178,7 @@ const chartOptions = ref({
     },
 });
 
+const totalRevenueYear = ref("");
 const fetchRevenueData = async (year) => {
     if (year > new Date().getFullYear()) {
         showNotification("Năm tìm kiếm không hợp lệ!", "error");
@@ -189,7 +191,7 @@ const fetchRevenueData = async (year) => {
         const response = await axios.get(
             `http://localhost:3000/api/thongke/donhangtheonam?year=${year}`
         );
-
+        totalRevenueYear.value = response.data.tongDoanhThu
         chartData.value = {
             labels: response.data.labels,
             datasets: [
@@ -411,7 +413,6 @@ const fetchEnterWarehouse = async (maSanPham, year, month) => {
 
     try {
         const response = await axios.get(`http://localhost:3000/api/thongke/nhapxuatton/${maSanPham}?year=${year}&month=${month}`);
-        console.log(response.data);
         listWarehouse.value = response.data;
         const product = listProducts.value.find(p => p.MaSanPham === maSanPham);
         selectedNameProduct.value = product.TenSanPham;
@@ -973,18 +974,6 @@ onMounted(() => {
                                         {{ formatCurrency(totalRevenueMonth.toString()) }}
                                         <span class="text-[24px] relative -top-[2px] underline">đ</span>
                                     </p>
-                                    <p class="text-[14px] font-semibold text-gray-600">Tổng đơn hàng: <span
-                                            class="text-[16px] text-green-700">{{ monthlyProfit.soDonHang }}</span></p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-[14px] font-semibold text-gray-600">Tổng lợi nhuận</p>
-                                    <p class="text-[24px] font-bold text-green-700">
-                                        {{ formatCurrencySale(monthlyProfit.loiNhuan) }}
-                                        <span class="text-[24px] relative -top-[2px] underline">đ</span>
-                                    </p>
-                                    <p class="text-[12px] text-gray-500">
-                                        Tỷ lệ: {{ monthlyProfit.tyLeLoiNhuan }}
-                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -1022,6 +1011,17 @@ onMounted(() => {
                             <input type="number" v-model="selectedYear" min="2000" max="2100"
                                 class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full lg:w-[200px] focus:ring focus:ring-[#1A1D27]"
                                 @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
+                        </div>
+                        <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng doanh thu</p>
+                                    <p class="text-[24px] font-bold">
+                                        {{ formatCurrency(totalRevenueYear.toString()) }}
+                                        <span class="text-[24px] relative -top-[2px] underline">đ</span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                             <Line v-if="chartData" :data="chartData" :options="chartOptions" />

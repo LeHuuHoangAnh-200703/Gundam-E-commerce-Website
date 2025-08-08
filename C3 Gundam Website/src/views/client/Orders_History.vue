@@ -18,7 +18,7 @@ const options = [
         icon: "fa-solid fa-wallet"
     },
     {
-        name: "Đang chờ lấy hàng",
+        name: "Đã xác nhận đơn",
         icon: "fa-solid fa-box"
     },
     {
@@ -31,7 +31,7 @@ const options = [
     },
     {
         name: "Đơn hàng đã hủy",
-        icon: "fa-solid fa-trash"
+        icon: "fa-solid fa-times-circle"
     },
 ]
 
@@ -142,59 +142,6 @@ const deleteOrder = async (maDonHang) => {
     });
 }
 
-const updatedStatus = async (maDonHang, currentStatus) => {
-    const statusOrder = ["Đang chờ xác nhận", "Đang chờ lấy hàng", "Đã được chuyển đi", "Đã nhận được hàng", "Đã giao thành công"];
-    const currentIndex = statusOrder.indexOf(currentStatus);
-
-    if (currentIndex === -1 || currentIndex >= statusOrder.length - 1) {
-        showNotification("Trạng thái đơn hàng không hợp lệ hoặc đã ở trạng thái cuối cùng.", "error");
-        setTimeout(() => {
-            notification.value.message = '';
-        }, 3000);
-        return;
-    }
-
-    const newStatus = statusOrder[currentIndex + 1];
-
-    showConfirmDialog({
-        title: 'Thông báo xác nhận',
-        message: 'Bạn có chắc chắn nhận được đơn hàng chưa, nếu đã nhận được hãy xác nhận nhé?',
-        type: 'success',
-        confirmText: 'Đã nhận được',
-        cancelText: 'Hủy bỏ',
-        onConfirm: async () => {
-            try {
-                const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
-                    newStatus: newStatus,
-                });
-
-                await createNotification(`Đơn hàng của ${tenKhachHang} đã được giao thành công!`);
-
-                await fetchOrders(maKhachHang);
-            } catch (err) {
-                console.error("Error updating status:", err);
-            }
-        }
-    });
-};
-
-// const checkOrderReviewed = async (idDonHang) => {
-//     try {
-//         const response = await axios.get(`http://localhost:3000/api/donhang/kiemtradanhgia/${idDonHang}`)
-//         if (response.data.results) {
-//             showNotification("Bạn đã đánh giá đơn hàng này rồi.", "error");
-//             setTimeout(() => {
-//                 notification.value.message = '';
-//             }, 3000);
-//             return;
-//         } else {
-//             router.push(`/feedback/${idDonHang}`)
-//         }
-//     } catch (err) {
-//         console.log("Error fetching orderReviewed:", err);
-//     }
-// }
-
 const selectedType = ref("");
 const selectTypeOrders = (type) => {
     selectedType.value = type;
@@ -304,14 +251,7 @@ onMounted(() => {
                             :class="order.TrangThaiDon === 'Đang chờ xác nhận' ? 'block' : 'hidden'"
                             class="bg-[#DB3F4C] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Hủy đơn
                             hàng</button>
-                        <button @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
-                            :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'block' : 'hidden'"
-                            class="bg-[#008B8B] px-5 py-2 rounded-md text-white self-end w-auto mt-4">Đã nhận được
-                            hàng</button>
                     </div>
-                    <p :class="order.TrangThaiDon === 'Đã được chuyển đi' ? 'block' : 'hidden'"
-                        class="font-medium text-white text-center lg:text-end mt-3">Vui lòng chỉ xác nhận khi bạn đã
-                        nhận được hàng.</p>
                 </div>
             </div>
             <EmtyState v-else icon="fa-bag-shopping" title="Chưa có đơn hàng nào"

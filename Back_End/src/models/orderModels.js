@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
   HinhThucVanChuyen: String,
   TrangThaiThanhToan: String,
   TransactionId: String,
-  TrangThaiDon: { type: String, enum: ['Đơn hàng đã hủy' ,'Đang chờ xác nhận', 'Đang chờ lấy hàng', 'Đã được chuyển đi', 'Đã nhận được hàng', 'Đã giao thành công'], default: 'Đang chờ xác nhận' },
+  TrangThaiDon: { type: String, enum: ['Đơn hàng đã hủy' ,'Đang chờ xác nhận', 'Đã xác nhận đơn', 'Đã được chuyển đi', 'Đã giao thành công', 'Đã trả hàng'], default: 'Đang chờ xác nhận' },
 });
 
 function generateMaDonHang() {

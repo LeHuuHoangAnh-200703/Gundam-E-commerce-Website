@@ -22,7 +22,7 @@ const options = [
         icon: "fa-solid fa-wallet"
     },
     {
-        name: "Đang chờ lấy hàng",
+        name: "Đã xác nhận đơn",
         icon: "fa-solid fa-box"
     },
     {
@@ -30,16 +30,16 @@ const options = [
         icon: "fa-solid fa-truck-fast"
     },
     {
-        name: "Đã nhận được hàng",
-        icon: "fa-solid fa-thumbs-up"
-    },
-    {
         name: "Đã giao thành công",
         icon: "fa-solid fa-circle-check"
     },
     {
+        name: "Đã trả hàng",
+        icon: "fa-solid fa-rotate-left"
+    },
+    {
         name: "Đơn hàng đã hủy",
-        icon: "fa-solid fa-trash"
+        icon: "fa-solid fa-times-circle"
     },
 ]
 
@@ -49,6 +49,7 @@ const searchValue = ref("");
 const filterYear = ref("");
 const filterMonth = ref("");
 const filterDay = ref("");
+const refreshKey = ref(0); // Thêm key để force re-render
 const years = Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() - i).toString());
 const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
 const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
@@ -91,9 +92,18 @@ const fetchOrders = async () => {
             }
         })
 
-        const ordersNormal = listOrders.value.filter(order => order.TrangThaiDon !== 'Đơn hàng đã hủy');
-        const ordersLost = listOrders.value.filter(order => order.TrangThaiDon === 'Đơn hàng đã hủy');
-        listOrders.value = [...ordersNormal.sort((a, b) => b.NgayDatHang - a.NgayDatHang), ...ordersLost.sort((a, b) => b.NgayDatHang - a.NgayDatHang)];
+        // Sắp xếp: đơn bình thường trước, đơn đã hủy/trả hàng sau
+        const ordersNormal = listOrders.value.filter(order => 
+            order.TrangThaiDon !== 'Đã trả hàng' && order.TrangThaiDon !== 'Đơn hàng đã hủy'
+        );
+        const ordersSpecial = listOrders.value.filter(order => 
+            order.TrangThaiDon === 'Đã trả hàng' || order.TrangThaiDon === 'Đơn hàng đã hủy'
+        );
+        
+        listOrders.value = [
+            ...ordersNormal.sort((a, b) => b.NgayDatHang - a.NgayDatHang), 
+            ...ordersSpecial.sort((a, b) => b.NgayDatHang - a.NgayDatHang)
+        ];
     } catch (err) {
         console.log("Error fetching: ", err);
     }
@@ -130,28 +140,48 @@ const handleDialogClose = () => {
     dialogState.value.visible = false;
 };
 
-const updatedStatus = async (maDonHang, currentStatus) => {
-    const currentIndex = options.findIndex(option => option.name === currentStatus);
-    const nextIndex = currentIndex + 1;
-
-    if (currentStatus === "Đã giao thành công") {
-        showNotification("Trạng thái đơn hàng đã ở trạng thái cuối cùng!", "error");
-        return;
+// Hàm lấy danh sách trạng thái có thể cập nhật
+const getAvailableStatuses = (currentStatus) => {
+    // Danh sách tất cả trạng thái (bỏ "Tất cả đơn hàng")
+    const allStatuses = options.filter(option => option.name !== "Tất cả đơn hàng");
+    
+    switch (currentStatus) {
+        case "Đang chờ xác nhận":
+            // Từ "Đang chờ xác nhận" có thể chuyển thành các trạng thái tiếp theo
+            return allStatuses.filter(status => 
+                ["Đã xác nhận đơn"].includes(status.name)
+            );
+            
+        case "Đã xác nhận đơn":
+            // Có thể tới và lui với "Đã được chuyển đi", có thể quay về "Đang chờ xác nhận"
+            return allStatuses.filter(status => 
+                ["Đã được chuyển đi", "Đã giao thành công", "Đã trả hàng"].includes(status.name)
+            );
+            
+        case "Đã được chuyển đi":
+            // Có thể tới và lui với "Đã xác nhận đơn"
+            return allStatuses.filter(status => 
+                ["Đã xác nhận đơn", "Đã giao thành công", "Đã trả hàng"].includes(status.name)
+            );
+            
+        case "Đã giao thành công":
+            return [];
+            
+        case "Đã trả hàng":
+            return [];
+            
+        case "Đơn hàng đã hủy":
+            return [];
+            
+        default:
+            return [];
     }
+};
 
-    if (options[nextIndex]?.name === "Đơn hàng đã hủy") {
-        showNotification("Không thể cập nhật trạng thái đơn hàng đã hủy!", "error");
-        return;
-    }
-
-    if (nextIndex >= options.length) {
-        showNotification("Trạng thái đơn hàng đã ở trạng thái cuối cùng!", "error");
-        return;
-    }
-
-    const newStatus = options[nextIndex].name;
-
-    // Sử dụng dialog với props
+// Hàm xử lý thay đổi trạng thái
+const handleStatusChange = (maDonHang, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
+    
     showConfirmDialog({
         title: 'Thông báo xác nhận',
         message: `Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng từ "${currentStatus}" thành "${newStatus}" không?`,
@@ -163,10 +193,20 @@ const updatedStatus = async (maDonHang, currentStatus) => {
                 const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
                     newStatus: newStatus,
                 });
-                await fetchOrders();
+                
+                // Cập nhật trạng thái trực tiếp trong mảng để tránh phải fetch lại toàn bộ
+                const orderIndex = listOrders.value.findIndex(order => order.MaDonHang === maDonHang);
+                if (orderIndex !== -1) {
+                    listOrders.value[orderIndex].TrangThaiDon = newStatus;
+                    // Force reactivity update
+                    listOrders.value = [...listOrders.value];
+                    refreshKey.value++; // Tăng refreshKey để force re-render
+                }
+                
                 showNotification("Cập nhật trạng thái đơn hàng thành công!", "success");
             } catch (err) {
                 showNotification("Lỗi khi cập nhật trạng thái đơn hàng!", "error");
+                console.error("Error updating order status:", err);
             }
         }
     });
@@ -185,12 +225,16 @@ const fetchOrderByDayMonth = async () => {
             NgayDatHang: new Date(order.NgayDatHang)
         }));
 
-        const ordersNormal = listOrders.value.filter(order => order.TrangThaiDon !== 'Đơn hàng đã hủy');
-        const ordersLost = listOrders.value.filter(order => order.TrangThaiDon === 'Đơn hàng đã hủy');
+        const ordersNormal = listOrders.value.filter(order => 
+            order.TrangThaiDon !== 'Đã trả hàng' && order.TrangThaiDon !== 'Đơn hàng đã hủy'
+        );
+        const ordersSpecial = listOrders.value.filter(order => 
+            order.TrangThaiDon === 'Đã trả hàng' || order.TrangThaiDon === 'Đơn hàng đã hủy'
+        );
 
         listOrders.value = [
             ...ordersNormal.sort((a, b) => b.NgayDatHang - a.NgayDatHang),
-            ...ordersLost.sort((a, b) => b.NgayDatHang - a.NgayDatHang)
+            ...ordersSpecial.sort((a, b) => b.NgayDatHang - a.NgayDatHang)
         ];
     } catch (err) {
         console.log("Lỗi khi lọc đơn hàng", err);
@@ -205,6 +249,7 @@ const exportOrderToPDF = async (order) => {
         type: 'info',
         confirmText: 'Xuất hóa đơn',
         cancelText: 'Hủy bỏ',
+
         onConfirm: async () => {
             try {
                 // Tính thành tiền cho từng sản phẩm
@@ -381,7 +426,7 @@ onMounted(() => {
                             </div>
                             <div v-if="filteredOrders.length > 0"
                                 class="flex flex-col gap-8 overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-[calc(100vh-180px)]">
-                                <div v-for="(order, index) in filteredOrders" :key="index"
+                                <div v-for="(order) in filteredOrders" :key="`${order.MaDonHang}-${refreshKey}`"
                                     class="bg-white p-4 w-full border-2 rounded-lg shadow-lg flex flex-col gap-4">
                                     <div
                                         class="flex flex-col lg:flex-row items-center justify-center lg:justify-between">
@@ -457,16 +502,42 @@ onMounted(() => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex justify-center lg:justify-end gap-4 items-center">
-                                        <button :class="(order.TrangThaiDon === 'Đơn hàng đã hủy') ? 'hidden' : 'block'"
+                                    <div class="flex flex-col lg:flex-row justify-center lg:justify-end gap-4 items-center" :key="`actions-${order.MaDonHang}-${refreshKey}`">
+                                        <button :class="(order.TrangThaiDon === 'Đã trả hàng' || order.TrangThaiDon === 'Đơn hàng đã hủy') ? 'hidden' : 'block'"
                                             @click="exportOrderToPDF(order)"
                                             class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#003171] transition-all duration-300 hover:bg-[#1A1D27]">Xuất
                                             hóa đơn</button>
-                                        <button
-                                            :class="(order.TrangThaiDon === 'Đã được chuyển đi') ? 'hidden' : 'block'"
-                                            @click="updatedStatus(order.MaDonHang, order.TrangThaiDon)"
-                                            class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] transition-all duration-300 hover:bg-[#003171]">{{
-                                                order.TrangThaiDon }}</button>
+                                        
+                                        <!-- Dropdown chọn trạng thái -->
+                                        <div v-if="getAvailableStatuses(order.TrangThaiDon).length > 0" class="relative">
+                                            <select 
+                                                @change="handleStatusChange(order.MaDonHang, order.TrangThaiDon, $event.target.value)"
+                                                class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-[#1A1D27] hover:bg-[#003171] transition-all duration-300 outline-none cursor-pointer min-w-[200px]"
+                                                :key="`select-${order.MaDonHang}-${refreshKey}`"
+                                            >
+                                                <option :value="order.TrangThaiDon" selected disabled>
+                                                    {{ order.TrangThaiDon }}
+                                                </option>
+                                                <option 
+                                                    v-for="status in getAvailableStatuses(order.TrangThaiDon)" 
+                                                    :key="status.name" 
+                                                    :value="status.name"
+                                                    class="bg-white text-black"
+                                                >
+                                                    {{ status.name }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Hiển thị thông báo khi không thể thay đổi trạng thái -->
+                                        <div v-else-if="order.TrangThaiDon === 'Đã trả hàng'" class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-orange-500">
+                                            Đã trả hàng
+                                        </div>
+                                        
+                                        <!-- Hiển thị thông báo cho đơn hàng đã hủy -->
+                                        <div v-else-if="order.TrangThaiDon === 'Đơn hàng đã hủy'" class="px-5 py-2 rounded-md font-semibold text-white text-[14px] bg-red-500">
+                                            Đơn hàng đã hủy
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -498,5 +569,14 @@ onMounted(() => {
 .active-link {
     background: #DB3F4C;
     color: white;
+}
+
+/* Custom styling for select dropdown */
+select option {
+    padding: 8px 12px;
+}
+
+select option:hover {
+    background-color: #f3f4f6;
 }
 </style>

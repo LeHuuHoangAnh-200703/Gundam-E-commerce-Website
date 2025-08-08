@@ -462,50 +462,66 @@ exports.resetPassword = async (req, res) => {
 }
 
 exports.hiddenAccount = async (req, res) => {
-  const { TrangThai } = req.body;
+  const { TrangThai, LyDoKhoa } = req.body;
+  
   try {
     const customer = await Customer.findOne({ MaKhachHang: req.params.maKhachHang });
     if (!customer) {
       return res.status(400).json({ message: "Tài khoản không tồn tại." });
     }
+    
     customer.TinhTrangTaiKhoan = TrangThai;
+    
+    if (TrangThai === 'Vô hiệu hóa' && LyDoKhoa) {
+      customer.LyDoKhoa = LyDoKhoa;
+    } else if (TrangThai === 'Đang sử dụng') {
+      customer.LyDoKhoa = null;
+    }
+    
     await customer.save();
-    return res.status(200).json({ message: "Vô hiệu hóa tài khoản thành công." });
+    
+    return res.status(200).json({ 
+      message: TrangThai === 'Vô hiệu hóa' ? "Vô hiệu hóa tài khoản thành công." : "Kích hoạt tài khoản thành công.",
+      reason: LyDoKhoa || null
+    });
+    
   } catch (error) {
-    return res.status(500).json({ message: "Lỗi khi vô hiệu hóa.", error: error.message });
+    return res.status(500).json({ message: "Lỗi khi cập nhật trạng thái.", error: error.message });
   }
-}
+};
 
 exports.sendEmail = async (req, res) => {
   const email = req.query.email;
+  const { customerName, reason } = req.body;
+  
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Thông báo quan trọng từ C3 GUNDAM STORE",
       html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #d32f2f;">Thông báo tạm khóa tài khoản</h2>
-                    
-                    <p>Kính gửi Quý khách hàng,</p>
-                    
-                    <p>Chúng tôi rất tiếc phải thông báo rằng tài khoản của bạn tại <strong>C3 GUNDAM STORE</strong> đã bị tạm khóa do phát hiện hành vi hủy đơn hàng quá nhiều lần.</p>
-                    
-                    <p><strong>Lý do:</strong> Việc hủy đơn hàng liên tục ảnh hưởng đến quy trình vận hành và dịch vụ của chúng tôi.</p>
-                    
-                    <p><strong>Để khôi phục tài khoản:</strong></p>
-                    <ul>
-                        <li>Vui lòng liên hệ bộ phận chăm sóc khách hàng</li>
-                        <li>Email: c3gundamstore@gmail.com</li>
-                        <li>Hotline: 079-965-8592</li>
-                    </ul>
-                    
-                    <p>Chúng tôi mong muốn tiếp tục phục vụ bạn trong tương lai.</p>
-                    
-                    <p>Trân trọng,<br>
-                    <strong>Đội ngũ C3 GUNDAM STORE</strong></p>
-                </div>
-            `,
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #d32f2f;">Thông báo tạm khóa tài khoản</h2>
+            
+            <p>Kính gửi ${customerName},</p>
+            
+            <p>Chúng tôi rất tiếc phải thông báo rằng tài khoản của bạn tại <strong>C3 GUNDAM STORE</strong> đã bị tạm khóa.</p>
+            
+            <p><strong>Lý do:</strong> ${reason}</p>
+            
+            <p><strong>Để khôi phục tài khoản:</strong></p>
+            <ul>
+                <li>Vui lòng liên hệ bộ phận chăm sóc khách hàng</li>
+                <li>Email: c3gundamstore@gmail.com</li>
+                <li>Hotline: 079-965-8592</li>
+            </ul>
+            
+            <p>Chúng tôi mong muốn tiếp tục phục vụ bạn trong tương lai.</p>
+            
+            <p>Trân trọng,<br>
+            <strong>Đội ngũ C3 GUNDAM STORE</strong></p>
+        </div>
+      `,
     };
 
     await transporter.sendMail(mailOptions);

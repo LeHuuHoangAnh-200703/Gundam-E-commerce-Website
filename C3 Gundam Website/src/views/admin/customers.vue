@@ -12,11 +12,19 @@ pdfMake.vfs = pdfFonts;
 
 const listCustomers = ref([]);
 const searchValue = ref('');
-
+const showReasonDialog = ref(false);
+const selectedReason = ref('');
+const currentCustomer = ref(null);
 const notification = ref({
     message: '',
     type: ''
 });
+const listReasons = ref([
+    { value: 'cancel_orders', title: 'Hủy đơn hàng liên tục' },
+    { value: 'fake_info', title: 'Đăng bài với thông tin không phù hợp nhiều lần' },
+    { value: 'payment_fraud', title: 'Đánh giá với từ ngữ thiếu văn minh' },
+    { value: 'abuse_system', title: 'Ý kiến từ khách hàng' }
+]);
 
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
@@ -81,45 +89,99 @@ const fetchCustomers = async () => {
     }
 }
 
-const toggleAccount = async (newStatus, maKhachHang, email) => {
-    showConfirmDialog({
-        title: 'Thông báo xác nhận',
-        message: 'Bạn có chắc chắn về việc cập nhật trạng thái này không?',
-        type: 'info',
-        confirmText: 'Cập nhật',
-        cancelText: 'Hủy bỏ',
-        onConfirm: async () => {
-            const nextStatus = newStatus === 'Đang sử dụng' ? 'Vô hiệu hóa' : 'Đang sử dụng';
+const toggleAccount = async (newStatus, maKhachHang, email, customer) => {
+    const nextStatus = newStatus === 'Đang sử dụng' ? 'Vô hiệu hóa' : 'Đang sử dụng';
+
+    if (nextStatus === 'Vô hiệu hóa') {
+        currentCustomer.value = {
+            ...customer,
+            maKhachHang,
+            email,
+            currentStatus: newStatus
+        };
+        selectedReason.value = '';
+        showReasonDialog.value = true;
+    } else {
+        showConfirmDialog({
+            title: 'Kích hoạt tài khoản',
+            message: `Bạn có chắc chắn muốn kích hoạt tài khoản "${customer.TenKhachHang}" không?`,
+            type: 'success',
+            confirmText: 'Kích hoạt',
+            cancelText: 'Hủy bỏ',
+            onConfirm: async () => {
+                await performAccountUpdate(newStatus, maKhachHang, email, customer.TenKhachHang, null);
+            }
+        });
+    }
+};
+
+const handleReasonSubmit = async () => {
+    if (!selectedReason.value) {
+        return;
+    }
+
+    const reasonText = listReasons.value.find(r => r.value === selectedReason.value)?.title || selectedReason.value;
+    showReasonDialog.value = false;
+
+    await performAccountUpdate(
+        currentCustomer.value.currentStatus,
+        currentCustomer.value.maKhachHang,
+        currentCustomer.value.email,
+        currentCustomer.value.TenKhachHang,
+        reasonText
+    );
+};
+
+const performAccountUpdate = async (currentStatus, maKhachHang, email, tenKhachHang, lyDoKhoa) => {
+    const nextStatus = currentStatus === 'Đang sử dụng' ? 'Vô hiệu hóa' : 'Đang sử dụng';
+
+    try {
+        const requestData = { TrangThai: nextStatus };
+        if (lyDoKhoa) {
+            requestData.LyDoKhoa = lyDoKhoa;
+        }
+
+        const response = await axios.patch(
+            `http://localhost:3000/api/khachhang/tinhtrangtaikhoan/${maKhachHang}`,
+            requestData
+        );
+
+        if (currentStatus === 'Đang sử dụng' && nextStatus === 'Vô hiệu hóa') {
             try {
-                const response = await axios.patch(`http://localhost:3000/api/khachhang/tinhtrangtaikhoan/${maKhachHang}`, {
-                    TrangThai: nextStatus,
+                await axios.post(`http://localhost:3000/api/khachhang/guimail?email=${email}`, {
+                    customerName: tenKhachHang,
+                    reason: lyDoKhoa
                 });
-
-                if (newStatus === 'Đang sử dụng' && nextStatus === 'Vô hiệu hóa') {
-                    try {
-                        await axios.post(`http://localhost:3000/api/khachhang/guimail?email=${email}`);
-                    } catch (emailError) {
-                        console.error('Lỗi khi gửi email:', emailError);
-                    }
-                }
-
-                const TenAdmin = localStorage.getItem("TenAdmin");
-                const ThoiGian = new Date();
-
-                const notificationData = {
-                    ThongBao: `Vừa cập nhật trạng thái ${maKhachHang} từ ${newStatus} sang ${nextStatus}`,
-                    NguoiChinhSua: TenAdmin,
-                    ThoiGian: ThoiGian,
-                };
-
-                await axios.post('http://localhost:3000/api/thongbao', notificationData);
-                await fetchCustomers();
-                showNotification("Cập nhật trạng thái thành công!", "success");
-            } catch (error) {
-                console.error('Error updating order status:', error);
+            } catch (emailError) {
+                console.error('Lỗi khi gửi email:', emailError);
             }
         }
-    });
+
+        const TenAdmin = localStorage.getItem("TenAdmin");
+        const notificationData = {
+            ThongBao: `Vừa cập nhật trạng thái ${tenKhachHang} từ ${currentStatus} sang ${nextStatus}${lyDoKhoa ? ` - Lý do: ${lyDoKhoa}` : ''}`,
+            NguoiChinhSua: TenAdmin,
+            ThoiGian: new Date(),
+        };
+
+        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        await fetchCustomers();
+
+        const message = nextStatus === 'Vô hiệu hóa'
+            ? `Đã khóa tài khoản "${tenKhachHang}" thành công!`
+            : `Đã kích hoạt tài khoản "${tenKhachHang}" thành công!`;
+        showNotification(message, "success");
+
+    } catch (error) {
+        console.error('Error updating account status:', error);
+        showNotification("Lỗi khi cập nhật trạng thái tài khoản!", "error");
+    }
+};
+
+const closeReasonDialog = () => {
+    showReasonDialog.value = false;
+    selectedReason.value = '';
+    currentCustomer.value = null;
 };
 
 const findNameCustomers = computed(() => {
@@ -127,7 +189,7 @@ const findNameCustomers = computed(() => {
         return listCustomers.value;
     }
     return listCustomers.value.filter(customer => {
-        return customer.TenKhachHang.toLowerCase().includes(searchValue.value);
+        return customer.TenKhachHang.toLowerCase().includes(searchValue.value.toLowerCase());
     })
 });
 
@@ -564,7 +626,6 @@ const exportTop3CustomersPDF = () => {
                         }
                     }
                 };
-
                 const fileName = `BaoCao_Top3KhachHang_${new Date().toISOString().split('T')[0]}.pdf`;
                 pdfMake.createPdf(docDefinition).download(fileName);
                 showNotification('Xuất báo cáo TOP 3 khách hàng thành công!', 'success');
@@ -676,13 +737,68 @@ onMounted(() => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
                                         :class="getNameClass(index)">
-                                        <button @click="toggleAccount(customer.TinhTrangTaiKhoan, customer.MaKhachHang, customer.Email)"
+                                        <button
+                                            @click="toggleAccount(customer.TinhTrangTaiKhoan, customer.MaKhachHang, customer.Email, customer)"
                                             class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
                                                 class="fa-solid fa-repeat"></i></button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div v-if="showReasonDialog" @click="closeReasonDialog"
+                        class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div @click.stop
+                            class="bg-white backdrop-blur-sm rounded-2xl border border-gray-600/30 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fadeInUp">
+
+                            <div class="p-6 pb-4 border-b border-gray-600/30 flex-shrink-0">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="font-bold text-xl flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-all duration-200">
+                                            <i class="fa-solid fa-ban text-red-500"></i>
+                                        </div>
+                                        Khóa tài khoản: {{ currentCustomer?.TenKhachHang }}
+                                    </h2>
+                                    <button @click="closeReasonDialog"
+                                        class="w-10 h-10 rounded-full bg-red-500/20 hover:bg-red-500/30 text-[#DC143C] transition-all duration-200 flex items-center justify-center">
+                                        <i class="fa-solid fa-times text-lg"></i>
+                                    </button>
+                                </div>
+                                <hr class="my-4 border-gray-600/30">
+                                <div class="flex flex-col items-start gap-4">
+                                    <div class="mb-2">
+                                        <p class="text-[18px] font-semibold mb-1">Thông tin khách hàng:</p>
+                                        <p class="text-[14px]">Mã khách hàng: <span class="font-semibold">{{ currentCustomer?.maKhachHang }}</span>
+                                        </p>
+                                        <p class="text-[14px]">Email: <span class="font-semibold">{{ currentCustomer?.email }}</span></p>
+                                    </div>
+                                    <div class="w-full">
+                                        <p class="text-[18px] font-semibold mb-3">Chọn lý do khóa tài khoản:
+                                        </p>
+                                        <div class="space-y-3">
+                                            <div class="flex gap-3 items-center hover:bg-gray-600/20 p-2 rounded-lg transition-all duration-200"
+                                                v-for="(reason, index) in listReasons" :key="index">
+                                                <input type="radio"
+                                                    class="cursor-pointer w-4 h-4 text-red-600 border-2 border-gray-400 focus:ring-red-500"
+                                                    :id="reason.value" :value="reason.value" v-model="selectedReason">
+                                                <label :for="reason.value"
+                                                    class="font-medium text-[16px] cursor-pointer flex-1 select-none">
+                                                    {{ reason.title }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end items-center mt-6 pt-4 border-t border-gray-600/30">
+                                    <button @click="handleReasonSubmit" :disabled="!selectedReason"
+                                        class="px-5 py-2 rounded-md text-white transition-all duration-200 flex items-center gap-2"
+                                        :class="selectedReason ? 'bg-[#DC143C] hover:bg-[#DC143C]/70' : 'bg-gray-500/50 cursor-not-allowed'">
+                                        Khóa tài khoản
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <NotificationAdmin :message="notification.message" :type="notification.type" />

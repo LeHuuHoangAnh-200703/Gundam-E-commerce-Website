@@ -191,7 +191,7 @@ exports.createFeedBack = async (req, res) => {
         // Kiểm tra toxic content
         let isToxic = false;
         if (moTa && moTa.trim()) {
-            isToxic = containsBannedWords(moTa);
+            isToxic = await checkToxicContent(moTa);
             if (!isToxic) {
                 isToxic = containsBannedWords(moTa);
             }

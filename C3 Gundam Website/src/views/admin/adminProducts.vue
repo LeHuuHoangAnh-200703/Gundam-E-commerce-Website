@@ -101,21 +101,22 @@ const fetchProductType = async () => {
 }
 
 const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
+    const nextStatus = newStatus === 'Đang bán' ? 'Ngừng kinh doanh' : 'Đang bán';
+    
     showConfirmDialog({
         title: 'Thông báo xác nhận',
-        message: 'Bạn có chắc chắn về việc cập nhật trạng thái này không?',
+        message: `Bạn có chắc chắn muốn cập nhật trạng thái từ "${newStatus}" sang "${nextStatus}" không?`,
         type: 'info',
         confirmText: 'Cập nhật',
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
-            const nextStatus = newStatus === 'Đang bán' ? 'Ngừng kinh doanh' : 'Đang bán';
             try {
                 const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`, {
                     TrangThai: nextStatus,
                 });
 
                 const notificationData = {
-                    ThongBao: `Vừa cập nhật trạng thái ${tenSanPham}`,
+                    ThongBao: `Vừa cập nhật trạng thái ${tenSanPham} từ "${newStatus}" sang "${nextStatus}"`,
                     NguoiChinhSua: TenAdmin,
                     ThoiGian: ThoiGian,
                 };
