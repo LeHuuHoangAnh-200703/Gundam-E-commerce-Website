@@ -57,6 +57,20 @@ exports.getAllCustomers = async (req, res) => {
       },
     ]);
 
+    const returnedOrders = await Order.aggregate([
+      {
+        $match: {
+          TrangThaiDon: "Đã trả hàng"
+        }
+      },
+      {
+        $group: {
+          _id: "$MaKhachHang",
+          TongDonHangDaTra: { $sum: 1 },
+        },
+      },
+    ]);
+
     // Ánh xạ lại orders thành object để truy vấn nhanh hơn
     const orderMap = {};
     orders.forEach(order => {
@@ -68,11 +82,17 @@ exports.getAllCustomers = async (req, res) => {
       cancelledOrderMap[order._id] = order.TongDonHangDaHuy;
     });
 
+    const returnedOrderMap = {};
+    returnedOrders.forEach(order => {
+      returnedOrderMap[order._id] = order.TongDonHangDaTra;
+    });
+
     const customersWithOrders = customers.map(customer => {
       return {
         ...customer.toObject(),
         TongDonHang: orderMap[customer.MaKhachHang] || 0,
         TongDonHangDaHuy: cancelledOrderMap[customer.MaKhachHang] || 0,
+        TongDonHangDaTra: returnedOrderMap[customer.MaKhachHang] || 0,
       };
     });
 

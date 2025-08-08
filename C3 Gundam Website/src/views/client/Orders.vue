@@ -639,8 +639,7 @@ watch(() => formData.value.discountCode, () => {
                                                     v-for="(discountCode, index) in discountCodeWithCustomer.filter((dc) => new Date(dc.NgayHetHan) >= new Date())"
                                                     :key="index" :value="discountCode.IdMaGiamGia"
                                                     class="text-[#333] cursor-pointer">
-                                                    Id Mã: {{ discountCode.IdMaGiamGia }} / Tên mã:
-                                                    {{ discountCode.TenMaGiamGia }} / Giảm:
+                                                    {{ discountCode.TenMaGiamGia }} /Giá áp dụng: {{ formatCurrency(discountCode.GiaApDung) }} đ  / Giảm:
                                                     {{
                                                         discountCode.GiamTien
                                                             ? `${formatCurrency(discountCode.GiamTien)} đ`

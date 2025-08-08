@@ -30,13 +30,6 @@ const products = ref([]);
 const listProducts = ref([]);
 const orders = ref([]);
 const feedbacks = ref([]);
-const monthlyProfit = ref({
-    loiNhuan: 0,
-    loiNhuanFormatted: "0",
-    doanhThuFormatted: "0",
-    tyLeLoiNhuan: "0%",
-    soDonHang: 0
-});
 
 const notification = ref({
     message: '',
@@ -252,34 +245,6 @@ const chartDayOptions = ref({
     },
 });
 
-//function fetch lợi nhuận
-const fetchMonthlyProfit = async (year, month) => {
-    try {
-        let url = "http://localhost:3000/api/thongke/loinhuan";
-
-        if (year && month) {
-            url += `?year=${year}&month=${month}`;
-        } else if (year) {
-            url += `?year=${year}`;
-        }
-
-        const response = await axios.get(url);
-
-        if (response.data.success) {
-            monthlyProfit.value = response.data.data;
-        }
-    } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu lợi nhuận:", error);
-        monthlyProfit.value = {
-            loiNhuan: 0,
-            loiNhuanFormatted: "0",
-            doanhThuFormatted: "0",
-            tyLeLoiNhuan: "0%",
-            soDonHang: 0
-        };
-    }
-};
-
 const fetchRevenueDay = async (year, month) => {
     if (year > new Date().getFullYear()) {
         showNotification("Năm tìm kiếm không hợp lệ!", "error");
@@ -306,7 +271,6 @@ const fetchRevenueDay = async (year, month) => {
                 },
             ],
         };
-        await fetchMonthlyProfit(year, month);
     } catch (err) {
         console.error("Lỗi khi lấy dữ liệu doanh thu theo ngày:", err);
     }
@@ -329,8 +293,8 @@ const fetchOrderStatusData = async () => {
                         "#113F67",
                         "#34699A",
                         "#58A0C8",
-                        "#FDF5AA",
-                        "rgba(5, 155, 255, 0.5)",
+                        "#D7D7D7",
+                        "#465C88",
                     ],
                 },
             ],
@@ -389,7 +353,6 @@ const fetchTopSellingProducts = async () => {
                 ...product,
             };
         });
-        console.log(listSelling.value)
     } catch (err) {
         console.log("Error fetching sellings products:", err);
     }
@@ -787,7 +750,6 @@ onMounted(() => {
     fetchFeedBackProducts();
     fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
     fetchTopSellingProducts();
-    fetchMonthlyProfit();
 });
 </script>
 
@@ -903,7 +865,7 @@ onMounted(() => {
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
                                 <select v-model="selectedProduct"
                                     @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
+                                    class="p-2 border-2 border-[#333] rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full">
                                     <option disabled value="">Chọn sản phẩm</option>
                                     <option v-for="(product, index) in listProducts" :key="index"
                                         :value="product.MaSanPham">
@@ -912,7 +874,7 @@ onMounted(() => {
                                 </select>
                                 <select v-model="filterYear"
                                     @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
+                                    class="p-2 border-2 border-[#333] rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full">
                                     <option disabled value="">Chọn năm</option>
                                     <option v-for="year in selectedYearProduct" :key="year" :value="year">
                                         Năm {{ year }}
@@ -920,7 +882,7 @@ onMounted(() => {
                                 </select>
                                 <select v-model="filterMonth"
                                     @change="fetchEnterWarehouse(selectedProduct, filterYear, filterMonth)"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full focus:ring focus:ring-[#1A1D27]">
+                                    class="p-2 border-2 border-[#333] rounded-md text-[14px] outline-none font-semibold lg:w-1/3 w-full">
                                     <option disabled value="">Chọn tháng</option>
                                     <option v-for="month in selectedMonthProduct" :key="month" :value="month">
                                         Tháng {{ month }}
@@ -950,12 +912,12 @@ onMounted(() => {
                             </h3>
                             <div class="flex items-center gap-4 flex-col lg:flex-row w-full">
                                 <input type="number" v-model="selectedYearofDay" min="2000" max="2100"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-[200px] w-full focus:ring focus:ring-[#1A1D27]"
+                                    class="p-2 border-2 border-[#333] rounded-md text-[14px] outline-none font-semibold lg:w-[200px] w-full"
                                     @change="
                                         fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)
                                         " placeholder="Nhập năm ..." />
                                 <select v-model="selectedMonthOfDay"
-                                    class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold lg:w-[150px] w-full focus:ring focus:ring-[#1A1D27]"
+                                    class="p-2 border-2 border-[#333] rounded-md text-[14px] outline-none font-semibold lg:w-[150px] w-full"
                                     @change="
                                         fetchRevenueDay(selectedYearofDay, selectedMonthOfDay)
                                         ">
@@ -1009,7 +971,7 @@ onMounted(() => {
                                 Thống kê doanh thu theo năm
                             </h3>
                             <input type="number" v-model="selectedYear" min="2000" max="2100"
-                                class="p-2 border-2 rounded-md text-[14px] outline-none font-semibold w-full lg:w-[200px] focus:ring focus:ring-[#1A1D27]"
+                                class="p-2 border-2 border-[#333] rounded-md text-[14px] outline-none font-semibold w-full lg:w-[200px]"
                                 @change="fetchRevenueData(selectedYear)" placeholder="Nhập năm ..." />
                         </div>
                         <div class="flex flex-col gap-1 p-4 rounded-md shadow bg-white border-2">

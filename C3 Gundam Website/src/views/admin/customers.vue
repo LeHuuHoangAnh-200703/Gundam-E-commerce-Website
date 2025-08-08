@@ -21,8 +21,9 @@ const notification = ref({
 });
 const listReasons = ref([
     { value: 'cancel_orders', title: 'Hủy đơn hàng liên tục' },
+    { value: 'return_orders', title: 'Trả hàng liên tục' },
     { value: 'fake_info', title: 'Đăng bài với thông tin không phù hợp nhiều lần' },
-    { value: 'payment_fraud', title: 'Đánh giá với từ ngữ thiếu văn minh' },
+    { value: 'payment_fraud', title: 'Đánh giá với từ ngữ thiếu văn minh nhiều lần' },
     { value: 'abuse_system', title: 'Ý kiến từ khách hàng' }
 ]);
 
@@ -637,17 +638,37 @@ const exportTop3CustomersPDF = () => {
     });
 };
 
-const getRowClass = (index) => {
+// Hàm kiểm tra khách hàng có số đơn trả lại cao (>5)
+const isHighReturnCustomer = (customer) => {
+    return customer.TongDonHangDaTra > 5;
+};
+
+const getRowClass = (index, customer) => {
+    if (isHighReturnCustomer(customer)) {
+        return 'bg-red-100 border-red-200';
+    }
+
     if (index === 0) return 'bg-[#F0F8FF]';
     if (index === 1) return 'bg-[#F0FFFF]';
     if (index === 2) return 'bg-orange-50';
     return '';
 };
 
-const getNameClass = (index) => {
+const getNameClass = (index, customer) => {
+    if (isHighReturnCustomer(customer)) {
+        return 'bg-red-100 border-red-200';
+    }
+
     if (index === 0) return 'font-bold text-[#007FFF]';
     if (index === 1) return 'font-bold text-[#01796F]';
     if (index === 2) return 'font-bold text-[#A52A2A]';
+    return '';
+};
+
+const getTextClass = (customer) => {
+    if (isHighReturnCustomer(customer)) {
+        return 'text-red-600 font-medium';
+    }
     return '';
 };
 
@@ -698,49 +719,61 @@ onMounted(() => {
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Ngày tham gia</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tổng đơn hàng</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đơn đã hủy</th>
+                                    <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Đơn đã trả</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Tình trạng</th>
                                     <th scope="col" class="px-6 py-4 font-semibold text-[12px]">Điều chỉnh</th>
                                 </tr>
                             </thead>
                             <tbody class="w-full">
                                 <tr class="border-t border-slate-500" v-for="(customer, index) in findNameCustomers"
-                                    :key="index" :class="getRowClass(index)">
+                                    :key="index" :class="getRowClass(index, customer)">
                                     <td class="px-6 py-4 font-medium text-gray-900 text-[14px]">
-                                        <span :class="getNameClass(index)" class="rounded-full font-bold">
+                                        <span :class="getNameClass(index, customer)" class="rounded-full font-bold">
                                             {{ index + 1 }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">
+                                    <td class="px-6 py-4 font-medium text-[12px]" :class="getTextClass(customer)">
                                         {{ customer.MaKhachHang }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
-                                        :class="getNameClass(index)">
+                                        :class="getNameClass(index, customer)">
                                         {{ customer.TenKhachHang }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
+                                        :class="getTextClass(customer)">
                                         {{ customer.Email }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
+                                        :class="getTextClass(customer)">
                                         {{ formatDate(customer.NgayTao) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
-                                        :class="getNameClass(index)">
+                                        :class="getNameClass(index, customer)">
                                         {{ customer.TongDonHang }} đơn hàng
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
-                                        :class="getNameClass(index)">
+                                        :class="getTextClass(customer)">
                                         {{ customer.TongDonHangDaHuy }} đơn hàng
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
-                                        :class="getNameClass(index)">
-                                        {{ customer.TinhTrangTaiKhoan }}
+                                        :class="isHighReturnCustomer(customer) ? 'text-red-700 font-bold bg-red-50' : getTextClass(customer)">
+                                        <div class="flex items-center justify-center gap-1">
+                                            {{ customer.TongDonHangDaTra }} đơn hàng
+                                            <i v-if="isHighReturnCustomer(customer)" 
+                                               class="fa-solid fa-exclamation-triangle text-red-600 text-sm" 
+                                               title="Cảnh báo: Khách hàng có nhiều đơn trả lại"></i>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis"
-                                        :class="getNameClass(index)">
+                                        :class="getTextClass(customer)">
+                                        {{ customer.TinhTrangTaiKhoan }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                         <button
                                             @click="toggleAccount(customer.TinhTrangTaiKhoan, customer.MaKhachHang, customer.Email, customer)"
-                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap"><i
-                                                class="fa-solid fa-repeat"></i></button>
+                                            class="inline-block text-white font-medium bg-[#003171] py-2 px-4 rounded-md transition-all duration-300 hover:bg-[#1c5ab2] whitespace-nowrap">
+                                            <i class="fa-solid fa-repeat"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
