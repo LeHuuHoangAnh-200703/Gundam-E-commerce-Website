@@ -34,6 +34,7 @@ const nameCustomer = ref('');
 const emailCustomer = ref('');
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
+const discountCodeWithCustomer = ref([]);
 const totalProductPrice = ref(0); // Giá sản phẩm gốc
 const finalProductPrice = ref(0); // Giá sản phẩm sau giảm
 const discountAmount = ref(0); // Số tiền giảm
@@ -146,17 +147,81 @@ watch([selectedProducts, finalProductPrice, shippingFee], () => {
     totalPrice.value = finalProductPrice.value + shippingFee.value;
 });
 
+const fetchDiscountCode = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/api/magiamgia');
+        listDiscountCodes.value = response.data.map(discountCode => ({
+            ...discountCode,
+            IdKhachHangSuDung: Array.isArray(discountCode.IdKhachHangSuDung)
+                ? discountCode.IdKhachHangSuDung
+                : [] // Đảm bảo IdKhachHangSuDung là mảng
+        }));
+        return true;
+    } catch (error) {
+        console.error('Error fetching discount codes:', error);
+        return false;
+    }
+};
+
 const fetchCustomer = async (idKhachHang) => {
     try {
+        // Đảm bảo lấy danh sách mã giảm giá trước
+        const discountFetchSuccess = await fetchDiscountCode();
+        if (!discountFetchSuccess) {
+            throw new Error('Không thể lấy danh sách mã giảm giá');
+        }
+
+        // Lấy dữ liệu khách hàng
         const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
         nameCustomer.value = response.data.TenKhachHang;
         emailCustomer.value = response.data.Email;
-        listAddress.value = response.data.DanhSachDiaChi;
-        listDiscountCodes.value = response.data.DanhSachMaGiamGia;
+        listAddress.value = response.data.DanhSachDiaChi || [];
+
+        // Lấy danh sách IdMaGiamGia từ DanhSachMaGiamGia
+        const customerDiscountIds = Array.isArray(response.data.DanhSachMaGiamGia)
+            ? response.data.DanhSachMaGiamGia
+                .map(item => item.IdMaGiamGia)
+                .filter(id => id) // Lọc các id hợp lệ
+            : [];
+        
+        console.log("Danh sách IdMaGiamGia từ khách hàng:", customerDiscountIds);
+        console.log("Tất cả mã giảm giá:", listDiscountCodes.value);
+
+        // Lọc mã giảm giá: chỉ giữ mã trong DanhSachMaGiamGia, chưa được khách hàng sử dụng và chưa hết hạn
+        discountCodeWithCustomer.value = listDiscountCodes.value
+            .filter(discountCode => {
+                // Kiểm tra mã có trong danh sách mã của khách hàng
+                const isInCustomerList = customerDiscountIds.includes(discountCode.IdMaGiamGia);
+                
+                // Kiểm tra mã chưa được khách hàng sử dụng
+                const isNotUsed = !discountCode.IdKhachHangSuDung.includes(idKhachHang);
+                
+                // Kiểm tra mã chưa hết hạn
+                const isNotExpired = new Date(discountCode.NgayHetHan) >= new Date();
+                
+                console.log(`Mã ${discountCode.IdMaGiamGia}:`, {
+                    isInCustomerList,
+                    isNotUsed,
+                    isNotExpired,
+                    shouldShow: isInCustomerList && isNotUsed && isNotExpired
+                });
+                
+                return isInCustomerList && isNotUsed && isNotExpired;
+            })
+            .map(discountCode => ({
+                ...discountCode
+            }));
+
+        console.log("Mã giảm giá khả dụng cho khách hàng:", discountCodeWithCustomer.value);
+        
+        // Cập nhật listDiscountCodes để sử dụng trong template
+        listDiscountCodes.value = discountCodeWithCustomer.value;
+
     } catch (err) {
-        console.log("Error fetching: ", err);
+        console.error("Error fetching customer:", err.response?.data || err.message);
+        showNotification('Lỗi khi tải thông tin khách hàng', 'error');
     }
-}
+};
 const addOrders = async () => {
     errors.value = {};
 
@@ -529,9 +594,7 @@ watch(() => formData.value.discountCode, () => {
                                                 <option
                                                     v-for="(discountCode, index) in listDiscountCodes.filter(dc => new Date(dc.NgayHetHan) >= new Date())"
                                                     :key="index" :value="discountCode.IdMaGiamGia"
-                                                    class="text-[#333] cursor-pointer">Id Mã: {{
-                                                        discountCode.IdMaGiamGia }}
-                                                    / Tên mã: {{ discountCode.TenMaGiamGia }} / Giảm:
+                                                    class="text-[#333] cursor-pointer">{{ discountCode.TenMaGiamGia }} /Giá áp dụng: {{ formatCurrency(discountCode.GiaApDung) }} đ  / Giảm:
                                                     {{
                                                         discountCode.GiamTien
                                                             ? `${formatCurrency(discountCode.GiamTien)} đ`
