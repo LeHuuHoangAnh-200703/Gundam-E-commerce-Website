@@ -256,24 +256,28 @@ const containsBannedWords = (text) => {
   return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
 };
 
-// const checkToxicContent = async (text) => {
-//   try {
-//     const response = await axios.post('http://localhost:5000/predict', { sentence: text });
-//     const isToxic = response.data.prediction === 1;
-//     return isToxic;
-//   } catch (error) {
-//     console.error('Error calling Flask API:', error.message);
-//     return false;
-//   }
-// };
+const checkToxicContent = async (text) => {
+  try {
+    const response = await axios.post('http://localhost:5000/predict', { sentence: text });
+    const isToxic = response.data.prediction === 1;
+    return isToxic;
+  } catch (error) {
+    console.error('Error calling Flask API:', error.message);
+    return false;
+  }
+};
 
 exports.commentCommunityPost = async (req, res) => {
   const { MaKhachHang, NoiDungBinhLuan } = req.body;
 
-  const isToxic = containsBannedWords(NoiDungBinhLuan);
-  // const hasBannedWords = await containsBannedWords(NoiDungBinhLuan);
+  const isToxic = await checkToxicContent(NoiDungBinhLuan);
+  const hasBannedWords = containsBannedWords(NoiDungBinhLuan);
 
   if (isToxic) {
+    return res
+      .status(400)
+      .json({ message: "Bình luận chứa nội dung không phù hợp!" });
+  } else if (hasBannedWords) {
     return res
       .status(400)
       .json({ message: "Bình luận chứa nội dung không phù hợp!" });
@@ -305,9 +309,14 @@ exports.commentCommunityPost = async (req, res) => {
 exports.replyComment = async (req, res) => {
   const { NoiDungBinhLuan } = req.body;
 
-  const isToxic = containsBannedWords(NoiDungBinhLuan);
-  // const hasBannedWords = containsBannedWords(NoiDungBinhLuan);
+  const isToxic = await checkToxicContent(NoiDungBinhLuan);
+  const hasBannedWords = containsBannedWords(NoiDungBinhLuan);
+
   if (isToxic) {
+    return res
+      .status(400)
+      .json({ message: "Bình luận chứa nội dung không phù hợp!" });
+  } else if (hasBannedWords) {
     return res
       .status(400)
       .json({ message: "Bình luận chứa nội dung không phù hợp!" });

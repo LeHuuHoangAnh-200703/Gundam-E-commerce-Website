@@ -154,14 +154,14 @@ const containsBannedWords = (text) => {
     return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
 };
 
-// const checkToxicContent = async (text) => {
-//     try {
-//         const response = await axios.post('http://localhost:5000/predict', { sentence: text });
-//         return response.data.prediction === 1;
-//     } catch (error) {
-//         console.error('Error calling Flask API:', error.message);
-//     }
-// };
+const checkToxicContent = async (text) => {
+    try {
+        const response = await axios.post('http://localhost:5000/predict', { sentence: text });
+        return response.data.prediction === 1;
+    } catch (error) {
+        console.error('Error calling Flask API:', error.message);
+    }
+};
 
 exports.createFeedBack = async (req, res) => {
     const {
@@ -192,9 +192,9 @@ exports.createFeedBack = async (req, res) => {
         let isToxic = false;
         if (moTa && moTa.trim()) {
             isToxic = containsBannedWords(moTa);
-            // if (!isToxic) {
-            //     isToxic = containsBannedWords(moTa);
-            // }
+            if (!isToxic) {
+                isToxic = containsBannedWords(moTa);
+            }
         }
 
         // Xử lý upload hình ảnh
