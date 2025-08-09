@@ -5,12 +5,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { io } from "socket.io-client";
 
 const isSidebarVisible = ref(false);
-const isNotificationVisible = ref(false);
-const hasUnreadNotifications = ref(false);
 const hasUnreadMessages = ref(false); // Biến để theo dõi tin nhắn chưa đọc
 const TenAdmin = localStorage.getItem("TenAdmin");
-
-const listNatifications = ref([]);
 
 // Kết nối Socket.IO
 const socket = io("http://localhost:3000", {
@@ -52,48 +48,7 @@ const toggleSideBar = () => {
   isSidebarVisible.value = !isSidebarVisible.value;
 };
 
-const toggleNotification = () => {
-  isNotificationVisible.value = !isNotificationVisible.value;
-  if (isNotificationVisible.value) {
-    hasUnreadNotifications.value = false;
-  }
-};
-
-const fetchNatifications = async () => {
-  try {
-    const response = await axios.get("http://localhost:3000/api/thongbao");
-    listNatifications.value = response.data.map((natification) => {
-      return {
-        ...natification,
-        ThoiGian: new Date(natification.ThoiGian),
-      };
-    });
-    listNatifications.value.sort((a, b) => b.ThoiGian - a.ThoiGian);
-    if (listNatifications.value.length > 0) {
-      hasUnreadNotifications.value = true;
-    }
-  } catch (err) {
-    console.log("error fetching: ", err);
-  }
-};
-
-const formatDate = (time) => {
-  if (!time) return ''
-
-  const now = new Date()
-  const postTime = new Date(time)
-  const diffInSeconds = Math.floor((now - postTime) / 1000)
-
-  if (diffInSeconds < 60) return 'Vừa xong'
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
-
-  return postTime.toLocaleDateString('vi-VN')
-};
-
 onMounted(async () => {
-  await fetchNatifications();
 
   socket.on("connect", () => {
     console.log("Đã kết nối Socket.IO với server trong Navbar"); // Debug kết nối
@@ -134,12 +89,6 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="flex gap-3 justify-center items-center">
-        <router-link to="" @click="toggleNotification" class="px-2 py-2 rounded-full group">
-          <i class="fa-solid fa-bell relative transition-all duration-200 text-[20px]">
-            <span v-if="hasUnreadNotifications"
-              class="absolute top-0 right-0 w-[10px] h-[10px] bg-[#DB3F4C] border-2 border-white transition-all duration-200 rounded-full"></span>
-          </i>
-        </router-link>
         <router-link to="/admin/chatWithCustomer" class="px-2 py-2 rounded-full group">
           <i class="fa-solid fa-comments relative transition-all duration-200 text-[20px]">
             <span v-if="hasUnreadMessages"
@@ -171,32 +120,6 @@ onUnmounted(() => {
               {{ sidebar.name }}
             </router-link>
           </ul>
-        </div>
-      </div>
-      <div
-        class="notification fixed top-28 w-full lg:w-auto bg-white max-h-[calc(100vh-150px)] overflow-hidden shadow-lg p-4 rounded-lg z-50"
-        :class="{ 'lg:right-[30%] right-[100%]': isNotificationVisible, 'right-[-100%]': !isNotificationVisible }">
-        <div class="flex justify-between items-center">
-          <p class="font-semibold text-[18px]">Thông báo</p>
-          <i @click="toggleNotification" class="fa-solid cursor-pointer fa-arrow-right font-semibold text-[20px]"></i>
-        </div>
-        <hr class="mt-2" />
-        <div class="flex flex-col max-h-[450px] overflow-y-auto">
-          <div class="flex gap-3 items-center border-b py-2" v-for="(natification, index) in listNatifications"
-            :key="index">
-            <div class="w-12 h-12 rounded-full bg-[#40E0D0] flex justify-center items-center">
-              <i class="fa-regular fa-bell text-[20px]"></i>
-            </div>
-            <div class="flex flex-col">
-              <div class="text-ellipsis whitespace-nowrap overflow-hidden max-w-[360px]">
-                <a class="font-semibold text-[16px]">{{ natification.ThongBao }}</a>
-              </div>
-              <p class="font-semibold text-[12px]">
-                Người chỉnh sửa: <span class="text-[#DB3F4C]">{{ natification.NguoiChinhSua }}</span>
-              </p>
-              <p class="text-[12px] font-medium text-gray-600">{{ formatDate(natification.ThoiGian) }}</p>
-            </div>
-          </div>
         </div>
       </div>
     </nav>

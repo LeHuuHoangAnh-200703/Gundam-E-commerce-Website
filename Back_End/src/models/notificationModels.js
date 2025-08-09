@@ -6,8 +6,7 @@ const notificationSchema = new mongoose.Schema({
     NguoiChinhSua: String,
     ThoiGian: {
         type: Date,
-        default: Date.now,
-        expires: 2592000,
+        default: Date.now
     },
 });
 

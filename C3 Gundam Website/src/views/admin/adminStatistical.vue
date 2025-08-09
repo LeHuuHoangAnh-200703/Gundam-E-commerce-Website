@@ -4,6 +4,7 @@ import Navbar from "@/components/admin/Navbar.vue";
 import SideBar from "@/components/admin/SideBar.vue";
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
+import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from "axios";
 import { Bar } from "vue-chartjs";
 import { Line } from "vue-chartjs";
@@ -30,7 +31,7 @@ const products = ref([]);
 const listProducts = ref([]);
 const orders = ref([]);
 const feedbacks = ref([]);
-
+const listNatifications = ref([]);
 const notification = ref({
     message: '',
     type: ''
@@ -119,6 +120,21 @@ const fetchStatistical = async () => {
     }
 };
 
+const fetchNatifications = async () => {
+    try {
+        const response = await axios.get("http://localhost:3000/api/thongbao");
+        listNatifications.value = response.data.map((natification) => {
+            return {
+                ...natification,
+                ThoiGian: new Date(natification.ThoiGian),
+            };
+        });
+        listNatifications.value.sort((a, b) => b.ThoiGian - a.ThoiGian);
+    } catch (err) {
+        console.log("error fetching: ", err);
+    }
+};
+
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(
     Title,
@@ -172,6 +188,7 @@ const chartOptions = ref({
 });
 
 const totalRevenueYear = ref("");
+const totalOrderYear = ref("");
 const fetchRevenueData = async (year) => {
     if (year > new Date().getFullYear()) {
         showNotification("Năm tìm kiếm không hợp lệ!", "error");
@@ -185,6 +202,7 @@ const fetchRevenueData = async (year) => {
             `http://localhost:3000/api/thongke/donhangtheonam?year=${year}`
         );
         totalRevenueYear.value = response.data.tongDoanhThu
+        totalOrderYear.value = response.data.tongDonHang
         chartData.value = {
             labels: response.data.labels,
             datasets: [
@@ -207,6 +225,7 @@ const chartDataDay = ref(null);
 const selectedYearofDay = ref(new Date().getFullYear());
 const selectedMonthOfDay = ref(new Date().getMonth() + 1);
 const totalRevenueMonth = ref("");
+const totalOrderMonth = ref("");
 
 const chartDayOptions = ref({
     responsive: true,
@@ -258,6 +277,7 @@ const fetchRevenueDay = async (year, month) => {
             `http://localhost:3000/api/thongke/donhangtheothang?year=${year}&month=${month}`
         );
         totalRevenueMonth.value = response.data.tongDoanhThu;
+        totalOrderMonth.value = response.data.tongDonHang;
 
         chartDataDay.value = {
             labels: response.data.labels,
@@ -397,7 +417,7 @@ const exportTopProductPDF = () => {
                 const productContent = listSelling.value.map((product, index) => {
                     const rank = index + 1;
                     const rankColor = rank <= 3 ? '#FFD700' : '#E0E0E0'; // Vàng cho top 3, xám cho còn lại
-                    
+
                     return [
                         // Header của mỗi sản phẩm
                         {
@@ -442,8 +462,8 @@ const exportTopProductPDF = () => {
                                         {
                                             columns: [
                                                 { text: 'Giá bán:', style: 'labelText', width: 60 },
-                                                { 
-                                                    text: `${formatCurrency(product.GiaBan)} đ`, 
+                                                {
+                                                    text: `${formatCurrency(product.GiaBan)} đ`,
                                                     style: 'priceText',
                                                     width: '*'
                                                 }
@@ -453,7 +473,7 @@ const exportTopProductPDF = () => {
                                         {
                                             columns: [
                                                 { text: 'Giá Sale:', style: 'labelText', width: 60 },
-                                                { 
+                                                {
                                                     text: (product.GiaSale && product.GiaSale > 0) ? `${formatCurrencySale(product.GiaSale)} đ` : 'Không có',
                                                     style: (product.GiaSale && product.GiaSale > 0) ? 'salePriceText' : 'noSaleText',
                                                     width: '*'
@@ -469,7 +489,7 @@ const exportTopProductPDF = () => {
                                         {
                                             columns: [
                                                 { text: 'Tình trạng:', style: 'labelText', width: 70 },
-                                                { 
+                                                {
                                                     text: product.TrangThai,
                                                     style: product.TrangThai === 'Đang bán' ? 'statusAvailable' : 'statusUnavailable',
                                                     width: '*'
@@ -480,7 +500,7 @@ const exportTopProductPDF = () => {
                                         {
                                             columns: [
                                                 { text: 'Lượt bán:', style: 'labelText', width: 70 },
-                                                { 
+                                                {
                                                     text: `${product.LuotBan} sản phẩm`,
                                                     style: 'soldCountText',
                                                     width: '*'
@@ -534,15 +554,15 @@ const exportTopProductPDF = () => {
                             ],
                             margin: [0, 0, 0, 20]
                         },
-                        
+
                         // Title
-                        { 
-                            text: 'BÁO CÁO TOP SẢN PHẨM ĐƯỢC MUA NHIỀU NHẤT', 
+                        {
+                            text: 'BÁO CÁO TOP SẢN PHẨM ĐƯỢC MUA NHIỀU NHẤT',
                             style: 'title',
                             margin: [0, 0, 0, 5]
                         },
-                        { 
-                            text: `Ngày xuất: ${formatDate(new Date())}`, 
+                        {
+                            text: `Ngày xuất: ${formatDate(new Date())}`,
                             style: 'dateInfo',
                             margin: [0, 0, 0, 20]
                         },
@@ -562,9 +582,9 @@ const exportTopProductPDF = () => {
                                     width: '50%',
                                     stack: [
                                         { text: 'TỔNG LƯỢT BÁN', style: 'statLabel' },
-                                        { 
-                                            text: listSelling.value.reduce((sum, p) => sum + p.LuotBan, 0).toString(), 
-                                            style: 'statNumber' 
+                                        {
+                                            text: listSelling.value.reduce((sum, p) => sum + p.LuotBan, 0).toString(),
+                                            style: 'statNumber'
                                         }
                                     ],
                                     alignment: 'center'
@@ -574,8 +594,8 @@ const exportTopProductPDF = () => {
                         },
 
                         // Tiêu đề danh sách
-                        { 
-                            text: 'DANH SÁCH CHI TIẾT', 
+                        {
+                            text: 'DANH SÁCH CHI TIẾT',
                             style: 'sectionHeader',
                             margin: [0, 0, 0, 15]
                         },
@@ -598,44 +618,44 @@ const exportTopProductPDF = () => {
                                     ],
                                     margin: [0, 20, 0, 10]
                                 },
-                                { 
-                                    text: 'Ghi chú: Danh sách được sắp xếp theo số lượng bán từ cao xuống thấp', 
+                                {
+                                    text: 'Ghi chú: Danh sách được sắp xếp theo số lượng bán từ cao xuống thấp',
                                     style: 'note',
                                     margin: [0, 0, 0, 5]
                                 },
-                                { 
-                                    text: `Thời gian xuất báo cáo: ${new Date().toLocaleString('vi-VN')}`, 
+                                {
+                                    text: `Thời gian xuất báo cáo: ${new Date().toLocaleString('vi-VN')}`,
                                     style: 'footer'
                                 }
                             ]
                         }
                     ],
                     styles: {
-                        header: { 
-                            fontSize: 20, 
-                            bold: true, 
+                        header: {
+                            fontSize: 20,
+                            bold: true,
                             alignment: 'center',
                             color: '#333'
                         },
-                        subheader: { 
-                            fontSize: 11, 
+                        subheader: {
+                            fontSize: 11,
                             alignment: 'center',
                             color: '#666',
                             margin: [0, 2, 0, 2]
                         },
-                        title: { 
-                            fontSize: 18, 
-                            bold: true, 
+                        title: {
+                            fontSize: 18,
+                            bold: true,
                             alignment: 'center',
                             color: '#2c3e50'
                         },
-                        dateInfo: { 
-                            fontSize: 12, 
+                        dateInfo: {
+                            fontSize: 12,
                             alignment: 'center',
                             color: '#7f8c8d'
                         },
-                        sectionHeader: { 
-                            fontSize: 14, 
+                        sectionHeader: {
+                            fontSize: 14,
                             bold: true,
                             color: '#34495e',
                             background: '#ecf0f1',
@@ -703,13 +723,13 @@ const exportTopProductPDF = () => {
                             color: '#3498db',
                             bold: true
                         },
-                        note: { 
-                            fontSize: 9, 
+                        note: {
+                            fontSize: 9,
                             italics: true,
                             color: '#7f8c8d'
                         },
-                        footer: { 
-                            fontSize: 9, 
+                        footer: {
+                            fontSize: 9,
                             alignment: 'right',
                             color: '#95a5a6'
                         }
@@ -742,6 +762,21 @@ const formatDate = (date) => {
     return formattedDate;
 };
 
+const formatDateV2 = (time) => {
+    if (!time) return ''
+
+    const now = new Date()
+    const postTime = new Date(time)
+    const diffInSeconds = Math.floor((now - postTime) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+    return postTime.toLocaleDateString('vi-VN')
+};
+
 onMounted(() => {
     fetchListProducts();
     fetchStatistical();
@@ -750,6 +785,7 @@ onMounted(() => {
     fetchFeedBackProducts();
     fetchRevenueDay(new Date().getFullYear(), new Date().getMonth() + 1);
     fetchTopSellingProducts();
+    fetchNatifications();
 });
 </script>
 
@@ -937,6 +973,12 @@ onMounted(() => {
                                         <span class="text-[24px] relative -top-[2px] underline">đ</span>
                                     </p>
                                 </div>
+                                <div>
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng đơn hàng</p>
+                                    <p class="text-[24px] font-bold text-end text-green-600">
+                                        {{ formatCurrency(totalOrderMonth.toString()) }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
@@ -983,10 +1025,77 @@ onMounted(() => {
                                         <span class="text-[24px] relative -top-[2px] underline">đ</span>
                                     </p>
                                 </div>
+                                <div>
+                                    <p class="text-[14px] font-semibold text-gray-600">Tổng đơn hàng</p>
+                                    <p class="text-[24px] font-bold text-end text-green-600">
+                                        {{ formatCurrency(totalOrderYear.toString()) }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md p-4 border-2">
                             <Line v-if="chartData" :data="chartData" :options="chartOptions" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-4 items-center lg:flex-row flex-col justify-between">
+                            <h3 class="font-bold text-[16px] lg:text-[20px] uppercase lg:text-start text-center">
+                                Danh sách thông báo
+                            </h3>
+                            <span
+                                class="text-sm font-semibold text-blue-500 bg-white border border-blue-500 rounded-lg py-2 px-6">
+                                {{ listNatifications.length }} thông báo
+                            </span>
+                        </div>
+                        <div class="w-full bg-white shadow-lg rounded-md border-2 max-h-[500px] overflow-hidden">
+                            <div class="overflow-y-auto max-h-[500px]">
+                                <div v-if="listNatifications.length > 0" class="">
+                                    <div v-for="(notification) in listNatifications" :key="notification.MaThongBao"
+                                        class="p-4 hover:bg-gray-50 transition-colors relative border-l-4 border-l-blue-500">
+                                        <div class="absolute top-4 left-2">
+                                            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div
+                                                        class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100">
+                                                        <i class="fas fa-bell text-blue-600 text-sm"></i>
+                                                    </div>
+                                                    <h5 class="font-semibold text-gray-800 text-sm">
+                                                        Nội dung thông báo
+                                                    </h5>
+                                                </div>
+                                                <span class="text-xs text-gray-500 whitespace-nowrap ml-2">
+                                                    {{ formatDateV2(notification.ThoiGian) }}
+                                                </span>
+                                            </div>
+                                            <p
+                                                class="text-gray-700 text-sm mb-3 leading-relaxed bg-gray-50 p-3 rounded-md border-l-2 border-blue-300">
+                                                {{ notification.ThongBao }}
+                                            </p>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-4 text-xs text-gray-500">
+                                                    <span v-if="notification.NguoiChinhSua"
+                                                        class="flex items-center gap-1">
+                                                        <i class="fas fa-user-edit"></i>
+                                                        <span class="font-medium">{{ notification.NguoiChinhSua
+                                                        }}</span>
+                                                    </span>
+                                                    <span class="flex items-center gap-1">
+                                                        <i class="fas fa-clock"></i>
+                                                        {{ formatDateV2(notification.ThoiGian) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else class="flex justify-center items-center m-auto w-full mt-10">
+                                    <EmtyStateAdmin icon="fa-bell" title="Chưa có thông báo nào"
+                                        message="Hiện tại chưa có thông báo chỉnh sửa hay cập nhật trên hệ thống!" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

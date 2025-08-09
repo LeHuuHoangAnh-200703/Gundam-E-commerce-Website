@@ -27,12 +27,12 @@ exports.getRevenueByMonth = async (req, res) => {
           TrangThaiDon: {
             $nin: ["Đơn hàng đã hủy", "Đã trả hàng"]
           },
-          
+
           // Chỉ tính các đơn hàng đã hoàn thành hoặc đã thanh toán online
           $or: [
             // Đơn hàng đã hoàn thành
             { TrangThaiDon: { $in: ["Đã giao thành công"] } },
-            
+
             // Đơn hàng đã thanh toán online (bất kể trạng thái giao hàng, miễn không bị hủy/trả)
             {
               TrangThaiThanhToan: {
@@ -57,6 +57,24 @@ exports.getRevenueByMonth = async (req, res) => {
       }
     ]);
 
+    const totalOrders = await Order.countDocuments({
+      TrangThaiDon: {
+        $nin: ["Đơn hàng đã hủy", "Đã trả hàng"]
+      },
+      $or: [
+        { TrangThaiDon: { $in: ["Đã giao thành công"] } },
+        {
+          TrangThaiThanhToan: {
+            $in: ["Đã thanh toán qua PayPal", "Đã thanh toán qua VNPay"]
+          }
+        }
+      ],
+      NgayDatHang: {
+        $gte: new Date(`${year}-01-01`),
+        $lte: new Date(`${year}-12-31`)
+      }
+    });
+
     // Tạo mảng doanh thu cho tất cả 12 tháng, nếu không có dữ liệu cho tháng nào thì gán doanh thu là 0
     const revenueMap = new Array(12).fill(0); // Mảng doanh thu mặc định cho 12 tháng
 
@@ -77,7 +95,8 @@ exports.getRevenueByMonth = async (req, res) => {
           borderWidth: 1
         }
       ],
-      tongDoanhThu: totalRevenueOfYear
+      tongDoanhThu: totalRevenueOfYear,
+      tongDonHang: totalOrders
     };
     return res.status(200).json(response);
   } catch (err) {
@@ -114,12 +133,12 @@ exports.getRevenueByDay = async (req, res) => {
           TrangThaiDon: {
             $nin: ["Đơn hàng đã hủy", "Đã trả hàng"]
           },
-          
+
           // Chỉ tính các đơn hàng đã hoàn thành hoặc đã thanh toán online
           $or: [
             // Đơn hàng đã hoàn thành
             { TrangThaiDon: { $in: ["Đã giao thành công"] } },
-            
+
             // Đơn hàng đã thanh toán online (bất kể trạng thái giao hàng, miễn không bị hủy/trả)
             {
               TrangThaiThanhToan: {
@@ -144,6 +163,24 @@ exports.getRevenueByDay = async (req, res) => {
       }
     ]);
 
+    const totalOrders = await Order.countDocuments({
+      TrangThaiDon: {
+        $nin: ["Đơn hàng đã hủy", "Đã trả hàng"]
+      },
+      $or: [
+        { TrangThaiDon: { $in: ["Đã giao thành công"] } },
+        {
+          TrangThaiThanhToan: {
+            $in: ["Đã thanh toán qua PayPal", "Đã thanh toán qua VNPay"]
+          }
+        }
+      ],
+      NgayDatHang: {
+        $gte: new Date(`${year}-${month}-01`),
+        $lte: new Date(`${year}-${month}-31`)
+      }
+    });
+
     // Tạo mảng doanh thu cho tất cả các ngày trong tháng (nếu không có dữ liệu cho ngày nào thì gán doanh thu là 0)
     const daysInMonth = new Date(year, month, 0).getDate(); // Số ngày trong tháng
     const revenueMap = new Array(daysInMonth).fill(0); // Mảng doanh thu mặc định cho tất cả các ngày trong tháng
@@ -152,7 +189,7 @@ exports.getRevenueByDay = async (req, res) => {
     revenueData.forEach(item => {
       revenueMap[item._id - 1] = item.totalRevenue; // Lưu doanh thu vào vị trí đúng của ngày (0-indexed)
     });
-    const totalRevenueOfYear = revenueMap.reduce((sum, val) => sum + val, 0);
+    const totalRevenueOfMonth = revenueMap.reduce((sum, val) => sum + val, 0);
 
     const response = {
       labels: Array.from({ length: daysInMonth }, (_, i) => `Ngày ${i + 1}`),
@@ -165,7 +202,8 @@ exports.getRevenueByDay = async (req, res) => {
           borderWidth: 1
         }
       ],
-      tongDoanhThu: totalRevenueOfYear
+      tongDoanhThu: totalRevenueOfMonth,
+      tongDonHang: totalOrders
     };
     return res.status(200).json(response);
   } catch (err) {
@@ -284,12 +322,12 @@ exports.getEnterWarehouse = async (req, res) => {
           TrangThaiDon: {
             $nin: ["Đơn hàng đã hủy", "Đã trả hàng"]
           },
-          
+
           // Chỉ tính các đơn hàng đã hoàn thành hoặc đã thanh toán online
           $or: [
             // Đơn hàng đã hoàn thành
             { TrangThaiDon: { $in: ["Đã giao thành công"] } },
-            
+
             // Đơn hàng đã thanh toán online (bất kể trạng thái giao hàng, miễn không bị hủy/trả)
             {
               TrangThaiThanhToan: {
