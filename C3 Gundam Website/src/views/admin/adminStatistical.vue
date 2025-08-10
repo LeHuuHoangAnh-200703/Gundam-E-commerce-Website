@@ -1049,9 +1049,9 @@ onMounted(() => {
                         </div>
                         <div class="w-full bg-white shadow-lg rounded-md border-2 max-h-[500px] overflow-hidden">
                             <div class="overflow-y-auto max-h-[500px]">
-                                <div v-if="listNatifications.length > 0" class="">
+                                <div v-if="listNatifications.length > 0" class="w-full">
                                     <div v-for="(notification) in listNatifications" :key="notification.MaThongBao"
-                                        class="p-4 hover:bg-gray-50 transition-colors relative border-l-4 border-l-blue-500">
+                                        class="p-4 relative border-l-4 border-l-blue-500">
                                         <div class="absolute top-4 left-2">
                                             <div class="w-2 h-2 rounded-full bg-blue-500"></div>
                                         </div>
@@ -1066,7 +1066,7 @@ onMounted(() => {
                                                         Nội dung thông báo
                                                     </h5>
                                                 </div>
-                                                <span class="text-xs text-gray-500 whitespace-nowrap ml-2">
+                                                <span class="text-xs text-blue-600 whitespace-nowrap ml-2">
                                                     {{ formatDateV2(notification.ThoiGian) }}
                                                 </span>
                                             </div>
@@ -1089,6 +1089,7 @@ onMounted(() => {
                                                 </div>
                                             </div>
                                         </div>
+                                        <hr class="mt-8">
                                     </div>
                                 </div>
                                 <div v-else class="flex justify-center items-center m-auto w-full mt-10">

@@ -23,7 +23,6 @@ const fetchCustomer = async (idKhachHang) => {
         maKhachHang.value = response.data.MaKhachHang;
         image.value = response.data.Image;
         orderCount.value = response.data.TongDonHang;
-        console.log(response.data.NgayTao)
         joinDate.value = formatDate(response.data.NgayTao);
     } catch (err) {
         console.log("Error fetching:", err);
