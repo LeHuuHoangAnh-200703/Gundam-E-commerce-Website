@@ -402,18 +402,18 @@ onMounted(() => {
                             </div>
                             <div class="flex justify-end items-center gap-4">
                                 <select v-model="filterDay"
-                                    class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                    class="p-2 border-2 border-[#333] rounded-md font-semibold outline-none w-full">
                                     <option value="">Chọn ngày (tùy chọn)</option>
                                     <option v-for="day in days" :key="day" :value="day">{{ day }}</option>
                                 </select>
                                 <select v-model="filterMonth"
-                                    class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                    class="p-2 border-2 border-[#333] rounded-md font-semibold outline-none w-full">
                                     <option value="">Chọn tháng (tùy chọn)</option>
                                     <option v-for="month in months" :key="month" :value="month">Tháng {{ month }}
                                     </option>
                                 </select>
                                 <select v-model="filterYear"
-                                    class="p-2 border-2 rounded-md font-semibold outline-none w-full">
+                                    class="p-2 border-2 border-[#333] rounded-md font-semibold outline-none w-full">
                                     <option value="">Chọn năm (tùy chọn)</option>
                                     <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
                                 </select>

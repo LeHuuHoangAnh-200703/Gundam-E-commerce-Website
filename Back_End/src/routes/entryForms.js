@@ -8,5 +8,6 @@ router.post("/", entryFormController.createEntryForm);
 router.put("/:maPN", entryFormController.updatedEntryForm);
 router.delete("/:maPN", entryFormController.deleteEntryForm);
 router.get("/kiemtra/:maPN", entryFormController.checkQuantity);
+router.get("/locphieunhap/ngaythangnam", entryFormController.getEntryFormByDayMonth);
 
 module.exports = router;

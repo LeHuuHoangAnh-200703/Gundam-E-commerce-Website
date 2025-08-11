@@ -388,7 +388,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                     <div class="flex flex-col gap-1">
                         <p class="text-white font-medium">Thương hiệu: {{ supplier }}</p>
                         <p class="text-white font-medium">Loại sản phẩm: {{ typeProduct }}</p>
-                        <p class="text-white font-medium">Tình trạng: {{ (quantity > 0) ? 'Còn hàng' : 'Hết hàng' }}</p>
+                        <p class="text-white font-medium">Tình trạng: {{ (quantity > 0) ? `Còn lại ` + quantity + ` sản phẩm` : 'Hết hàng' }}</p>
                         <p class="text-white font-medium">Đã bán: {{ sales || 0 }} sản phẩm</p>
                     </div>
                     <p class="text-white font-medium">Số lượng: </p>
@@ -425,7 +425,7 @@ watch(() => router.currentRoute.value.params.maSanPham, async (newIdSanPham) => 
                         <router-link :to="`/orders/${idProduct}?quantity=${orderQuantity}`"
                             class="bg-[#DB3F4C] w-full px-5 py-3 text-center text-white transition-all duration-300 hover:bg-[#b25058] rounded-md shadow-lg hover:shadow-xl">
                             <p
-                                class="text-[16px] lg:text-[18px] uppercase font-semibold flex items-center justify-center gap-2">
+                                class="text-[16px] lg:text-[18px] uppercase font-semibold">
                                 <i class="fa-solid fa-bolt"></i>
                                 Mua ngay với giá
                                 <span>{{ priceSale > 0 ? formatCurrencySale(priceSale) : formatCurrency(price) }}

@@ -11,7 +11,12 @@ const router = useRouter();
 const TenAdmin = localStorage.getItem("TenAdmin");
 const MaAdmin = localStorage.getItem("MaAdmin");
 const ThoiGian = new Date();
-
+const filterYear = ref("");
+const filterMonth = ref("");
+const filterDay = ref("");
+const years = Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() - i).toString());
+const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 const listSuppliers = ref([]);
 const listEntryForms = ref([]);
 const errors = ref({});
@@ -119,6 +124,30 @@ const checkQuantityEntryForms = async (idPhieuNhap) => {
     }, 3000);
 }
 
+const fetchEntryformByDayMonth = async () => {
+    try {
+        const params = {};
+        if (filterYear.value) params.year = filterYear.value;
+        if (filterMonth.value) params.month = filterMonth.value;
+        if (filterDay.value) params.day = filterDay.value;
+
+        const response = await axios.get('http://localhost:3000/api/phieunhap/locphieunhap/ngaythangnam', { params });
+        listEntryForms.value = response.data.map(entryform => ({
+            ...entryform,
+            NgayNhap: new Date(entryform.NgayNhap)
+        })).sort((a, b) => b.NgayNhap - a.NgayNhap);
+    } catch (err) {
+        console.log("Lỗi khi lọc đơn hàng", err);
+    }
+}
+
+const resetFilter = () => {
+    filterYear.value = "";
+    filterMonth.value = "";
+    filterDay.value = "";
+    fetchEntryForm();
+};
+
 const formatDate = (date) => {
     const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' };
     const formattedDate = date.toLocaleString('vi-VN', options);
@@ -174,6 +203,27 @@ onMounted(() => {
                             </div>
                         </form>
                     </div>
+                    <div class="flex justify-end items-center gap-4">
+                        <select v-model="filterDay" class="p-2 border-2 border-[#333] rounded-md font-semibold outline-none w-full">
+                            <option value="">Chọn ngày (tùy chọn)</option>
+                            <option v-for="day in days" :key="day" :value="day">{{ day }}</option>
+                        </select>
+                        <select v-model="filterMonth" class="p-2 border-2 border-[#333] rounded-md font-semibold outline-none w-full">
+                            <option value="">Chọn tháng (tùy chọn)</option>
+                            <option v-for="month in months" :key="month" :value="month">Tháng {{ month }}
+                            </option>
+                        </select>
+                        <select v-model="filterYear" class="p-2 border-2 border-[#333] rounded-md font-semibold outline-none w-full">
+                            <option value="">Chọn năm (tùy chọn)</option>
+                            <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <button @click="fetchEntryformByDayMonth"
+                                class="px-4 py-2 bg-[#003171] text-white rounded-md hover:bg-[#1A1D27]">Lọc</button>
+                            <button @click="resetFilter"
+                                class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Reset</button>
+                        </div>
+                    </div>
                     <div class="shadow-lg rounded-lg border-2 border-gray-300">
                         <div class="w-full overflow-x-auto">
                             <table class="w-full bg-white whitespace-nowrap text-center text-gray-500">
@@ -194,7 +244,7 @@ onMounted(() => {
                                         :key="index">
                                         <td class="px-6 py-4 font-medium text-gray-900 text-[12px]">{{
                                             entryForm.MaPhieuNhap
-                                            }}</td>
+                                        }}</td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-[12px] overflow-hidden text-ellipsis">
                                             {{ entryForm.MaNhaCungCap }}</td>
