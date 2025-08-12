@@ -277,7 +277,7 @@ onMounted(() => {
                 </p>
             </div>
             <div class="w-full my-4">
-                <div class="hidden lg:grid grid-cols-4 gap-4 items-center mb-6">
+                <div class="hidden lg:grid grid-cols-4 gap-4 items-center mb-4">
                     <button v-for="item in arrange" :key="item" @click.prevent="selectTypeProducts(item.type)"
                         class="bg-gradient-to-br from-[#2A2D37] via-[#1A1D27] to-[#0F1419] border border-white/20 p-5 text-center flex flex-col gap-3 hover:border-[#DB3F4C]/50 hover:shadow-lg hover:shadow-[#DB3F4C]/10 transition-all duration-300 group">
                         <div class="flex items-center justify-between">
