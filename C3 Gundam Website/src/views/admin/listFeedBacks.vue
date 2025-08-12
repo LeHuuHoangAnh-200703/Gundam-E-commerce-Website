@@ -40,9 +40,13 @@ const formatDate = (time) => {
 };
 
 const totalQuality = computed(() => {
-    if (!comments.value.length) return 0;
-    const total = comments.value.reduce((sum, comment) => sum + (comment.ChatLuong || 0), 0); // Tính tổng điểm
-    const average = total / comments.value.length;
+    // Lọc ra những bình luận không tiêu cực (isToxic !== true)
+    const nonToxicComments = comments.value.filter(comment => comment.isToxic !== true);
+    
+    if (!nonToxicComments.length) return 0;
+    
+    const total = nonToxicComments.reduce((sum, comment) => sum + (comment.ChatLuong || 0), 0);
+    const average = total / nonToxicComments.length;
     return average.toFixed(1);
 });
 

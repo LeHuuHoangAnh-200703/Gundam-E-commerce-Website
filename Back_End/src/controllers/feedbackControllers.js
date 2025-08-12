@@ -57,7 +57,7 @@ exports.getFeedBack = async (req, res) => {
 const bannedWords = [
     "ngu", "đần", "ngu dốt", "khốn nạn", "vô học", "đồ rác rưởi",
     "thằng", "con", "mày", "đồ dốt", "đồ điên", "chết tiệt", "vô dụng",
-    "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại",
+    "vứt đi", "tởm", "thảm họa", "đồ rác", "tệ hại", "oc cho",
     "địt", "đéo", "cái đéo gì", "đm", "dm", "vkl", "vcl", "cc",
     "đm nó", "con cat", "con cac", "con cặc", "con cặt", "m nó", "đồ cút", "thằng chó",
     "con mẹ nó", "chết mẹ", "bố mày", "cmm", "vl", "thằng chó",
