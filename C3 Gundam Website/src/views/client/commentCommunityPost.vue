@@ -446,13 +446,18 @@ onMounted(() => {
                             </div>
                             <div class="flex-1 space-y-2">
                                 <div class="bg-gradient-to-r from-gray-700/80 to-gray-600/80 rounded-2xl p-4 shadow-md">
-                                    <h4 class="text-white text-sm font-bold mb-1">{{ comment.TenKhachHang }}</h4>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-white text-sm font-bold mb-1">{{ comment.TenKhachHang }}</h4>
+                                        <p :class="comment.MaKhachHang == idCustomer ? 'inline-flex' : 'hidden'"
+                                            class="text-blue-400 hover:text-blue-300 text-sm mb-1 underline">
+                                            Tác giả</p>
+                                    </div>
                                     <p class="text-gray-200 text-sm leading-relaxed">{{ comment.NoiDungBinhLuan }}
                                     </p>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
                                     <span class="text-gray-400 text-xs">{{ formatTime(new Date(comment.ThoiGian))
-                                    }}</span>
+                                        }}</span>
                                     <div
                                         class="flex items-center gap-3 opacity-0 group-hover/comment:opacity-100 transition-opacity duration-200">
                                         <button @click="deleteComment(comment.MaBinhLuan)"
@@ -492,8 +497,13 @@ onMounted(() => {
                                     <div class="flex-1 space-y-2">
                                         <div
                                             class="bg-gradient-to-r from-gray-600/60 to-gray-500/60 rounded-xl p-3 shadow-sm">
-                                            <h5 class="text-white text-xs font-bold mb-1">{{ reply.TenKhachHang }}
-                                            </h5>
+                                            <div class="flex gap-2 items-center">
+                                                <h5 class="text-white text-xs font-bold mb-1">{{ reply.TenKhachHang }}
+                                                </h5>
+                                                <p :class="reply.MaKhachHang == idCustomer ? 'inline-flex' : 'hidden'"
+                                                    class="text-blue-400 hover:text-blue-300 text-xs mb-1 underline">
+                                                    Tác giả</p>
+                                            </div>
                                             <p class="text-gray-200 text-xs leading-relaxed">
                                                 <span v-if="reply.ReplyToTenKhachHang"
                                                     class="text-blue-400 font-medium">@{{ reply.ReplyToTenKhachHang
