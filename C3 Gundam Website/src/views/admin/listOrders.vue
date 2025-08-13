@@ -42,6 +42,8 @@ const options = [
         icon: "fa-solid fa-times-circle"
     },
 ]
+const TenAdmin = localStorage.getItem("TenAdmin");
+const ThoiGian = new Date()
 
 const listOrders = ref([]);
 const selectedType = ref("Tất cả đơn hàng");
@@ -92,7 +94,6 @@ const fetchOrders = async () => {
             }
         })
 
-        // Sắp xếp: đơn bình thường trước, đơn đã hủy/trả hàng sau
         const ordersNormal = listOrders.value.filter(order => 
             order.TrangThaiDon !== 'Đã trả hàng' && order.TrangThaiDon !== 'Đơn hàng đã hủy'
         );
@@ -193,14 +194,22 @@ const handleStatusChange = (maDonHang, currentStatus, newStatus) => {
                 const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
                     newStatus: newStatus,
                 });
+
+                const notificationData = {
+                    ThongBao: `Đã cập nhật trạng thái đơn hàng ${maDonHang} từ "${currentStatus}" thành "${newStatus}"`,
+                    NguoiChinhSua: TenAdmin,
+                    ThoiGian: ThoiGian,
+                };
+
+                // Lưu thông báo vào database
+                await axios.post('http://localhost:3000/api/thongbao', notificationData);
                 
                 // Cập nhật trạng thái trực tiếp trong mảng để tránh phải fetch lại toàn bộ
                 const orderIndex = listOrders.value.findIndex(order => order.MaDonHang === maDonHang);
                 if (orderIndex !== -1) {
                     listOrders.value[orderIndex].TrangThaiDon = newStatus;
-                    // Force reactivity update
                     listOrders.value = [...listOrders.value];
-                    refreshKey.value++; // Tăng refreshKey để force re-render
+                    refreshKey.value++;
                 }
                 
                 showNotification("Cập nhật trạng thái đơn hàng thành công!", "success");
