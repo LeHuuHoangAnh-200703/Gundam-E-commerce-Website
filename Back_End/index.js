@@ -171,192 +171,192 @@ setInterval(async () => {
   }
 }, 5 * 60 * 1000);
 
-// Middleware xác thực Socket.IO
-socketIO.use((socket, next) => {
-  const { userId, userName } = socket.handshake.auth;
-  if (!userId || !userName) {
-    return next(new Error("Authentication error"));
-  }
-  socket.userId = userId;
-  socket.userName = userName;
-  next();
-});
+// // Middleware xác thực Socket.IO
+// socketIO.use((socket, next) => {
+//   const { userId, userName } = socket.handshake.auth;
+//   if (!userId || !userName) {
+//     return next(new Error("Authentication error"));
+//   }
+//   socket.userId = userId;
+//   socket.userName = userName;
+//   next();
+// });
 
-// Xử lý sự kiện Socket.IO
-socketIO.on("connection", (socket) => {
-  console.log(`⚡: ${socket.userName} (ID: ${socket.userId}) vừa kết nối!`);
+// // Xử lý sự kiện Socket.IO
+// socketIO.on("connection", (socket) => {
+//   console.log(`⚡: ${socket.userName} (ID: ${socket.userId}) vừa kết nối!`);
 
-  socket.on("getChatRooms", async () => {
-    try {
-      const ChatRoom = require("./src/models/messageModels");
-      const User = require("./src/models/customersModels");
-      const chatRooms = await ChatRoom.find();
-      const enrichedChatRooms = await Promise.all(
-        chatRooms.map(async (room) => {
-          const sender = await User.findOne({ MaKhachHang: room.senderId });
-          return {
-            ...room.toObject(),
-            senderName: sender ? sender.TenKhachHang : "Unknown",
-            senderAvatar: sender ? sender.Avatar || "" : "",
-          };
-        })
-      );
-      socket.emit("chatRoomsUpdated", enrichedChatRooms);
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách phòng chat:", error);
-    }
-  });
+//   socket.on("getChatRooms", async () => {
+//     try {
+//       const ChatRoom = require("./src/models/messageModels");
+//       const User = require("./src/models/customersModels");
+//       const chatRooms = await ChatRoom.find();
+//       const enrichedChatRooms = await Promise.all(
+//         chatRooms.map(async (room) => {
+//           const sender = await User.findOne({ MaKhachHang: room.senderId });
+//           return {
+//             ...room.toObject(),
+//             senderName: sender ? sender.TenKhachHang : "Unknown",
+//             senderAvatar: sender ? sender.Avatar || "" : "",
+//           };
+//         })
+//       );
+//       socket.emit("chatRoomsUpdated", enrichedChatRooms);
+//     } catch (error) {
+//       console.error("Lỗi khi lấy danh sách phòng chat:", error);
+//     }
+//   });
 
-  socket.on("joinRoom", async ({ roomCode, senderId, receiverId, receiverName }) => {
-    socket.join(roomCode);
-    console.log(`${socket.userName} đã tham gia phòng: ${roomCode}`);
+//   socket.on("joinRoom", async ({ roomCode, senderId, receiverId, receiverName }) => {
+//     socket.join(roomCode);
+//     console.log(`${socket.userName} đã tham gia phòng: ${roomCode}`);
 
-    try {
-      const ChatRoom = require("./src/models/messageModels");
-      const User = require("./src/models/customersModels");
-      let chatRoom = await ChatRoom.findOne({ roomCode });
+//     try {
+//       const ChatRoom = require("./src/models/messageModels");
+//       const User = require("./src/models/customersModels");
+//       let chatRoom = await ChatRoom.findOne({ roomCode });
 
-      if (!chatRoom) {
-        chatRoom = new ChatRoom({
-          roomCode,
-          senderId,
-          receiverId,
-          receiverName,
-          messages: [],
-          senderMessagesNotRead: [],
-          receiverMessagesNotRead: [],
-        });
-        await chatRoom.save();
-      }
-      // Lấy thông tin khách hàng từ bảng User
-      const sender = await User.findOne({ MaKhachHang: senderId });
-      const chatRoomWithUserInfo = {
-        ...chatRoom.toObject(),
-        senderName: sender ? sender.TenKhachHang : "",
-        senderAvatar: sender ? sender.Image || "" : "",
-      };
+//       if (!chatRoom) {
+//         chatRoom = new ChatRoom({
+//           roomCode,
+//           senderId,
+//           receiverId,
+//           receiverName,
+//           messages: [],
+//           senderMessagesNotRead: [],
+//           receiverMessagesNotRead: [],
+//         });
+//         await chatRoom.save();
+//       }
+//       // Lấy thông tin khách hàng từ bảng User
+//       const sender = await User.findOne({ MaKhachHang: senderId });
+//       const chatRoomWithUserInfo = {
+//         ...chatRoom.toObject(),
+//         senderName: sender ? sender.TenKhachHang : "",
+//         senderAvatar: sender ? sender.Image || "" : "",
+//       };
 
-      socket.emit("roomJoined", chatRoomWithUserInfo);
-    } catch (error) {
-      console.error("Lỗi khi tham gia/tạo phòng:", error);
-    }
-  });
+//       socket.emit("roomJoined", chatRoomWithUserInfo);
+//     } catch (error) {
+//       console.error("Lỗi khi tham gia/tạo phòng:", error);
+//     }
+//   });
 
-  socket.on("sendMessage", async (data) => {
-    const { roomCode, senderId, senderName, text, images } = data;
-    const message = {
-      text: text || "",
-      senderId,
-      senderN: senderName,
-      time: new Date(),
-      images: images || [],
-    };
+//   socket.on("sendMessage", async (data) => {
+//     const { roomCode, senderId, senderName, text, images } = data;
+//     const message = {
+//       text: text || "",
+//       senderId,
+//       senderN: senderName,
+//       time: new Date(),
+//       images: images || [],
+//     };
 
-    try {
-      const ChatRoom = require("./src/models/messageModels");
-      let chatRoom = await ChatRoom.findOne({ roomCode });
+//     try {
+//       const ChatRoom = require("./src/models/messageModels");
+//       let chatRoom = await ChatRoom.findOne({ roomCode });
 
-      if (chatRoom) {
-        chatRoom.messages.push(message);
-        if (chatRoom.senderId === senderId) {
-          chatRoom.receiverMessagesNotRead.push(message);
-        } else {
-          chatRoom.senderMessagesNotRead.push(message);
-        }
-        await chatRoom.save();
+//       if (chatRoom) {
+//         chatRoom.messages.push(message);
+//         if (chatRoom.senderId === senderId) {
+//           chatRoom.receiverMessagesNotRead.push(message);
+//         } else {
+//           chatRoom.senderMessagesNotRead.push(message);
+//         }
+//         await chatRoom.save();
 
-        // Phát tin nhắn real-time đến phòng
-        socketIO.to(roomCode).emit("receiveMessage", message);
+//         // Phát tin nhắn real-time đến phòng
+//         socketIO.to(roomCode).emit("receiveMessage", message);
 
-        // Phát cập nhật danh sách chatRooms cho tất cả client
-        const updatedChatRooms = await ChatRoom.find();
-        // Thêm thông tin khách hàng động vào danh sách phòng chat
-        const User = require("./src/models/customersModels");
-        const enrichedChatRooms = await Promise.all(
-          updatedChatRooms.map(async (room) => {
-            const sender = await User.findOne({ MaKhachHang: room.senderId });
-            return {
-              ...room.toObject(),
-              senderName: sender ? sender.TenKhachHang : "",
-              senderAvatar: sender ? sender.Image || "" : "",
-            };
-          })
-        );
-        socketIO.emit("chatRoomsUpdated", enrichedChatRooms);
-      } else {
-        console.log("Phòng chat không tồn tại");
-      }
-    } catch (error) {
-      console.error("Lỗi khi gửi tin nhắn:", error);
-    }
-  });
+//         // Phát cập nhật danh sách chatRooms cho tất cả client
+//         const updatedChatRooms = await ChatRoom.find();
+//         // Thêm thông tin khách hàng động vào danh sách phòng chat
+//         const User = require("./src/models/customersModels");
+//         const enrichedChatRooms = await Promise.all(
+//           updatedChatRooms.map(async (room) => {
+//             const sender = await User.findOne({ MaKhachHang: room.senderId });
+//             return {
+//               ...room.toObject(),
+//               senderName: sender ? sender.TenKhachHang : "",
+//               senderAvatar: sender ? sender.Image || "" : "",
+//             };
+//           })
+//         );
+//         socketIO.emit("chatRoomsUpdated", enrichedChatRooms);
+//       } else {
+//         console.log("Phòng chat không tồn tại");
+//       }
+//     } catch (error) {
+//       console.error("Lỗi khi gửi tin nhắn:", error);
+//     }
+//   });
 
-  socket.on("markAsRead", async ({ roomCode, userId }) => {
-    try {
-      const ChatRoom = require("./src/models/messageModels");
-      let chatRoom = await ChatRoom.findOne({ roomCode });
+//   socket.on("markAsRead", async ({ roomCode, userId }) => {
+//     try {
+//       const ChatRoom = require("./src/models/messageModels");
+//       let chatRoom = await ChatRoom.findOne({ roomCode });
 
-      if (chatRoom) {
-        if (chatRoom.senderId === userId) {
-          chatRoom.senderMessagesNotRead = [];
-        } else {
-          chatRoom.receiverMessagesNotRead = [];
-        }
-        await chatRoom.save();
+//       if (chatRoom) {
+//         if (chatRoom.senderId === userId) {
+//           chatRoom.senderMessagesNotRead = [];
+//         } else {
+//           chatRoom.receiverMessagesNotRead = [];
+//         }
+//         await chatRoom.save();
 
-        const User = require("./src/models/customersModels");
-        const sender = await User.findOne({ MaKhachHang: chatRoom.senderId });
-        const chatRoomWithUserInfo = {
-          ...chatRoom.toObject(),
-          senderName: sender ? sender.TenKhachHang : "",
-          senderAvatar: sender ? sender.Image || "" : "",
-        };
+//         const User = require("./src/models/customersModels");
+//         const sender = await User.findOne({ MaKhachHang: chatRoom.senderId });
+//         const chatRoomWithUserInfo = {
+//           ...chatRoom.toObject(),
+//           senderName: sender ? sender.TenKhachHang : "",
+//           senderAvatar: sender ? sender.Image || "" : "",
+//         };
 
-        socketIO.to(roomCode).emit("roomUpdated", chatRoomWithUserInfo);
-        const updatedChatRooms = await ChatRoom.find();
-        const enrichedChatRooms = await Promise.all(
-          updatedChatRooms.map(async (room) => {
-            const sender = await User.findOne({ MaKhachHang: room.senderId });
-            return {
-              ...room.toObject(),
-              senderName: sender ? sender.TenKhachHang : "",
-              senderAvatar: sender ? sender.Image || "" : "",
-            };
-          })
-        );
-        socketIO.emit("chatRoomsUpdated", enrichedChatRooms);
-      }
-    } catch (error) {
-      console.error("Lỗi khi đánh dấu đã đọc:", error);
-    }
-  });
+//         socketIO.to(roomCode).emit("roomUpdated", chatRoomWithUserInfo);
+//         const updatedChatRooms = await ChatRoom.find();
+//         const enrichedChatRooms = await Promise.all(
+//           updatedChatRooms.map(async (room) => {
+//             const sender = await User.findOne({ MaKhachHang: room.senderId });
+//             return {
+//               ...room.toObject(),
+//               senderName: sender ? sender.TenKhachHang : "",
+//               senderAvatar: sender ? sender.Image || "" : "",
+//             };
+//           })
+//         );
+//         socketIO.emit("chatRoomsUpdated", enrichedChatRooms);
+//       }
+//     } catch (error) {
+//       console.error("Lỗi khi đánh dấu đã đọc:", error);
+//     }
+//   });
 
-  socket.on("disconnect", () => {
-    console.log(`🔥: ${socket.userName} (ID: ${socket.userId}) đã ngắt kết nối`);
-  });
-});
+//   socket.on("disconnect", () => {
+//     console.log(`🔥: ${socket.userName} (ID: ${socket.userId}) đã ngắt kết nối`);
+//   });
+// });
 
-// API lấy danh sách phòng chat
-app.get("/api/chat", async (req, res) => {
-  try {
-    const ChatRoom = require("./src/models/messageModels");
-    const User = require("./src/models/customersModels");
-    const chatRooms = await ChatRoom.find();
-    const enrichedChatRooms = await Promise.all(
-      chatRooms.map(async (room) => {
-        const sender = await User.findOne({ MaKhachHang: room.senderId });
-        return {
-          ...room.toObject(),
-          senderName: sender ? sender.TenKhachHang : "",
-          senderAvatar: sender ? sender.Image || "" : "",
-        };
-      })
-    );
-    res.json(enrichedChatRooms);
-  } catch (error) {
-    res.status(500).json({ error: "Lỗi khi lấy danh sách phòng chat" });
-  }
-});
+// // API lấy danh sách phòng chat
+// app.get("/api/chat", async (req, res) => {
+//   try {
+//     const ChatRoom = require("./src/models/messageModels");
+//     const User = require("./src/models/customersModels");
+//     const chatRooms = await ChatRoom.find();
+//     const enrichedChatRooms = await Promise.all(
+//       chatRooms.map(async (room) => {
+//         const sender = await User.findOne({ MaKhachHang: room.senderId });
+//         return {
+//           ...room.toObject(),
+//           senderName: sender ? sender.TenKhachHang : "",
+//           senderAvatar: sender ? sender.Image || "" : "",
+//         };
+//       })
+//     );
+//     res.json(enrichedChatRooms);
+//   } catch (error) {
+//     res.status(500).json({ error: "Lỗi khi lấy danh sách phòng chat" });
+//   }
+// });
 
 passport.deserializeUser(async (id, done) => {
   try {
