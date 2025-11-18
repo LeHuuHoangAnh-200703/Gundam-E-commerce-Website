@@ -47,7 +47,7 @@ const socketIO = new Server(server, {
   cors: {
     // Thêm domain Netlify của bạn vào đây
     origin: [
-        "http://localhost:5173", 
+        // "http://localhost:5173", 
         "https://c3gundam-ecommercewebsite.netlify.app"
     ],
     methods: ["GET", "POST"],
@@ -63,7 +63,7 @@ cloudinary.config({
 
 app.use(cors({
     origin: [
-        "http://localhost:5173", 
+        // "http://localhost:5173", 
         "https://c3gundam-ecommercewebsite.netlify.app"
     ],
     credentials: true
@@ -408,12 +408,12 @@ passport.use(new GoogleStrategy({
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/login?googleSuccess=false' }),
+  passport.authenticate('google', { failureRedirect: 'https://c3gundam-ecommercewebsite.netlify.app/login?googleSuccess=false' }),
   (req, res) => {
     if (req.user && req.user.MaKhachHang) {
-      res.redirect(`http://localhost:5173/login/?maKhachHang=${req.user.MaKhachHang}&googleSuccess=true`);
+      res.redirect(`https://c3gundam-ecommercewebsite.netlify.app/login/?maKhachHang=${req.user.MaKhachHang}&googleSuccess=true`);
     } else {
-      res.redirect('http://localhost:5173/login?googleSuccess=false');
+      res.redirect('https://c3gundam-ecommercewebsite.netlify.app/login?googleSuccess=false');
     }
   }
 );
