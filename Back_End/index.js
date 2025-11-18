@@ -48,7 +48,7 @@ const socketIO = new Server(server, {
     // Thêm domain Netlify của bạn vào đây
     origin: [
         "http://localhost:5173", 
-        "https://c3gundam-ecommercewebsite.netlify.app/"
+        "https://c3gundam-ecommercewebsite.netlify.app"
     ],
     methods: ["GET", "POST"],
     credentials: true
@@ -64,7 +64,7 @@ cloudinary.config({
 app.use(cors({
     origin: [
         "http://localhost:5173", 
-        "https://c3gundam-ecommercewebsite.netlify.app/"
+        "https://c3gundam-ecommercewebsite.netlify.app"
     ],
     credentials: true
 }));
