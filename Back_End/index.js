@@ -39,14 +39,19 @@ const OTP = require("./src/models/otpModels");
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 // Khởi tạo Socket.IO
 const socketIO = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    // Thêm domain Netlify của bạn vào đây
+    origin: [
+        "http://localhost:5173", 
+        "https://c3gundam-ecommercewebsite.netlify.app/"
+    ],
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
@@ -56,7 +61,13 @@ cloudinary.config({
     api_secret: '6gAWhCMdI8DfBAs-1ZDwwx1xM0Y'
 });
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:5173", 
+        "https://c3gundam-ecommercewebsite.netlify.app/"
+    ],
+    credentials: true
+}));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(session({
