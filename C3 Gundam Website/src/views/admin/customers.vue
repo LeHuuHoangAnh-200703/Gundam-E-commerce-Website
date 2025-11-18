@@ -10,6 +10,11 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 pdfMake.vfs = pdfFonts;
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listCustomers = ref([]);
 const searchValue = ref('');
 const showReasonDialog = ref(false);
@@ -78,7 +83,8 @@ const handleDialogClose = () => {
 };
 const fetchCustomers = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/khachhang');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang`);
         listCustomers.value = response.data.map(customer => {
             return {
                 ...customer,
@@ -142,14 +148,16 @@ const performAccountUpdate = async (currentStatus, maKhachHang, email, tenKhachH
             requestData.LyDoKhoa = lyDoKhoa;
         }
 
+        // SỬA 2: Dùng API_URL (Cập nhật trạng thái)
         const response = await axios.patch(
-            `http://localhost:3000/api/khachhang/tinhtrangtaikhoan/${maKhachHang}`,
+            `${API_URL}/api/khachhang/tinhtrangtaikhoan/${maKhachHang}`,
             requestData
         );
 
         if (currentStatus === 'Đang sử dụng' && nextStatus === 'Vô hiệu hóa') {
             try {
-                await axios.post(`http://localhost:3000/api/khachhang/guimail?email=${email}`, {
+                // SỬA 3: Dùng API_URL (Gửi mail khóa tài khoản)
+                await axios.post(`${API_URL}/api/khachhang/guimail?email=${email}`, {
                     customerName: tenKhachHang,
                     reason: lyDoKhoa
                 });
@@ -165,7 +173,8 @@ const performAccountUpdate = async (currentStatus, maKhachHang, email, tenKhachH
             ThoiGian: new Date(),
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 4: Dùng API_URL (Thêm thông báo)
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
         await fetchCustomers();
 
         const message = nextStatus === 'Vô hiệu hóa'
@@ -521,7 +530,6 @@ const exportTop3CustomersPDF = () => {
                             fontSize: 16,
                             bold: true,
                             color: '#34495e',
-                            alignment: 'center',
                             background: '#ecf0f1',
                             margin: [0, 5, 0, 5]
                         },

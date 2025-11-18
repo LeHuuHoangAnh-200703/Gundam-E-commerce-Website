@@ -8,6 +8,12 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listOrders = ref([]);
 const idDonHang = ref('');
 const selectedProduct = ref(null);
@@ -48,7 +54,8 @@ const escapeHtml = (unsafe) => {
 
 const fetchOrder = async (maDonHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/donhang/${maDonHang}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/donhang/${maDonHang}`);
         listOrders.value = response.data.SanPhamDaMua;
         formData.value.idCustomer = response.data.MaKhachHang;
         
@@ -61,7 +68,8 @@ const fetchOrder = async (maDonHang) => {
 
 const checkOrderReviewStatus = async (maDonHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/danhgia/order-status/${maDonHang}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/danhgia/order-status/${maDonHang}`);
         const reviewedProductIds = response.data.products
             .filter(product => product.isReviewed)
             .map(product => product.maSanPham);
@@ -141,7 +149,8 @@ const createFeedBack = async () => {
             dataToSend.append('HinhAnhSanPham', image);
         });
 
-        const response = await axios.post('http://localhost:3000/api/danhgia', dataToSend);
+        // SỬA 3: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/danhgia`, dataToSend);
         showNotification(response.data.message, "success");
         
         // Thêm sản phẩm vào danh sách đã đánh giá

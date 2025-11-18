@@ -12,6 +12,12 @@ import NotificationClient from '@/components/Notification/NotificationClient.vue
 import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 
 const router = useRouter()
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listAddress = ref([]);
 const listDiscountCodes = ref([]);
 const discountCodeWithCustomer = ref([]);
@@ -71,7 +77,8 @@ const handleDialogClose = () => {
 
 const fetchDiscountCode = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/magiamgia');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/magiamgia`);
         listDiscountCodes.value = response.data.map(discountCode => {
             return {
                 ...discountCode
@@ -83,7 +90,8 @@ const fetchDiscountCode = async () => {
 }
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
         listAddress.value = response.data.DanhSachDiaChi;
         maKhachHang.value = response.data.MaKhachHang;
         const customerDiscountIds = Array.isArray(response.data.DanhSachMaGiamGia)
@@ -110,7 +118,8 @@ const deleteLocation = async (maKhachHang, id) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/khachhang/diachi/${maKhachHang}/${id}`);
+                // SỬA 3: Dùng API_URL
+                const response = await axios.delete(`${API_URL}/api/khachhang/diachi/${maKhachHang}/${id}`);
                 showNotification("Xóa địa chỉ thành công!", "success");
                 setTimeout(() => {
                     router.push('/profile');
@@ -134,7 +143,8 @@ const deleteDiscountCode = async (maKhachHang, idMaGiamGia) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/khachhang/magiamgia/${maKhachHang}/${idMaGiamGia}`);
+                // SỬA 4: Dùng API_URL
+                const response = await axios.delete(`${API_URL}/api/khachhang/magiamgia/${maKhachHang}/${idMaGiamGia}`);
                 showNotification("Xóa mã giảm giá thành công!", "success");
                 setTimeout(() => {
                     router.push('/profile');

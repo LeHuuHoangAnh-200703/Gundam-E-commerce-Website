@@ -9,6 +9,11 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Lấy link từ file .env hoặc Netlify. Nếu không có thì dùng localhost.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -85,14 +90,18 @@ const addCommunityPost = async () => {
         dataToSend.append('NoiDung', formData.value.content);
         dataToSend.append('MaKhachHang', router.currentRoute.value.params.maKhachHang);
         dataToSend.append('LoaiBaiDang', formData.value.category);
+        dataToSend.append('HinhAnh', img);
         formData.value.image.forEach(img => {
             dataToSend.append('HinhAnh', img);
         });
-        const response = await axios.post("http://localhost:3000/api/baidang", dataToSend, {
+
+        // SỬA 1: Thay localhost bằng API_URL
+        const response = await axios.post(`${API_URL}/api/baidang`, dataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
+
         const nameCustomer = localStorage.getItem('TenKhachHang');
         const ThoiGian = new Date();
 
@@ -102,14 +111,16 @@ const addCommunityPost = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 2: Thay localhost bằng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification("Đăng bài thành công và chờ duyệt!", "success");
         setTimeout(() => {
             router.push('/communityPost');
         }, 3000);
     } catch (error) {
-        showNotification(err.response?.data?.message || "Thêm bài đăng thất bại!", "success");
+        // SỬA 3: Đổi 'err' thành 'error' cho khớp với khai báo catch(error)
+        showNotification(error.response?.data?.message || "Thêm bài đăng thất bại!", "error"); // Đổi type thành 'error' cho đúng ngữ cảnh
     }
     setTimeout(() => {
         notification.value.message = '';

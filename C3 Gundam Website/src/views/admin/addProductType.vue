@@ -7,6 +7,12 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -62,7 +68,8 @@ const addProductType = async () => {
             LoaiSanPham: formData.value.productType
         };
 
-        const response = await axios.post('http://localhost:3000/api/loaisanpham', dataToSend);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/loaisanpham`, dataToSend);
 
         const notificationData = {
             ThongBao: `Vừa thêm loại sản phẩm ${formData.value.nameProductType}`,
@@ -70,7 +77,8 @@ const addProductType = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 2: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification(response.data.message, "success");
         setTimeout(() => {
@@ -78,7 +86,7 @@ const addProductType = async () => {
         }, 2000);
     } catch (error) {
         console.log(error.message)
-        showNotification(error.response?.data?.message || "Thêm nhà cung cấp thất bại! Vui lòng kiểm tra lại thông tin.", "error");
+        showNotification(error.response?.data?.message || "Thêm loại sản phẩm thất bại! Vui lòng kiểm tra lại thông tin.", "error");
     }
     setTimeout(() => {
         notification.value.message = '';

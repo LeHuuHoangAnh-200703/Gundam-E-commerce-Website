@@ -6,12 +6,20 @@ import { io } from "socket.io-client";
 const router = useRouter();
 const hasUnreadMessages = ref(false); // Biến để theo dõi tin nhắn chưa đọc
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+// -------------------------
+
 // Kết nối Socket.IO
-const socket = io("http://localhost:3000", {
+// SỬA 1: Dùng SOCKET_URL thay vì localhost cứng
+const socket = io(SOCKET_URL, {
     auth: {
         userId: localStorage.getItem('MaKhachHang'),
         userName: localStorage.getItem('TenKhachHang')
     },
+    transports: ['websocket', 'polling'],
+    withCredentials: true
 });
 
 const chatBox = () => {
@@ -52,7 +60,6 @@ onMounted(() => {
 onUnmounted(() => {
     socket.disconnect();
 });
-
 </script>
 
 <template>

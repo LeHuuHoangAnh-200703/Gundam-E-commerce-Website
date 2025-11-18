@@ -8,6 +8,11 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const TenAdmin = localStorage.getItem("TenAdmin");
 const MaAdmin = localStorage.getItem("MaAdmin");
 const ThoiGian = new Date();
@@ -37,7 +42,8 @@ const showNotification = (msg, type) => {
 
 const fetchSuppliers = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/nhacungcap');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/nhacungcap`);
         listSuppliers.value = response.data.map(supplier => {
             return {
                 ...supplier,
@@ -73,14 +79,17 @@ const addEntryForm = async () => {
             NgayNhap: ThoiGian,
         }
 
-        const response = await axios.post('http://localhost:3000/api/phieunhap', dataToSend);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/phieunhap`, dataToSend);
+        
         const notificationData = {
             ThongBao: `${TenAdmin} vừa tạo phiếu nhập kho sản phẩm.`,
             NguoiChinhSua: TenAdmin,
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 3: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification("Thêm phiếu nhập thành công!", "success");
         fetchEntryForm();
@@ -94,7 +103,8 @@ const addEntryForm = async () => {
 
 const fetchEntryForm = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/phieunhap');
+        // SỬA 4: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/phieunhap`);
         listEntryForms.value = response.data.map(entryForm => {
             return {
                 ...entryForm,
@@ -109,7 +119,8 @@ const fetchEntryForm = async () => {
 
 const checkQuantityEntryForms = async (idPhieuNhap) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/phieunhap/kiemtra/${idPhieuNhap}`);
+        // SỬA 5: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/phieunhap/kiemtra/${idPhieuNhap}`);
         if (response.data.results) {
             showNotification("Đã có thông tin nhập kho, không thể sửa!", "error");
             return;
@@ -131,7 +142,8 @@ const fetchEntryformByDayMonth = async () => {
         if (filterMonth.value) params.month = filterMonth.value;
         if (filterDay.value) params.day = filterDay.value;
 
-        const response = await axios.get('http://localhost:3000/api/phieunhap/locphieunhap/ngaythangnam', { params });
+        // SỬA 6: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/phieunhap/locphieunhap/ngaythangnam`, { params });
         listEntryForms.value = response.data.map(entryform => ({
             ...entryform,
             NgayNhap: new Date(entryform.NgayNhap)

@@ -14,6 +14,11 @@ pdfMake.vfs = pdfFonts;
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
 
@@ -86,7 +91,8 @@ const handleDialogClose = () => {
 
 const fetchEntryForm = async (idPhieuNhap) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/phieunhap/${idPhieuNhap}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/phieunhap/${idPhieuNhap}`);
         idEntryForm.value = response.data.MaPhieuNhap;
         idSupplier.value = response.data.MaNhaCungCap;
         timeEntryForm.value = new Date(response.data.NgayNhap);
@@ -97,7 +103,8 @@ const fetchEntryForm = async (idPhieuNhap) => {
 
 const fetchProducts = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/sanpham');
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham`);
         listProducts.value = response.data.filter(product => product.MaNhaCungCap === idSupplier.value
             && product.TrangThai !== 'Ngừng kinh doanh'
         );
@@ -153,7 +160,8 @@ const addEntryFormInfo = async () => {
             confirmText: 'Xác nhận',
             cancelText: 'Hủy bỏ',
             onConfirm: async () => {
-                const response = await axios.post('http://localhost:3000/api/chitietphieunhap', dataToSend);
+                // SỬA 3: Dùng API_URL
+                const response = await axios.post(`${API_URL}/api/chitietphieunhap`, dataToSend);
 
                 const notificationData = {
                     ThongBao: `Chi tiết phiếu nhập ${idEntryForm.value} vừa được thêm.`,
@@ -161,7 +169,8 @@ const addEntryFormInfo = async () => {
                     ThoiGian: ThoiGian,
                 };
 
-                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                // SỬA 4: Dùng API_URL
+                await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
                 showNotification("Thêm chi tiết phiếu nhập thành công!", "success");
                 fetchEntryFormInfos();
@@ -178,7 +187,8 @@ const addEntryFormInfo = async () => {
 
 const fetchEntryFormInfos = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/chitietphieunhap');
+        // SỬA 5: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/chitietphieunhap`);
         listEntryFormInfos.value = response.data
             .filter(entryFormInfo => entryFormInfo.MaPhieuNhap === idEntryForm.value)
             .map(entryFormInfo => {
@@ -203,7 +213,8 @@ const exportToPDF = async (maPN) => {
         onConfirm: async () => {
             try {
                 // Lấy dữ liệu chi tiết phiếu nhập
-                const response = await axios.get(`http://localhost:3000/api/chitietphieunhap/phieunhap/${maPN}`);
+                // SỬA 6: Dùng API_URL
+                const response = await axios.get(`${API_URL}/api/chitietphieunhap/phieunhap/${maPN}`);
                 const data = response.data;
 
                 if (!Array.isArray(data) || data.length === 0) {
@@ -212,11 +223,13 @@ const exportToPDF = async (maPN) => {
                 }
 
                 // Lấy thông tin phiếu nhập
-                const phieuNhapResponse = await axios.get(`http://localhost:3000/api/phieunhap/${maPN}`);
+                // SỬA 7: Dùng API_URL
+                const phieuNhapResponse = await axios.get(`${API_URL}/api/phieunhap/${maPN}`);
                 const phieuNhapInfo = phieuNhapResponse.data;
 
                 // Lấy thông tin nhà cung cấp
-                const nhaCungCapResponse = await axios.get(`http://localhost:3000/api/nhacungcap/${phieuNhapInfo.MaNhaCungCap}`);
+                // SỬA 8: Dùng API_URL
+                const nhaCungCapResponse = await axios.get(`${API_URL}/api/nhacungcap/${phieuNhapInfo.MaNhaCungCap}`);
                 const nhaCungCapInfo = nhaCungCapResponse.data;
 
                 // Tính tổng tiền

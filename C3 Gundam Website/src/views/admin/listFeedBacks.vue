@@ -5,13 +5,20 @@ import SideBar from "@/components/admin/SideBar.vue";
 import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from 'axios';
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const comments = ref([]);
 const searchValue = ref("");
 const selectedStar = ref(6);
 const isToxic = ref(null);
+
 const fetchFeedBacks = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/danhgia');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/danhgia`);
         comments.value = response.data.map(feedback => {
             return {
                 ...feedback,

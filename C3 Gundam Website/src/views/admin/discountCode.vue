@@ -7,6 +7,11 @@ import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from "axios";
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listDiscountCodes = ref([]);
 const searchValue = ref('');
 const TenAdmin = localStorage.getItem("TenAdmin");
@@ -67,7 +72,8 @@ const handleDialogClose = () => {
 
 const fetchDiscountCode = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/magiamgia');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/magiamgia`);
         listDiscountCodes.value = response.data.map(discountCode => {
             return {
                 ...discountCode,
@@ -91,7 +97,8 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/magiamgia/${idMaGG}`);
+                // SỬA 2: Dùng API_URL
+                const response = await axios.delete(`${API_URL}/api/magiamgia/${idMaGG}`);
 
                 const notificationData = {
                     ThongBao: `Vừa xóa mã giảm giá ${tenMaGG.toLowerCase()}`,
@@ -99,12 +106,14 @@ const deleteDiscountCode = async (idMaGG, tenMaGG) => {
                     ThoiGian: ThoiGian,
                 };
 
-                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                // SỬA 3: Dùng API_URL
+                await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
                 showNotification("Xóa mã giảm giá thành công!", "success");
-                setTimeout(() => {
-                    router.push('/admin/discountCode');
-                }, 3000);
+                // setTimeout(() => {
+                //     router.push('/admin/discountCode');
+                // }, 3000);
+                await fetchDiscountCode(); // Refresh danh sách ngay lập tức thay vì reload trang
             } catch (err) {
                 showNotification(err.response?.data?.message || "Xóa mã mã giảm giá thất bại!", "error");
             }

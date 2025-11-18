@@ -6,6 +6,12 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -37,7 +43,8 @@ const formData = ref({
 
 const fetchDiscountCode = async (idMaGG) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/magiamgia/${idMaGG}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/magiamgia/${idMaGG}`);
         formData.value.idCode = response.data.IdMaGiamGia;
         formData.value.nameCode = response.data.TenMaGiamGia;
         formData.value.applyToOrders = response.data.GiaApDung;
@@ -117,7 +124,8 @@ const editDiscountCode = async () => {
             dataToSend.GiamTien = formData.value.decreaseMoney;
         }
 
-        const response = await axios.put(`http://localhost:3000/api/magiamgia/${formData.value.idCode}`, dataToSend);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.put(`${API_URL}/api/magiamgia/${formData.value.idCode}`, dataToSend);
 
         const notificationData = {
             ThongBao: `Vừa cập nhật mã giảm giá ${formData.value.nameCode.toLowerCase()}`,
@@ -125,7 +133,8 @@ const editDiscountCode = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 3: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         notification.value = {
             message: "Cập nhật mã giảm giá thành công!",

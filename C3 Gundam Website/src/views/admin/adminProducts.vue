@@ -7,6 +7,11 @@ import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import JsBarcode from 'jsbarcode';
 import axios from 'axios';
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listProducts = ref([]);
 const searchValue = ref('');
 const selectedType = ref('');
@@ -70,7 +75,8 @@ const showNotification = (msg, type) => {
 
 const fetchProducts = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/sanpham');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham`);
         listProducts.value = response.data.map(product => {
             return {
                 ...product,
@@ -89,7 +95,8 @@ const fetchProducts = async () => {
 
 const fetchProductType = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/loaisanpham");
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/loaisanpham`);
         listProductTypes.value = response.data.map(producttype => {
             return {
                 ...producttype
@@ -111,7 +118,8 @@ const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.patch(`http://localhost:3000/api/sanpham/${maSanPham}`, {
+                // SỬA 3: Dùng API_URL
+                const response = await axios.patch(`${API_URL}/api/sanpham/${maSanPham}`, {
                     TrangThai: nextStatus,
                 });
 
@@ -121,7 +129,8 @@ const updateStatus = async (maSanPham, newStatus, tenSanPham) => {
                     ThoiGian: ThoiGian,
                 };
 
-                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                // SỬA 4: Dùng API_URL
+                await axios.post(`${API_URL}/api/thongbao`, notificationData);
                 await fetchProducts();
                 showNotification("Cập nhật trạng thái thành công!", "success");
             } catch (error) {

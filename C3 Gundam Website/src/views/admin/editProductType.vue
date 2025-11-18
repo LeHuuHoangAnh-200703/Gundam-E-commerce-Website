@@ -7,6 +7,12 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -40,7 +46,8 @@ const showNotification = (msg, type) => {
 
 const fetchProductType = async (maLoaiSanPham) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/loaisanpham/${maLoaiSanPham}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/loaisanpham/${maLoaiSanPham}`);
         formData.value.nameProductType = response.data.TenLoaiSanPham;
         formData.value.productType = response.data.LoaiSanPham;
         formData.value.idProductType = response.data.MaLoaiSanPham;
@@ -74,7 +81,8 @@ const editProductType = async () => {
             LoaiSanPham: formData.value.productType
         };
 
-        const response = await axios.put(`http://localhost:3000/api/loaisanpham/${formData.value.idProductType}`, dataToSend);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.put(`${API_URL}/api/loaisanpham/${formData.value.idProductType}`, dataToSend);
 
         const notificationData = {
             ThongBao: `Vừa chỉnh sửa loại sản phẩm ${formData.value.nameProductType}`,
@@ -82,7 +90,8 @@ const editProductType = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 3: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification(response.data.message, "success");
         setTimeout(() => {

@@ -11,6 +11,11 @@ import ChatBot from "../../components/client/ChatBot.vue";
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const arrange = ref([
     {
         name: "Bán chạy nhất",
@@ -53,7 +58,8 @@ const handleSearch = (query) => {
 
 const fectchProducts = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/sanpham");
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham`);
         listProducts.value = response.data.map((product) => {
             return {
                 ...product,
@@ -83,7 +89,8 @@ const fectchProducts = async () => {
 
 const fetchProductType = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/loaisanpham");
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/loaisanpham`);
         listProductTypes.value = response.data.map((productType) => {
             return {
                 ...productType,
@@ -105,8 +112,9 @@ const addToCart = async (idProDuct) => {
         return;
     }
     try {
+        // SỬA 3: Dùng API_URL
         const response = await axios.post(
-            `http://localhost:3000/api/giohang/${idProDuct}`,
+            `${API_URL}/api/giohang/${idProDuct}`,
             {
                 MaKhachHang: maKhachHang,
             }

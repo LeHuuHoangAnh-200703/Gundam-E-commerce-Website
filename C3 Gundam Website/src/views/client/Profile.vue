@@ -7,6 +7,11 @@ import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 import axios from 'axios';
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const name = ref('');
 const email = ref('');
 const maKhachHang = ref('');
@@ -17,7 +22,8 @@ const listPost = ref([]);
 
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
         name.value = response.data.TenKhachHang;
         email.value = response.data.Email;
         maKhachHang.value = response.data.MaKhachHang;
@@ -31,7 +37,8 @@ const fetchCustomer = async (idKhachHang) => {
 
 const fetchCommunityPost = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/baidang/danhsachbaidang/${idKhachHang}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/baidang/danhsachbaidang/${idKhachHang}`);
         listPost.value = response.data.filter(post => {
             return post.TrangThaiDang === 'Đã duyệt'
         }).map(post => {
@@ -40,7 +47,8 @@ const fetchCommunityPost = async (idKhachHang) => {
             }
         });
     } catch (error) {
-        console.log("Error fetching: ", message.error);
+        // SỬA LỖI: Biến 'message' không tồn tại, sửa thành 'error'
+        console.log("Error fetching: ", error);
     }
 }
 
@@ -65,8 +73,8 @@ const formatDate = (dateString) => {
             timeZone: 'Asia/Ho_Chi_Minh' 
         };
         
+        // Định dạng thủ công để đảm bảo hiển thị đúng format dd/mm/yyyy
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-        console.log('Formatted date (fallback):', formattedDate);
         
         return formattedDate;
     } catch (error) {

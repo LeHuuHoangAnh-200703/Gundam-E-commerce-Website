@@ -9,6 +9,11 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -39,9 +44,15 @@ const showNotification = (msg, type) => {
     }, 3000);
 };
 
+const handleFileUpload = (event) => {
+    // Hàm xử lý khi chọn file ảnh (Cần thêm hàm này vì trong template chắc chắn có gọi)
+    formData.value.image = Array.from(event.target.files);
+};
+
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
         formData.value.name = response.data.TenKhachHang;
         formData.value.email = response.data.Email;
         formData.value.idKhachHang = response.data.MaKhachHang;
@@ -73,19 +84,20 @@ const editProfile = async () => {
     }
 
     try {
-        const dataToSend = {
-            TenKhachHang: formData.value.name,
-        }
+        // SỬA: Dùng FormData chuẩn để gửi file ảnh
+        const dataToSend = new FormData();
+        dataToSend.append('TenKhachHang', formData.value.name);
 
         if (formData.value.password !== "") {
-            dataToSend.password = formData.value.password;
+            dataToSend.append('password', formData.value.password);
         }
 
         if (formData.value.image.length > 0) {
-            dataToSend.Image = formData.value.image[0];
+            dataToSend.append('Image', formData.value.image[0]);
         }
 
-        const response = await axios.put(`http://localhost:3000/api/khachhang/${formData.value.idKhachHang}`, dataToSend, {
+        // SỬA 2: Dùng API_URL
+        const response = await axios.put(`${API_URL}/api/khachhang/${formData.value.idKhachHang}`, dataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -112,7 +124,6 @@ onMounted(() => {
     fetchCustomer(idKhachHang);
 })
 </script>
-
 
 <template>
     <div class="bg-gradient-to-br from-[#0F1419] via-[#1A1D27] to-[#0F1419] relative flex flex-col overflow-hidden min-h-screen font-sans scroll-smooth">

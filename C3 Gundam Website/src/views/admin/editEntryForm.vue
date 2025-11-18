@@ -8,6 +8,11 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const TenAdmin = localStorage.getItem("TenAdmin");
 const MaAdmin = localStorage.getItem("MaAdmin");
 const ThoiGian = new Date();
@@ -33,7 +38,8 @@ const showNotification = (msg, type) => {
 
 const fetchSuppliers = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/nhacungcap');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/nhacungcap`);
         listSuppliers.value = response.data.map(supplier => {
             return {
                 ...supplier,
@@ -46,7 +52,8 @@ const fetchSuppliers = async () => {
 
 const fetchEntryForm = async (idPhieuNhap) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/phieunhap/${idPhieuNhap}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/phieunhap/${idPhieuNhap}`);
         formData.value.idSupplier = response.data.MaNhaCungCap;
         formData.value.idEntryForm = response.data.MaPhieuNhap;
         const date = new Date(response.data.NgayNhap);
@@ -80,7 +87,9 @@ const editEntryForm = async () => {
             MaNhanVien: MaAdmin,
             TenNhanVien: TenAdmin,
         }
-        const response = await axios.put(`http://localhost:3000/api/phieunhap/${formData.value.idEntryForm}`, dataToSend);
+        
+        // SỬA 3: Dùng API_URL
+        const response = await axios.put(`${API_URL}/api/phieunhap/${formData.value.idEntryForm}`, dataToSend);
         
         const notificationData = {
             ThongBao: `${TenAdmin} vừa cập nhật phiếu nhập.`,
@@ -88,7 +97,8 @@ const editEntryForm = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 4: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
         
         showNotification("Cập nhật phiếu nhập thành công!", "success");
         setTimeout(() => {

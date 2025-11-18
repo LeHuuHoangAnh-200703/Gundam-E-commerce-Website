@@ -12,6 +12,11 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 // Gán font cho pdfMake
 pdfMake.vfs = pdfFonts;
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const options = [
     {
         name: "Tất cả đơn hàng",
@@ -86,7 +91,8 @@ const selectTypeOrders = (type) => {
 
 const fetchOrders = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/donhang');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/donhang`);
         listOrders.value = response.data.map(order => {
             return {
                 ...order,
@@ -191,7 +197,8 @@ const handleStatusChange = (maDonHang, currentStatus, newStatus) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.patch(`http://localhost:3000/api/donhang/trangthai/${maDonHang}`, {
+                // SỬA 2: Dùng API_URL
+                const response = await axios.patch(`${API_URL}/api/donhang/trangthai/${maDonHang}`, {
                     newStatus: newStatus,
                 });
 
@@ -202,7 +209,8 @@ const handleStatusChange = (maDonHang, currentStatus, newStatus) => {
                 };
 
                 // Lưu thông báo vào database
-                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                // SỬA 3: Dùng API_URL
+                await axios.post(`${API_URL}/api/thongbao`, notificationData);
                 
                 // Cập nhật trạng thái trực tiếp trong mảng để tránh phải fetch lại toàn bộ
                 const orderIndex = listOrders.value.findIndex(order => order.MaDonHang === maDonHang);
@@ -228,7 +236,8 @@ const fetchOrderByDayMonth = async () => {
         if (filterMonth.value) params.month = filterMonth.value;
         if (filterDay.value) params.day = filterDay.value;
 
-        const response = await axios.get('http://localhost:3000/api/donhang/locdonhang/ngaythangnam', { params });
+        // SỬA 4: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/donhang/locdonhang/ngaythangnam`, { params });
         listOrders.value = response.data.map(order => ({
             ...order,
             NgayDatHang: new Date(order.NgayDatHang)

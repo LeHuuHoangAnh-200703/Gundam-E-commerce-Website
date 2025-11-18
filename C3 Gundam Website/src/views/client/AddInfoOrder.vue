@@ -9,6 +9,11 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -46,7 +51,8 @@ const showNotification = (msg, type) => {
 
 const fetchProvinces = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/location/provinces');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/location/provinces`);
         provinces.value = response.data;
         console.log(response.data)
     } catch (error) {
@@ -56,7 +62,8 @@ const fetchProvinces = async () => {
 
 const fetchDistricts = async (provinceId) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/location/districts?province_id=${provinceId}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/location/districts?province_id=${provinceId}`);
         districts.value = response.data;
         wards.value = [];
     } catch (error) {
@@ -66,7 +73,8 @@ const fetchDistricts = async (provinceId) => {
 
 const fetchWards = async (districtId) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/location/wards?district_id=${districtId}`);
+        // SỬA 3: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/location/wards?district_id=${districtId}`);
         wards.value = response.data;
     } catch (error) {
         console.error("Error fetching wards:", error);
@@ -75,7 +83,8 @@ const fetchWards = async (districtId) => {
 
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        // SỬA 4: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
         formData.value.idKhachHang = response.data.MaKhachHang;
     } catch (err) {
         console.log("Error fetching: ", err);
@@ -140,7 +149,9 @@ const addInfoOrder = async () => {
 
     try {
         const fullAddress = `${selectedWard.value.name}, ${selectedDistrict.value.name}, ${selectedProvince.value.name}`;
-        const response = await axios.post(`http://localhost:3000/api/khachhang/thongtin/${formData.value.idKhachHang}`, {
+        
+        // SỬA 5: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/thongtin/${formData.value.idKhachHang}`, {
             TenNguoiNhan: formData.value.name,
             DienThoai: formData.value.phone,
             DiaChi: fullAddress

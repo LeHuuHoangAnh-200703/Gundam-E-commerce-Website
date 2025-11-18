@@ -7,6 +7,11 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -39,7 +44,8 @@ const showNotification = (msg, type) => {
 
 const fectchSupplier = async (maNCC) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/nhacungcap/${maNCC}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/nhacungcap/${maNCC}`);
         formData.value.idSupplier = response.data.MaNhaCungCap;
         formData.value.nameSupplier = response.data.TenNhaCungCap;
         formData.value.phone = response.data.DienThoai;
@@ -85,14 +91,17 @@ const editSupplier = async () => {
             DiaChi: formData.value.address,
         };
 
-        const response = await axios.put(`http://localhost:3000/api/nhacungcap/${formData.value.idSupplier}`, dataToSend);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.put(`${API_URL}/api/nhacungcap/${formData.value.idSupplier}`, dataToSend);
+        
         const notificationData = {
             ThongBao: `Nhà cung cấp ${formData.value.nameSupplier} vừa được cập nhật thông tin.`,
             NguoiChinhSua: TenAdmin,
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 3: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification("Cập nhật thông tin thành công!", "success");
         setTimeout(() => {

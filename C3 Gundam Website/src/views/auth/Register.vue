@@ -4,6 +4,11 @@ import axios from 'axios';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import { useRouter } from 'vue-router';
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -71,7 +76,8 @@ const sendOTP = async () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:3000/api/khachhang/send-otp', {
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/send-otp`, {
             email: formData.value.emailCustomer
         });
         showNotification(response.data.message, "success");
@@ -129,7 +135,8 @@ const verifyOtpAndRegister = async () => {
     }
 
     try {
-        const otpResponse = await axios.post("http://localhost:3000/api/khachhang/verify-otp", {
+        // SỬA 2: Dùng API_URL (Verify OTP)
+        const otpResponse = await axios.post(`${API_URL}/api/khachhang/verify-otp`, {
             email: formData.value.emailCustomer,
             otp: otp.value,
         });
@@ -142,7 +149,8 @@ const verifyOtpAndRegister = async () => {
                 NgayTao: new Date()
             };
 
-            const response = await axios.post('http://localhost:3000/api/khachhang', dataToSend);
+            // SỬA 3: Dùng API_URL (Register)
+            const response = await axios.post(`${API_URL}/api/khachhang`, dataToSend);
             showNotification("Đăng ký tài khoản thành công!", "success");
             setTimeout(() => {
                 router.push('/login');
@@ -157,7 +165,8 @@ const verifyOtpAndRegister = async () => {
 };
 
 const loginWithGoogle = () => {
-  window.location.href = 'http://localhost:3000/auth/google';
+    // SỬA 4: Dùng API_URL (Google Login Redirect)
+    window.location.href = `${API_URL}/auth/google`;
 };
 </script>
 

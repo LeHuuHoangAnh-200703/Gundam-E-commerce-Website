@@ -9,6 +9,12 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const maDonHang = ref('');
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const notification = ref({
     message: '',
     type: ''
@@ -26,12 +32,15 @@ onMounted(async () => {
     const responseCode = urlParams.get('vnp_ResponseCode');
     const transactionNo = urlParams.get('vnp_TransactionNo');
     maDonHang.value = urlParams.get('vnp_TxnRef');
+
     if (responseCode) {
         try {
             // Gọi API backend để xử lý kết quả thanh toán
-            await axios.get('http://localhost:3000/api/thanhtoanvnp/vnpay-return', {
+            // SỬA 1: Dùng API_URL thay vì localhost
+            await axios.get(`${API_URL}/api/thanhtoanvnp/vnpay-return`, {
                 params: Object.fromEntries(urlParams),
             });
+
             if (responseCode === '00') {
                 showNotification("Thanh toán thành công! Kiểm tra đơn hàng nhé.", 'success');
             } else {

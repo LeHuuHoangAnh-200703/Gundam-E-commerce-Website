@@ -4,16 +4,25 @@ import axios from "axios";
 import { ref, onMounted, onUnmounted } from "vue";
 import { io } from "socket.io-client";
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+// -------------------------
+
 const isSidebarVisible = ref(false);
 const hasUnreadMessages = ref(false); // Biến để theo dõi tin nhắn chưa đọc
 const TenAdmin = localStorage.getItem("TenAdmin");
 
 // Kết nối Socket.IO
-const socket = io("http://localhost:3000", {
+// SỬA 1: Dùng SOCKET_URL
+const socket = io(SOCKET_URL, {
   auth: {
     userId: localStorage.getItem("MaAdmin"),
     userName: TenAdmin,
   },
+  transports: ['websocket', 'polling'],
+  withCredentials: true
 });
 
 const sidebarMenuMobile = [
@@ -34,13 +43,14 @@ const sidebarMenuMobile = [
 const logout = async () => {
   const maAdmin = localStorage.getItem("MaAdmin");
   try {
-    const response = await axios.post("http://localhost:3000/api/admin/logout", { maAdmin });
+    // SỬA 2: Dùng API_URL
+    const response = await axios.post(`${API_URL}/api/admin/logout`, { maAdmin });
     localStorage.removeItem("TenAdmin");
     localStorage.removeItem("EmailAdmin");
     localStorage.removeItem("MaAdmin");
     router.push("/admin/adminLogin");
   } catch (error) {
-    console.error("Đăng xuất thất bại:", error.response.data.message);
+    console.error("Đăng xuất thất bại:", error.response?.data?.message);
   }
 };
 

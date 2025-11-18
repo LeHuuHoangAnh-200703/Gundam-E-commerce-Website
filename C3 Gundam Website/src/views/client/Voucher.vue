@@ -11,6 +11,12 @@ import Chat from '../../components/client/Chat.vue';
 import ChatBot from '../../components/client/ChatBot.vue';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listDiscountCodes = ref([]);
 const notification = ref({
     message: '',
@@ -29,7 +35,8 @@ function formatCurrency(value) {
 
 const fetchDiscountCode = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/magiamgia");
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/magiamgia`);
         listDiscountCodes.value = response.data.map(discountCode => {
             return {
                 ...discountCode,
@@ -46,7 +53,8 @@ const fetchDiscountCode = async () => {
 const saveDiscountCode = async (IdMaGiamGia) => {
     const MaKhachHang = localStorage.getItem("MaKhachHang");
     try {
-        const response = await axios.post(`http://localhost:3000/api/khachhang/luuma/${MaKhachHang}/${IdMaGiamGia}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/luuma/${MaKhachHang}/${IdMaGiamGia}`);
         showNotification("Lưu mã giảm giá thành công!", "success");
         setTimeout(() => {
             router.push('/voucher');

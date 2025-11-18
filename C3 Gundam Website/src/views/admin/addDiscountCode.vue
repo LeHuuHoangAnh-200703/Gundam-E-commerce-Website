@@ -7,6 +7,12 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -107,7 +113,8 @@ const addDiscountCode = async () => {
             dataToSend.GiamTien = formData.value.decreaseMoney;
         }
 
-        const response = await axios.post('http://localhost:3000/api/magiamgia', dataToSend);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/magiamgia`, dataToSend);
 
         const notificationData = {
             ThongBao: `Vừa thêm mã giảm giá ${formData.value.nameCode.toLowerCase()}`,
@@ -115,7 +122,8 @@ const addDiscountCode = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 2: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification("Thêm mã giảm giá thành công!", "success");
         setTimeout(() => {

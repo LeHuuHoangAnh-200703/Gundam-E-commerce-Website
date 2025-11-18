@@ -7,6 +7,11 @@ import NotificationAdmin from "@/components/Notification/NotificationAdmin.vue";
 import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import axios from 'axios';
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listPost = ref([]);
 const searchValue = ref('');
 const selectedType = ref('');
@@ -65,7 +70,8 @@ const handleDialogClose = () => {
 
 const fetchCommunityPost = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/baidang");
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/baidang`);
         listPost.value = response.data.map(post => {
             return {
                 ...post,
@@ -99,7 +105,8 @@ const updateStatus = async (maBaiDang, newStatus) => {
             const nextStatus = newStatus === 'Đang chờ duyệt' ? 'Đã duyệt' : 'Đang chờ duyệt';
 
             try {
-                const response = await axios.patch(`http://localhost:3000/api/baidang/${maBaiDang}`, {
+                // SỬA 2: Dùng API_URL
+                const response = await axios.patch(`${API_URL}/api/baidang/${maBaiDang}`, {
                     TrangThaiDang: nextStatus,
                 });
                 showNotification("Duyệt bài đăng thành công!", "success");
@@ -120,7 +127,8 @@ const deletePost = async (idBaiDang) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
+                // SỬA 3: Dùng API_URL
+                await axios.delete(`${API_URL}/api/baidang/xoabaidang/${idBaiDang}`);
                 showNotification("Xóa bài đăng thành công!", "success");
                 await fetchCommunityPost();
             } catch (error) {
@@ -180,7 +188,8 @@ const restoreHiddenPost = async (maBaiDang, TrangThai) => {
         onConfirm: async () => {
             const nextStatus = TrangThai === 'Đã duyệt' ? 'Đã ẩn' : 'Đã duyệt';
             try {
-                await axios.patch(`http://localhost:3000/api/baidang/anbaidang/${maBaiDang}`,{
+                // SỬA 4: Dùng API_URL
+                await axios.patch(`${API_URL}/api/baidang/anbaidang/${maBaiDang}`,{
                     TrangThai: nextStatus,
                 });
                 showNotification("Cập nhật trạng thái bài đăng thành công!", "success");

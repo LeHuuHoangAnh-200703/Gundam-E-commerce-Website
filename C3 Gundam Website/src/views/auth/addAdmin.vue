@@ -4,6 +4,13 @@ import axios from 'axios';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import { useRouter } from 'vue-router';
 
+const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -15,7 +22,6 @@ const escapeHtml = (unsafe) => {
 };
 
 const errors = ref({});
-const router = useRouter();
 const formData = ref({
     nameAdmin: '',
     emailAdmin: '',
@@ -78,7 +84,9 @@ const registerAdmin = async () => {
             NgayTao: new Date()
         };
 
-        const response = await axios.post('http://localhost:3000/api/admin', dataToSend);
+        // SỬA 1: Dùng API_URL thay vì localhost
+        const response = await axios.post(`${API_URL}/api/admin`, dataToSend);
+        
         showNotification("Thêm tài khoản thành công!", "success");
         setTimeout(() => {
             router.push('/admin/adminLogin');

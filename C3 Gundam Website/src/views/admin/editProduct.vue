@@ -7,6 +7,12 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -100,7 +106,8 @@ const handleFileUpload = (event) => {
 
 const fetchSuppliers = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/nhacungcap');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/nhacungcap`);
         listSuppliers.value = response.data.map(supplier => {
             return {
                 ...supplier
@@ -113,7 +120,8 @@ const fetchSuppliers = async () => {
 
 const fetchProductType = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/loaisanpham');
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/loaisanpham`);
         listProductType.value = response.data.map(productType => {
             return {
                 ...productType
@@ -126,7 +134,8 @@ const fetchProductType = async () => {
 
 const fetchProduct = async (maSanPham) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/sanpham/${maSanPham}`);
+        // SỬA 3: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham/${maSanPham}`);
         formData.value.nameProduct = response.data.TenSanPham;
         formData.value.price = response.data.GiaBan;
         formData.value.typeProduct = response.data.MaLoaiSanPham;
@@ -233,7 +242,8 @@ const editProduct = async () => {
             dataToSend.append(`removedImages[${index}]`, image);
         });
 
-        const response = await axios.put(`http://localhost:3000/api/sanpham/${formData.value.idSanPham}`, dataToSend, {
+        // SỬA 4: Dùng API_URL
+        const response = await axios.put(`${API_URL}/api/sanpham/${formData.value.idSanPham}`, dataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -245,7 +255,8 @@ const editProduct = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 5: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification("Cập nhật sản phẩm thành công!", "success");
         setTimeout(() => {

@@ -10,6 +10,11 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const errors = ref({});
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -116,7 +121,8 @@ const calculateShippingFee = async () => {
         return;
     }
     try {
-        const response = await axios.post('http://localhost:3000/api/donhang/tinhphiship', {
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/donhang/tinhphiship`, {
             address: formData.value.address,
             totalOrder: finalProductPrice.value,
         });
@@ -131,7 +137,8 @@ const calculateShippingFee = async () => {
 // Tính giá sau giảm giá
 const calculateDiscount = async () => {
     try {
-        const response = await axios.post('http://localhost:3000/api/donhang/capnhatmagiamgia', {
+        // SỬA 2: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/donhang/capnhatmagiamgia`, {
             IdMaGiamGia: formData.value.discountCode,
             MaKhachHang: maKhachHang,
             totalProductPrice: totalProductPrice.value,
@@ -157,8 +164,9 @@ watch([currentPrice, quantity, finalProductPrice, shippingFee], () => {
 
 const fetchProduct = async (idProduct) => {
     try {
+        // SỬA 3: Dùng API_URL
         const response = await axios.get(
-            `http://localhost:3000/api/sanpham/${idProduct}`
+            `${API_URL}/api/sanpham/${idProduct}`
         );
         images.value = response.data.Images;
         nameProducts.value = response.data.TenSanPham;
@@ -173,7 +181,8 @@ const fetchProduct = async (idProduct) => {
 
 const fetchDiscountCode = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/magiamgia');
+        // SỬA 4: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/magiamgia`);
         listDiscountCodes.value = response.data.map(discountCode => ({
             ...discountCode,
             IdKhachHangSuDung: Array.isArray(discountCode.IdKhachHangSuDung)
@@ -196,7 +205,8 @@ const fetchCustomer = async (idKhachHang) => {
         }
 
         // Lấy dữ liệu khách hàng
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        // SỬA 5: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
         nameCustomer.value = response.data.TenKhachHang;
         emailCustomer.value = response.data.Email;
         listAddress.value = response.data.DanhSachDiaChi || [];
@@ -280,8 +290,9 @@ const addOrders = async () => {
     // Nếu thanh toán qua PayPal thì redirect trực tiếp
     if (formData.value.payment === "Thanh toán qua Paypal") {
         try {
+            // SỬA 6: Dùng API_URL
             const response = await axios.post(
-                "http://localhost:3000/api/donhang",
+                `${API_URL}/api/donhang`,
                 dataToSend
             );
             showNotification(
@@ -289,8 +300,9 @@ const addOrders = async () => {
                 "success"
             );
 
+            // SỬA 7: Dùng API_URL
             await axios.post(
-                `http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`
+                `${API_URL}/api/donhang/guiemail?email=${emailCustomer.value}`
             );
             setTimeout(() => {
                 router.push("/orders_history");
@@ -313,8 +325,9 @@ const addOrders = async () => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
+                // SỬA 8: Dùng API_URL
                 const response = await axios.post(
-                    "http://localhost:3000/api/donhang",
+                    `${API_URL}/api/donhang`,
                     dataToSend
                 );
                 showNotification(
@@ -322,8 +335,9 @@ const addOrders = async () => {
                     "success"
                 );
 
+                // SỬA 9: Dùng API_URL
                 await axios.post(
-                    `http://localhost:3000/api/donhang/guiemail?email=${emailCustomer.value}`
+                    `${API_URL}/api/donhang/guiemail?email=${emailCustomer.value}`
                 );
                 setTimeout(() => {
                     router.push("/orders_history");
@@ -458,13 +472,14 @@ const createPaymentVNPay = async () => {
                     HinhThucVanChuyen: formData.value.shippingMethod,
                 };
 
+                // SỬA 10: Dùng API_URL (2 vị trí)
                 const response = await axios.post(
-                    "http://localhost:3000/api/donhang/luutamdon",
+                    `${API_URL}/api/donhang/luutamdon`,
                     tempOrder
                 );
                 const maDonHang = response.data.MaDonHang;
                 const paymentResponse = await axios.post(
-                    "http://localhost:3000/api/thanhtoanvnp",
+                    `${API_URL}/api/thanhtoanvnp`,
                     {
                         amount: totalPrice.value,
                         orderId: maDonHang,

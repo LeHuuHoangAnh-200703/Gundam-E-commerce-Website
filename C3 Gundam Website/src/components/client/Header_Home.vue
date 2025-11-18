@@ -5,6 +5,12 @@ import { useRouter } from 'vue-router';
 import debounce from "lodash/debounce";
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const cartLists = ref([]);
 const emit = defineEmits();
 const searchQuery = ref("");
@@ -25,7 +31,8 @@ const isLoggedIn = ref(!userInfo.value.MaKhachHang);
 const logout = async () => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
     try {
-        const response = await axios.post("http://localhost:3000/api/khachhang/logout", {
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/logout`, {
             maKhachHang
         });
         localStorage.removeItem("Email");
@@ -42,7 +49,8 @@ const logout = async () => {
 
 const category = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/loaisanpham');
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/loaisanpham`);
         categories.value = response.data;
         showCategories.value = !showCategories.value;
     } catch (error) {
@@ -112,7 +120,8 @@ const handleSearch = () => {
 
 const fetchCarts = async (maKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
+        // SỬA 3: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/giohang/khachhang/${maKhachHang}`);
         cartLists.value = response.data.map(cart => {
             return {
                 ...cart
@@ -127,7 +136,8 @@ const fetchCarts = async (maKhachHang) => {
 
 const fetchCustomer = async (maKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${maKhachHang}`);
+        // SỬA 4: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${maKhachHang}`);
         imageCustomer.value = response.data.Image;
         nameCustomer.value = response.data.TenKhachHang;
         emailCustomer.value = response.data.Email;
@@ -144,7 +154,8 @@ const searchProducts = async () => {
     }
 
     try {
-        const response = await axios.get(`http://localhost:3000/api/sanpham/goiy/ketquatimkiem?tenSanPham=${searchQuery.value}`);
+        // SỬA 5: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham/goiy/ketquatimkiem?tenSanPham=${searchQuery.value}`);
         listProducts.value = response.data.map(product => {
             return {
                 ...product

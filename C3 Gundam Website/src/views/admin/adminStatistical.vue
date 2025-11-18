@@ -26,6 +26,11 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 pdfMake.vfs = pdfFonts;
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const customers = ref([]);
 const products = ref([]);
 const listProducts = ref([]);
@@ -90,7 +95,8 @@ const listSelling = ref([]);
 
 const fetchListProducts = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/sanpham");
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham`);
         listProducts.value = response.data.map(product => {
             return {
                 ...product
@@ -98,12 +104,13 @@ const fetchListProducts = async () => {
         })
         listProducts.value.sort((a, b) => b.NgayBan - a.NgayBan);
     } catch (error) {
-        console.log("Error fetching: ", err);
+        console.log("Error fetching: ", error);
     }
 }
 const fetchStatistical = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/thongke");
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/thongke`);
         customers.value = response.data.customer;
         products.value = response.data.product;
         feedbacks.value = response.data.feedback;
@@ -122,7 +129,8 @@ const fetchStatistical = async () => {
 
 const fetchNatifications = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/thongbao");
+        // SỬA 3: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/thongbao`);
         listNatifications.value = response.data.map((natification) => {
             return {
                 ...natification,
@@ -198,8 +206,9 @@ const fetchRevenueData = async (year) => {
         return;
     }
     try {
+        // SỬA 4: Dùng API_URL
         const response = await axios.get(
-            `http://localhost:3000/api/thongke/donhangtheonam?year=${year}`
+            `${API_URL}/api/thongke/donhangtheonam?year=${year}`
         );
         totalRevenueYear.value = response.data.tongDoanhThu
         totalOrderYear.value = response.data.tongDonHang
@@ -273,8 +282,9 @@ const fetchRevenueDay = async (year, month) => {
         return;
     }
     try {
+        // SỬA 5: Dùng API_URL
         const response = await axios.get(
-            `http://localhost:3000/api/thongke/donhangtheothang?year=${year}&month=${month}`
+            `${API_URL}/api/thongke/donhangtheothang?year=${year}&month=${month}`
         );
         totalRevenueMonth.value = response.data.tongDoanhThu;
         totalOrderMonth.value = response.data.tongDonHang;
@@ -299,8 +309,9 @@ const fetchRevenueDay = async (year, month) => {
 const orderStatusChartData = ref(null);
 const fetchOrderStatusData = async () => {
     try {
+        // SỬA 6: Dùng API_URL
         const response = await axios.get(
-            "http://localhost:3000/api/thongke/trangthaidonhang"
+            `${API_URL}/api/thongke/trangthaidonhang`
         );
         const data = response.data;
         orderStatusChartData.value = {
@@ -329,7 +340,8 @@ const starCounts = ref({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, Toxic: 0 });
 
 const fetchFeedBackProducts = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/thongke/danhgiasanpham");
+        // SỬA 7: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/thongke/danhgiasanpham`);
         const data = response.data;
 
         starCounts.value = {
@@ -365,8 +377,9 @@ const fetchFeedBackProducts = async () => {
 
 const fetchTopSellingProducts = async () => {
     try {
+        // SỬA 8: Dùng API_URL
         const response = await axios.get(
-            "http://localhost:3000/api/thongke/topluotban"
+            `${API_URL}/api/thongke/topluotban`
         );
         listSelling.value = response.data.map((product) => {
             return {
@@ -395,7 +408,8 @@ const fetchEnterWarehouse = async (maSanPham, year, month) => {
     }
 
     try {
-        const response = await axios.get(`http://localhost:3000/api/thongke/nhapxuatton/${maSanPham}?year=${year}&month=${month}`);
+        // SỬA 9: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/thongke/nhapxuatton/${maSanPham}?year=${year}&month=${month}`);
         listWarehouse.value = response.data;
         const product = listProducts.value.find(p => p.MaSanPham === maSanPham);
         selectedNameProduct.value = product.TenSanPham;

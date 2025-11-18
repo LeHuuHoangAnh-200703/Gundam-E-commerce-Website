@@ -8,6 +8,12 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const TenAdmin = localStorage.getItem("TenAdmin");
 const ThoiGian = new Date();
 const listSuppliers = ref([]);
@@ -68,7 +74,8 @@ const handleDialogClose = () => {
 
 const fetchSuppliers = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/nhacungcap');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/nhacungcap`);
         listSuppliers.value = response.data.map(supplier => {
             return {
                 ...supplier
@@ -88,7 +95,8 @@ const deleteSupplier = async (maNCC, tenNCC) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/nhacungcap/${maNCC}`);
+                // SỬA 2: Dùng API_URL
+                const response = await axios.delete(`${API_URL}/api/nhacungcap/${maNCC}`);
 
                 const notificationData = {
                     ThongBao: `Vừa xóa nhà cung cấp ${tenNCC}`,
@@ -96,13 +104,16 @@ const deleteSupplier = async (maNCC, tenNCC) => {
                     ThoiGian: ThoiGian,
                 };
 
-                await axios.post('http://localhost:3000/api/thongbao', notificationData);
+                // SỬA 3: Dùng API_URL
+                await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
                 showNotification("Xóa nhà cung cấp thành công!", "success");
-                await fetchSuppliers();
-                setTimeout(() => {
-                    router.push('/admin/listSuppliers');
-                }, 3000);
+                await fetchSuppliers(); // Load lại danh sách ngay lập tức
+                
+                // Không cần router.push nếu đang ở trang danh sách
+                // setTimeout(() => {
+                //     router.push('/admin/listSuppliers');
+                // }, 3000);
             } catch (err) {
                 showNotification(err.response?.data?.message || "Xóa nhà cung cấp thất bại!", "error");
             }

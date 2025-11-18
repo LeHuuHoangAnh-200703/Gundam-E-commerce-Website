@@ -5,6 +5,13 @@ import Footer from "@/components/client/Footer.vue";
 import BackToTop from "@/components/client/BackToTop.vue";
 import { io } from "socket.io-client";
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+// Lấy từ biến VITE_SOCKET_URL trong .env (hoặc fallback về localhost)
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Khai báo các biến reactive
 const messages = ref([]);
 const message = ref("");
@@ -13,11 +20,16 @@ const userId = ref(localStorage.getItem("MaKhachHang"));
 const userName = ref(localStorage.getItem("TenKhachHang"));
 const image = ref(localStorage.getItem("HinhAnh"));
 const roomCode = ref(`${userId.value}_admin`);
-const socket = io("http://localhost:3000", {
+
+// SỬA 1: Dùng SOCKET_URL thay vì localhost cứng
+const socket = io(SOCKET_URL, {
   auth: {
     userId: userId.value,
     userName: userName.value,
   },
+  // Thêm option này để đảm bảo kết nối ổn định trên môi trường Production
+  transports: ['websocket', 'polling'], 
+  withCredentials: true 
 });
 
 const escapeHtml = (unsafe) => {
@@ -68,7 +80,8 @@ const sendMessage = async () => {
     });
 
     try {
-      const response = await fetch("http://localhost:3000/api/upload", {
+      // SỬA 2: Dùng API_URL cho upload ảnh
+      const response = await fetch(`${API_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });

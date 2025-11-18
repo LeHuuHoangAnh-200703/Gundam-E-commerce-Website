@@ -8,6 +8,12 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const avatarCustomer = ref('');
 const nameCustomer = ref('');
 const idCustomer = ref('');
@@ -17,7 +23,8 @@ const listTopPost = ref([]);
 const fetchCustomer = async () => {
     const maKhachHang = localStorage.getItem("MaKhachHang");
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${maKhachHang}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${maKhachHang}`);
         avatarCustomer.value = response.data.Image;
         nameCustomer.value = response.data.TenKhachHang;
         idCustomer.value = response.data.MaKhachHang;
@@ -28,7 +35,8 @@ const fetchCustomer = async () => {
 
 const fetchCommunityPost = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/baidang");
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/baidang`);
         listPost.value = response.data.filter(post => {
             return post.TrangThaiDang === 'Đã duyệt'
         }).map(post => {
@@ -44,7 +52,8 @@ const fetchCommunityPost = async () => {
 
 const fetchTopCommunityPost = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/baidang/top/topbinhluan");
+        // SỬA 3: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/baidang/top/topbinhluan`);
         listTopPost.value = response.data.filter(post => {
             return post.TrangThaiDang === 'Đã duyệt'
         }).map(post => {

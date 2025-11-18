@@ -8,12 +8,19 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const idCustomer = ref('');
 const listPost = ref([]);
 
 const fetchCustomer = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
         idCustomer.value = response.data.MaKhachHang;
     } catch (error) {
         console.log("Error fetching: ", error);
@@ -22,7 +29,8 @@ const fetchCustomer = async (idKhachHang) => {
 
 const fetchCommunityPost = async (idKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/baidang/danhsachbaidang/${idKhachHang}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/baidang/danhsachbaidang/${idKhachHang}`);
         listPost.value = response.data.filter(post => {
             return post.TrangThaiDang === 'Đã duyệt'
         }).map(post => {
@@ -32,7 +40,8 @@ const fetchCommunityPost = async (idKhachHang) => {
             }
         }).sort((a, b) => b.ThoiGianDang - a.ThoiGianDang);
     } catch (error) {
-        console.log("Error fetching: ", message.error);
+        // SỬA LỖI: Biến 'message' không tồn tại -> đổi thành 'error'
+        console.log("Error fetching: ", error);
     }
 }
 const formatTime = (time) => {

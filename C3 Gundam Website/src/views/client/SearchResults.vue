@@ -13,6 +13,11 @@ import ChatBot from '../../components/client/ChatBot.vue';
 const router = useRouter();
 const route = useRoute();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listProducts = ref([]);
 const products = ref([]);
 const searchQuery = ref(route.query.query || '');
@@ -36,7 +41,8 @@ const showNotification = (msg, type) => {
 
 const fetchProducts = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/sanpham");
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham`);
         products.value = response.data.map(product => {
             return {
                 ...product,
@@ -50,7 +56,8 @@ const fetchProducts = async () => {
 
 const fetchProductsBySearch = async () => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/sanpham/timkiem/ketquatimkiem?tenSanPham=${searchQuery.value}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham/timkiem/ketquatimkiem?tenSanPham=${searchQuery.value}`);
         listProducts.value = response.data.map(product => {
             return {
                 ...product,
@@ -98,7 +105,8 @@ const addToCart = async (idProduct) => {
         return;
     }
     try {
-        const response = await axios.post(`http://localhost:3000/api/giohang/${idProduct}`, {
+        // SỬA 3: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/giohang/${idProduct}`, {
             MaKhachHang: maKhachHang,
         });
         showNotification("Thêm giỏ hàng thành công!", "success");

@@ -6,6 +6,11 @@ import BackToTop from "@/components/client/BackToTop.vue";
 import ChatBox from "../../components/client/Chat.vue";
 import axios from 'axios';
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động lấy link từ Netlify Environment hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const nameCustomer = ref('');
 const message = ref('');
 const listMessage = ref([]);
@@ -21,13 +26,15 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, "&#039;");
 };
 const fetchCustomer = async (idKhachHang) => {
-    const response = await axios.get(`http://localhost:3000/api/khachhang/${idKhachHang}`);
+    // SỬA 1: Dùng API_URL
+    const response = await axios.get(`${API_URL}/api/khachhang/${idKhachHang}`);
     nameCustomer.value = response.data.TenKhachHang;
 }
 
 const fetchChatHistory = async () => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/chatbot/${maKhachHang}`);
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/chatbot/${maKhachHang}`);
         listMessage.value = response.data;
     } catch (error) {
         console.log("Lỗi khi lấy tin nhắn: ", error);
@@ -50,7 +57,8 @@ const sendMessage = async () => {
     isLoading.value = true;
 
     try {
-        const response = await axios.post("http://localhost:3000/api/chatbot", {
+        // SỬA 3: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/chatbot`, {
             maKhachHang,
             NoiDung: escapedMessage
         });

@@ -3,6 +3,15 @@ import { ref, onMounted } from "vue";
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
+
+const router = useRouter();
+const route = useRoute();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -14,8 +23,6 @@ const escapeHtml = (unsafe) => {
 };
 
 const errors = ref({});
-const router = useRouter();
-const route = useRoute();
 const formData = ref({
     email: '',
     password: '',
@@ -83,7 +90,8 @@ const login = async () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:3000/api/khachhang/login', {
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/login`, {
             email: formData.value.email,
             password: formData.value.password
         });
@@ -105,7 +113,8 @@ const login = async () => {
 }
 
 const loginWithGoogle = async () => {
-    window.location.href = 'http://localhost:3000/auth/google';
+    // SỬA 2: Dùng API_URL cho Google Auth Redirect
+    window.location.href = `${API_URL}/auth/google`;
 };
 
 const sendOTP = async () => {
@@ -127,7 +136,8 @@ const sendOTP = async () => {
     forgotPasswordLoading.value = true;
 
     try {
-        const response = await axios.post('http://localhost:3000/api/khachhang/send-otp', {
+        // SỬA 3: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/send-otp`, {
             email: forgotPasswordData.value.email,
         });
         showNotification(response.data.message, 'success');
@@ -149,7 +159,8 @@ const verifyOTP = async () => {
 
     forgotPasswordLoading.value = true;
     try {
-        const response = await axios.post('http://localhost:3000/api/khachhang/verify-otp', {
+        // SỬA 4: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/verify-otp`, {
             email: forgotPasswordData.value.email,
             otp: forgotPasswordData.value.otp,
         });
@@ -181,7 +192,8 @@ const resetPassword = async () => {
 
     forgotPasswordLoading.value = true;
     try {
-        const response = await axios.post('http://localhost:3000/api/khachhang/quenmatkhau', {
+        // SỬA 5: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/quenmatkhau`, {
             email: forgotPasswordData.value.email,
             newPassword: forgotPasswordData.value.newPassword,
         });
@@ -202,7 +214,8 @@ const resendOTP = async () => {
     forgotPasswordErrors.value = {};
     forgotPasswordLoading.value = true;
     try {
-        const response = await axios.post('http://localhost:3000/api/khachhang/send-otp', {
+        // SỬA 6: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/khachhang/send-otp`, {
             email: forgotPasswordData.value.email,
         });
         showNotification('OTP mới đã được gửi đến email!', 'success');
@@ -219,7 +232,8 @@ onMounted(async () => {
 
     if (googleSuccess && maKhachHang) {
         try {
-            const response = await axios.get(`http://localhost:3000/api/khachhang/loginGoogle/google?maKhachHang=${maKhachHang}`);
+            // SỬA 7: Dùng API_URL
+            const response = await axios.get(`${API_URL}/api/khachhang/loginGoogle/google?maKhachHang=${maKhachHang}`);
             localStorage.setItem('Email', response.data.customer.Email);
             localStorage.setItem('TenKhachHang', response.data.customer.TenKhachHang);
             localStorage.setItem('MaKhachHang', response.data.customer.MaKhachHang);

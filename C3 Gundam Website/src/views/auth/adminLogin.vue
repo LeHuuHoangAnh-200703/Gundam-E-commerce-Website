@@ -4,6 +4,13 @@ import axios from 'axios';
 import NotificationClient from "@/components/Notification/NotificationClient.vue";
 import { useRouter } from 'vue-router';
 
+const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -15,7 +22,6 @@ const escapeHtml = (unsafe) => {
 };
 
 const errors = ref({});
-const router = useRouter();
 const formData = ref({
     email: '',
     password: '',
@@ -61,7 +67,8 @@ const loginAdmin = async () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:3000/api/admin/login', {
+        // SỬA 1: Dùng API_URL thay vì localhost
+        const response = await axios.post(`${API_URL}/api/admin/login`, {
             email: formData.value.email,
             password: formData.value.password
         });

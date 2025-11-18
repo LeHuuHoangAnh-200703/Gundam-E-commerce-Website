@@ -6,6 +6,12 @@ import EmtyStateAdmin from '@/components/Notification/EmtyStateAdmin.vue';
 import { io } from "socket.io-client";
 import axios from "axios";
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+// -------------------------
+
 const messages = ref([]);
 const message = ref("");
 const chatRooms = ref([]);
@@ -15,17 +21,22 @@ const adminId = ref("AM55511");
 const adminName = ref("C3 GUNDAM STORE");
 const searchQuery = ref("");
 
-const socket = io("http://localhost:3000", {
+// SỬA 1: Dùng SOCKET_URL
+const socket = io(SOCKET_URL, {
   auth: {
     userId: adminId.value,
     userName: adminName.value,
   },
+  // Thêm cấu hình này để kết nối ổn định hơn trên môi trường mạng
+  transports: ['websocket', 'polling'],
+  withCredentials: true
 });
 
 
 const loadChatRooms = async () => {
   try {
-    const response = await axios.get("http://localhost:3000/api/chat");
+    // SỬA 2: Dùng API_URL
+    const response = await axios.get(`${API_URL}/api/chat`);
     chatRooms.value = response.data.filter((room) => room.receiverId === adminId.value)
       .sort((a, b) => b.receiverMessagesNotRead.length - a.receiverMessagesNotRead.length);
   } catch (error) {
@@ -60,7 +71,8 @@ const sendMessage = async () => {
       });
 
       try {
-        const response = await fetch("http://localhost:3000/api/upload", {
+        // SỬA 3: Dùng API_URL
+        const response = await fetch(`${API_URL}/api/upload`, {
           method: "POST",
           body: formData,
         });

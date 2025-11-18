@@ -9,6 +9,12 @@ import ConfirmDialog from "@/components/Notification/ConfirmDialog.vue";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const listReport = [
     {
         title: "Thông tin sản phẩm sai lệch.",
@@ -146,7 +152,8 @@ const handleDialogClose = () => {
 };
 const fetchCommunityPost = async (idBaiDang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/baidang/${idBaiDang}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/baidang/${idBaiDang}`);
         idPost.value = response.data.MaBaiDang;
         idCustomer.value = response.data.MaKhachHang;
         avatarCustomer.value = response.data.HinhAnhKhachHang;
@@ -165,7 +172,8 @@ const addComment = async () => {
     if (!newComment.value.trim()) return;
     const maKhachHangBinhLuan = localStorage.getItem("MaKhachHang");
     try {
-        const response = await axios.post(`http://localhost:3000/api/baidang/binhluan/${idPost.value}`, {
+        // SỬA 2: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/baidang/binhluan/${idPost.value}`, {
             MaKhachHang: maKhachHangBinhLuan,
             NoiDungBinhLuan: newComment.value
         })
@@ -200,7 +208,8 @@ const submitReply = async (commentId) => {
     }
 
     try {
-        const response = await axios.post(`http://localhost:3000/api/baidang/traloibinhluan/${idPost.value}/${commentId}`, {
+        // SỬA 3: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/baidang/traloibinhluan/${idPost.value}/${commentId}`, {
             MaKhachHang: idCustomerReplay,
             NoiDungBinhLuan: content
         });
@@ -226,7 +235,8 @@ const deleteComment = async (commentId) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                await axios.delete(`http://localhost:3000/api/baidang/xoabinhluan/${idPost.value}/${commentId}`);
+                // SỬA 4: Dùng API_URL
+                await axios.delete(`${API_URL}/api/baidang/xoabinhluan/${idPost.value}/${commentId}`);
                 await fetchCommunityPost(idPost.value);
             } catch (error) {
                 console.error('Lỗi khi xóa bình luận:', error);
@@ -259,7 +269,8 @@ const deletePost = async (idBaiDang) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                await axios.delete(`http://localhost:3000/api/baidang/xoabaidang/${idBaiDang}`);
+                // SỬA 5: Dùng API_URL
+                await axios.delete(`${API_URL}/api/baidang/xoabaidang/${idBaiDang}`);
                 showNotification("Xóa bài đăng thành công!", "success");
                 await fetchCommunityPost();
             } catch (error) {
@@ -281,7 +292,8 @@ const reportPost = async (maBaiDang) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.put(`http://localhost:3000/api/baidang/baocao/${maBaiDang}`, {
+                // SỬA 6: Dùng API_URL
+                const response = await axios.put(`${API_URL}/api/baidang/baocao/${maBaiDang}`, {
                     MaKhachHang: idCustomerLocal,
                     LyDoBaoCao: reportingReason.value
                 });

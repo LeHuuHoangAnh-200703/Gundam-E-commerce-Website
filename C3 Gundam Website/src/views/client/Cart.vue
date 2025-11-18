@@ -16,6 +16,12 @@ const notification = ref({
     message: '',
     type: ''
 });
+
+// --- CẤU HÌNH URL ĐỘNG (QUAN TRỌNG) ---
+// Lấy link từ file .env hoặc Netlify. Nếu không có thì dùng localhost.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------------------
+
 const showNotification = (msg, type) => {
     notification.value = { message: msg, type: type };
     setTimeout(() => {
@@ -25,7 +31,8 @@ const showNotification = (msg, type) => {
 
 const fetchCarts = async (maKhachHang) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/giohang/khachhang/${maKhachHang}`);
+        // Thay localhost bằng API_URL
+        const response = await axios.get(`${API_URL}/api/giohang/khachhang/${maKhachHang}`);
         carts.value = response.data.map(cart => {
             return {
                 ...cart,
@@ -41,7 +48,8 @@ const fetchCarts = async (maKhachHang) => {
 
 const deleteCart = async (idGioHang) => {
     try {
-        const response = await axios.delete(`http://localhost:3000/api/giohang/${idGioHang}`);
+        // Thay localhost bằng API_URL
+        const response = await axios.delete(`${API_URL}/api/giohang/${idGioHang}`);
         showNotification("Xóa sản phẩm khỏi giỏ hàng thành công!", "success");
         setTimeout(() => {
             router.replace('/carts');
@@ -56,7 +64,8 @@ const deleteCart = async (idGioHang) => {
 
 const updateCartItemQuantity = async (cart) => {
     try {
-        await axios.put("http://localhost:3000/api/giohang", {
+        // Thay localhost bằng API_URL
+        await axios.put(`${API_URL}/api/giohang`, {
             maKhachHang: cart.MaKhachHang,
             maSanPham: cart.MaSanPham,
             soLuong: cart.SoLuong,
@@ -90,7 +99,8 @@ const deleteSelectedCarts = async () => {
 
     try {
         // Dùng Promise.all để xóa tất cả các sản phẩm đã chọn cùng lúc
-        const deletePromises = selectedCartIds.map(id => axios.delete(`http://localhost:3000/api/giohang/${id}`));
+        // Thay localhost bằng API_URL
+        const deletePromises = selectedCartIds.map(id => axios.delete(`${API_URL}/api/giohang/${id}`));
         await Promise.all(deletePromises);
         carts.value = carts.value.filter(cart => !selectedCartIds.includes(cart.MaGioHang));
 
@@ -112,7 +122,8 @@ const goToOrderPage = async () => {
         const maKhachHang = selectedProducts[0].MaKhachHang; // Vì chắc cùng 1 người mua
 
         // Gửi danh sách mã sản phẩm cần kiểm tra
-        const response = await axios.post(`http://localhost:3000/api/giohang/kiemtra/${maKhachHang}`, {
+        // Thay localhost bằng API_URL
+        const response = await axios.post(`${API_URL}/api/giohang/kiemtra/${maKhachHang}`, {
             sanPhams: selectedProducts.map(p => p.MaSanPham)
         });
 

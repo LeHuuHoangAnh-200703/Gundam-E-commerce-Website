@@ -6,6 +6,12 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const staffLists = ref([]);
 const searchValue = ref('');
 const idAdmin = localStorage.getItem('MaAdmin');
@@ -14,9 +20,18 @@ const notification = ref({
     type: ''
 });
 
+// Bổ sung hàm hiển thị thông báo
+const showNotification = (msg, type) => {
+    notification.value = { message: msg, type: type };
+    setTimeout(() => {
+        notification.value.message = '';
+    }, 3000);
+};
+
 const fetchStaffs = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/admin');
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/admin`);
         staffLists.value = response.data.filter(staff =>
             staff.MaAdmin !== idAdmin
         ).map(staff => ({
@@ -33,13 +48,15 @@ const updatedStatus = async (maAdmin, newStatus) => {
     if (!confirmUpdate) return;
     const nextStatus = newStatus === 'Đang sử dụng' ? 'Đã vô hiệu hóa' : 'Đang sử dụng';
     try {
-        const response = await axios.patch(`http://localhost:3000/api/admin/trangthai/${maAdmin}`, {
+        // SỬA 2: Dùng API_URL
+        const response = await axios.patch(`${API_URL}/api/admin/trangthai/${maAdmin}`, {
             TrangThai: nextStatus,
         });
         await fetchStaffs();
-        console.log("Status updated successfully:", response.data);
+        showNotification("Cập nhật trạng thái thành công!", "success");
     } catch (err) {
         console.log("Error updating status:", err);
+        showNotification("Cập nhật thất bại!", "error");
     }
 };
 

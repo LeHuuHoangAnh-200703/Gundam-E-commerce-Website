@@ -13,6 +13,11 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 const comments = ref([]);
 
 const relatedProducts = ref([]);
@@ -85,9 +90,11 @@ const handleDialogCancel = () => {
 const handleDialogClose = () => {
     dialogState.value.visible = false;
 };
+
 const fetchProduct = async (idSanPham) => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/sanpham/${idSanPham}`);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham/${idSanPham}`);
         idProduct.value = response.data.MaSanPham;
         nameProduct.value = response.data.TenSanPham;
         description.value = response.data.MoTa;
@@ -111,7 +118,8 @@ const fetchProduct = async (idSanPham) => {
 
 const fetchRelatedProducts = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/sanpham');
+        // SỬA 2: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/sanpham`);
         relatedProducts.value = response.data.filter(relatedProduct =>
             relatedProduct.LoaiSanPham === typeProduct.value && relatedProduct.MaSanPham !== idProduct.value
         );
@@ -122,7 +130,8 @@ const fetchRelatedProducts = async () => {
 
 const fetchFeedBacks = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/danhgia');
+        // SỬA 3: Dùng API_URL
+        const response = await axios.get(`${API_URL}/api/danhgia`);
         const allComments = response.data.filter(comment =>
             comment.SanPhamDaDanhGia &&
             Array.isArray(comment.SanPhamDaDanhGia) &&
@@ -149,7 +158,8 @@ const addToCart = async () => {
         return;
     }
     try {
-        const response = await axios.post(`http://localhost:3000/api/giohang/${idProduct.value}`, {
+        // SỬA 4: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/giohang/${idProduct.value}`, {
             MaKhachHang: maKhachHang,
         });
         showNotification("Thêm giỏ hàng thành công!", "success");
@@ -173,7 +183,8 @@ const deleteFeedback = async (idDanhGia) => {
         cancelText: 'Hủy bỏ',
         onConfirm: async () => {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/danhgia/${idDanhGia}`);
+                // SỬA 5: Dùng API_URL
+                const response = await axios.delete(`${API_URL}/api/danhgia/${idDanhGia}`);
                 showNotification("Xóa đánh giá thành công!", "success");
                 await fetchFeedBacks();
             } catch (err) {

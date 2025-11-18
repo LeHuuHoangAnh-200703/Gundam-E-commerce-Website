@@ -7,6 +7,12 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- CẤU HÌNH URL ĐỘNG ---
+// Tự động nhận diện môi trường: Netlify (Production) hoặc Localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// -------------------------
+
 // Hàm mã hóa đầu vào
 const escapeHtml = (unsafe) => {
     return unsafe
@@ -73,7 +79,8 @@ const addSupplier = async () => {
             DiaChi: formData.value.address,
         };
 
-        const response = await axios.post('http://localhost:3000/api/nhacungcap', dataToSend);
+        // SỬA 1: Dùng API_URL
+        const response = await axios.post(`${API_URL}/api/nhacungcap`, dataToSend);
 
         const notificationData = {
             ThongBao: `Vừa thêm nhà cung cấp ${formData.value.nameSupplier}`,
@@ -81,7 +88,8 @@ const addSupplier = async () => {
             ThoiGian: ThoiGian,
         };
 
-        await axios.post('http://localhost:3000/api/thongbao', notificationData);
+        // SỬA 2: Dùng API_URL
+        await axios.post(`${API_URL}/api/thongbao`, notificationData);
 
         showNotification("Thêm nhà cung cấp thành công!", "success");
         setTimeout(() => {
