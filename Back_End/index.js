@@ -42,18 +42,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
-// Khởi tạo Socket.IO
-const socketIO = new Server(server, {
-  cors: {
-    // Thêm domain Netlify của bạn vào đây
-    origin: [
-        // "http://localhost:5173", 
-        "https://c3gundam-ecommercewebsite.netlify.app"
-    ],
-    methods: ["GET", "POST"],
-    credentials: true
-  },
-});
+// // Khởi tạo Socket.IO
+// const socketIO = new Server(server, {
+//   cors: {
+//     // Thêm domain Netlify của bạn vào đây
+//     origin: [
+//         // "http://localhost:5173", 
+//         "https://c3gundam-ecommercewebsite.netlify.app"
+//     ],
+//     methods: ["GET", "POST"],
+//     credentials: true
+//   },
+// });
 
 cloudinary.config({
     cloud_name: 'dwcajbc6f',
